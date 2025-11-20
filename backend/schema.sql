@@ -1,0 +1,1 @@
+-- Añade aquí el schema SQL que quieres (usuarios, negocios, mesas, reservas, etc.)
