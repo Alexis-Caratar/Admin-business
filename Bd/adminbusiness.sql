@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 21-11-2025 a las 00:32:55
+-- Tiempo de generación: 22-11-2025 a las 00:51:49
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.2.0
 
@@ -68,7 +68,8 @@ INSERT INTO `app_modulos` (`id`, `url`, `nombre`, `icono`, `orden`, `activo`) VA
 (2, 'negocios', 'Negocios', 'StoreIcon', 1, 1),
 (3, 'productos', 'Productos', 'ShoppingCartIcon', 4, 1),
 (4, 'categorias', 'categorias', NULL, 3, 1),
-(5, 'inventariofisico', 'Inventario Fisico', 'Inventory2Icon', 5, 1);
+(5, 'inventariofisico', 'Inventario Fisico', 'Inventory2Icon', 5, 1),
+(6, 'activos', 'Activos', 'BusinessCenterIcon', 6, 1);
 
 -- --------------------------------------------------------
 
@@ -92,7 +93,8 @@ INSERT INTO `app_modulos_negocio` (`id`, `id_negocio`, `id_modulo`, `activo`) VA
 (2, 1, 2, 1),
 (3, 1, 3, 1),
 (4, 1, 4, 1),
-(5, 1, 5, 1);
+(5, 1, 5, 1),
+(6, 1, 6, 1);
 
 -- --------------------------------------------------------
 
@@ -118,7 +120,8 @@ INSERT INTO `app_modulos_negocio_rol` (`id`, `id_app_modulos_negocio`, `rol`, `e
 (2, 2, 'admin', 1, '2025-11-17 03:38:07', '2025-11-17 03:38:07'),
 (3, 3, 'admin', 1, '2025-11-17 20:25:29', '2025-11-17 20:25:29'),
 (4, 4, 'admin', 1, '2025-11-20 23:02:44', '2025-11-20 23:02:44'),
-(5, 5, 'admin', 1, '2025-11-20 23:02:56', '2025-11-20 23:02:56');
+(5, 5, 'admin', 1, '2025-11-20 23:02:56', '2025-11-20 23:02:56'),
+(6, 6, 'admin', 1, '2025-11-21 19:17:33', '2025-11-21 19:17:33');
 
 -- --------------------------------------------------------
 
@@ -130,8 +133,18 @@ CREATE TABLE `categorias` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `id_negocio` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
-  `imagen` varchar(255) DEFAULT NULL
+  `imagen` varchar(500) DEFAULT NULL,
+  `descripcion` varchar(500) NOT NULL,
+  `activo` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `categorias`
+--
+
+INSERT INTO `categorias` (`id`, `id_negocio`, `nombre`, `imagen`, `descripcion`, `activo`) VALUES
+(1, 1, 'Platos a la carta', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCPwdtgqUB9QfFeElHJh7rbQVn5Ft1zGwQBw&s', 'Deliciosos platos a la carta', 1),
+(2, 1, 'Desayunos', 'https://recetasdecocina.elmundo.es/wp-content/uploads/2022/08/desayuno-saludables-recetas.jpg', 'desayunos ', 1);
 
 -- --------------------------------------------------------
 
@@ -308,7 +321,7 @@ CREATE TABLE `negocios` (
   `direccion` varchar(200) DEFAULT NULL,
   `telefono` varchar(50) DEFAULT NULL,
   `descripcion` text DEFAULT NULL,
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
+  `fecha_creacion` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -316,9 +329,9 @@ CREATE TABLE `negocios` (
 --
 
 INSERT INTO `negocios` (`id`, `nombre`, `direccion`, `telefono`, `descripcion`, `fecha_creacion`) VALUES
-(1, 'Mestizo', 'llorente', 'casa', 'ninguna', '2025-11-16 05:58:42'),
-(3, 'restaurante mister pollo', 'salida norte', '3242343534543', '', '2025-11-16 07:33:37'),
-(4, 'pollo al dia', 'casa 11', '343543', '', '2025-11-16 07:33:49');
+(1, 'Restaurante Mestizo', 'San juan de pasto', '3162467600', 'Restaurante el Dorado', '2025-11-21 19:51:06'),
+(3, 'Minimarket Sarita', 'llorente', '3146027224', 'Minimarket llorente Nariño', '2025-11-21 19:52:02'),
+(4, 'Restaurante de prueba ', 'casa 11', '343543', '', '2025-11-21 20:03:58');
 
 -- --------------------------------------------------------
 
@@ -362,7 +375,11 @@ CREATE TABLE `personas` (
 
 INSERT INTO `personas` (`id`, `tipo_identificacion`, `identificacion`, `nombres`, `apellidos`, `tipo`, `email`, `telefono`, `direccion`, `nota`, `fecha_creacion`) VALUES
 (1, 'CC', '1233194301', 'Yohan Alexis ', 'Caratar Pabon', 'otro', 'ing@alexis@gmail.com', '3162467600', 'Torres san luis', 'Administrador', '2025-11-17 21:14:32'),
-(13, NULL, '9879878', 'juan', 'perez', 'cliente', NULL, '87687687', 'pasto', NULL, '2025-11-18 04:12:06');
+(13, NULL, '9879878', 'juan', 'perez', 'cliente', NULL, '87687687', 'pasto', NULL, '2025-11-18 04:12:06'),
+(14, NULL, '1233194305', 'alexistos', 'asdad', 'cliente', NULL, '3162467600', 'manzana O casa 18', NULL, '2025-11-21 16:17:03'),
+(15, NULL, '97415439', 'Sara Maria ', 'Pabon Riascos', 'cliente', NULL, '3146027224', 'manzana O casa 18', NULL, '2025-11-21 16:17:35'),
+(16, NULL, '1233194301', 'Yohan Alexis ', 'Caratar Pabon', 'cliente', NULL, '3162467600', 'Torres san luis', NULL, '2025-11-21 16:43:43'),
+(17, NULL, '345345', 'dfgdfg', 'dfgdf', 'cliente', NULL, 'dfgdfg', 'dfgdfg', NULL, '2025-11-21 20:04:25');
 
 -- --------------------------------------------------------
 
@@ -372,20 +389,20 @@ INSERT INTO `personas` (`id`, `tipo_identificacion`, `identificacion`, `nombres`
 
 CREATE TABLE `productos` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `id_negocio` int(11) NOT NULL,
   `codigo` varchar(50) DEFAULT NULL,
   `nombre` varchar(100) NOT NULL,
   `descripcion` text DEFAULT NULL,
-  `unidad_medida` varchar(20) DEFAULT NULL
+  `unidad_medida` varchar(20) DEFAULT NULL,
+  `id_categoria` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `productos`
 --
 
-INSERT INTO `productos` (`id`, `id_negocio`, `codigo`, `nombre`, `descripcion`, `unidad_medida`) VALUES
-(1, 1, '255', 'Pollo en salsa2', 'Almuerzo de pollo con salsa de la casa, 1/4 de pollo broster acompañado de delicioso jugo 2', 'litro'),
-(3, 1, '45', 'Yohan Alexis Caratar Pabon', 'SWL es un acrónimo que puede tener varios significados, como Carga de Trabajo Segura (Safe Working Load) en ingeniería y elevación, que indica el peso máximo que un equipo puede soportar de forma segura. También puede referirse a la escucha de ondas cortas (Shortwave Listening), o puede ser el nombre de empresas de logística, tecnología o consultoría. \n', 'litro');
+INSERT INTO `productos` (`id`, `codigo`, `nombre`, `descripcion`, `unidad_medida`, `id_categoria`) VALUES
+(1, '255', 'Pollo en salsa', 'Almuerzo de pollo con salsa de la casa, 1/4 de pollo broster acompañado de delicioso jugo 2', 'litro', NULL),
+(3, '45', 'Desayuno Casero', 'Un dato es una representación simbólica de un atributo o variable cuantitativa o cualitativa.', 'litro', NULL);
 
 -- --------------------------------------------------------
 
@@ -482,7 +499,8 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id`, `id_persona`, `email`, `password`, `rol`, `id_negocio`, `fecha_creacion`, `imagen`) VALUES
 (23, 1, 'admin@gmail.com', '$2b$10$YTHbCcGSWTrDC1phmHus..3bbGjVJ.ujyMRsXfbhAls/mIDn4XXLO', 'admin', 1, '2025-11-18 02:22:46', 'https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png'),
-(29, 13, 'juan9878@gmail.com', '$2b$10$hDHtS3kwmQ8VJrsyvwWPK.U8TYqphiIb9VzOrfyCUFAPVu2b0on3O', 'empleado', 1, '2025-11-18 04:12:06', 'https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png');
+(30, 15, 'alexistos-5439@gmail.com', '$2b$10$1CMmRGCU17w5/hQqM9du5ecyyHWNhIAVyPqGrdzCdiUH0sU0QEprC', 'admin', 1, '2025-11-21 16:17:35', 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngegg.com%2Fes%2Fsearch%3Fq%3Davatar&psig=AOvVaw3cy7Tbo5O0M2jfkkQg9rYe&ust=1763828243218000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCMCXv7LSg5EDFQAAAAAdAAAAABAE'),
+(31, 16, 'yohan4301@gmail.com', '$2b$10$g6ehdeh0z6dyi5TUNLdOnefWzoptQOJgkvHErXx3yOsEmeGUNOYTe', 'admin', 1, '2025-11-21 16:43:43', 'https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png');
 
 -- --------------------------------------------------------
 
@@ -559,7 +577,8 @@ ALTER TABLE `app_modulos_negocio_rol`
 -- Indices de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_categorias` (`id_negocio`);
 
 --
 -- Indices de la tabla `compras`
@@ -646,7 +665,8 @@ ALTER TABLE `personas`
 --
 ALTER TABLE `productos`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `codigo` (`codigo`);
+  ADD UNIQUE KEY `codigo` (`codigo`),
+  ADD KEY `id_categoria` (`id_categoria`);
 
 --
 -- Indices de la tabla `productos_precios`
@@ -713,25 +733,25 @@ ALTER TABLE `activos`
 -- AUTO_INCREMENT de la tabla `app_modulos`
 --
 ALTER TABLE `app_modulos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `app_modulos_negocio`
 --
 ALTER TABLE `app_modulos_negocio`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `app_modulos_negocio_rol`
 --
 ALTER TABLE `app_modulos_negocio_rol`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `compras`
@@ -767,7 +787,7 @@ ALTER TABLE `inventario`
 -- AUTO_INCREMENT de la tabla `inventario_fisico`
 --
 ALTER TABLE `inventario_fisico`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `inventario_fisico_detalles`
@@ -803,7 +823,7 @@ ALTER TABLE `pagos`
 -- AUTO_INCREMENT de la tabla `personas`
 --
 ALTER TABLE `personas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
@@ -839,7 +859,7 @@ ALTER TABLE `ubicaciones`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT de la tabla `ventas`
