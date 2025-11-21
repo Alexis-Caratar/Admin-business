@@ -48,7 +48,7 @@ export const crear = async (req, res) => {
 // Actualizar usuario
 export const actualizar = async (req, res) => {
   try {
-    const data = await service.actualizar(req.params.id, req.body);
+    const data = await service.actualizar(req.body);
     res.json(data);
   } catch (err) {
     console.error("ERROR actualizar usuario:", err);

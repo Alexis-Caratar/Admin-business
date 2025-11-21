@@ -29,6 +29,15 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import QrCode2Icon from "@mui/icons-material/QrCode2";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import StraightenIcon from "@mui/icons-material/Straighten";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+
+
+
+
 
 const AdminProductos: React.FC = () => {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -114,9 +123,10 @@ const AdminProductos: React.FC = () => {
   return (
     <Box p={3}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5" fontWeight={600}>
-          Administrar Productos
-        </Typography>
+     <Typography variant="h5" fontWeight={600} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+  <ShoppingBagIcon sx={{ fontSize: 28 }} />
+  Administrar Productos
+</Typography>
         <Button
           variant="contained"
           color="primary"
@@ -131,57 +141,122 @@ const AdminProductos: React.FC = () => {
       <Grid container spacing={3}>
         {productos.map((p) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={p.id}>
-            <Card
-              sx={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-              }}
-            >
-              {/* IMAGEN DEL PRODUCTO */}
-              <CardMedia
-                component="img"
-                height="140"
-                image={p.imagen || defaultImage}
-                alt={p.nombre}
-              />
+ 
 
-              <CardContent sx={{ flex: 1, overflow: "hidden" }}>
-                <Typography variant="subtitle2" color="textSecondary" noWrap>
-                  Código: {p.codigo}
-                </Typography>
-                <Typography variant="h6" fontWeight={600} noWrap>
-                  {p.nombre}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  sx={{
-                    mt: 1,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 4,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {p.descripcion || "Sin descripción"}
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  Unidad: {p.unidad_medida || "N/A"}
-                </Typography>
-              </CardContent>
+ <Card
+  sx={{
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    borderRadius: 3,
+    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      transform: "translateY(-4px)",
+      boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+    },
+  }}
+>
+  {/* IMAGEN */}
+  <CardMedia
+    component="img"
+    height="150"
+    image={p.imagen || defaultImage}
+    alt={p.nombre}
+    sx={{
+      borderTopLeftRadius: 12,
+      borderTopRightRadius: 12,
+      objectFit: "cover",
+    }}
+  />
 
-              <CardActions sx={{ justifyContent: "flex-end" }}>
-                <IconButton color="primary" onClick={() => handleEdit(p)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton color="error" onClick={() => handleDelete(p.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </CardActions>
-            </Card>
+  <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+    
+    {/* CÓDIGO */}
+    <Typography
+      variant="subtitle2"
+      color="textSecondary"
+      noWrap
+      sx={{ display: "flex", alignItems: "center", gap: 0.7 }}
+    >
+      <QrCode2Icon fontSize="small" sx={{ color: "#fb8c00" }} />
+      Código: {p.codigo}
+    </Typography>
+
+    {/* PRODUCTO */}
+    <Typography
+      variant="body1"
+      fontWeight={700}
+      noWrap
+      sx={{ display: "flex", alignItems: "center", gap: 0.7 }}
+    >
+      <Inventory2Icon fontSize="small" sx={{ color: "#7e57c2" }} />
+      {p.nombre}
+    </Typography>
+
+    {/* UNIDAD */}
+    <Box display="flex" alignItems="center" gap={0.5}>
+      <StraightenIcon fontSize="small" sx={{ color: "#08670a" }} />
+      <Typography variant="body2">Unidad: {p.unidad_medida || "N/A"}</Typography>
+    </Box>
+
+    {/* DESCRIPCIÓN DESPLEGABLE */}
+    <Box mt={1}>
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={0.5}
+        sx={{ cursor: "pointer" }}
+        onClick={() =>
+          setProductos((prev) =>
+            prev.map((x) => (x.id === p.id ? { ...x, showDesc: !x.showDesc } : x))
+          )
+        }
+      >
+        <ExpandMoreIcon
+          sx={{
+            transition: "0.3s",
+            transform: p.showDesc ? "rotate(180deg)" : "rotate(0deg)",
+            color: "#1976d2",
+          }}
+        />
+        <Typography variant="body2" fontWeight={600} color="primary">
+          Descripción
+        </Typography>
+      </Box>
+
+      {/* TEXTO QUE SE DESPLIEGA */}
+      {p.showDesc && (
+        <Typography
+          variant="body2"
+          sx={{
+            mt: 1,
+            p: 1,
+            width:250,
+            background: "#f5f5f5",
+            borderRadius: 1,
+            maxHeight: 90,
+            overflowY: "auto",
+            fontSize: 13,
+          }}
+        >
+          {p.descripcion || "Sin descripción"}
+        </Typography>
+      )}
+    </Box>
+  </CardContent>
+
+  {/* BOTONES */}
+  <CardActions sx={{ justifyContent: "flex-end", pb: 1 }}>
+    <IconButton color="primary" onClick={() => handleEdit(p)}>
+      <EditIcon />
+    </IconButton>
+    <IconButton color="error" onClick={() => handleDelete(p.id)}>
+      <DeleteIcon />
+    </IconButton>
+  </CardActions>
+</Card>
+
           </Grid>
         ))}
       </Grid>

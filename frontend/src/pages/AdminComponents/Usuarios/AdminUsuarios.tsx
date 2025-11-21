@@ -20,15 +20,23 @@ import {
   Avatar,
   Stack
 } from "@mui/material";
+
 import { motion, AnimatePresence } from "framer-motion";
-import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SortIcon from "@mui/icons-material/Sort";
 import PeopleIcon from "@mui/icons-material/People";
+import SearchIcon from "@mui/icons-material/Search";
+
 import Swal from "sweetalert2";
 
-import { getUsuarios, createUsuarioCompleto, deleteUsuario } from "../../../api/usuarios";
+import {
+  getUsuarios,
+  createUsuarioCompleto,
+  updateUsuarioCompleto,
+  deleteUsuario
+} from "../../../api/usuarios";
+
 import type { User } from "../../../types";
 
 const AdminUsuarios: React.FC = () => {
@@ -36,8 +44,8 @@ const AdminUsuarios: React.FC = () => {
 
   const [usuarios, setUsuarios] = useState<User[]>([]);
   const [search, setSearch] = useState("");
-  const [rolFilter, setRolFilter] = useState("todos");
-  const [sortField, setSortField] = useState<keyof User>("nombre");
+
+  const [sortField] = useState<keyof User>("nombres");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const [page, setPage] = useState(1);
@@ -45,20 +53,23 @@ const AdminUsuarios: React.FC = () => {
 
   const [openModal, setOpenModal] = useState(false);
 
+  /** FORMULARIO con tipado real */
   const [form, setForm] = useState({
-    // Persona
+    id_usuario: 0,
+    id_persona: 0,
     identificacion: "",
     nombres: "",
     apellidos: "",
     telefono: "",
     direccion: "",
-
-    // Usuario
+    email: "",
     rol: "empleado",
     imagen: "",
   });
 
-  /** --------------- TRAER USUARIOS --------------- */
+  /** ============================
+   * TRAER USUARIOS
+   ============================ */
   const fetchUsuarios = async () => {
     const data = await getUsuarios();
     setUsuarios(data);
@@ -68,144 +79,193 @@ const AdminUsuarios: React.FC = () => {
     fetchUsuarios();
   }, []);
 
-  /** --------------- FILTROS Y ORDEN --------------- */
+  /** ============================
+   *  BUSCADOR + ORDENAMIENTO
+   ============================ */
   const filtered = useMemo(() => {
     let result = [...usuarios];
 
-    if (search) {
-      result = result.filter(u =>
-        u.nombre.toLowerCase().includes(search.toLowerCase())
-      );
-    }
+    if (search.trim() !== "") {
+      const term = search.toLowerCase();
 
-    if (rolFilter !== "todos") {
-      result = result.filter(u => u.rol === rolFilter);
+      result = result.filter((u) => {
+        const fullName = `${u.nombres ?? ""} ${u.apellidos ?? ""}${u.rol?? ""} ${u.identificacion?? ""} `.toLowerCase();
+        const email = u.email?.toLowerCase() ?? "";
+        return fullName.includes(term) || email.includes(term);
+      });
     }
 
     result.sort((a, b) => {
-      const A = a[sortField];
-      const B = b[sortField];
-      if (typeof A === "string" && typeof B === "string") {
-        return sortOrder === "asc" ? A.localeCompare(B) : B.localeCompare(A);
-      }
-      return 0;
+      const A = (a[sortField] ?? "").toString();
+      const B = (b[sortField] ?? "").toString();
+
+      const cmp = A.localeCompare(B, undefined, { numeric: true });
+      return sortOrder === "asc" ? cmp : -cmp;
     });
 
     return result;
-  }, [usuarios, search, rolFilter, sortField, sortOrder]);
+  }, [usuarios, search, sortField, sortOrder]);
 
-  /** --------------- PAGINACIÓN --------------- */
+  /** PAGINACIÓN */
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
-  );
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
-  /** --------------- MANEJO DEL FORMULARIO --------------- */
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  /** ============================
+   * FORM CHANGE
+   ============================ */
+  const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  /** ============================
+   * GUARDAR / ACTUALIZAR
+   ============================ */
   const handleSubmit = async () => {
-    if (!form.identificacion || !form.nombres || !form.apellidos) {
-      Swal.fire("Error", "Todos los campos obligatorios deben estar completos", "error");
-      return;
-    }
-
     try {
-      // Generar email y password automáticamente
-      const ultimos4 = form.identificacion.slice(-4);
-      const nombreUsuario = `${form.nombres.split(" ")[0]}${ultimos4}`.replace(/ /g, "").toLowerCase();
-      const email = `${nombreUsuario}@gmail.com`;
-      const password = ultimos4;
+      /** === SI ES CREAR === */
+      if (form.id_usuario === 0) {
+        if (!form.identificacion || !form.nombres || !form.apellidos) {
+          Swal.fire("Error", "Todos los campos son obligatorios", "error");
+          return;
+        }
 
-      // Payload completo
-      const payload = {
-        persona: {
-          identificacion: form.identificacion,
-          nombres: form.nombres,
-          apellidos: form.apellidos,
-          telefono: form.telefono || null,
-          direccion: form.direccion || null
-        },
-        usuario: {
-          email,
-          password,
-          rol: form.rol,
-          id_negocio: idNegocioLS,
-          imagen: form.imagen || null,
-        },
-      };
+        const ultimos4 = form.identificacion.slice(-4);
+        const nombresUsuario = `${form.nombres.split(" ")[0]}${ultimos4}`
+          .replace(/ /g, "")
+          .toLowerCase();
+        const email = `${nombresUsuario}@gmail.com`;
+        const password = ultimos4;
 
-      await createUsuarioCompleto(payload);
+        const payload = {
+          persona: {
+            identificacion: form.identificacion,
+            nombres: form.nombres,
+            apellidos: form.apellidos,
+            telefono: form.telefono || null,
+            direccion: form.direccion || null,
+          },
+          usuario: {
+            email,
+            password,
+            rol: form.rol,
+            id_negocio: idNegocioLS,
+            imagen: form.imagen || null,
+          },
+        };
 
-      Swal.fire("Éxito", "Usuario creado correctamente", "success");
+        await createUsuarioCompleto(payload);
+        Swal.fire("Éxito", "Usuario creado correctamente", "success");
+      } else {
+        /** === SI ES EDITAR === */
 
-      setForm({
-        identificacion: "",
-        nombres: "",
-        apellidos: "",
-        telefono: "",
-        direccion: "",
-        rol: "empleado",
-        imagen: "",
-      });
+        const payload = {
+          persona: {
+            id: form.id_persona,
+            identificacion: form.identificacion,
+            nombres: form.nombres,
+            apellidos: form.apellidos,
+            telefono: form.telefono,
+            direccion: form.direccion,
+          },
+          usuario: {
+            id: form.id_usuario,
+            email: form.email,
+            rol: form.rol,
+            imagen: form.imagen,
+            password:'12345'
+          },
+        };
 
-      fetchUsuarios();
+        await updateUsuarioCompleto(payload);
+        Swal.fire("Éxito", "Usuario actualizado correctamente", "success");
+      }
+
       setOpenModal(false);
+      fetchUsuarios();
     } catch (err: any) {
-      console.error(err);
-      Swal.fire("Error", err.message || "Ocurrió un error al crear el usuario", "error");
+      Swal.fire("Error", err.message || "Error al guardar", "error");
     }
   };
 
-const handleDeleteUser = async (id: number) => {
-  Swal.fire({
-    title: "¿Está seguro?",
-    text: "Esta acción eliminará el usuario de forma permanente.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        await deleteUsuario(id);
-        await fetchUsuarios();
-
-        Swal.fire({
-          title: "Eliminado",
-          text: "El usuario ha sido eliminado correctamente.",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      } catch (error) {
-        Swal.fire("Error", "No se pudo eliminar el usuario", "error");
+  /** ============================
+   * ELIMINAR
+   ============================ */
+  const handleDeleteUser = async (id: number) => {
+    Swal.fire({
+      title: "¿Está seguro?",
+      text: "Esta acción eliminará el usuario permanentemente.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteUsuario(id);
+          fetchUsuarios();
+          Swal.fire("Eliminado", "Usuario eliminado correctamente", "success");
+        } catch {
+          Swal.fire("Error", "No se pudo eliminar el usuario", "error");
+        }
       }
-    }
-  });
-};
+    });
+  };
 
-
+  /** ============================
+   * ANIMACIONES TARJETAS
+   ============================ */
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 }
+    exit: { opacity: 0, y: -20 },
+  };
+
+  /** ============================
+   * CARGAR DATOS EN EDICIÓN
+   ============================ */
+  const handleEdit = (u: User) => {
+    setForm({
+      id_usuario: u.id_usuario,
+      id_persona: u.id_persona,
+      identificacion: u.identificacion,
+      nombres: u.nombres,
+      apellidos: u.apellidos,
+      telefono: u.telefono,
+      direccion: u.direccion,
+      email: u.email,
+      rol: u.rol,
+      imagen: u.imagen || "",
+    });
+
+    setOpenModal(true);
   };
 
   return (
     <Box p={1}>
-      <Box display="flex" justifyContent="space-between" mb={3}>
-        <Typography variant="h5" display="flex" alignItems="center" gap={1}>
+      {/* HEADER */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h5" fontWeight={600} display="flex" gap={1}>
           <PeopleIcon /> Administrar Usuarios
         </Typography>
+
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setOpenModal(true)}
+          startIcon={<PeopleIcon />}
+          onClick={() => {
+            setForm({
+              id_usuario: 0,
+              id_persona: 0,
+              identificacion: "",
+              nombres: "",
+              apellidos: "",
+              telefono: "",
+              direccion: "",
+              email: "",
+              rol: "empleado",
+              imagen: "",
+            });
+            setOpenModal(true);
+          }}
           component={motion.button}
           whileHover={{ scale: 1.05 }}
         >
@@ -213,63 +273,95 @@ const handleDeleteUser = async (id: number) => {
         </Button>
       </Box>
 
-      {/* FILTROS */}
-      <Grid container spacing={2} mb={1}>
-        <Grid item xs={12} md={3}>
-          <TextField label="Buscar..." fullWidth value={search} onChange={(e) => setSearch(e.target.value)} />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <FormControl fullWidth>
-            <InputLabel>Rol</InputLabel>
-            <Select value={rolFilter} onChange={(e) => setRolFilter(e.target.value)}>
-              <MenuItem value="todos">Todos</MenuItem>
-              <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="cliente">Cliente</MenuItem>
-              <MenuItem value="empleado">Empleado</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} md={2}>
-          <Button variant="outlined" fullWidth startIcon={<SortIcon />} onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-            Ordenar
-          </Button>
-        </Grid>
-      </Grid>
+      {/* BUSCADOR */}
+      <Box mb={3}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            background: "#f1f3f4",
+            px: 2,
+            borderRadius: 5,
+            width: 450,
+            height: 38,
+          }}
+        >
+          <SearchIcon sx={{ opacity: 0.6, mr: 1 }} />
+          <TextField
+            variant="standard"
+            placeholder="Buscar..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{ disableUnderline: true }}
+            fullWidth
+          />
+        </Box>
+      </Box>
+
+      {/* ORDENAMIENTO */}
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={<SortIcon />}
+        onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+        sx={{ mb: 2 }}
+      >
+        Ordenar
+      </Button>
 
       <Typography mb={2}>
         Total: <strong>{filtered.length}</strong> usuarios encontrados.
       </Typography>
 
-      {/* CARDS */}
+      {/* LISTA DE TARJETAS */}
       <Grid container spacing={2}>
         <AnimatePresence>
-          {paginated.map(u => (
-            <Grid item xs={12} md={4} key={u.id}>
-              <motion.div variants={cardVariants} initial="hidden" animate="visible" exit="exit" layout>
-                <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
+          {paginated.map((u) => (
+            <Grid item xs={12} md={4} key={u.id_usuario}>
+              <motion.div
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                whileHover={{
+                  scale: 1.04,
+                  transition: { duration: 0.25 },
+                }}
+              >
+                <Card sx={{ borderRadius: 3 }}>
                   <CardContent>
-                    <Box display="flex" justifyContent="center" mb={2}>
-                      <Avatar src={u.imagen || ""} sx={{ width: 80, height: 80, bgcolor: "#1976d2", fontSize: 28 }}>
-                        {!u.imagen && u.nombre.charAt(0).toUpperCase()}
+                    <Box display="flex" justifyContent="center">
+                      <Avatar
+                        src={u.imagen || ""}
+                        sx={{ width: 80, height: 80, fontSize: 28 }}
+                      >
+                        {!u.imagen && u.nombres.charAt(0)}
                       </Avatar>
                     </Box>
-                    <Typography variant="body2" align="center" fontWeight="bold">{u.nombre}</Typography>
-                    <Typography variant="body2" align="center">{u.email}</Typography>
-                    <Typography variant="caption" align="center" component="div" fontWeight="bold">
+
+                    <Typography align="center" fontWeight="bold">
+                      {u.nombres} {u.apellidos}
+                    </Typography>
+
+                    <Typography align="center">
+                      {u.tipo_identificacion}-{u.identificacion}
+                    </Typography>
+
+                    <Typography align="center">{u.email}</Typography>
+
+                    <Typography align="center" variant="caption" fontWeight="bold">
                       <strong>Rol:</strong> {u.rol}
                     </Typography>
 
+                    {/* BOTONES */}
                     <Stack direction="row" spacing={1} justifyContent="center" mt={2}>
-                      <motion.div whileHover={{ scale: 1.2 }}>
-                        <IconButton color="primary" onClick={() => setForm(u) || setOpenModal(true)}>
-                          <EditIcon />
-                        </IconButton>
-                      </motion.div>
-                      <motion.div whileHover={{ scale: 1.2 }}>
-                        <IconButton color="error" onClick={() => handleDeleteUser(u.id)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </motion.div>
+                      <IconButton color="primary" onClick={() => handleEdit(u)}>
+                        <EditIcon />
+                      </IconButton>
+
+                      <IconButton color="error" onClick={() => handleDeleteUser(u.id_usuario)}>
+                        <DeleteIcon />
+                      </IconButton>
                     </Stack>
                   </CardContent>
                 </Card>
@@ -281,31 +373,51 @@ const handleDeleteUser = async (id: number) => {
 
       {/* PAGINACIÓN */}
       <Box display="flex" justifyContent="center" mt={3}>
-        <Pagination count={totalPages} page={page} onChange={(e, value) => setPage(value)} color="primary" />
+        <Pagination count={totalPages} page={page} onChange={(e, v) => setPage(v)} />
       </Box>
 
       {/* MODAL */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
-        <DialogTitle>{form.identificacion ? "Editar Usuario" : "Adicionar Usuario"}</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-          <TextField label="Identificación" name="identificacion" value={form.identificacion} onChange={handleChange} fullWidth />
-          <TextField label="Nombres" name="nombres" value={form.nombres} onChange={handleChange} fullWidth />
-          <TextField label="Apellidos" name="apellidos" value={form.apellidos} onChange={handleChange} fullWidth />
-          <TextField label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} fullWidth />
-          <TextField label="Dirección" name="direccion" value={form.direccion} onChange={handleChange} fullWidth />
+        <DialogTitle>
+          {form.id_usuario === 0 ? "Adicionar Usuario" : "Editar Usuario"}
+        </DialogTitle>
+
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <TextField
+            label="Identificación"
+            name="identificacion"
+            value={form.identificacion}
+            onChange={handleChange}
+          />
+          <TextField label="Nombres" name="nombres" value={form.nombres} onChange={handleChange} />
+          <TextField label="Apellidos" name="apellidos" value={form.apellidos} onChange={handleChange} />
+          <TextField label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
+          <TextField label="Dirección" name="direccion" value={form.direccion} onChange={handleChange} />
+
           <FormControl fullWidth>
             <InputLabel>Rol</InputLabel>
-            <Select name="rol" value={form.rol} onChange={handleChange}>
+            <Select name="rol" value={form.rol} label="Rol" onChange={handleChange}>
               <MenuItem value="admin">Admin</MenuItem>
               <MenuItem value="cliente">Cliente</MenuItem>
               <MenuItem value="empleado">Empleado</MenuItem>
             </Select>
           </FormControl>
-          <TextField label="URL Imagen (opcional)" name="imagen" value={form.imagen} onChange={handleChange} fullWidth />
+
+          <TextField label="Email usuario" name="email" value={form.email} onChange={handleChange} />
+
+          <TextField
+            label="URL Imagen (opcional)"
+            name="imagen"
+            value={form.imagen}
+            onChange={handleChange}
+          />
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
-          <Button variant="contained" onClick={handleSubmit}>Guardar</Button>
+          <Button variant="contained" onClick={handleSubmit}>
+            Guardar
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

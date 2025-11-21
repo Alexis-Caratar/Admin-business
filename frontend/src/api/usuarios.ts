@@ -20,15 +20,16 @@ export const createUsuarioCompleto = async (data:any) => {
 };
 
 
-export const updateUsuario = async (id: number, payload: Partial<User>) => {
+export const updateUsuarioCompleto = async (data: any) => {
   try {
-    const { data } = await axios.put(`/usuarios/${id}`, payload);
-    return data;
-  } catch (error) {
-    console.error(`Error PUT /usuarios/${id}:`, error);
-    throw error;
+    const res = await axios.put("/usuarios/actualizar", data);
+    return res.data;
+  } catch (error: any) {
+    console.error("Error PUT /actualizar:", error);
+    throw error.response?.data || error;
   }
 };
+
 
 export const deleteUsuario = async (id: number) => {
   try {

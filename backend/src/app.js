@@ -12,6 +12,8 @@ import productosRoutes from "./routes/productos.routes.js";
 import empleadosRoutes from "./routes/empleados.routes.js";
 import inventariosRoutes from "./routes/inventarios.routes.js";
 import ventasRoutes from "./routes/ventas.routes.js";
+import categoriasRouter from "./routes/categorias.routes.js";
+
 
 // Middleware JWT
 import { authenticate } from "./middlewares/auth.middleware.js";
@@ -36,6 +38,7 @@ app.use("/api/usuarios", usuariosRoutes);
 // ---------------------------
 app.use("/api/menus_sistema", /* authenticate,*/ menus_sistema);
 app.use("/api/negocios", /* authenticate,*/ negociosRoutes);
+app.use("/api/categorias", /* authenticate,*/ categoriasRouter);
 app.use("/api/productos", /* authenticate,*/ productosRoutes);
 app.use("/api/reservas", /* authenticate,*/ reservasRoutes);
 app.use("/api/empleados", /* authenticate,*/ empleadosRoutes);

@@ -1,6 +1,12 @@
 export interface User {
-  id: number;
-  nombre: string;
+  id_usuario: number;
+  id_persona: number;
+  nombres: string;
+  apellidos: string;
+  tipo_identificacion: string;
+  identificacion: string;
+  telefono: string;
+  direccion: string;
   email: string;
   rol: "admin" | "cliente" | "empleado";
   password?: string;
@@ -14,7 +20,6 @@ export interface Negocio {
   direccion?: string; 
   telefono?: string;
   descripcion?: string;
-  fecha_creacion?: string;
   imagen?:string;
 }
 
@@ -25,4 +30,5 @@ export interface Producto {
   nombre: string;
   descripcion?: string;
   unidad_medida?: string;
+  imagen?: string;
 }

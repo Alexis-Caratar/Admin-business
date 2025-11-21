@@ -4,7 +4,7 @@ const TABLE = "negocios";
 
 // Listar todos los negocios
 export const listar = async () => {
-  const [rows] = await db.query(`SELECT * FROM ${TABLE}`);
+  const [rows] = await db.query(`SELECT id,nombre,direccion,descripcion,telefono FROM ${TABLE}`);
   return rows;
 };
 

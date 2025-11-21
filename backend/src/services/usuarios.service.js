@@ -12,7 +12,7 @@ export const listar = async (id_negocio) => {
   const [rows] = await db.query(
     `
     SELECT 
-      u.rol,u.email,p.tipo_identificacion,p.identificacion,
+     u.id as id_usuario,p.id as id_persona,u.rol,u.email,p.tipo_identificacion,p.identificacion,
       p.telefono,p.direccion,p.nombres,p.apellidos,u.imagen
     FROM usuarios u
     INNER JOIN negocios n ON u.id_negocio = n.id
@@ -149,44 +149,108 @@ export const crearPersonaService = async (data) => {
 // -----------------------------
 // ACTUALIZAR
 // -----------------------------
-export const actualizar = async (id, payload) => {
-  const data = { ...payload };
+export const actualizar = async (payload) => {
+  console.log("payload", payload);
 
-  // Si viene nueva contraseña → encriptar
-  if (data.password) {
-    data.password = await bcrypt.hash(data.password, SALT_ROUNDS);
+  const { persona, usuario } = payload;
+
+  // ================================
+  // 1️⃣ Validar existencia del usuario
+  // ================================
+  const [exist] = await db.query(
+    `SELECT id, id_persona FROM ${TABLE} WHERE id = ?`,
+    [usuario.id]
+  );
+
+  if (exist.length === 0) {
+    const err = new Error("El usuario no existe");
+    err.status = 404;
+    throw err;
   }
 
-  // Si intenta cambiar el email → validar duplicado
-  if (data.email) {
-    const [exists] = await db.query(
-      `SELECT id FROM ${TABLE} WHERE email = ? AND id != ?`,
-      [data.email, id]
+  const id_usuario = usuario.id;
+  const id_persona = exist[0].id_persona;
+
+  // ================================
+  // 2️⃣ Validar email duplicado
+  // ================================
+  if (usuario.email) {
+    const [checkEmail] = await db.query(
+      `SELECT id FROM ${TABLE} WHERE email = ? AND id <> ?`,
+      [usuario.email, id_usuario]
     );
 
-    if (exists.length > 0) {
-      const err = new Error("El email ya está en uso por otro usuario");
-      err.status = 409;
+    if (checkEmail.length > 0) {
+      const err = new Error("El correo ya está registrado por otro usuario");
+      err.status = 400;
       throw err;
     }
   }
 
-  const sets = Object.keys(data)
-    .map((key) => `${key} = ?`)
-    .join(", ");
+  // ================================
+  // 3️⃣ Actualizar Persona
+  // ================================
+  if (persona && Object.keys(persona).length > 0) {
+    // eliminar ID para no actualizarlo
+    const { id, ...personaClean } = persona;
 
-  const values = Object.values(data);
+    const personaFields = Object.keys(personaClean)
+      .map((key) => `${key} = ?`)
+      .join(", ");
 
-  await db.query(
-    `UPDATE ${TABLE} SET ${sets} WHERE id = ?`,
-    [...values, id]
-  );
+    const personaValues = Object.values(personaClean);
+
+    const sqlPersona = `
+      UPDATE ${TABLE_PERSONAS}
+      SET ${personaFields}
+      WHERE id = ?
+    `;
+
+    console.log("SQL PERSONA:", sqlPersona, [...personaValues, id_persona]);
+
+    await db.query(sqlPersona, [...personaValues, id_persona]);
+  }
+
+  // ================================
+  // 4️⃣ Actualizar Usuario
+  // ================================
+  if (usuario && Object.keys(usuario).length > 0) {
+    // eliminar campos que no deben actualizarse
+    let { id, id_persona: ignore, ...usuarioClean } = usuario;
+
+    // Si llega una contraseña, encriptar
+    if (usuarioClean.password) {
+      usuarioClean.password = await bcrypt.hash(
+        usuarioClean.password,
+        SALT_ROUNDS
+      );
+    }
+
+    const usuarioFields = Object.keys(usuarioClean)
+      .map((key) => `${key} = ?`)
+      .join(", ");
+
+    const usuarioValues = Object.values(usuarioClean);
+
+    const sqlUsuario = `
+      UPDATE ${TABLE}
+      SET ${usuarioFields}
+      WHERE id = ?
+    `;
+
+    console.log("SQL USUARIO:", sqlUsuario, [...usuarioValues, id_usuario]);
+
+    await db.query(sqlUsuario, [...usuarioValues, id_usuario]);
+  }
 
   return {
-    id,
-    ...data
+    mensaje: "Usuario actualizado correctamente",
+    id_usuario,
+    id_persona,
   };
 };
+
+
 
 // -----------------------------
 // ELIMINAR
