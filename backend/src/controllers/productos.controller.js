@@ -1,6 +1,6 @@
 import * as service from "../services/productos.service.js";
 export const listar = async (req, res) => {
-  try { const data = await service.listar(); res.json(data); } catch (err) { res.status(500).json({ error: err.message }); }
+  try { const data = await service.listar(req.params.id); res.json(data); } catch (err) { res.status(500).json({ error: err.message }); }
 };
 export const obtener = async (req, res) => {
   try { const data = await service.obtener(req.params.id); if(!data) return res.status(404).json({ error: "No encontrado" }); res.json(data); } catch (err) { res.status(500).json({ error: err.message }); }

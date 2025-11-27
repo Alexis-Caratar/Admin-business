@@ -1,8 +1,8 @@
 import axios from "./axios";
 import type{ Producto } from "../types";
 
-export const getProductos = async () => {
-  const { data } = await axios.get<Producto[]>("/productos");
+export const getProductos = async (id:number) => {
+  const { data } = await axios.get<Producto[]>(`/productos/categorias/${id}`);
   return data;
 };
 

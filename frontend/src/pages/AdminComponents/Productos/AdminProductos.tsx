@@ -24,6 +24,7 @@ import {
   DialogActions,
   TextField,
   Autocomplete,
+  Pagination,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -34,12 +35,15 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import StraightenIcon from "@mui/icons-material/Straighten";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SearchIcon from "@mui/icons-material/Search";
 
+interface Props {
+  id: number;
+  onBack: () => void;
+}
 
-
-
-
-const AdminProductos: React.FC = () => {
+const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [form, setForm] = useState<Producto>({
     codigo: "",
@@ -50,22 +54,46 @@ const AdminProductos: React.FC = () => {
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [openModal, setOpenModal] = useState(false);
+
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 8;
+
   const unidades = ["kg", "litro", "pieza", "unidad"];
   const defaultImage =
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQde1Zuns3SWsvZyR31zNW6hWWyf8N20bmBFA&s";
 
   const fetchProductos = async () => {
-    const data = await getProductos();
+    const data = await getProductos(id);
     setProductos(data);
   };
 
   useEffect(() => {
     fetchProductos();
-  }, []);
+  }, [id]);
+
+  // FILTRADO
+  const filtered = productos.filter((p) =>
+    (p.nombre + p.codigo + p.descripcion+p.unidad_medida)
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
+  // PAGINACIÓN
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginated = filtered.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
 
   const handleSubmit = async () => {
-    const id_negocio = localStorage.getItem("id_negocio") || "";
-    const payload = { ...form, id_negocio };
+    const payload = {
+      id_categoria: id,
+      codigo: form.codigo,
+      nombre: form.nombre,
+      descripcion: form.descripcion,
+      unidad_medida: form.unidad_medida,
+    };
 
     try {
       if (editingId) {
@@ -73,7 +101,13 @@ const AdminProductos: React.FC = () => {
       } else {
         await crearProducto(payload);
       }
-      setForm({ codigo: "", nombre: "", descripcion: "", unidad_medida: "", imagen: "" });
+      setForm({
+        codigo: "",
+        nombre: "",
+        descripcion: "",
+        unidad_medida: "",
+        imagen: "",
+      });
       setEditingId(null);
       setOpenModal(false);
       fetchProductos();
@@ -109,162 +143,212 @@ const AdminProductos: React.FC = () => {
         Swal.fire("Eliminado", "El producto ha sido eliminado.", "success");
       } catch (error) {
         Swal.fire("Error", "No se pudo eliminar el producto.", "error");
-        console.error(error);
       }
     }
   };
 
   const handleOpenModal = () => {
-    setForm({ codigo: "", nombre: "", descripcion: "", unidad_medida: "", imagen: "" });
+    setForm({
+      codigo: "",
+      nombre: "",
+      descripcion: "",
+      unidad_medida: "",
+      imagen: "",
+    });
     setEditingId(null);
     setOpenModal(true);
   };
 
   return (
     <Box p={3}>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={onBack}
+        sx={{ mb: 2, fontWeight: "bold" }}
+      >
+        Volver
+      </Button>
+
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-     <Typography variant="h5" fontWeight={600} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-  <ShoppingBagIcon sx={{ fontSize: 28 }} />
-  Administrar Productos
-</Typography>
+        <Typography
+          variant="h5"
+          fontWeight={600}
+          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+        >
+          <ShoppingBagIcon sx={{ fontSize: 28 }} />
+          Administrar Productos
+        </Typography>
+
         <Button
           variant="contained"
           color="primary"
-          startIcon={<AddIcon />}
+          startIcon={<ShoppingBagIcon />}
           onClick={handleOpenModal}
         >
           Crear Producto
         </Button>
       </Box>
 
-      {/* GRID DE TARJETAS */}
-      <Grid container spacing={3}>
-        {productos.map((p) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={p.id}>
- 
-
- <Card
-  sx={{
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    borderRadius: 3,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      transform: "translateY(-4px)",
-      boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-    },
-  }}
->
-  {/* IMAGEN */}
-  <CardMedia
-    component="img"
-    height="150"
-    image={p.imagen || defaultImage}
-    alt={p.nombre}
-    sx={{
-      borderTopLeftRadius: 12,
-      borderTopRightRadius: 12,
-      objectFit: "cover",
-    }}
-  />
-
-  <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-    
-    {/* CÓDIGO */}
-    <Typography
-      variant="subtitle2"
-      color="textSecondary"
-      noWrap
-      sx={{ display: "flex", alignItems: "center", gap: 0.7 }}
-    >
-      <QrCode2Icon fontSize="small" sx={{ color: "#fb8c00" }} />
-      Código: {p.codigo}
-    </Typography>
-
-    {/* PRODUCTO */}
-    <Typography
-      variant="body1"
-      fontWeight={700}
-      noWrap
-      sx={{ display: "flex", alignItems: "center", gap: 0.7 }}
-    >
-      <Inventory2Icon fontSize="small" sx={{ color: "#7e57c2" }} />
-      {p.nombre}
-    </Typography>
-
-    {/* UNIDAD */}
-    <Box display="flex" alignItems="center" gap={0.5}>
-      <StraightenIcon fontSize="small" sx={{ color: "#08670a" }} />
-      <Typography variant="body2">Unidad: {p.unidad_medida || "N/A"}</Typography>
-    </Box>
-
-    {/* DESCRIPCIÓN DESPLEGABLE */}
-    <Box mt={1}>
-      <Box
-        display="flex"
-        alignItems="center"
-        gap={0.5}
-        sx={{ cursor: "pointer" }}
-        onClick={() =>
-          setProductos((prev) =>
-            prev.map((x) => (x.id === p.id ? { ...x, showDesc: !x.showDesc } : x))
-          )
-        }
-      >
-        <ExpandMoreIcon
+      {/* BUSCADOR */}
+      <Box mb={3}>
+        <Box
           sx={{
-            transition: "0.3s",
-            transform: p.showDesc ? "rotate(180deg)" : "rotate(0deg)",
-            color: "#1976d2",
-          }}
-        />
-        <Typography variant="body2" fontWeight={600} color="primary">
-          Descripción
-        </Typography>
-      </Box>
-
-      {/* TEXTO QUE SE DESPLIEGA */}
-      {p.showDesc && (
-        <Typography
-          variant="body2"
-          sx={{
-            mt: 1,
-            p: 1,
-            width:250,
-            background: "#f5f5f5",
-            borderRadius: 1,
-            maxHeight: 90,
-            overflowY: "auto",
-            fontSize: 13,
+            display: "flex",
+            alignItems: "center",
+            background: "#f1f3f4",
+            px: 2,
+            borderRadius: 5,
+            width: 450,
+            height: 38,
           }}
         >
-          {p.descripcion || "Sin descripción"}
-        </Typography>
-      )}
-    </Box>
-  </CardContent>
+          <SearchIcon sx={{ opacity: 0.6, mr: 1 }} />
+          <TextField
+            variant="standard"
+            placeholder="Buscar producto..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            InputProps={{ disableUnderline: true }}
+            fullWidth
+          />
+        </Box>
+      </Box>
 
-  {/* BOTONES */}
-  <CardActions sx={{ justifyContent: "flex-end", pb: 1 }}>
-    <IconButton color="primary" onClick={() => handleEdit(p)}>
-      <EditIcon />
-    </IconButton>
-    <IconButton color="error" onClick={() => handleDelete(p.id)}>
-      <DeleteIcon />
-    </IconButton>
-  </CardActions>
-</Card>
+      {/* GRID DE TARJETAS */}
+      <Grid container spacing={3}>
+        {paginated.map((p) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={p.id}>
+            <Card
+              sx={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                borderRadius: 3,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              <CardMedia
+                component="img"
+                height="150"
+                image={p.imagen || defaultImage}
+                alt={p.nombre}
+                sx={{
+                  borderTopLeftRadius: 12,
+                  borderTopRightRadius: 12,
+                  objectFit: "cover",
+                }}
+              />
 
+              <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+                <Typography
+                  variant="subtitle2"
+                  color="textSecondary"
+                  noWrap
+                  sx={{ display: "flex", alignItems: "center", gap: 0.7 }}
+                >
+                  <QrCode2Icon fontSize="small" sx={{ color: "#fb8c00" }} />
+                  Código: {p.codigo}
+                </Typography>
+
+                <Typography
+                  variant="body1"
+                  fontWeight={700}
+                  noWrap
+                  sx={{ display: "flex", alignItems: "center", gap: 0.7 }}
+                >
+                  <Inventory2Icon fontSize="small" sx={{ color: "#7e57c2" }} />
+                  {p.nombre}
+                </Typography>
+
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <StraightenIcon fontSize="small" sx={{ color: "#08670a" }} />
+                  <Typography variant="body2">Unidad: {p.unidad_medida || "N/A"}</Typography>
+                </Box>
+
+                <Box mt={1}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    gap={0.5}
+                    sx={{ cursor: "pointer" }}
+                    onClick={() =>
+                      setProductos((prev) =>
+                        prev.map((x) =>
+                          x.id === p.id ? { ...x, showDesc: !x.showDesc } : x
+                        )
+                      )
+                    }
+                  >
+                    <ExpandMoreIcon
+                      sx={{
+                        transition: "0.3s",
+                        transform: p.showDesc ? "rotate(180deg)" : "rotate(0deg)",
+                        color: "#1976d2",
+                      }}
+                    />
+                    <Typography variant="body2" fontWeight={600} color="primary">
+                      Descripción
+                    </Typography>
+                  </Box>
+
+                  {p.showDesc && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 1,
+                        p: 1,
+                        width: 250,
+                        background: "#f5f5f5",
+                        borderRadius: 1,
+                        maxHeight: 90,
+                        overflowY: "auto",
+                        fontSize: 13,
+                      }}
+                    >
+                      {p.descripcion || "Sin descripción"}
+                    </Typography>
+                  )}
+                </Box>
+              </CardContent>
+
+              <CardActions sx={{ justifyContent: "flex-end", pb: 1 }}>
+                <IconButton color="primary" onClick={() => handleEdit(p)}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton color="error" onClick={() => handleDelete(p.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              </CardActions>
+            </Card>
           </Grid>
         ))}
       </Grid>
 
-      {/* MODAL PARA CREAR/EDITAR */}
+      {/* PAGINACIÓN */}
+      <Box display="flex" justifyContent="center" mt={4}>
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={(e, value) => setPage(value)}
+          color="primary"
+          shape="rounded"
+        />
+      </Box>
+
+      {/* MODAL */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
         <DialogTitle>{editingId ? "Editar Producto" : "Crear Producto"}</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+        >
           <TextField
             label="Código"
             value={form.codigo}
@@ -272,6 +356,7 @@ const AdminProductos: React.FC = () => {
             fullWidth
             required
           />
+
           <TextField
             label="Nombre"
             value={form.nombre}
@@ -279,31 +364,48 @@ const AdminProductos: React.FC = () => {
             fullWidth
             required
           />
+
           <TextField
             label="Descripción"
             value={form.descripcion}
-            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, descripcion: e.target.value })
+            }
             fullWidth
             multiline
             rows={2}
           />
+
           <TextField
             label="URL Imagen"
             value={form.imagen || ""}
-            onChange={(e) => setForm({ ...form, imagen: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, imagen: e.target.value })
+            }
             fullWidth
           />
+
           <Autocomplete
             freeSolo
             options={unidades}
             value={form.unidad_medida || ""}
-            onChange={(event, newValue) => setForm({ ...form, unidad_medida: newValue || "" })}
-            onInputChange={(event, newInputValue) => setForm({ ...form, unidad_medida: newInputValue })}
+            onChange={(event, newValue) =>
+              setForm({ ...form, unidad_medida: newValue || "" })
+            }
+            onInputChange={(event, newInputValue) =>
+              setForm({ ...form, unidad_medida: newInputValue })
+            }
             renderInput={(params) => (
-              <TextField {...params} label="Unidad de medida" placeholder="Ej: kg, litro, pieza" fullWidth />
+              <TextField
+                {...params}
+                label="Unidad de medida"
+                placeholder="Ej: kg, litro, pieza"
+                fullWidth
+              />
             )}
           />
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
           <Button variant="contained" color="primary" onClick={handleSubmit}>

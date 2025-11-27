@@ -3,8 +3,9 @@ import { db } from "../config/db.js";
 const TABLE = "productos";
 
 // Listar todos los productos
-export const listar = async () => {
-  const [rows] = await db.query(`SELECT * FROM ${TABLE}`);
+export const listar = async (id) => {
+  const [rows] = await db.query(`SELECT * FROM ${TABLE} where id_categoria=?`,
+    [id]);
   return rows;
 };
 

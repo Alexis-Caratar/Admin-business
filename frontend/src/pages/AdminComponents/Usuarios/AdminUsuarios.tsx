@@ -57,6 +57,7 @@ const AdminUsuarios: React.FC = () => {
   const [form, setForm] = useState({
     id_usuario: 0,
     id_persona: 0,
+    tipo_identificacion:"",
     identificacion: "",
     nombres: "",
     apellidos: "",
@@ -136,8 +137,11 @@ const AdminUsuarios: React.FC = () => {
         const email = `${nombresUsuario}@gmail.com`;
         const password = ultimos4;
 
+        console.log("form",form);
+        
         const payload = {
           persona: {
+            tipo_identificacion:form.tipo_identificacion,
             identificacion: form.identificacion,
             nombres: form.nombres,
             apellidos: form.apellidos,
@@ -161,6 +165,7 @@ const AdminUsuarios: React.FC = () => {
         const payload = {
           persona: {
             id: form.id_persona,
+            tipo_identificacion:form.tipo_identificacion,
             identificacion: form.identificacion,
             nombres: form.nombres,
             apellidos: form.apellidos,
@@ -227,6 +232,7 @@ const AdminUsuarios: React.FC = () => {
     setForm({
       id_usuario: u.id_usuario,
       id_persona: u.id_persona,
+      tipo_identificacion:u.tipo_identificacion,
       identificacion: u.identificacion,
       nombres: u.nombres,
       apellidos: u.apellidos,
@@ -255,6 +261,7 @@ const AdminUsuarios: React.FC = () => {
             setForm({
               id_usuario: 0,
               id_persona: 0,
+              tipo_identificacion: "",
               identificacion: "",
               nombres: "",
               apellidos: "",
@@ -383,6 +390,27 @@ const AdminUsuarios: React.FC = () => {
         </DialogTitle>
 
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+         <FormControl fullWidth>
+  <InputLabel>Tipo de Identificación</InputLabel>
+  <Select
+    name="tipo_identificacion"
+    label="Tipo de Identificación"
+    value={form.tipo_identificacion}
+    onChange={handleChange}
+  >
+    <MenuItem value="CC">Cédula de Ciudadanía</MenuItem>
+    <MenuItem value="CE">Cédula de Extranjería</MenuItem>
+    <MenuItem value="VISA">VISA</MenuItem>
+  </Select>
+</FormControl>
+
+<TextField
+  label="Identificación"
+  name="identificacion"
+  value={form.identificacion}
+  onChange={handleChange}
+/>
+
           <TextField
             label="Identificación"
             name="identificacion"

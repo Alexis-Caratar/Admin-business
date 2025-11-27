@@ -274,7 +274,7 @@ const AdminDashboard: React.FC = () => {
         </AppBar>
 
         {/* RENDER DEL COMPONENTE */}
-        <Box flex={1} sx={{ width: "100%", overflow: "auto", p: 3 }}>
+        <Box flex={1} sx={{ width: "auto", overflow: "auto", p: 3 }}>
           <Paper elevation={3} sx={{ p: 3 }}>
             {ActiveComponent ? <ActiveComponent /> : <h2>Módulo no encontrado</h2>}
           </Paper>

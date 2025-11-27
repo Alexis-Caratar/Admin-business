@@ -5,6 +5,8 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import MenuIcon from "@mui/icons-material/Menu";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
+import CategoryIcon from "@mui/icons-material/Category";
+
 
 export const iconMap: Record<string, React.ReactNode> = {
   PersonIcon: <PersonIcon />,
@@ -13,5 +15,6 @@ export const iconMap: Record<string, React.ReactNode> = {
   ShoppingCartIcon: <ShoppingCartIcon />,
   Inventory2Icon:<Inventory2Icon/>,
   BusinessCenterIcon:<BusinessCenterIcon/>,
+  CategoryIcon:<CategoryIcon/>,
   default: <MenuIcon />   // default
 };
