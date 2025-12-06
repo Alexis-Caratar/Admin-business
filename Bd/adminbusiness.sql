@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 29-11-2025 a las 00:41:08
+-- Tiempo de generación: 06-12-2025 a las 16:35:04
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.2.0
 
@@ -142,7 +142,8 @@ CREATE TABLE `categorias` (
 INSERT INTO `categorias` (`id`, `id_negocio`, `nombre`, `imagen`, `descripcion`, `activo`) VALUES
 (1, 1, 'Platos a la carta', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCPwdtgqUB9QfFeElHJh7rbQVn5Ft1zGwQBw&s', 'Deliciosos platos a la carta', 1),
 (2, 1, 'Desayunos', 'https://recetasdecocina.elmundo.es/wp-content/uploads/2022/08/desayuno-saludables-recetas.jpg', 'desayunos ', 1),
-(3, 1, 'Almuerzos', 'https://plus.unsplash.com/premium_photo-1673108852141-e8c3c22a4a22?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YWxtdWVyem98ZW58MHx8MHx8fDA%3D', 'Alumuerzo de la casa', 1);
+(3, 1, 'Almuerzos', 'https://plus.unsplash.com/premium_photo-1673108852141-e8c3c22a4a22?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YWxtdWVyem98ZW58MHx8MHx8fDA%3D', 'Alumuerzo de la casa', 1),
+(4, 1, 'Insumos', 'https://ingenieriademenu.com/wp-content/uploads/2024/11/Proceso-de-recepcion-de-mercancias-en-un-restaurante1.jpg', 'Insumos para el funcionamiento de platos', 1);
 
 -- --------------------------------------------------------
 
@@ -392,10 +393,12 @@ CREATE TABLE `productos` (
   `descripcion` text DEFAULT NULL,
   `unidad_medida` varchar(20) DEFAULT NULL,
   `id_categoria` int(11) UNSIGNED DEFAULT NULL,
+  `tipo_producto` enum('producto_terminado','insumo','combo_mixto','servicio','otro') DEFAULT 'producto_terminado',
   `stock_actual` int(11) DEFAULT 0,
   `stock_minimo` int(11) DEFAULT 0,
   `stock_maximo` int(11) DEFAULT 0,
   `estado` tinyint(4) DEFAULT 1,
+  `publicacion_web` tinyint(1) DEFAULT 0,
   `creacion` datetime DEFAULT current_timestamp(),
   `actualizacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -404,15 +407,13 @@ CREATE TABLE `productos` (
 -- Volcado de datos para la tabla `productos`
 --
 
-INSERT INTO `productos` (`id`, `codigo_barra`, `nombre`, `descripcion`, `unidad_medida`, `id_categoria`, `stock_actual`, `stock_minimo`, `stock_maximo`, `estado`, `creacion`, `actualizacion`) VALUES
-(1, '123456789', 'Pollo en salsa', 'Almuerzo de pollo con salsa de la casa, 1/4 de pollo broster acompañado de delicioso jugo 2', 'litro', 1, 0, 0, 0, 1, '2025-11-28 14:30:28', '2025-11-28 16:15:40'),
-(3, NULL, 'Desayuno Casero', 'Un dato es una representación simbólica de un atributo o variable cuantitativa o cualitativa.', 'litro', 2, 0, 0, 0, 1, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
-(5, NULL, 'dfsdfsdfdsf', 'sdf', 'pieza', 3, 0, 0, 0, 1, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
-(6, NULL, 'asd', 'sdf', 'litro', 3, 0, 0, 0, 1, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
-(7, NULL, 'asdasdasdsadsa', 'asdsada', 'unidad', 3, 0, 0, 0, 1, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
-(8, NULL, 'qweeds', 'asds', 'litro', 3, 0, 0, 0, 1, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
-(9, NULL, 'Plato de almuerzo', 'almuerzo', 'pieza', 3, 0, 0, 0, 1, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
-(10, '464565', 'Bandeja paisa', 'Bandeja paisa', 'kg', 1, 0, 0, 0, 2, '2025-11-28 17:40:15', '2025-11-28 18:38:41');
+INSERT INTO `productos` (`id`, `codigo_barra`, `nombre`, `descripcion`, `unidad_medida`, `id_categoria`, `tipo_producto`, `stock_actual`, `stock_minimo`, `stock_maximo`, `estado`, `publicacion_web`, `creacion`, `actualizacion`) VALUES
+(1, '123456789', 'Pollo en salsa', 'Almuerzo de pollo con salsa de la casa, 1/4 de pollo broster acompañado de delicioso jugo 2', 'litro', 1, 'producto_terminado', 0, 0, 0, 1, 0, '2025-11-28 14:30:28', '2025-11-28 16:15:40'),
+(3, NULL, 'Desayuno Casero', 'Un dato es una representación simbólica de un atributo o variable cuantitativa o cualitativa.', 'litro', 2, 'producto_terminado', 0, 0, 0, 1, 0, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
+(9, NULL, 'Plato de almuerzo', 'almuerzo', 'pieza', 3, 'producto_terminado', 0, 0, 0, 1, 0, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
+(10, '464565', 'Bandeja paisa', 'Bandeja paisa', 'kg', 1, 'producto_terminado', 0, 0, 0, 2, 0, '2025-11-28 17:40:15', '2025-11-28 18:38:41'),
+(14, '869749465465', 'filte de pollo', 'pollo en filites', 'pieza', 4, 'producto_terminado', 50, 10, 80, 1, 0, '2025-12-02 17:00:32', '2025-12-02 17:15:13'),
+(15, '45645', 'costilla ahumada', 'porcion de costilla ahumada de 100 gramos ', 'kg', 4, 'insumo', 45, 50, 60, 1, 0, '2025-12-03 16:46:52', '2025-12-03 16:46:52');
 
 -- --------------------------------------------------------
 
@@ -470,7 +471,22 @@ CREATE TABLE `productos_precios` (
 
 INSERT INTO `productos_precios` (`id`, `id_producto`, `precio_costo`, `precio_venta`, `precio_anterior`, `precio_mayorista`, `descuento_valor`, `descuento_porcentaje`, `fecha_inicio_promo`, `fecha_fin_promo`, `activo_promo`, `usuario_modifico`, `fecha_modificacion`) VALUES
 (1, 1, '57000.00', '82000.00', '6000.00', '78000.00', '0.00', '0.00', NULL, NULL, 1, NULL, '2025-11-28 17:16:37'),
-(3, 10, '45000.00', '520000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-11-28 18:26:52');
+(3, 10, '45000.00', '520000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-11-28 18:26:52'),
+(4, 14, '2500.00', '2700.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-02 17:00:32'),
+(5, 15, '25000.00', '75000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-03 16:46:52');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `producto_insumo`
+--
+
+CREATE TABLE `producto_insumo` (
+  `id` int(11) NOT NULL,
+  `id_producto` int(10) UNSIGNED NOT NULL,
+  `id_insumo` int(10) UNSIGNED NOT NULL,
+  `cantidad` decimal(10,2) NOT NULL DEFAULT 1.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -712,6 +728,14 @@ ALTER TABLE `productos_precios`
   ADD KEY `fk_productos_precios_productos` (`id_producto`);
 
 --
+-- Indices de la tabla `producto_insumo`
+--
+ALTER TABLE `producto_insumo`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_producto` (`id_producto`),
+  ADD KEY `id_insumo` (`id_insumo`);
+
+--
 -- Indices de la tabla `reservas`
 --
 ALTER TABLE `reservas`
@@ -782,7 +806,7 @@ ALTER TABLE `app_modulos_negocio_rol`
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `compras`
@@ -860,7 +884,7 @@ ALTER TABLE `personas`
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `productos_imagenes`
@@ -872,7 +896,13 @@ ALTER TABLE `productos_imagenes`
 -- AUTO_INCREMENT de la tabla `productos_precios`
 --
 ALTER TABLE `productos_precios`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT de la tabla `producto_insumo`
+--
+ALTER TABLE `producto_insumo`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `reservas`
@@ -965,6 +995,13 @@ ALTER TABLE `productos`
 --
 ALTER TABLE `productos_precios`
   ADD CONSTRAINT `fk_productos_precios_productos` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `producto_insumo`
+--
+ALTER TABLE `producto_insumo`
+  ADD CONSTRAINT `producto_insumo_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id`),
+  ADD CONSTRAINT `producto_insumo_ibfk_2` FOREIGN KEY (`id_insumo`) REFERENCES `productos` (`id`);
 
 --
 -- Filtros para la tabla `reservas`

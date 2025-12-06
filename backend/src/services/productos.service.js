@@ -110,7 +110,7 @@ export const crear = async (payload) => {
   // 3️⃣ Insertar precios
   if (productos_precios && productos_precios.length > 0) {
     for (const precio of productos_precios) {
-      const sqlPrecio = `INSERT INTO ${TABLE_PRECIOS} (id_producto, precio_costo, precio_venta, precio_anterior, precio_mayorista, descuento_valor, descuento_porcentaje, activo_promo, utilidad_porcentaje) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const sqlPrecio = `INSERT INTO ${TABLE_PRECIOS} (id_producto, precio_costo, precio_venta, precio_anterior, precio_mayorista, descuento_valor, descuento_porcentaje, activo_promo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
       await db.query(sqlPrecio, [
         productoId,
         precio.precio_costo || 0,
@@ -119,8 +119,7 @@ export const crear = async (payload) => {
         precio.precio_mayorista || 0,
         precio.descuento_valor || 0,
         precio.descuento_porcentaje || 0,
-        precio.activo_promo || 0,
-        precio.utilidad_porcentaje || 0,
+        precio.activo_promo || 0
       ]);
     }
   }
@@ -196,6 +195,8 @@ export const actualizar = async (id, payload) => {
 
 // Eliminar un producto
 export const eliminar = async (id) => {
+  console.log("id a eliminar",id);
+  
   await db.query(
     `DELETE FROM ${TABLE} WHERE id = ?`,
     [id]

@@ -24,6 +24,7 @@ import {
   TextField,
   Autocomplete,
   Pagination,
+  MenuItem,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -35,6 +36,8 @@ import QrCode2Icon from "@mui/icons-material/QrCode2";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ProductosImg from './../../../assets/img/Productos.png';
+
 
 interface Props {
   id: number;
@@ -58,8 +61,7 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
   const [imgIndices, setImgIndices] = useState<{ [key: number]: number }>({});
 
   const unidades = ["kg", "litro", "pieza", "unidad"];
-  const defaultImage =
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQde1Zuns3SWsvZyR31zNW6hWWyf8N20bmBFA&s";
+  const defaultImage =ProductosImg
 
   // Fetch productos
   const fetchProductos = async () => {
@@ -101,58 +103,65 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
   };
 
   // CRUD
-  const handleOpenModal = (producto?: Producto) => {
-    if (producto) {
-      setForm(producto);
-      setEditingId(producto.id!);
+const handleOpenModal = (producto?: Producto) => {
+  if (producto) {
+    setForm(producto);
+    setEditingId(producto.id!);
+  } else {
+    setForm({
+      codigo_barra: "",
+      nombre: "",
+      descripcion: "",
+      unidad_medida: "",
+      tipo_producto: "producto_terminado", // valor por defecto
+      stock_actual: 0,
+      stock_minimo: 0,
+      stock_maximo: 0,
+      estado: "activo", // por defecto
+      publicacion_web: "no", // por defecto
+      precios: { id_producto: 0, precio_venta: 0, precio_costo: 0 },
+      imagenes: [],
+    });
+    setEditingId(null);
+  }
+  setOpenModal(true);
+};
+
+
+const handleSubmit = async () => {
+  const payload = {
+    producto: {
+      id_categoria: id,
+      codigo_barra: form.codigo_barra,
+      nombre: form.nombre,
+      descripcion: form.descripcion,
+      unidad_medida: form.unidad_medida,
+      tipo_producto: form.tipo_producto,
+      stock_actual: form.stock_actual,
+      stock_minimo: form.stock_minimo,
+      stock_maximo: form.stock_maximo,
+      estado: form.estado,
+      publicacion_web: form.publicacion_web,
+    },
+    productos_precios: form.precios ? [{ ...form.precios }] : [],
+    productos_imagenes: form.imagenes ? [...form.imagenes] : [],
+  };
+
+  try {
+    if (editingId) {
+      await actualizarProducto(editingId, payload);
     } else {
-      setForm({
-        codigo_barra: "",
-        nombre: "",
-        descripcion: "",
-        unidad_medida: "",
-        precios: { id_producto: 0, precio_venta: 0, precio_costo: 0 },
-        imagenes: [],
-      });
-      setEditingId(null);
+      await crearProducto(payload);
     }
-    setOpenModal(true);
-  };
 
-  const handleSubmit = async () => {
-    // Payload completo
-    const payload = {
-      producto: {
-        id_categoria: id,
-        codigo_barra: form.codigo_barra,
-        nombre: form.nombre,
-        descripcion: form.descripcion,
-        unidad_medida: form.unidad_medida,
-        stock_actual: form.stock_actual,
-        stock_minimo: form.stock_minimo,
-        stock_maximo: form.stock_maximo,
-        estado: form.estado,
-      },
-      productos_precios: form.precios ? [{ ...form.precios }] : [],
-      productos_imagenes: form.imagenes ? [...form.imagenes] : [],
-    };
+    setOpenModal(false);
 
-    try {
-      if (editingId) {
-        // Actualiza producto
-        await actualizarProducto(editingId, payload);
-      } else {
-        // Crea producto
-        await crearProducto(payload);
-      }
-      setOpenModal(false);
-      // Refresca lista
-      const data = await getProductos(id);
-      setProductos(data);
-    } catch (error) {
-      console.error("Error al guardar producto:", error);
-    }
-  };
+    const data = await getProductos(id);
+    setProductos(data);
+  } catch (error) {
+    console.error("Error al guardar producto:", error);
+  }
+};
 
   const handleEdit = (producto: Producto) => {
     setForm(producto);
@@ -481,102 +490,180 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
       </Box>
 
       {/* Modal */}
-        <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
-        <DialogTitle>{editingId ? "Editar Producto" : "Crear Producto"}</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-          {/* Información principal */}
-          <TextField
-            label="Código"
-            value={form.codigo_barra}
-            onChange={(e) => setForm({ ...form, codigo_barra: e.target.value })}
-            fullWidth
-            required
-          />
-          <TextField
-            label="Nombre"
-            value={form.nombre}
-            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            fullWidth
-            required
-          />
-          <TextField
-            label="Descripción"
-            value={form.descripcion}
-            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-            fullWidth
-            multiline
-            rows={2}
-          />
-          <Autocomplete
-            freeSolo
-            options={unidades}
-            value={form.unidad_medida || ""}
-            onChange={(event, newValue) => setForm({ ...form, unidad_medida: newValue || "" })}
-            onInputChange={(event, newInputValue) => setForm({ ...form, unidad_medida: newInputValue })}
-            renderInput={(params) => <TextField {...params} label="Unidad de medida" fullWidth />}
-          />
+      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
+  <DialogTitle>{editingId ? "Editar Producto" : "Crear Producto"}</DialogTitle>
 
-          {/* Precios */}
-          <Box display="flex" gap={1}>
-            <TextField
-              label="Precio Costo"
-              type="number"
-              value={form.precios?.precio_costo || ""}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  precios: { ...form.precios!, precio_costo: Number(e.target.value) },
-                })
-              }
-              fullWidth
-            />
-            <TextField
-              label="Precio Venta"
-              type="number"
-              value={form.precios?.precio_venta || ""}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  precios: { ...form.precios!, precio_venta: Number(e.target.value) },
-                })
-              }
-              fullWidth
-            />
-          </Box>
+  <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
 
-          {/* Imágenes */}
-          {form.imagenes?.map((img, index) => (
-            <TextField
-              key={index}
-              label={`Imagen ${index + 1}`}
-              value={img.url}
-              onChange={(e) => {
-                const imgs = [...(form.imagenes || [])];
-                imgs[index].url = e.target.value;
-                setForm({ ...form, imagenes: imgs });
-              }}
-              fullWidth
-            />
-          ))}
-          <Button
-            variant="outlined"
-            onClick={() =>
-              setForm({
-                ...form,
-                imagenes: [...(form.imagenes || []), { id_producto: form.id!, url: "", orden: form.imagenes?.length || 0, activo: 1 }],
-              })
-            }
-          >
-            Agregar Imagen
-          </Button>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
-            {editingId ? "Actualizar" : "Crear"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+    {/* Información principal */}
+    <TextField
+      label="Código"
+      value={form.codigo_barra}
+      onChange={(e) => setForm({ ...form, codigo_barra: e.target.value })}
+      fullWidth
+      required
+    />
+
+    <TextField
+      label="Nombre"
+      value={form.nombre}
+      onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+      fullFullWidth
+      required
+    />
+
+    <TextField
+      label="Descripción"
+      value={form.descripcion}
+      onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+      fullWidth
+      multiline
+      rows={2}
+    />
+
+    <Autocomplete
+      freeSolo
+      options={unidades}
+      value={form.unidad_medida || ""}
+      onChange={(event, newValue) => setForm({ ...form, unidad_medida: newValue || "" })}
+      onInputChange={(event, newInputValue) => setForm({ ...form, unidad_medida: newInputValue })}
+      renderInput={(params) => <TextField {...params} label="Unidad de medida" fullWidth />}
+    />
+
+    {/* Tipo de Producto */}
+    <TextField
+      select
+      label="Tipo de Producto"
+      value={form.tipo_producto || "producto_terminado"}
+      onChange={(e) => setForm({ ...form, tipo_producto: e.target.value })}
+      fullWidth
+    >
+      <MenuItem value="Producto">Producto</MenuItem>
+      <MenuItem value="Producto_con_insumo">Producto con insumo</MenuItem>
+      <MenuItem value="insumo">Insumo</MenuItem>
+      <MenuItem value="servicio">Servicio</MenuItem>
+      <MenuItem value="otro">Otro</MenuItem>
+    </TextField>
+
+    {/* Stock */}
+    <Box display="flex" gap={1}>
+      <TextField
+        label="Stock Actual"
+        type="number"
+        value={form.stock_actual || 0}
+        onChange={(e) => setForm({ ...form, stock_actual: Number(e.target.value) })}
+        fullWidth
+      />
+
+      <TextField
+        label="Stock Mínimo"
+        type="number"
+        value={form.stock_minimo || 0}
+        onChange={(e) => setForm({ ...form, stock_minimo: Number(e.target.value) })}
+        fullWidth
+      />
+
+      <TextField
+        label="Stock Máximo"
+        type="number"
+        value={form.stock_maximo || 0}
+        onChange={(e) => setForm({ ...form, stock_maximo: Number(e.target.value) })}
+        fullWidth
+      />
+    </Box>
+
+    {/* Estado */}
+    <TextField
+      select
+      label="Estado"
+      value={form.estado ?? 1}
+      onChange={(e) => setForm({ ...form, estado: Number(e.target.value) })}
+      fullWidth
+    >
+      <MenuItem value={1}>Activo</MenuItem>
+      <MenuItem value={0}>Inactivo</MenuItem>
+    </TextField>
+
+    {/* Publicación Web */}
+    <TextField
+      select
+      label="Publicación Web"
+      value={form.publicacion_web ?? 0}
+      onChange={(e) => setForm({ ...form, publicacion_web: Number(e.target.value) })}
+      fullWidth
+    >
+      <MenuItem value={0}>No</MenuItem>
+      <MenuItem value={1}>Sí</MenuItem>
+    </TextField>
+
+    {/* Precios */}
+    <Box display="flex" gap={1}>
+      <TextField
+        label="Precio Costo"
+        type="number"
+        value={form.precios?.precio_costo || ""}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            precios: { ...form.precios!, precio_costo: Number(e.target.value) },
+          })
+        }
+        fullWidth
+      />
+
+      <TextField
+        label="Precio Venta"
+        type="number"
+        value={form.precios?.precio_venta || ""}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            precios: { ...form.precios!, precio_venta: Number(e.target.value) },
+          })
+        }
+        fullWidth
+      />
+    </Box>
+
+    {/* Imágenes */}
+    {form.imagenes?.map((img, index) => (
+      <TextField
+        key={index}
+        label={`Imagen ${index + 1}`}
+        value={img.url}
+        onChange={(e) => {
+          const imgs = [...(form.imagenes || [])];
+          imgs[index].url = e.target.value;
+          setForm({ ...form, imagenes: imgs });
+        }}
+        fullWidth
+      />
+    ))}
+
+    <Button
+      variant="outlined"
+      onClick={() =>
+        setForm({
+          ...form,
+          imagenes: [
+            ...(form.imagenes || []),
+            { id_producto: form.id!, url: "", orden: form.imagenes?.length || 0, activo: 1 },
+          ],
+        })
+      }
+    >
+      Agregar Imagen
+    </Button>
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
+    <Button variant="contained" color="primary" onClick={handleSubmit}>
+      {editingId ? "Actualizar" : "Crear"}
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </Box>
   );
 };

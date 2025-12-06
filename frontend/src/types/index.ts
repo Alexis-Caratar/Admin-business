@@ -40,7 +40,8 @@ export interface Producto {
   estado?: number;
   creacion?: string;
   actualizacion?: string;
-
+  tipo_producto?: string;
+  publicacion_web?: string;
   // Precios
   precios?: ProductoPrecio | null;
 
