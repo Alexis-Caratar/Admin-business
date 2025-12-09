@@ -1,16 +1,46 @@
-import * as service from "../services/ventas.service.js";
-export const listar = async (req, res) => {
-  try { const data = await service.listar(); res.json(data); } catch (err) { res.status(500).json({ error: err.message }); }
-};
-export const obtener = async (req, res) => {
-  try { const data = await service.obtener(req.params.id); if(!data) return res.status(404).json({ error: "No encontrado" }); res.json(data); } catch (err) { res.status(500).json({ error: err.message }); }
-};
-export const crear = async (req, res) => {
-  try { const data = await service.crear(req.body); res.status(201).json(data); } catch (err) { res.status(500).json({ error: err.message }); }
-};
-export const actualizar = async (req, res) => {
-  try { const data = await service.actualizar(req.params.id, req.body); res.json(data); } catch (err) { res.status(500).json({ error: err.message }); }
-};
-export const eliminar = async (req, res) => {
-  try { await service.eliminar(req.params.id); res.json({ ok: true }); } catch (err) { res.status(500).json({ error: err.message }); }
+import { VentasService } from "../services/ventas.service.js";
+
+export const VentasController = {
+  
+  crearVenta: async (req, res) => {
+    try {
+      const { venta, items } = req.body;
+
+      const result = await VentasService.crearVenta(venta, items);
+      return res.json(result);
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ ok: false, error: error.message });
+    }
+  },
+
+  listarVentas: async (req, res) => {
+    try {
+      const ventas = await VentasService.listarVentas();
+      return res.json({ ok: true, ventas });
+    } catch (error) {
+      return res.status(500).json({ ok: false, error: error.message });
+    }
+  },
+
+  obtenerVenta: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await VentasService.obtenerVenta(id);
+      return res.json({ ok: true, ...data });
+    } catch (error) {
+      return res.status(500).json({ ok: false, error: error.message });
+    }
+  },
+
+  eliminarVenta: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await VentasService.eliminarVenta(id);
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ ok: false, error: error.message });
+    }
+  }
 };

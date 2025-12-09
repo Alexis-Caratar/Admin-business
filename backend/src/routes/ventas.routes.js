@@ -1,9 +1,11 @@
 import { Router } from "express";
-import * as controller from "../controllers/ventas.controller.js";
+import { VentasController } from "../controllers/ventas.controller.js";
+
 const router = Router();
-router.get("/", controller.listar);
-router.get("/:id", controller.obtener);
-router.post("/", controller.crear);
-router.put("/:id", controller.actualizar);
-router.delete("/:id", controller.eliminar);
+
+router.post("/", VentasController.crearVenta);
+router.get("/", VentasController.listarVentas);
+router.get("/:id", VentasController.obtenerVenta);
+router.delete("/:id", VentasController.eliminarVenta);
+
 export default router;
