@@ -13,6 +13,7 @@ import empleadosRoutes from "./routes/empleados.routes.js";
 import inventariosRoutes from "./routes/inventarios.routes.js";
 import ventasRoutes from "./routes/ventas.routes.js";
 import categoriasRouter from "./routes/categorias.routes.js";
+import cajero from "./routes/cajero.routes.js";
 
 
 // Middleware JWT
@@ -44,5 +45,6 @@ app.use("/api/reservas", /* authenticate,*/ reservasRoutes);
 app.use("/api/empleados", /* authenticate,*/ empleadosRoutes);
 app.use("/api/inventario", /* authenticate,*/ inventariosRoutes);
 app.use("/api/ventas", /* authenticate,*/ ventasRoutes);
+app.use("/api/cajero", /* authenticate,*/ cajero);
 
 export default app;

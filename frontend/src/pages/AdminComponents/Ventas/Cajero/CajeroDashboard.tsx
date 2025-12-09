@@ -1,206 +1,238 @@
-import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { apiListarProductos, apiAbrirCaja, apiCerrarCaja, apiArqueoCaja } from "../../../../api/cajero";
-import { CrearVenta } from "../../../../api/ventas"; // DEBES TENERLO YA CREADO
+/* ---------- /src/pages/CajeroDashboard.tsx ---------- */
+import React, { useEffect, useState } from "react";
+import { Box, Grid, Card, CardContent, Typography, Stack, Chip, Button } from "@mui/material";
 
-export default function CajeroDashboard() {
-  const [productos, setProductos] = useState<any[]>([]);
+import type { ProductoCajero, CategoriaCajero } from "../../../../types/cajero";
+import { apiListarProductos, apiAbrirCaja, apiArqueoCaja, apiCerrarCaja } from "../../../../api/cajero";
+
+import { Mesas } from "./components/Mesas";
+import { Carrito } from "./components/Carrito";
+import { AperturaCajaModal } from "./components/AperturaCaja";
+import { ArqueoCajaModal } from "./components/ArqueoCaja";
+import { CierreCajaModal } from "./components/CierreCaja";
+import { ProductosCategoriaModal } from "./components/ProductosCategoria";
+import { Categorias } from "./components/Categorias";
+
+export const CajeroDashboard: React.FC = () => {
+  const [categorias, setCategorias] = useState<CategoriaCajero[]>([]);
+  const [loadingCategorias, setLoadingCategorias] = useState(true);
+
   const [cajaAbierta, setCajaAbierta] = useState(false);
   const [montoApertura, setMontoApertura] = useState("");
   const [idCaja, setIdCaja] = useState<number | null>(null);
   const [ventas, setVentas] = useState<any[]>([]);
-  const [carrito, setCarrito] = useState<any[]>([]);
+  const [carrito, setCarrito] = useState<(ProductoCajero & { cantidad: number; precio_venta: number })[]>([]);
+
   const [modalApertura, setModalApertura] = useState(false);
   const [modalCierre, setModalCierre] = useState(false);
   const [modalArqueo, setModalArqueo] = useState(false);
-  const [arqueoInfo, setArqueoInfo] = useState<any>(null);
+  const [arqueoInfo, setArqueoInfo] = useState<any | null>(null);
 
-  /** ================================
-   * 📌 Cargar productos reales
-   * ================================ */
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<CategoriaCajero | null>(null);
+  const [modalProductosOpen, setModalProductosOpen] = useState(false);
+
+  const [mesas] = useState(
+    Array.from({ length: 18 }, (_, i) => ({
+      id: i + 1,
+      numero: i + 1,
+      estado: ["Disponible", "Ocupada", "Reservada"][Math.floor(Math.random() * 3)],
+    }))
+  );
+  const [mesaSeleccionada, setMesaSeleccionada] = useState<any | null>(null);
+
   useEffect(() => {
-    apiListarProductos().then((res) => {
-      if (res.data.ok) setProductos(res.data.productos);
-    });
+    let mounted = true;
+    async function load() {
+      try {
+        setLoadingCategorias(true);
+        const res = await apiListarProductos();
+        let data: any[] = [];
+        if (res && res.data) {
+          if (Array.isArray(res.data)) data = res.data;
+          else if (res.data.ok && res.data.productos) data = res.data.productos;
+          else if (res.data.productos) data = res.data.productos;
+        }
+        if (mounted) setCategorias(data || []);
+      } catch (err) {
+        console.error("Error cargando categorías y productos:", err);
+      } finally {
+        if (mounted) setLoadingCategorias(false);
+      }
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  /** 📊 Estadísticas */
   const totalVentas = ventas.length;
-  const dineroTotal = ventas.reduce((acc, v) => acc + v.total, 0);
+  const dineroTotal = ventas.reduce((acc, v) => acc + Number(v.total ?? 0), 0);
 
-  /** ➕ Agregar producto */
-  const addCart = (p: any) => {
-    setCarrito([...carrito, p]);
-  };
+  const getPrecio = (p: Partial<ProductoCajero>) => Number(p.precio_venta ?? 0);
 
-  /** 🗑 Eliminar producto */
-  const removeItem = (index: number) => {
-    const copy = [...carrito];
-    copy.splice(index, 1);
-    setCarrito(copy);
-  };
+const addCart = (p: ProductoCajero) => {
+console.log("p",p);
 
-  /** 💰 Finalizar venta REAL */
+
+  const precio = getPrecio(p);
+
+  setCarrito((prev) => {
+    // Buscamos si ya existe exactamente el mismo producto
+    const existe = prev.find((x) => x.id_producto === p.id_producto);
+
+    if (existe) {
+      // Si existe, incrementamos cantidad
+      return prev.map((x) =>
+        x.id_producto === p.id_producto ? { ...x, cantidad: x.cantidad + 1 } : x
+      );
+    }
+
+    // Si no existe, lo agregamos como un nuevo item
+    return [...prev, { ...p, cantidad: 1, precio_venta: precio }];
+  });
+};
+
+
+  const sumarCantidad = (id: number) => setCarrito((prev) => prev.map((item) => (item.id === id ? { ...item, cantidad: item.cantidad + 1 } : item)));
+  const restarCantidad = (id: number) =>
+    setCarrito((prev) =>
+      prev
+        .map((item) => (item.id === id ? { ...item, cantidad: item.cantidad - 1 } : item))
+        .filter((item) => item.cantidad > 0)
+    );
+  const removeItem = (id: number) => setCarrito((prev) => prev.filter((item) => item.id !== id));
+
   const finalizarVenta = async () => {
     if (carrito.length === 0) return;
-
-    const total = carrito.reduce((acc, v) => acc + Number(v.precio), 0);
-
-    // Registrar venta REAL
-    const { data } = await apiCrearVenta({
-      id_caja: idCaja,
-      total,
-      productos: carrito.map((c) => ({
-        id_producto: c.id,
-        precio: c.precio,
-      })),
-    });
-
-    if (data.ok) {
-      setVentas([
-        ...ventas,
-        {
-          id: data.venta.id,
-          fecha: data.venta.fecha,
-          total,
-          productos: carrito,
-        },
-      ]);
-      setCarrito([]);
-    }
+    const total = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
+    setVentas((prev) => [...prev, { id: Date.now(), fecha: new Date().toISOString(), total, productos: carrito }]);
+    setCarrito([]);
   };
 
-  /** 📌 Abrir caja REAL */
   const abrirCajaReal = async () => {
-    const { data } = await apiAbrirCaja({
-      id_usuario: 1, // <- reemplazar por el user logueado
-      monto_inicial: montoApertura,
-    });
-
-    if (data.ok) {
-      setCajaAbierta(true);
-      setIdCaja(data.result.id);
-      setModalApertura(false);
+    try {
+      const { data } = await apiAbrirCaja({ id_usuario: 1, monto_inicial: Number(montoApertura) });
+      if (data?.ok) {
+        setCajaAbierta(true);
+        setIdCaja(data.result.id);
+        setModalApertura(false);
+      }
+    } catch (err) {
+      console.error("Error abrirCajaReal:", err);
     }
   };
 
-  /** 📌 Arqueo REAL */
   const cargarArqueo = async () => {
-    const { data } = await apiArqueoCaja({ id_caja: idCaja });
-    if (data.ok) {
-      setArqueoInfo(data.result);
+    try {
+      const { data } = await apiArqueoCaja({ id_caja: idCaja });
+      if (data?.ok) setArqueoInfo(data.result);
+    } catch (err) {
+      console.error("Error arqueo:", err);
     }
   };
 
-  /** 📌 Cierre de caja REAL */
   const cerrarCajaReal = async () => {
-    const { data } = await apiCerrarCaja({
-      id_caja: idCaja,
-      monto_final: Number(montoApertura) + dineroTotal,
-    });
-
-    if (data.ok) {
-      setCajaAbierta(false);
-      setVentas([]);
-      setCarrito([]);
-      setMontoApertura("");
-      setIdCaja(null);
-      setModalCierre(false);
+    try {
+      const { data } = await apiCerrarCaja({
+        id_caja: idCaja ?? 0,
+        monto_final: Number(montoApertura) + carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0),
+      });
+      if (data?.ok) {
+        setCajaAbierta(false);
+        setVentas([]);
+        setCarrito([]);
+        setMontoApertura("");
+        setIdCaja(null);
+        setModalCierre(false);
+      }
+    } catch (err) {
+      console.error("Error cerrarCajaReal:", err);
     }
+  };
+
+  const openCategoria = (categoria: CategoriaCajero) => {
+    setCategoriaSeleccionada(categoria);
+    setModalProductosOpen(true);
+  };
+  const closeCategoria = () => {
+    setCategoriaSeleccionada(null);
+    setModalProductosOpen(false);
   };
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" fontWeight="bold" mb={3}>
+    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", p: 3 }}>
+      <Typography variant="h4" fontWeight="bold" mb={2}>
         Perfil del Cajero
       </Typography>
 
-      {/* ========================== */}
-      {/* 📦 Estado de Caja */}
-      {/* ========================== */}
+
+
       <Grid container spacing={2} mb={3}>
+        {/* Estado de Caja */}
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
             <CardContent>
-              <Typography variant="h6">Estado de Caja</Typography>
-              <Typography color={cajaAbierta ? "green" : "red"}>
-                {cajaAbierta ? "Caja Abierta" : "Caja Cerrada"}
-              </Typography>
+              <Stack spacing={1}>
+                <Typography variant="h6">Estado de Caja</Typography>
 
-              {!cajaAbierta ? (
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{ mt: 2 }}
-                  onClick={() => setModalApertura(true)}
-                >
-                  Abrir Caja
-                </Button>
-              ) : (
-                <>
+                <Chip
+                  label={cajaAbierta ? "Caja Abierta" : "Caja Cerrada"}
+                  color={cajaAbierta ? "success" : "error"}
+                  sx={{ width: "fit-content" }}
+                />
+
+                {!cajaAbierta ? (
                   <Button
                     fullWidth
                     variant="contained"
-                    color="warning"
                     sx={{ mt: 2 }}
-                    onClick={() => {
-                      setModalArqueo(true);
-                      cargarArqueo();
-                    }}
+                    onClick={() => setModalApertura(true)}
                   >
-                    Arqueo
+                    Abrir Caja
                   </Button>
+                ) : (
+                  <Stack spacing={1} sx={{ mt: 2 }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="warning"
+                      onClick={() => {
+                        setModalArqueo(true);
+                        cargarArqueo();
+                      }}
+                    >
+                      Arqueo
+                    </Button>
 
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="error"
-                    sx={{ mt: 2 }}
-                    onClick={() => setModalCierre(true)}
-                  >
-                    Cerrar Caja
-                  </Button>
-                </>
-              )}
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="error"
+                      onClick={() => setModalCierre(true)}
+                    >
+                      Cerrar Caja
+                    </Button>
+                  </Stack>
+                )}
+              </Stack>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* ========================== */}
-        {/* 📊 Estadísticas */}
-        {/* ========================== */}
+        {/* Estadísticas de Ventas */}
         <Grid item xs={12} md={8}>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <Card>
+              <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
                 <CardContent>
                   <Typography variant="h6">Cantidad de Ventas</Typography>
-                  <Typography variant="h4" color="primary">
-                    {totalVentas}
-                  </Typography>
+                  <Typography variant="h4" color="primary">{totalVentas}</Typography>
                 </CardContent>
               </Card>
             </Grid>
+
             <Grid item xs={6}>
-              <Card>
+              <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
                 <CardContent>
                   <Typography variant="h6">Dinero Recaudado</Typography>
                   <Typography variant="h4" color="success.main">
@@ -213,152 +245,45 @@ export default function CajeroDashboard() {
         </Grid>
       </Grid>
 
-      {/* ========================== */}
-      {/* 🛒 Productos */}
-      {/* ========================== */}
-      <Typography variant="h5" fontWeight="bold" mt={4} mb={2}>
-        Productos
-      </Typography>
+{/* esto es el contenido mas importante */}
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
+        {/* Categorías */}
+        <Box sx={{ width: "20%", borderRight: "1px solid #e0e0e0", pr: 1, display: "flex", flexDirection: "column", overflowY: "auto", minHeight: 0 }}>
+          <Categorias categorias={categorias} loading={loadingCategorias} onOpen={openCategoria} />
+        </Box>
 
-      <Grid container spacing={2}>
-        {productos.map((p) => (
-          <Grid item xs={12} sm={6} md={3} key={p.id}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">{p.nombre}</Typography>
-                <Typography color="primary">${p.precio}</Typography>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{ mt: 2 }}
-                  onClick={() => addCart(p)}
-                >
-                  Agregar
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+        {/* Mesas */}
+        <Box sx={{ width: "60%", px: 2, display: "flex", flexDirection: "column", overflowY: "auto", minHeight: 0 }}>
+          <Mesas mesas={mesas} onSelect={(m) => setMesaSeleccionada(m)} />
+        </Box>
 
-      {/* ========================== */}
-      {/* 🛒 Carrito */}
-      {/* ========================== */}
-      <Box mt={4}>
-        <Typography variant="h5" fontWeight="bold" mb={2}>
-          Carrito
-        </Typography>
-
-        <Card>
-          <CardContent>
-            {carrito.length === 0 ? (
-              <Typography>No hay productos agregados.</Typography>
-            ) : (
-              <>
-                <List>
-                  {carrito.map((item, idx) => (
-                    <ListItem
-                      key={idx}
-                      secondaryAction={
-                        <IconButton onClick={() => removeItem(idx)}>
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      }
-                    >
-                      <ListItemText
-                        primary={item.nombre}
-                        secondary={`$ ${item.precio}`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="h6">
-                  Total: $
-                  {carrito
-                    .reduce((acc, v) => acc + Number(v.precio), 0)
-                    .toLocaleString()}
-                </Typography>
-
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="success"
-                  sx={{ mt: 2 }}
-                  onClick={finalizarVenta}
-                >
-                  Finalizar Venta
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        {/* Carrito */}
+        <Box sx={{ width: "20%", borderLeft: "1px solid #e0e0e0", pl: 3, display: "flex", flexDirection: "column", overflowY: "auto", minHeight: 0 }}>
+<Carrito
+  carrito={carrito}
+  onRemove={removeItem}
+  onAdd={sumarCantidad}
+  onSub={restarCantidad}
+  onFinalizar={finalizarVenta}
+/>
+        </Box>
       </Box>
 
-      {/* ===================================================================== */}
-      {/* 💵 MODALES: Apertura | Cierre | Arqueo */}
-      {/* ===================================================================== */}
-
-      {/* Modal Apertura */}
-      <Dialog open={modalApertura} onClose={() => setModalApertura(false)}>
-        <DialogTitle>Abrir Caja</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Monto inicial"
-            type="number"
-            sx={{ mt: 2 }}
-            value={montoApertura}
-            onChange={(e) => setMontoApertura(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setModalApertura(false)}>Cancelar</Button>
-          <Button variant="contained" onClick={abrirCajaReal}>
-            Abrir
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Modal Arqueo */}
-      <Dialog open={modalArqueo} onClose={() => setModalArqueo(false)}>
-        <DialogTitle>Arqueo de Caja</DialogTitle>
-        <DialogContent>
-          {arqueoInfo ? (
-            <>
-              <Typography>Monto inicial: ${arqueoInfo.monto_inicial}</Typography>
-              <Typography>Ventas totales: ${arqueoInfo.total_ventas}</Typography>
-              <Typography>
-                Total en caja: $
-                {Number(arqueoInfo.monto_inicial) +
-                  Number(arqueoInfo.total_ventas)}
-              </Typography>
-            </>
-          ) : (
-            <Typography>Cargando...</Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setModalArqueo(false)}>Cerrar</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Modal Cierre */}
-      <Dialog open={modalCierre} onClose={() => setModalCierre(false)}>
-        <DialogTitle>Cerrar Caja</DialogTitle>
-        <DialogContent>
-          <Typography>Total ventas: {totalVentas}</Typography>
-          <Typography>Dinero total: ${dineroTotal}</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setModalCierre(false)}>Cancelar</Button>
-          <Button color="error" variant="contained" onClick={cerrarCajaReal}>
-            Cerrar Caja
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Modales */}
+      <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} />
+      <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
+      <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} totalVentas={totalVentas} dineroTotal={dineroTotal} onCerrar={cerrarCajaReal} />
+<ProductosCategoriaModal
+  open={modalProductosOpen}
+  onClose={closeCategoria}
+  categoria={categoriaSeleccionada ?? undefined}
+  onAgregar={addCart}
+/>
     </Box>
+
+
+
   );
-}
+};
+
+export default CajeroDashboard;
