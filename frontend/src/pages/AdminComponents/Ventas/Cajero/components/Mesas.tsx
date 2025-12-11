@@ -46,9 +46,17 @@ export const Mesas: React.FC<Props> = ({ mesas, onSelect }) => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Typography variant="h6" fontWeight="bold" mb={2}>
-        Mesas del Restaurante
-      </Typography>
+      <Typography
+  variant="h6"
+  fontWeight="bold"
+  mb={2}
+  sx={{
+    fontSize: { xs: 16, md: 20 }, // 🔹 Más pequeño en móviles, más grande en escritorio
+  }}
+>
+  Mesas del Restaurante
+</Typography>
+
 
       <Grid container spacing={2}>
         {mesas.map((mesa) => {

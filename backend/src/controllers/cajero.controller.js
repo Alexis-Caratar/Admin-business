@@ -58,3 +58,14 @@ export const finalizarVenta = async (req, res) => {
   }
   
 };
+
+export const buscarCliente = async (req, res) => {
+  try {
+   const {id_cliente} = req.body;   
+      const resultado = await CajeroService.buscarCliente(id_cliente);
+    return res.json({ ok: true,result: resultado });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};

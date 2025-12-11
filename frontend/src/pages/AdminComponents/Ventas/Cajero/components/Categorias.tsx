@@ -1,6 +1,5 @@
-/* ---------- /src/components/Categorias.tsx ---------- */
 import React from "react";
-import { Card, CardContent, Avatar, Typography, Box } from "@mui/material";
+import { Card, Avatar, Typography, Box } from "@mui/material";
 import type { CategoriaCajero } from "../../../../../types/cajero";
 
 type Props = {
@@ -12,9 +11,16 @@ type Props = {
 export const Categorias: React.FC<Props> = ({ categorias, loading, onOpen }) => {
   return (
     <Box>
-      <Typography variant="h6" fontWeight="bold" mb={2}>
-        Categorías
-      </Typography>
+     <Typography
+  variant="h6"
+  fontWeight="bold"
+  mb={2}
+  sx={{
+    fontSize: { xs: 16, md: 20 }, // 🔹 Más pequeño en móviles, más grande en escritorio
+  }}
+>
+  Categorías
+</Typography>
 
       {loading ? (
         <Typography color="text.secondary">Cargando categorías...</Typography>
@@ -23,7 +29,7 @@ export const Categorias: React.FC<Props> = ({ categorias, loading, onOpen }) => 
           sx={{
             display: "grid",
             gap: 1.2,
-            gridTemplateColumns: "1fr", // 🔥 SIEMPRE UNA POR FILA
+            gridTemplateColumns: "1fr", // Siempre una por fila
           }}
         >
           {categorias.map((cat) => (
@@ -32,7 +38,9 @@ export const Categorias: React.FC<Props> = ({ categorias, loading, onOpen }) => 
               onClick={() => onOpen(cat)}
               sx={{
                 display: "flex",
+                flexDirection: { xs: "column", md: "row" }, // Columna en móvil, fila en escritorio
                 alignItems: "center",
+                justifyContent: { xs: "center", md: "flex-start" },
                 p: 1.3,
                 borderRadius: 3,
                 cursor: "pointer",
@@ -48,21 +56,19 @@ export const Categorias: React.FC<Props> = ({ categorias, loading, onOpen }) => 
               <Avatar
                 src={cat.imagen}
                 sx={{
-                  width: { xs: 36, md: 40 },
-                  height: { xs: 36, md: 40 },
-                  mr: 2,
+                  width: { xs: 50, md: 40 },
+                  height: { xs: 50, md: 40 },
+                  mb: { xs: 1, md: 0 },
+                  mr: { xs: 0, md: 2 },
                   borderRadius: 2,
                   bgcolor: "#f5f5f5",
                 }}
               />
 
               <Typography
-                fontSize={{ xs: 13, md: 14 }}
+                fontSize={{ xs: 12, md: 14 }} // 🔹 Letra más pequeña en móviles
                 fontWeight={600}
-                noWrap
-                sx={{
-                  flex: 1,
-                }}
+                textAlign={{ xs: "center", md: "left" }}
               >
                 {cat.categoria}
               </Typography>

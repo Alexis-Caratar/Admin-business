@@ -1,4 +1,3 @@
-/* ---------- /src/components/modales/AperturaCaja.tsx ---------- */
 import React from "react";
 import {
   Dialog,
@@ -10,6 +9,7 @@ import {
   Typography,
   Box
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   open: boolean;
@@ -21,17 +21,21 @@ type Props = {
 
 export const AperturaCajaModal: React.FC<Props> = ({
   open,
-  onClose,
   monto,
   setMonto,
   onAbrir,
 }) => {
+  const navigate = useNavigate();
+
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={(_e, reason) => {
+        if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+      }}
       maxWidth="xs"
       fullWidth
+      disableEscapeKeyDown
       PaperProps={{
         sx: {
           borderRadius: 3,
@@ -60,29 +64,28 @@ export const AperturaCajaModal: React.FC<Props> = ({
           Ingrese el monto inicial para iniciar la jornada.
         </Typography>
 
-       <Box>
-  <TextField
-    fullWidth
-    label="Monto inicial"
-    value={new Intl.NumberFormat("es-CO").format(Number(monto) || 0)}
-    onChange={(e) => {
-      const raw = e.target.value.replace(/\D/g, ""); // Solo números
-      setMonto(raw); // Guarda el número sin formato
-    }}
-    InputProps={{
-      startAdornment: (
-        <span style={{ marginRight: 6, fontWeight: 600 }}>$</span>
-      ),
-    }}
-    sx={{
-      mt: 1,
-      "& .MuiOutlinedInput-root": {
-        borderRadius: 2,
-      },
-    }}
-  />
-</Box>
-
+        <Box>
+          <TextField
+            fullWidth
+            label="Monto inicial"
+            value={new Intl.NumberFormat("es-CO").format(Number(monto) || 0)}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/\D/g, "");
+              setMonto(raw);
+            }}
+            InputProps={{
+              startAdornment: (
+                <span style={{ marginRight: 6, fontWeight: 600 }}>$</span>
+              ),
+            }}
+            sx={{
+              mt: 1,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+              },
+            }}
+          />
+        </Box>
       </DialogContent>
 
       <DialogActions
@@ -93,8 +96,9 @@ export const AperturaCajaModal: React.FC<Props> = ({
           justifyContent: "space-between",
         }}
       >
+        {/* 🔥 Cancelar redirige a Home */}
         <Button
-          onClick={onClose}
+          onClick={() => navigate("/admin/home")}
           variant="outlined"
           sx={{ borderRadius: 2, textTransform: "none" }}
         >

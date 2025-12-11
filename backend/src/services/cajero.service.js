@@ -59,7 +59,7 @@ listarProductos: async () => {
       categoria: cat.nombre,
       imagen: cat.imagen,
       platos: platos.map(pl => ({
-        id_producto: pl.id_producto,
+        id: pl.id_producto,
         nombre: pl.nombre_producto,
         precio_venta: pl.precio_venta,
         imagen_plato: pl.imagen
@@ -126,13 +126,14 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
     try {
       await conn.beginTransaction();
 
-      const { id_cliente, id_caja, fecha, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota, productos } = payload;
+      const { id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado,
+          nota, productos, metodo_pago,monto_pagado,monto_recibido,cambio} = payload;
 
       // 1️⃣ Insertar en tabla ventas
       const [ventaResult] = await conn.query(
         `INSERT INTO ventas (id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota)
          VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota]
+        [id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, 'EFECTIVO', nota]
       );
 
       const id_venta = ventaResult.insertId;
@@ -146,6 +147,14 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
         );
       }
 
+
+ const [venta_pago] = await conn.query(
+        `INSERT INTO pagos (id_venta, metodo_pago, monto_pagado, monto_recibido, cambio)
+         VALUES ( ?, ?, ?, ?, ?)`,
+        [id_venta, metodo_pago,monto_pagado,monto_recibido,cambio]
+      );
+
+      
       await conn.commit();
       return { id_venta, productos };
     } catch (err) {
@@ -154,6 +163,25 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
     } finally {
       conn.release();
     }
+  },
+
+
+   buscarCliente: async ( datoscliente ) => {
+    
+    
+    const query = `
+SELECT *
+FROM personas
+WHERE tipo = 'cliente'
+  AND identificacion LIKE CONCAT('%', ?, '%')
+LIMIT 20;
+
+
+
+    `;    
+    const  [rows] = await db.query(query, [datoscliente]);
+    
+    return rows;
   },
 
 };

@@ -29,7 +29,7 @@ type Props = {
 
 export const ProductosCategoriaModal: React.FC<Props> = ({ open, onClose, categoria, onAgregar }) => {
   const [search, setSearch] = useState("");
-
+  
   // Filtrar productos por nombre
   const filteredPlatos = categoria?.platos?.filter((prod) =>
     (prod.nombre ?? "").toLowerCase().includes(search.toLowerCase())

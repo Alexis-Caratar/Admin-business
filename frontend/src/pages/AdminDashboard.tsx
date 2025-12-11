@@ -15,6 +15,9 @@ import {
   Toolbar,
   Menu,
   MenuItem,
+  useMediaQuery,
+  useTheme,
+  Drawer,
 } from "@mui/material";
 
 import { useNavigate, useParams } from "react-router-dom";
@@ -46,10 +49,15 @@ type Modulo = {
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { modulo } = useParams(); // ← lee el código desde la URL
+  const { modulo } = useParams();
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const [menus, setMenus] = useState<Modulo[]>([]);
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+
   const [id_negocio, setIdNegocio] = useState<string>("");
   const [nombre_negocio, setNombreNegocio] = useState<string>("Mi Negocio");
   const [nombre, setNombre] = useState<string>("Administrador");
@@ -58,6 +66,16 @@ const AdminDashboard: React.FC = () => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
+
+  useEffect(() => {
+    // Ajusta colapso automáticamente según tamaño de pantalla
+    if (isSmallScreen) {
+      setCollapsed(true);
+    } else {
+      setCollapsed(false);
+      setDrawerOpen(false);
+    }
+  }, [isSmallScreen]);
 
   useEffect(() => {
     const storedIdNegocio = localStorage.getItem("id_negocio") || "";
@@ -80,7 +98,6 @@ const AdminDashboard: React.FC = () => {
     const loadMenus = async () => {
       const data = await getModulos(storedIdNegocio, storedRol);
       setMenus(data);
-      
 
       if (!modulo && data.length > 0) {
         navigate(`/admin/${data[0].url}`);
@@ -99,43 +116,41 @@ const AdminDashboard: React.FC = () => {
 
   const ActiveComponent = modulo ? componentMap[modulo] : null;
 
-  return (
-    <Box display="flex" height="100vh" width="100vw">
-      {/* SIDEBAR */}
-      <Paper
-        elevation={0}
-        sx={{
-          width: collapsed ? 60 : 220,
-          bgcolor: "#25313F",
-          color: "#9AA7B6",
-          transition: "width 0.3s ease",
-          height: "100vh",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          fontFamily: FONT,
-          borderRadius: 0,
-        }}
+  // Contenido del sidebar
+  const sidebarContent = (
+    <Paper
+      elevation={0}
+      sx={{
+        width: 220,
+        bgcolor: "#25313F",
+        color: "#9AA7B6",
+        height: "100%",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: FONT,
+      }}
+    >
+      {/* HEADER */}
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        p={2}
       >
-        {/* HEADER */}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent={collapsed ? "center" : "space-between"}
-          p={2}
-        >
+        <Box display="flex" alignItems="center" gap={1}>
+          <StorefrontIcon sx={{ color: "#FFFFFF", fontSize: 20 }} />
           {!collapsed && (
-            <Box display="flex" alignItems="center" gap={1}>
-              <StorefrontIcon sx={{ color: "#FFFFFF", fontSize: 20 }} />
-              <Typography
-                variant="subtitle2"
-                sx={{ fontWeight: 600, color: "#FFFFFF", fontFamily: FONT }}
-              >
-                {nombre_negocio}
-              </Typography>
-            </Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ fontWeight: 600, color: "#FFFFFF", fontFamily: FONT }}
+            >
+              {nombre_negocio}
+            </Typography>
           )}
+        </Box>
 
+        {!isSmallScreen && (
           <IconButton
             size="small"
             sx={{ color: "#9AA7B6" }}
@@ -143,82 +158,109 @@ const AdminDashboard: React.FC = () => {
           >
             {collapsed ? <MenuIcon /> : <MenuOpenIcon />}
           </IconButton>
+        )}
+      </Box>
+
+      {/* AVATAR */}
+      <Box display="flex" flexDirection="column" alignItems="center" p={2}>
+        <Avatar
+          src={safeImage(imagen)}
+          sx={{ width: 50, height: 50, mb: collapsed ? 0 : 1 }}
+        >
+          {nombre?.charAt(0).toUpperCase()}
+        </Avatar>
+
+        {!collapsed && (
+          <>
+            <Typography variant="body2" sx={{ color: "#FFFFFF" }}>
+              {nombre}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "#9AA7B6" }}>
+              {rol}
+            </Typography>
+          </>
+        )}
+      </Box>
+
+      <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
+
+      {/* MENÚ */}
+    <List sx={{ flex: 1, p: 0 }}>
+  {menus.map((menu) => {
+    const selected = modulo === menu.url;
+
+    return (
+      <ListItemButton
+        key={menu.id}
+        selected={selected}
+        onClick={() => {
+          navigate(`/admin/${menu.url}`);
+          if (isSmallScreen) setDrawerOpen(false); // Cierra drawer en móvil al seleccionar
+        }}
+        sx={{
+          mb: 1,
+          borderRadius: 1,
+          px: 2, // siempre suficiente padding en móviles
+          color: selected ? "#FFFFFF" : "#9AA7B6",
+          "& .MuiListItemIcon-root": {
+            color: selected ? "#FFFFFF" : "#9AA7B6",
+            minWidth: 40,
+          },
+          "&.Mui-selected": { bgcolor: "rgba(255,255,255,0.08)" },
+          "&:hover": {
+            bgcolor: "rgba(255,255,255,0.12)",
+            color: "#FFFFFF",
+            "& .MuiListItemIcon-root": { color: "#FFFFFF" },
+          },
+        }}
+      >
+        <ListItemIcon sx={{ justifyContent: "center" }}>
+          {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
+        </ListItemIcon>
+
+        {/* Mostrar nombres siempre en móviles (Drawer) */}
+        {(!collapsed || (isSmallScreen && drawerOpen)) && (
+          <ListItemText
+            primary={menu.nombre}
+            sx={{
+              ml: 2,
+              ".MuiTypography-root": { fontFamily: FONT, fontSize: 14 },
+            }}
+          />
+        )}
+      </ListItemButton>
+    );
+  })}
+</List>
+
+    </Paper>
+  );
+
+  return (
+    <Box display="flex" height="100vh" width="100vw">
+      {/* SIDEBAR escritorio */}
+      {!isSmallScreen && (
+        <Box
+          sx={{
+            width: collapsed ? 60 : 220,
+            transition: "width 0.3s",
+          }}
+        >
+          {sidebarContent}
         </Box>
+      )}
 
-        {/* AVATAR */}
-        <Box display="flex" flexDirection="column" alignItems="center" p={2}>
-          <Avatar
-            src={safeImage(imagen)}
-            sx={{ width: 50, height: 50, mb: collapsed ? 0 : 1 }}
-          >
-            {nombre?.charAt(0).toUpperCase()}
-          </Avatar>
-
-          {!collapsed && (
-            <>
-              <Typography variant="body2" sx={{ color: "#FFFFFF" }}>
-                {nombre}
-              </Typography>
-              <Typography variant="caption" sx={{ color: "#9AA7B6" }}>
-                {rol}
-              </Typography>
-            </>
-          )}
-        </Box>
-
-        <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
-
-        {/* MENÚ */}
-        <List sx={{ flex: 1, p: 0 }}>
-          {menus.map((menu) => {
-            const selected = modulo === menu.url;
-
-            return (
-              <ListItemButton
-                key={menu.id}
-                selected={selected}
-                onClick={() => navigate(`/admin/${menu.url}`)}
-                sx={{
-                  mb: 1,
-                  borderRadius: 1,
-                  px: collapsed ? 1 : 2,
-                  color: selected ? "#FFFFFF" : "#9AA7B6",
-
-                  "& .MuiListItemIcon-root": {
-                    color: selected ? "#FFFFFF" : "#9AA7B6",
-                  },
-                  "&.Mui-selected": {
-                    bgcolor: "rgba(255,255,255,0.08)",
-                  },
-                  "&:hover": {
-                    bgcolor: "rgba(255,255,255,0.12)",
-                    color: "#FFFFFF",
-
-                    "& .MuiListItemIcon-root": { color: "#FFFFFF" },
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 0, justifyContent: "center" }}>
-                  {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
-                </ListItemIcon>
-
-                {!collapsed && (
-                  <ListItemText
-                    primary={menu.nombre}
-                    sx={{
-                      ml: 2,
-                      ".MuiTypography-root": {
-                        fontFamily: FONT,
-                        fontSize: 14,
-                      },
-                    }}
-                  />
-                )}
-              </ListItemButton>
-            );
-          })}
-        </List>
-      </Paper>
+      {/* SIDEBAR móvil */}
+      {isSmallScreen && (
+        <Drawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          variant="temporary"
+          ModalProps={{ keepMounted: true }}
+        >
+          {sidebarContent}
+        </Drawer>
+      )}
 
       {/* CONTENIDO */}
       <Box flex={1} display="flex" flexDirection="column" bgcolor="#f3f4f6">
@@ -226,50 +268,63 @@ const AdminDashboard: React.FC = () => {
           position="static"
           sx={{ bgcolor: "#25313F", boxShadow: "none", fontFamily: FONT }}
         >
-          <Toolbar sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-            <Tooltip title="Notificaciones">
-              <IconButton sx={{ color: "#9AA7B6" }}>
-                <NotificationsIcon />
+          <Toolbar sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+            {/* Botón menú móvil */}
+            {isSmallScreen && (
+              <IconButton
+                size="small"
+                sx={{ color: "#9AA7B6" }}
+                onClick={() => setDrawerOpen(true)}
+              >
+                <MenuIcon />
               </IconButton>
-            </Tooltip>
+            )}
 
-            <Tooltip title="Restaurar contraseña">
-              <IconButton sx={{ color: "#9AA7B6" }}>
-                <RestoreIcon />
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Tooltip title="Notificaciones">
+                <IconButton sx={{ color: "#9AA7B6" }}>
+                  <NotificationsIcon />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Restaurar contraseña">
+                <IconButton sx={{ color: "#9AA7B6" }}>
+                  <RestoreIcon />
+                </IconButton>
+              </Tooltip>
+
+              {/* Avatar */}
+              <IconButton
+                onClick={(e) => setAnchorEl(e.currentTarget)}
+                sx={{ p: 0 }}
+              >
+                <Avatar src={imagen}>{nombre.charAt(0)}</Avatar>
+                <ArrowDropDownIcon sx={{ color: "#FFFFFF" }} />
               </IconButton>
-            </Tooltip>
 
-            {/* Avatar */}
-            <IconButton
-              onClick={(e) => setAnchorEl(e.currentTarget)}
-              sx={{ p: 0 }}
-            >
-              <Avatar src={imagen}>{nombre.charAt(0)}</Avatar>
-              <ArrowDropDownIcon sx={{ color: "#FFFFFF" }} />
-            </IconButton>
-
-            <Menu
-              anchorEl={anchorEl}
-              open={openMenu}
-              onClose={() => setAnchorEl(null)}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-            >
-              <MenuItem
-                onClick={() => {
-                  localStorage.clear();
-                  window.location.href = "/login";
+              <Menu
+                anchorEl={anchorEl}
+                open={openMenu}
+                onClose={() => setAnchorEl(null)}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
                 }}
               >
-                <LogoutIcon sx={{ mr: 1 }} /> Salir
-              </MenuItem>
-            </Menu>
+                <MenuItem
+                  onClick={() => {
+                    localStorage.clear();
+                    window.location.href = "/login";
+                  }}
+                >
+                  <LogoutIcon sx={{ mr: 1 }} /> Salir
+                </MenuItem>
+              </Menu>
+            </Box>
           </Toolbar>
         </AppBar>
 

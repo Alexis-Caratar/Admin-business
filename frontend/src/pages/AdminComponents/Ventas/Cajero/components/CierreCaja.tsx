@@ -84,7 +84,7 @@ export const CierreCajaModal: React.FC<Props> = ({
                 Total Recaudado:
               </Typography>
               <Typography fontSize={22} fontWeight={700} color="success.main">
-                ${dineroTotal.toLocaleString()}
+                ${dineroTotal}
               </Typography>
             </Box>
           </Stack>

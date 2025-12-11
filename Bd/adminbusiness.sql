@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 11-12-2025 a las 01:46:43
+-- Tiempo de generación: 11-12-2025 a las 18:43:20
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.2.0
 
@@ -151,8 +151,11 @@ INSERT INTO `caja` (`id`, `id_usuario`, `monto_inicial`, `estado`, `fecha_apertu
 (7, 23, '12000.00', 'CERRADA', '2025-12-10 18:20:45', '2025-12-10 18:33:00', '12000.00', NULL),
 (8, 23, '520000.00', 'CERRADA', '2025-12-10 18:36:58', '2025-12-10 19:07:09', '520000.00', NULL),
 (9, 30, '454654.00', 'ABIERTA', '2025-12-10 19:08:24', NULL, NULL, NULL),
-(10, 23, '420000.00', 'ABIERTA', '2025-12-10 19:09:08', NULL, NULL, NULL),
-(11, 23, '452000.00', 'ABIERTA', '2025-12-10 19:37:13', NULL, NULL, NULL);
+(10, 23, '420000.00', 'CERRADA', '2025-12-10 19:09:08', '2025-12-11 09:09:34', '420000.00', NULL),
+(11, 23, '452000.00', 'CERRADA', '2025-12-10 19:37:13', '2025-12-11 09:09:24', '452000.00', NULL),
+(12, 23, '52000.00', 'CERRADA', '2025-12-11 09:14:57', '2025-12-11 09:42:36', '52000.00', NULL),
+(13, 23, '24000.00', 'CERRADA', '2025-12-11 09:45:20', '2025-12-11 11:20:14', '101700.00', NULL),
+(14, 23, '320000.00', 'ABIERTA', '2025-12-11 11:20:37', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -376,11 +379,21 @@ CREATE TABLE `pagos` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `id_venta` int(11) NOT NULL,
   `metodo_pago` varchar(20) NOT NULL CHECK (`metodo_pago` in ('efectivo','tarjeta','transferencia')),
-  `monto` decimal(10,2) NOT NULL,
   `monto_pagado` decimal(10,2) DEFAULT NULL,
-  `cambio` decimal(10,2) DEFAULT NULL,
+  `monto_recibido` decimal(10,2) DEFAULT NULL,
+  `cambio` int(11) NOT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `pagos`
+--
+
+INSERT INTO `pagos` (`id`, `id_venta`, `metodo_pago`, `monto_pagado`, `monto_recibido`, `cambio`, `fecha`) VALUES
+(4, 29, 'EFECTIVO', '150000.00', '200000.00', 50000, '2025-12-11 16:48:08'),
+(5, 30, 'EFECTIVO', '77700.00', '180000.00', 102300, '2025-12-11 16:50:42'),
+(6, 35, 'EFECTIVO', '77700.00', '520000.00', 442300, '2025-12-11 17:13:33'),
+(7, 36, 'EFECTIVO', '77700.00', '1200000.00', 1122300, '2025-12-11 17:25:17');
 
 -- --------------------------------------------------------
 
@@ -407,7 +420,7 @@ CREATE TABLE `personas` (
 --
 
 INSERT INTO `personas` (`id`, `tipo_identificacion`, `identificacion`, `nombres`, `apellidos`, `tipo`, `email`, `telefono`, `direccion`, `nota`, `fecha_creacion`) VALUES
-(1, 'CC', '1233194301', 'Yohan Alexis ', 'Caratar Pabon', 'otro', 'ing@alexis@gmail.com', '3162467600', 'Torres san luis', 'Administrador', '2025-11-17 21:14:32'),
+(1, 'CC', '1233194302', 'perez', 'Caratar Pabon', 'cliente', 'ing@alexis@gmail.com', '3162467600', 'Torres san luis', 'Administrador', '2025-11-17 21:14:32'),
 (13, 'CC', '9879878', 'juan', 'perez', 'cliente', NULL, '87687687', 'pasto', NULL, '2025-11-18 04:12:06'),
 (14, 'CC', '1233194305', 'alexistos', 'asdad', 'cliente', NULL, '3162467600', 'manzana O casa 18', NULL, '2025-11-21 16:17:03'),
 (15, 'CC', '97415439', 'Sara Maria ', 'Pabon Riascos', 'cliente', NULL, '3146027224', 'manzana O casa 18', NULL, '2025-11-21 16:17:35'),
@@ -609,9 +622,10 @@ CREATE TABLE `ventas` (
 --
 
 INSERT INTO `ventas` (`id`, `id_cliente`, `id_caja`, `fecha`, `subtotal`, `descuento`, `descuento_porcentaje`, `impuesto`, `total`, `estado`, `metodo_pago`, `nota`) VALUES
-(1, 18, 10, '2025-12-11 00:22:53', '155400.00', '0.00', '0.00', '0.00', '155400.00', 'PENDIENTE', 'EFECTIVO', ''),
-(2, 18, 11, '2025-12-11 00:38:01', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', ''),
-(3, 18, 11, '2025-12-11 00:45:51', '233100.00', '0.00', '0.00', '0.00', '233100.00', 'PENDIENTE', 'EFECTIVO', '');
+(29, 18, 14, '2025-12-11 16:48:08', '150000.00', '0.00', '0.00', '0.00', '150000.00', 'PENDIENTE', 'EFECTIVO', ''),
+(30, 16, 14, '2025-12-11 16:50:42', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', ''),
+(35, 1, 14, '2025-12-11 17:13:33', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', ''),
+(36, 18, 14, '2025-12-11 17:25:17', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', '');
 
 -- --------------------------------------------------------
 
@@ -636,12 +650,13 @@ CREATE TABLE `ventas_items` (
 --
 
 INSERT INTO `ventas_items` (`id`, `id_venta`, `id_producto`, `cantidad`, `precio_unitario`, `descuento`, `descuento_porcentaje`, `impuesto`, `subtotal`) VALUES
-(1, 1, 14, '2.00', '2700.00', '0.00', '0.00', '0.00', '5400.00'),
-(2, 1, 15, '2.00', '75000.00', '0.00', '0.00', '0.00', '150000.00'),
-(3, 2, 14, '1.00', '2700.00', '0.00', '0.00', '0.00', '2700.00'),
-(4, 2, 15, '1.00', '75000.00', '0.00', '0.00', '0.00', '75000.00'),
-(5, 3, 14, '3.00', '2700.00', '0.00', '0.00', '0.00', '8100.00'),
-(6, 3, 15, '3.00', '75000.00', '0.00', '0.00', '0.00', '225000.00');
+(49, 29, 15, '2.00', '75000.00', '0.00', '0.00', '0.00', '150000.00'),
+(50, 30, 14, '1.00', '2700.00', '0.00', '0.00', '0.00', '2700.00'),
+(51, 30, 15, '1.00', '75000.00', '0.00', '0.00', '0.00', '75000.00'),
+(56, 35, 15, '1.00', '75000.00', '0.00', '0.00', '0.00', '75000.00'),
+(57, 35, 14, '1.00', '2700.00', '0.00', '0.00', '0.00', '2700.00'),
+(58, 36, 14, '1.00', '2700.00', '0.00', '0.00', '0.00', '2700.00'),
+(59, 36, 15, '1.00', '75000.00', '0.00', '0.00', '0.00', '75000.00');
 
 --
 -- Índices para tablas volcadas
@@ -868,7 +883,7 @@ ALTER TABLE `app_modulos_negocio_rol`
 -- AUTO_INCREMENT de la tabla `caja`
 --
 ALTER TABLE `caja`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `categorias`
@@ -940,7 +955,7 @@ ALTER TABLE `negocios`
 -- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `personas`
@@ -994,13 +1009,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT de la tabla `ventas_items`
 --
 ALTER TABLE `ventas_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- Restricciones para tablas volcadas

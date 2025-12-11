@@ -17,3 +17,6 @@ export const apiArqueoCaja = (data: any) =>
 
 export const finalizar_venta = (payload: any) => 
   axios.post("/cajero/finalizar-venta", payload);
+
+export const apibuscar_cliente = (payload: any) => 
+  axios.post("/cajero/buscar-cliente", payload);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   ListItem,
@@ -9,26 +9,49 @@ import {
   Typography,
   Divider,
   Button,
+  TextField,
+  Box,
+  Paper,
+  MenuItem,
 } from "@mui/material";
 
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-
 import {
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
 } from "react-swipeable-list";
-import "react-swipeable-list/dist/styles.css";
 
-import type { ProductoCajero } from "../../../../../types/cajero";
+import "react-swipeable-list/dist/styles.css";
+import PersonIcon from "@mui/icons-material/Person";
+import BadgeIcon from "@mui/icons-material/Badge";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import {  apibuscar_cliente} from "../../../../../api/cajero";
+
+
+// 👉 Importas tu modal EXACTA
+import { CrearClienteModal } from "./CrearClienteModal";
+
+type Cliente = {
+  id: number;
+  nombres: string;
+  apellidos: string;
+  identificacion: string;
+  tipo: string;
+};
 
 type Props = {
-  carrito: (ProductoCajero & { cantidad: number; precio_venta: number })[];
+  carrito: any[];
   onRemove: (id: number) => void;
   onAdd: (id: number) => void;
   onSub: (id: number) => void;
-  onFinalizar: () => void;
+  onFinalizar: (idCliente: number | null,
+    pago: {
+    metodo_pago: string;
+    monto_recibido: number;
+    cambio: number;
+  }) => void;
 };
 
 export const Carrito: React.FC<Props> = ({
@@ -37,19 +60,50 @@ export const Carrito: React.FC<Props> = ({
   onAdd,
   onSub,
   onFinalizar,
+
 }) => {
+  const [clienteBuscado, setClienteBuscado] = useState("");
+  const [resultados, setResultados] = useState<Cliente[]>([]);
+  const [clienteSeleccionado, setClienteSeleccionado] =
+    useState<Cliente | null>(null);
+  const [openCrearModal, setOpenCrearModal] = useState(false);
+
+const [metodoPago, setMetodoPago] = useState("EFECTIVO");
+  const [montoRecibido, setMontoRecibido] = useState<number>(0);
+
+  // Total carrito
   const total = carrito.reduce(
     (acc, v) => acc + v.precio_venta * v.cantidad,
     0
   );
 
-  // Acción del swipe (eliminar)
+  const cambio = montoRecibido - total;
+  const handleBuscar = async (term: string) => {
+    setClienteBuscado(term);
+
+    if (term.trim().length < 2) {
+      setResultados([]);
+      return;
+    }
+
+    const res = await apibuscar_cliente( { id_cliente: term });
+    console.log("res",res);
+    
+    setResultados(res.data.result);
+    
+  };
+
+  const seleccionarCliente = (cli: Cliente) => {
+    console.log("setClienteSeleccionado",setClienteSeleccionado);
+    
+    setClienteSeleccionado(cli);
+    setResultados([]);
+    setClienteBuscado("");
+  };
+
   const trailingActions = (id: number) => (
     <TrailingActions>
-      <SwipeAction
-        destructive={true}
-        onClick={() => onRemove(id)}
-      >
+      <SwipeAction destructive onClick={() => onRemove(id)}>
         <div
           style={{
             background: "#d32f2f",
@@ -69,13 +123,134 @@ export const Carrito: React.FC<Props> = ({
 
   return (
     <div>
+      {/* CLIENTE */}
+      <Card sx={{ p: 2, borderRadius: 2, mb: 2 }}>
+        <Typography fontWeight={700} fontSize={16} mb={1}>
+          Cliente
+        </Typography>
+
+        {/* BUSCADOR */}
+        <TextField
+          fullWidth
+          placeholder="Buscar cliente..."
+          size="small"
+          value={clienteBuscado}
+          onChange={(e) => handleBuscar(e.target.value)}
+        />
+
+        {/* RESULTADOS */}
+        {resultados.length > 0 && (
+          <Paper sx={{ mt: 1, maxHeight: 150, overflowY: "auto" }}>
+            {resultados.map((cli) => (
+             <Box
+  key={cli.id}
+  sx={{
+    p: 1,
+    cursor: "pointer",
+    borderRadius: 1,
+    display: "flex",
+    alignItems: "center",
+    gap: 1.2,
+    "&:hover": {
+      backgroundColor: "#f0f4ff",
+    },
+  }}
+  onClick={() => seleccionarCliente(cli)}
+>
+  <PersonIcon sx={{ fontSize: 26, color: "primary.main" }} />
+
+  <Box sx={{ flexGrow: 1 }}>
+    <Typography fontWeight={600} fontSize={11}>
+      {cli.nombres} {cli.apellidos}
+    </Typography>
+
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <BadgeIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+      <Typography variant="caption" color="text.secondary">
+        {cli.identificacion}
+      </Typography>
+    </Box>
+  </Box>
+</Box>
+            ))}
+          </Paper>
+        )}
+
+        {/* CLIENTE SELECCIONADO */}
+        {clienteSeleccionado && (
+         
+<Box
+  mt={2}
+  p={1.5}
+  sx={{
+    background: "#e8f5e9",
+    borderRadius: 2,
+    display: "flex",
+    alignItems: "center",
+    gap: 1.5,
+    border: "1px solid #c8e6c9",
+  }}
+>
+  {/* Icono Persona */}
+  <PersonIcon sx={{ fontSize: 30, color: "primary.main" }} />
+
+  <Box sx={{ flexGrow: 1 }}>
+    <Typography fontWeight={600} fontSize={12}>
+      {clienteSeleccionado.nombres} {clienteSeleccionado.apellidos}
+    </Typography>
+
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <BadgeIcon sx={{ fontSize: 15, color: "text.secondary" }} />
+      <Typography variant="body2" color="text.secondary">
+        {clienteSeleccionado.identificacion}
+      </Typography>
+    </Box>
+  </Box>
+
+  {/* Check verde */}
+  <CheckCircleIcon sx={{ fontSize: 30, color: "#2ecc71" }} />
+</Box>
+        )}
+
+        <Button
+          variant="outlined"
+          fullWidth
+          sx={{ mt: 2 }}
+          onClick={() => setOpenCrearModal(true)}
+        >
+          Crear Cliente / Empresa
+        </Button>
+      </Card>
+
+      {/* MODAL */}
+      <CrearClienteModal
+        open={openCrearModal}
+        onClose={() => setOpenCrearModal(false)}
+        onCreated={(nuevo) => {
+          // Simular ID — tu API debe devolver el ID real
+          const clienteFinal: Cliente = {
+            ...nuevo,
+            id: Date.now(),
+          };
+
+          setClienteSeleccionado(clienteFinal);
+          setOpenCrearModal(false);
+        }}
+      />
+
+      {/* CARRITO */}
       <Typography variant="h6" fontWeight="bold" mb={1}>
         CARRITO VENTAS
       </Typography>
 
       <Card sx={{ p: 1, borderRadius: 2, boxShadow: 3 }}>
         {carrito.length === 0 ? (
-          <Typography color="text.secondary" px={1} py={4} align="center">
+          <Typography
+            color="text.secondary"
+            px={1}
+            py={4}
+            align="center"
+          >
             No hay productos.
           </Typography>
         ) : (
@@ -89,7 +264,10 @@ export const Carrito: React.FC<Props> = ({
                   <ListItem
                     sx={{
                       py: 1,
-                      "&:hover": { backgroundColor: "#f5f5f5", borderRadius: 1 },
+                      "&:hover": {
+                        backgroundColor: "#f5f5f5",
+                        borderRadius: 1,
+                      },
                     }}
                   >
                     <ListItemAvatar>
@@ -109,7 +287,11 @@ export const Carrito: React.FC<Props> = ({
                       }
                       secondary={
                         <Stack spacing={0.5}>
-                          <Stack direction="row" alignItems="center" spacing={1}>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1}
+                          >
                             <Button
                               variant="outlined"
                               size="small"
@@ -119,7 +301,10 @@ export const Carrito: React.FC<Props> = ({
                               -
                             </Button>
 
-                            <Typography fontSize={14} fontWeight={600}>
+                            <Typography
+                              fontSize={14}
+                              fontWeight={600}
+                            >
                               {item.cantidad}
                             </Typography>
 
@@ -132,7 +317,11 @@ export const Carrito: React.FC<Props> = ({
                               +
                             </Button>
 
-                            <Typography fontSize={13} color="text.secondary" ml={1}>
+                            <Typography
+                              fontSize={13}
+                              color="text.secondary"
+                              ml={1}
+                            >
                               x ${item.precio_venta.toLocaleString()}
                             </Typography>
                           </Stack>
@@ -169,16 +358,75 @@ export const Carrito: React.FC<Props> = ({
               </Typography>
             </Stack>
 
-            <Button
+          {/* MÉTODO DE PAGO */}
+            <TextField
+              select
               fullWidth
-              variant="contained"
-              color="success"
+              label="Método de Pago"
+              size="small"
               sx={{ mt: 2 }}
-              startIcon={<AddShoppingCartIcon />}
-              onClick={onFinalizar}
+              value={metodoPago}
+              onChange={(e) => setMetodoPago(e.target.value)}
             >
-              Finalizar Venta
-            </Button>
+              <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
+                               <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
+                               <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
+                              <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
+            </TextField>
+
+            {/* MONTO RECIBIDO */}
+            {metodoPago === "EFECTIVO" && (
+              <TextField
+                fullWidth
+                label="Monto recibido"
+                size="small"
+                type="number"
+                sx={{ mt: 2 }}
+                value={montoRecibido}
+                onChange={(e) => setMontoRecibido(Number(e.target.value))}
+              />
+            )}
+
+            {/* CAMBIO */}
+            {metodoPago === "EFECTIVO" && (
+              <Typography
+                sx={{ mt: 1 }}
+                fontWeight="bold"
+                color={cambio < 0 ? "error.main" : "success.main"}
+              >
+                Cambio: ${Math.max(cambio, 0).toLocaleString()}
+              </Typography>
+            )}
+
+            {/* BOTÓN FINALIZAR */}
+        <Button
+  fullWidth
+  variant="contained"
+  color="success"
+  sx={{ mt: 2 }}
+  startIcon={<AddShoppingCartIcon />}
+  disabled={metodoPago === "EFECTIVO" && cambio < 0}
+  onClick={() => {
+    onFinalizar(
+      clienteSeleccionado ? clienteSeleccionado.id : null,
+      {
+        metodo_pago: metodoPago,
+        monto_recibido: montoRecibido,
+        cambio: Math.max(cambio, 0),
+      }
+    );
+
+    setClienteSeleccionado(null);
+    setClienteBuscado("");
+    setResultados([]);
+    setMetodoPago("EFECTIVO");
+    setMontoRecibido(0);
+  }}
+>
+  Finalizar Venta
+</Button>
+
+
           </>
         )}
       </Card>
