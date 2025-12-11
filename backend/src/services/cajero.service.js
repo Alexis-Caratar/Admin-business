@@ -1,6 +1,33 @@
 import { db } from "../config/db.js";
 
+
 const CajeroService = {
+ estadoCaja: async ({id_usuario}) => {
+    try {
+
+        const estado_caja = `
+     SELECT 
+          c.*,
+          COUNT(v.id) AS total_ventas,
+          IFNULL(SUM(v.total), 0) AS dinero_recaudado
+      FROM caja c
+      LEFT JOIN ventas v ON v.id_caja = c.id
+      WHERE c.estado = 'ABIERTA'
+        AND c.id_usuario = ?
+      GROUP BY c.id
+      ORDER BY c.fecha_apertura DESC
+      LIMIT 1;`
+
+    const [rows ] = await db.query(estado_caja, [id_usuario]);
+    return rows;
+
+    } catch (error) {
+      console.error("Error obteniendo estado de caja:", error);
+      return { abierta: false, caja: null, error: "No se pudo consultar la caja" };
+    }
+  },
+
+  
 listarProductos: async () => {
   // 1. OBTENER CATEGORÍAS
   const [categorias] = await db.query(`
@@ -44,39 +71,91 @@ listarProductos: async () => {
 },
 
   abrirCaja: async ({ id_usuario, monto_inicial }) => {
-    const insert = `
-      INSERT INTO caja (id_usuario, monto_inicial, estado, fecha_apertura)
-      VALUES ($1, $2, 'ABIERTA', NOW())
-      RETURNING *;
-    `;
-    const { rows } = await db.query(insert, [id_usuario, monto_inicial]);
-    return rows[0];
-  },
+   const query = `
+  INSERT INTO caja (id_usuario, monto_inicial, estado, fecha_apertura)
+  VALUES (?, ?, 'ABIERTA', NOW());
+`;
 
-  cerrarCaja: async ({ id_caja, monto_final }) => {
-    const update = `
-      UPDATE caja 
-      SET estado='CERRADA', fecha_cierre=NOW(), monto_cierre=$2
-      WHERE id=$1
-      RETURNING *;
-    `;
-    const { rows } = await db.query(update, [id_caja, monto_final]);
-    return rows[0];
-  },
+const [insert] = await db.execute(query, [id_usuario, monto_inicial]);
+
+const [rows] = await db.execute("SELECT * FROM caja WHERE id = ?", [
+  insert.insertId,
+]);
+
+return rows[0];
+
+  },    
+
+cerrarCaja: async ({ id_caja, monto_final }) => {
+  // 1️⃣ Actualizar la caja
+  const update = `
+    UPDATE caja 
+    SET estado='CERRADA', fecha_cierre=NOW(), monto_final=?
+    WHERE id=?
+  `;
+  const [result] = await db.query(update, [monto_final, id_caja]);
+
+  // 2️⃣ Consultar la caja actualizada
+  const [rows] = await db.query('SELECT * FROM caja WHERE id=?', [id_caja]);
+
+  // 3️⃣ Retornar la fila actualizada
+  return rows[0];
+},
+
 
   arqueo: async ({ id_caja }) => {
+    
     const query = `
       SELECT 
         c.monto_inicial,
         COALESCE(SUM(v.total), 0) AS total_ventas
       FROM caja c
       LEFT JOIN ventas v ON v.id_caja = c.id
-      WHERE c.id = $1
+      WHERE c.id = ?
       GROUP BY c.monto_inicial;
-    `;
-    const { rows } = await db.query(query, [id_caja]);
+    `;    
+    const  [rows] = await db.query(query, [id_caja]);
+    console.log("rows",rows);
+    
     return rows[0];
   },
+
+
+  finalizarVenta: async (payload) => {
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      const { id_cliente, id_caja, fecha, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota, productos } = payload;
+
+      // 1️⃣ Insertar en tabla ventas
+      const [ventaResult] = await conn.query(
+        `INSERT INTO ventas (id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota)
+         VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota]
+      );
+
+      const id_venta = ventaResult.insertId;
+
+      // 2️⃣ Insertar en tabla ventas_items
+      for (const p of productos) {
+        await conn.query(
+          `INSERT INTO ventas_items (id_venta, id_producto, cantidad, precio_unitario, descuento, descuento_porcentaje, impuesto, subtotal)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [id_venta, p.id_producto, p.cantidad, p.precio_unitario, p.descuento, p.descuento_porcentaje, p.impuesto, p.subtotal]
+        );
+      }
+
+      await conn.commit();
+      return { id_venta, productos };
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+  },
+
 };
 
 export default CajeroService;

@@ -24,3 +24,22 @@ export interface CierreCaja {
   export interface ItemCarrito extends ProductoCajero {
   cantidad: number;
 }
+
+// types/cajero.ts
+
+export interface Caja {
+  id: number;
+  id_usuario: number;
+  monto_inicial: number;
+  estado: "ABIERTA" | "CERRADA";
+  fecha_apertura: string;
+  fecha_cierre?: string;
+  total_ventas: number;
+  dinero_recaudado:number;
+}
+
+export interface EstadoCajaResponse {
+  abierta: boolean;
+  caja: Caja | null;
+  error?: string;
+}

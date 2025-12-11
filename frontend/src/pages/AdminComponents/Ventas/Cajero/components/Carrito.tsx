@@ -1,19 +1,26 @@
 import React from "react";
 import {
   Card,
-  List,
   ListItem,
   ListItemAvatar,
   Avatar,
   ListItemText,
-  IconButton,
   Stack,
   Typography,
   Divider,
   Button,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+
+import {
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from "react-swipeable-list";
+import "react-swipeable-list/dist/styles.css";
+
 import type { ProductoCajero } from "../../../../../types/cajero";
 
 type Props = {
@@ -24,8 +31,41 @@ type Props = {
   onFinalizar: () => void;
 };
 
-export const Carrito: React.FC<Props> = ({ carrito, onRemove, onAdd, onSub, onFinalizar }) => {
-  const total = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
+export const Carrito: React.FC<Props> = ({
+  carrito,
+  onRemove,
+  onAdd,
+  onSub,
+  onFinalizar,
+}) => {
+  const total = carrito.reduce(
+    (acc, v) => acc + v.precio_venta * v.cantidad,
+    0
+  );
+
+  // Acción del swipe (eliminar)
+  const trailingActions = (id: number) => (
+    <TrailingActions>
+      <SwipeAction
+        destructive={true}
+        onClick={() => onRemove(id)}
+      >
+        <div
+          style={{
+            background: "#d32f2f",
+            color: "white",
+            padding: "0 20px",
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
+            fontWeight: "bold",
+          }}
+        >
+          Eliminar
+        </div>
+      </SwipeAction>
+    </TrailingActions>
+  );
 
   return (
     <div>
@@ -40,83 +80,91 @@ export const Carrito: React.FC<Props> = ({ carrito, onRemove, onAdd, onSub, onFi
           </Typography>
         ) : (
           <>
-            <List dense>
+            <SwipeableList>
               {carrito.map((item) => (
-                <ListItem
+                <SwipeableListItem
                   key={item.id}
-                  alignItems="flex-start"
-                  secondaryAction={
-                    <IconButton edge="end" onClick={() => onRemove(item.id)}>
-                      <DeleteIcon color="error" fontSize="small" />
-                    </IconButton>
-                  }
-                  sx={{
-                    py: 1,
-                    "&:hover": { backgroundColor: "#f5f5f5", borderRadius: 1 },
-                  }}
+                  trailingActions={trailingActions(item.id)}
                 >
-                  <ListItemAvatar>
-                    <Avatar
-                      src={item.imagen} // Suponiendo que el producto tiene campo 'imagen'
-                      alt={item.nombre}
-                      variant="rounded"
-                      sx={{ width: 50, height: 50, mr: 1 }}
-                    />
-                  </ListItemAvatar>
+                  <ListItem
+                    sx={{
+                      py: 1,
+                      "&:hover": { backgroundColor: "#f5f5f5", borderRadius: 1 },
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar
+                        src={item.imagen}
+                        alt={item.nombre}
+                        variant="rounded"
+                        sx={{ width: 50, height: 50, mr: 1 }}
+                      />
+                    </ListItemAvatar>
 
-                  <ListItemText
-                    primary={
-                      <Typography fontSize={14} fontWeight={600}>
-                        {item.nombre}
-                      </Typography>
-                    }
-                    secondary={
-                      <Stack spacing={0.5}>
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => onSub(item.id)}
-                            sx={{ minWidth: 24, padding: "2px" }}
+                    <ListItemText
+                      primary={
+                        <Typography fontSize={14} fontWeight={600}>
+                          {item.nombre}
+                        </Typography>
+                      }
+                      secondary={
+                        <Stack spacing={0.5}>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => onSub(item.id)}
+                              sx={{ minWidth: 24, padding: "2px" }}
+                            >
+                              -
+                            </Button>
+
+                            <Typography fontSize={14} fontWeight={600}>
+                              {item.cantidad}
+                            </Typography>
+
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => onAdd(item.id)}
+                              sx={{ minWidth: 24, padding: "2px" }}
+                            >
+                              +
+                            </Button>
+
+                            <Typography fontSize={13} color="text.secondary" ml={1}>
+                              x ${item.precio_venta.toLocaleString()}
+                            </Typography>
+                          </Stack>
+
+                          <Typography
+                            fontSize={13}
+                            fontWeight="bold"
+                            color="primary"
                           >
-                            -
-                          </Button>
-
-                          <Typography fontSize={14} fontWeight={600}>
-                            {item.cantidad}
-                          </Typography>
-
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => onAdd(item.id)}
-                            sx={{ minWidth: 24, padding: "2px" }}
-                          >
-                            +
-                          </Button>
-
-                          <Typography fontSize={13} color="text.secondary" ml={1}>
-                            x ${item.precio_venta.toLocaleString()}
+                            Subtotal: $
+                            {(item.cantidad * item.precio_venta).toLocaleString()}
                           </Typography>
                         </Stack>
-
-                        <Typography fontSize={13} fontWeight="bold" color="primary">
-                          Subtotal: ${(item.cantidad * item.precio_venta).toLocaleString()}
-                        </Typography>
-                      </Stack>
-                    }
-                  />
-                </ListItem>
+                      }
+                    />
+                  </ListItem>
+                </SwipeableListItem>
               ))}
-            </List>
+            </SwipeableList>
 
             <Divider sx={{ my: 1 }} />
 
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack direction="row" justifyContent="space-between">
               <Typography fontWeight="bold" fontSize={16}>
                 Total
               </Typography>
-              <Typography fontWeight="bold" color="success.main" fontSize={16}>
+
+              <Typography
+                fontWeight="bold"
+                color="success.main"
+                fontSize={16}
+              >
                 ${total.toLocaleString()}
               </Typography>
             </Stack>

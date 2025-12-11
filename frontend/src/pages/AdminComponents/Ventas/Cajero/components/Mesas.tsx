@@ -7,68 +7,97 @@ import EventSeatIcon from "@mui/icons-material/EventSeat";
 type Mesa = { id: number; numero: number; estado: string };
 
 type Props = {
-    mesas: Mesa[];
-    onSelect: (m: Mesa) => void;
+  mesas: Mesa[];
+  onSelect: (m: Mesa) => void;
 };
 
 export const Mesas: React.FC<Props> = ({ mesas, onSelect }) => {
+  const getEstadoConfig = (estado: string) => {
+    switch (estado) {
+      case "Disponible":
+        return {
+          icon: <CheckCircleIcon sx={{ fontSize: 32, color: "#2e7d32" }} />,
+          bg: "#e8f5e9",
+          chip: "success",
+        };
 
-    const getEstadoConfig = (estado: string) => {
-        switch (estado) {
-            case "Disponible":
-                return { color: "success", icon: <CheckCircleIcon sx={{ fontSize: 28, color: "#2e7d32" }} />, bg: "#e8f5e9", chipColor: "success" };
-            case "Ocupada":
-                return { color: "error", icon: <RestaurantIcon sx={{ fontSize: 28, color: "#c62828" }} />, bg: "#ffebee", chipColor: "error" };
-            case "Reservada":
-                return { color: "warning", icon: <EventSeatIcon sx={{ fontSize: 28, color: "#d84315" }} />, bg: "#fff3e0", chipColor: "warning" };
-            default:
-                return { color: "default", icon: null, bg: "#eeeeee", chipColor: "default" };
-        }
-    };
+      case "Ocupada":
+        return {
+          icon: <RestaurantIcon sx={{ fontSize: 32, color: "#c62828" }} />,
+          bg: "#ffebee",
+          chip: "error",
+        };
 
-    return (
-        <Box>
-            <Typography variant="h6" fontWeight="bold" mb={2}>
-                Mesas del Restaurante
-            </Typography>
+      case "Reservada":
+        return {
+          icon: <EventSeatIcon sx={{ fontSize: 32, color: "#ef6c00" }} />,
+          bg: "#fff3e0",
+          chip: "warning",
+        };
 
-            <Grid container spacing={2}>
-                {mesas.map((mesa) => {
-                    const config = getEstadoConfig(mesa.estado);
+      default:
+        return {
+          icon: null,
+          bg: "#eeeeee",
+          chip: "default",
+        };
+    }
+  };
 
-                    return (
-                        <Grid item xs={6} sm={4} md={2} key={mesa.id}>
-                            <Card
-                                onClick={() => onSelect(mesa)}
-                                sx={{
-                                    p: 2,
-                                    textAlign: "center",
-                                    borderRadius: 3,
-                                    cursor: "pointer",
-                                    height: 120,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    background: config.bg,
-                                    boxShadow: 2,
-                                    transition: "0.25s",
-                                    "&:hover": {
-                                        boxShadow: 6,
-                                        transform: "translateY(-4px)",
-                                    },
-                                }}
-                            >
-                                <Box mb={1}>{config.icon}</Box>
-                                <Typography variant="h6" fontWeight="bold">
-                                    Mesa {mesa.numero}
-                                </Typography>
-                                <Chip label={mesa.estado} color={config.chipColor} size="small" sx={{ mt: 1, fontWeight: "bold" }} />
-                            </Card>
-                        </Grid>
-                    );
-                })}
+  return (
+    <Box sx={{ width: "100%" }}>
+      <Typography variant="h6" fontWeight="bold" mb={2}>
+        Mesas del Restaurante
+      </Typography>
+
+      <Grid container spacing={2}>
+        {mesas.map((mesa) => {
+          const config = getEstadoConfig(mesa.estado);
+
+          return (
+            <Grid item xs={8} sm={6} md={5} lg={4} key={mesa.id}>
+              <Card
+                onClick={() => onSelect(mesa)}
+                sx={{
+                  p: 1,
+                  textAlign: "center",
+                  borderRadius: 4,
+                  cursor: "pointer",
+                  height: 80,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  background: config.bg,
+                  boxShadow: 2,
+                  transition: "0.25s ease",
+                  "&:hover": {
+                    transform: "translateY(-5px) scale(1.03)",
+                    boxShadow: 6,
+                  },
+                }}
+              >
+                <Box mb={1}>{config.icon}</Box>
+
+                <Typography variant="body2" fontWeight="bold" sx={{ fontSize: 13 }}>
+                  Mesa {mesa.numero}
+                </Typography>
+
+                <Chip
+                  label={mesa.estado}
+                  color={config.chip}
+                  size="small"
+                  sx={{
+                    mt: 1,
+                    fontWeight: 500,
+                    textTransform: "capitalize",
+                  }}
+                />
+              </Card>
             </Grid>
-        </Box>
-    );
+          );
+        })}
+      </Grid>
+    </Box>
+  );
 };
