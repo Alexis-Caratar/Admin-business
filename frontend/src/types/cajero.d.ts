@@ -43,3 +43,14 @@ export interface EstadoCajaResponse {
   caja: Caja | null;
   error?: string;
 }
+
+
+// /src/types/cajero.ts
+export interface Mesa {
+  id: number;
+  id_negocio: number | null; // opcional según lo definiste en la DB
+  nombre: string;
+  capacidad: number;
+  estado: "Disponible" | "Ocupada" | "Reservada"; // Ajusta según tus valores posibles
+  fecha_creacion: string; // ISO string
+}

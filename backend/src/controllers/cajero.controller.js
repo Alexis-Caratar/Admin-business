@@ -69,3 +69,14 @@ export const buscarCliente = async (req, res) => {
   }
   
 };
+
+export const mesas = async (req, res) => {
+  try {
+   const {id_negocio} = req.body;   
+      const resultado = await CajeroService.mesas(id_negocio);
+    return res.json({ ok: true,result: resultado });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};

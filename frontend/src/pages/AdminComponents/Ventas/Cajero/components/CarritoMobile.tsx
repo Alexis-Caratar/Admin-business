@@ -26,11 +26,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import PersonIcon from "@mui/icons-material/Person";
 import BadgeIcon from "@mui/icons-material/Badge";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
 import PaymentIcon from "@mui/icons-material/Payment";
-
 import { motion, AnimatePresence } from "framer-motion";
-
 import { CrearClienteModal } from "./CrearClienteModal";
 import { apibuscar_cliente } from "../../../../../api/cajero";
 

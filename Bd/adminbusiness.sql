@@ -2,10 +2,10 @@
 -- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost
--- Tiempo de generación: 11-12-2025 a las 18:43:20
--- Versión del servidor: 10.4.27-MariaDB
--- Versión de PHP: 8.2.0
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 12-12-2025 a las 05:45:52
+-- Versión del servidor: 10.4.24-MariaDB
+-- Versión de PHP: 8.1.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -42,7 +42,7 @@ CREATE TABLE `activos` (
   `estado` enum('BUENO','REGULAR','MALO','DADO DE BAJA') DEFAULT 'BUENO',
   `ubicacion` varchar(150) DEFAULT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -57,7 +57,7 @@ CREATE TABLE `app_modulos` (
   `icono` varchar(100) DEFAULT NULL,
   `orden` int(11) DEFAULT 1,
   `activo` tinyint(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `app_modulos`
@@ -83,7 +83,7 @@ CREATE TABLE `app_modulos_negocio` (
   `id_negocio` int(11) NOT NULL,
   `id_modulo` int(11) NOT NULL,
   `activo` tinyint(4) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `app_modulos_negocio`
@@ -111,7 +111,7 @@ CREATE TABLE `app_modulos_negocio_rol` (
   `estado` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `app_modulos_negocio_rol`
@@ -141,7 +141,7 @@ CREATE TABLE `caja` (
   `fecha_cierre` datetime DEFAULT NULL,
   `monto_final` decimal(12,2) DEFAULT NULL,
   `diferencia` decimal(12,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `caja`
@@ -170,7 +170,7 @@ CREATE TABLE `categorias` (
   `imagen` varchar(500) DEFAULT NULL,
   `descripcion` varchar(500) NOT NULL,
   `activo` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `categorias`
@@ -201,7 +201,7 @@ CREATE TABLE `compras` (
   `estado` varchar(20) DEFAULT 'pendiente',
   `metodo_pago` varchar(50) DEFAULT 'efectivo',
   `nota` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -219,7 +219,7 @@ CREATE TABLE `compras_items` (
   `descuento_porcentaje` decimal(5,2) DEFAULT 0.00,
   `impuesto` decimal(12,2) DEFAULT 0.00,
   `subtotal` decimal(12,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -235,7 +235,7 @@ CREATE TABLE `domicilios` (
   `estado` enum('pendiente','en camino','entregado','cancelado') DEFAULT 'pendiente',
   `total` decimal(10,2) DEFAULT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -251,7 +251,7 @@ CREATE TABLE `empleados` (
   `cargo` varchar(100) DEFAULT NULL,
   `telefono` varchar(50) DEFAULT NULL,
   `fecha_ingreso` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -264,7 +264,7 @@ CREATE TABLE `inventario` (
   `id_producto` int(11) NOT NULL,
   `id_negocio` int(11) NOT NULL,
   `cantidad_actual` decimal(10,2) DEFAULT 0.00
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -279,7 +279,7 @@ CREATE TABLE `inventario_fisico` (
   `nombre` varchar(500) NOT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
   `tipo` enum('PRODUCTOS','ACTIVOS','OTROS') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `inventario_fisico`
@@ -305,7 +305,7 @@ CREATE TABLE `inventario_fisico_detalles` (
   `diferencia` decimal(12,2) GENERATED ALWAYS AS (`cantidad_fisica` - `cantidad_sistema`) STORED,
   `observacion` text DEFAULT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `inventario_fisico_detalles`
@@ -323,11 +323,22 @@ INSERT INTO `inventario_fisico_detalles` (`id`, `id_inventario_fisico`, `id_prod
 
 CREATE TABLE `mesas` (
   `id` int(11) NOT NULL,
-  `negocio_id` int(11) NOT NULL,
+  `id_negocio` int(11) DEFAULT NULL,
   `nombre` varchar(50) DEFAULT NULL,
   `capacidad` int(11) NOT NULL DEFAULT 2,
-  `estado` enum('activa','inactiva') DEFAULT 'activa'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `estado` enum('Disponible','Ocupada','Reservada') DEFAULT 'Disponible',
+  `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `mesas`
+--
+
+INSERT INTO `mesas` (`id`, `id_negocio`, `nombre`, `capacidad`, `estado`, `fecha_creacion`) VALUES
+(1, 1, 'Mesa1', 4, 'Disponible', '2025-12-11 23:32:41'),
+(2, 1, 'Mesa 2', 4, 'Reservada', '2025-12-11 23:41:26'),
+(3, 1, 'Mesa 3', 4, 'Reservada', '2025-12-11 23:41:42'),
+(4, 1, 'Mesa 4', 2, 'Ocupada', '2025-12-11 23:42:18');
 
 -- --------------------------------------------------------
 
@@ -343,7 +354,7 @@ CREATE TABLE `movimientos_inventario` (
   `cantidad` decimal(10,2) NOT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
   `detalle` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -358,7 +369,7 @@ CREATE TABLE `negocios` (
   `telefono` varchar(50) DEFAULT NULL,
   `descripcion` text DEFAULT NULL,
   `fecha_creacion` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `negocios`
@@ -383,7 +394,7 @@ CREATE TABLE `pagos` (
   `monto_recibido` decimal(10,2) DEFAULT NULL,
   `cambio` int(11) NOT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `pagos`
@@ -393,7 +404,9 @@ INSERT INTO `pagos` (`id`, `id_venta`, `metodo_pago`, `monto_pagado`, `monto_rec
 (4, 29, 'EFECTIVO', '150000.00', '200000.00', 50000, '2025-12-11 16:48:08'),
 (5, 30, 'EFECTIVO', '77700.00', '180000.00', 102300, '2025-12-11 16:50:42'),
 (6, 35, 'EFECTIVO', '77700.00', '520000.00', 442300, '2025-12-11 17:13:33'),
-(7, 36, 'EFECTIVO', '77700.00', '1200000.00', 1122300, '2025-12-11 17:25:17');
+(7, 36, 'EFECTIVO', '77700.00', '1200000.00', 1122300, '2025-12-11 17:25:17'),
+(8, 37, 'EFECTIVO', '77700.00', '120000.00', 42300, '2025-12-11 21:16:10'),
+(9, 38, 'EFECTIVO', '40000.00', '250000.00', 210000, '2025-12-12 02:41:08');
 
 -- --------------------------------------------------------
 
@@ -413,7 +426,7 @@ CREATE TABLE `personas` (
   `direccion` text DEFAULT NULL,
   `nota` text DEFAULT NULL,
   `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `personas`
@@ -449,19 +462,25 @@ CREATE TABLE `productos` (
   `publicacion_web` tinyint(1) DEFAULT 0,
   `creacion` datetime DEFAULT current_timestamp(),
   `actualizacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `productos`
 --
 
 INSERT INTO `productos` (`id`, `codigo_barra`, `nombre`, `descripcion`, `unidad_medida`, `id_categoria`, `tipo_producto`, `stock_actual`, `stock_minimo`, `stock_maximo`, `estado`, `publicacion_web`, `creacion`, `actualizacion`) VALUES
-(1, '123456789', 'Pollo en salsa', 'Almuerzo de pollo con salsa de la casa, 1/4 de pollo broster acompañado de delicioso jugo 2', 'litro', 1, 'producto_terminado', 0, 0, 0, 1, 0, '2025-11-28 14:30:28', '2025-11-28 16:15:40'),
-(3, NULL, 'Desayuno Casero', 'Un dato es una representación simbólica de un atributo o variable cuantitativa o cualitativa.', 'litro', 2, 'producto_terminado', 0, 0, 0, 1, 0, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
-(9, NULL, 'Plato de almuerzo', 'almuerzo', 'pieza', 3, 'producto_terminado', 0, 0, 0, 1, 0, '2025-11-28 14:30:28', '2025-11-28 14:30:28'),
-(10, '464565', 'Bandeja paisa', 'Bandeja paisa', 'kg', 1, 'producto_terminado', 0, 0, 0, 2, 0, '2025-11-28 17:40:15', '2025-11-28 18:38:41'),
+(1, '10', 'Pollo en salsa', 'Almuerzo de pollo con salsa de la casa, 1/4 de pollo broster acompañado de delicioso jugo 2', 'pieza', 1, 'producto_terminado', 10, 5, 20, 1, 0, '2025-11-28 14:30:28', '2025-12-11 17:26:47'),
+(3, '7', 'Desayuno Casero', 'Desayuno Casero con huevos', 'litro', 2, '', 10, 5, 20, 1, 0, '2025-11-28 14:30:28', '2025-12-11 17:20:58'),
+(10, '9', 'Bandeja paisa', 'Bandeja paisa', 'pieza', 1, '', 10, 5, 20, 1, 0, '2025-11-28 17:40:15', '2025-12-11 17:25:46'),
 (14, '869749465465', 'filte de pollo', 'pollo en filites', 'pieza', 4, 'producto_terminado', 50, 10, 80, 1, 0, '2025-12-02 17:00:32', '2025-12-02 17:15:13'),
-(15, '45645', 'costilla ahumada', 'porcion de costilla ahumada de 100 gramos ', 'kg', 4, 'insumo', 45, 50, 60, 1, 0, '2025-12-03 16:46:52', '2025-12-03 16:46:52');
+(15, '45645', 'costilla ahumada', 'porcion de costilla ahumada de 100 gramos ', 'kg', 4, 'insumo', 45, 50, 60, 1, 0, '2025-12-03 16:46:52', '2025-12-03 16:46:52'),
+(16, '1', 'Pollo plancha', 'Delicioso almuerzo de pollo a la plancha', 'pieza', 3, '', 10, 2, 25, 1, 0, '2025-12-11 16:33:28', '2025-12-11 16:33:28'),
+(17, '2', 'Cerdo plancha', 'Delicioso Almuerzo de cerdo a la plancha', 'pieza', 3, '', 10, 5, 25, 1, 0, '2025-12-11 16:35:01', '2025-12-11 16:35:01'),
+(18, '3', 'Chuleta de Pollo', 'Almuerzo con deliciosa chuleta de pollo', 'pieza', 3, '', 10, 5, 25, 1, 0, '2025-12-11 16:38:57', '2025-12-11 16:38:57'),
+(19, '4', 'Chuleta de Cerdo', 'Delicioso Almuerzo con chuleta de cerdo', 'pieza', 3, '', 5, 10, 25, 1, 0, '2025-12-11 16:41:02', '2025-12-11 16:41:02'),
+(20, '5', 'Gulash', 'Delicioso Almuerzo con gulash', 'pieza', 3, 'insumo', 15, 5, 20, 1, 0, '2025-12-11 17:14:35', '2025-12-11 17:14:35'),
+(21, '6', 'Churrasco', 'Delicioso Almuerzo con churrasco', 'pieza', 3, '', 10, 5, 20, 1, 0, '2025-12-11 17:16:03', '2025-12-11 17:16:03'),
+(22, '8', 'Desayuno con Carne', 'Delicioso Desayuno con porcion de carne', 'pieza', 2, '', 10, 5, 20, 1, 0, '2025-12-11 17:19:42', '2025-12-11 17:19:42');
 
 -- --------------------------------------------------------
 
@@ -475,20 +494,23 @@ CREATE TABLE `productos_imagenes` (
   `url` varchar(255) NOT NULL,
   `orden` int(11) DEFAULT 0,
   `activo` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `productos_imagenes`
 --
 
 INSERT INTO `productos_imagenes` (`id`, `id_producto`, `url`, `orden`, `activo`) VALUES
-(1, 1, 'https://www.renypicot.es/wp-content/uploads/2021/11/2.jpg', 1, 1),
 (2, 1, 'https://static.bainet.es/clip/27fb5aa6-a019-4edb-88fd-801212bae27d_source-aspect-ratio_1600w_0.jpg', 2, 1),
-(3, 1, 'https://comedera.com/wp-content/uploads/sites/9/2024/11/shutterstock_309154157.jpg?fit=720,480&crop=0px,38px,720px,404px', 3, 1),
 (4, 10, 'https://buenprovecho.hn/wp-content/uploads/2023/07/Diseno-sin-titulo-3.png', 0, 1),
-(5, 10, 'https://img.freepik.com/premium-photo/traditional-colombian-food-bandeja-paisa-restaurant_843415-843.jpg?w=2000', 1, 1),
-(6, 10, 'https://i.pinimg.com/originals/b7/0c/d9/b70cd941ca2eb17cde99a52f7ea82eef.jpg', 2, 1),
-(7, 10, 'https://thumbs.dreamstime.com/z/bandeja-paisa-comida-colombiana-tradicional-con-carne-huevo-pl%C3%A1tano-y-aguacate-165437656.jpg', 3, 1);
+(8, 16, 'https://img.freepik.com/fotos-premium/pechuga-pollo-plancha-arroz-ensalada-verde_491130-1235.jpg', 0, 1),
+(9, 17, 'https://img.freepik.com/fotos-premium/cerdo-plancha-farofa-arroz-patatas-fritas_538646-12679.jpg', 0, 1),
+(10, 18, 'https://png.pngtree.com/background/20230906/original/pngtree-chicken-chop-on-background-healthy-eat-lunch-photo-picture-image_4968950.jpg', 0, 1),
+(11, 19, 'https://media.istockphoto.com/id/1093507584/es/foto/chuleta-de-cerdo-frita-pur%C3%A9-de-patatas-y-verduras.jpg?s=612x612&w=0&k=20&c=b7fmjJU-mGdCj5MBxt7SDezOIWbOEfB1PYAeFPu0-do=', 0, 1),
+(12, 20, 'https://cdn.colombia.com/gastronomia/2016/06/27/goulash-con-verduras-2992.jpg', 0, 1),
+(13, 21, 'https://img.freepik.com/foto-gratis/alimentos-pre-preparados-que-muestran-comidas-deliciosas-listas-comer-camino_23-2151431652.jpg?semt=ais_se_enriched&w=740&q=80', 0, 1),
+(14, 3, 'https://www.recetasnestle.com.co/sites/default/files/styles/cropped_recipe_card_new/public/srh_recipes/1b49f4b41df21c804db0a460d5503016.jpg.webp?itok=C0bZaBqm', 0, 1),
+(15, 22, 'https://media.istockphoto.com/id/155601165/es/foto/bistec-y-los-huevos.jpg?s=612x612&w=0&k=20&c=lFsckfVSwFqJy0eskTdrIR2hdFDoqEJRrjItX9bCyUc=', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -511,17 +533,25 @@ CREATE TABLE `productos_precios` (
   `utilidad_porcentaje` decimal(6,2) GENERATED ALWAYS AS ((`precio_venta` - `precio_costo`) / `precio_costo` * 100) STORED,
   `usuario_modifico` varchar(100) DEFAULT NULL,
   `fecha_modificacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `productos_precios`
 --
 
 INSERT INTO `productos_precios` (`id`, `id_producto`, `precio_costo`, `precio_venta`, `precio_anterior`, `precio_mayorista`, `descuento_valor`, `descuento_porcentaje`, `fecha_inicio_promo`, `fecha_fin_promo`, `activo_promo`, `usuario_modifico`, `fecha_modificacion`) VALUES
-(1, 1, '57000.00', '82000.00', '6000.00', '78000.00', '0.00', '0.00', NULL, NULL, 1, NULL, '2025-11-28 17:16:37'),
-(3, 10, '45000.00', '520000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-11-28 18:26:52'),
+(1, 1, '15000.00', '20000.00', '6000.00', '78000.00', '0.00', '0.00', NULL, NULL, 1, NULL, '2025-12-11 17:26:47'),
+(3, 10, '15000.00', '20000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-11 17:25:32'),
 (4, 14, '2500.00', '2700.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-02 17:00:32'),
-(5, 15, '25000.00', '75000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-03 16:46:52');
+(5, 15, '25000.00', '75000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-03 16:46:52'),
+(6, 16, '11500.00', '12000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-11 16:33:28'),
+(7, 17, '11500.00', '12000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-11 16:35:01'),
+(8, 18, '11500.00', '12000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-11 16:38:57'),
+(9, 19, '11500.00', '12000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-11 16:41:02'),
+(10, 20, '11500.00', '12000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-11 17:14:35'),
+(11, 21, '11500.00', '12000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-11 17:16:03'),
+(12, 3, '7500.00', '8000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-11 17:18:25'),
+(13, 22, '9500.00', '10000.00', '0.00', '0.00', '0.00', '0.00', NULL, NULL, 0, NULL, '2025-12-11 17:19:42');
 
 -- --------------------------------------------------------
 
@@ -534,7 +564,7 @@ CREATE TABLE `producto_insumo` (
   `id_producto` int(10) UNSIGNED NOT NULL,
   `id_insumo` int(10) UNSIGNED NOT NULL,
   `cantidad` decimal(10,2) NOT NULL DEFAULT 1.00
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -553,7 +583,7 @@ CREATE TABLE `reservas` (
   `estado` enum('pendiente','confirmada','cancelada') DEFAULT 'pendiente',
   `observaciones` text DEFAULT NULL,
   `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -568,7 +598,7 @@ CREATE TABLE `ubicaciones` (
   `activo` tinyint(1) DEFAULT 1,
   `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
   `actualizado_en` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -585,7 +615,7 @@ CREATE TABLE `usuarios` (
   `id_negocio` int(11) NOT NULL,
   `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
   `imagen` varchar(255) NOT NULL DEFAULT 'https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png\r\n'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `usuarios`
@@ -606,6 +636,7 @@ CREATE TABLE `ventas` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `id_cliente` int(11) NOT NULL,
   `id_caja` int(11) NOT NULL,
+  `id_mesa` int(11) DEFAULT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
   `subtotal` decimal(12,2) NOT NULL,
   `descuento` decimal(12,2) DEFAULT 0.00,
@@ -615,17 +646,19 @@ CREATE TABLE `ventas` (
   `estado` varchar(20) DEFAULT 'pendiente',
   `metodo_pago` varchar(50) DEFAULT 'efectivo',
   `nota` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `ventas`
 --
 
-INSERT INTO `ventas` (`id`, `id_cliente`, `id_caja`, `fecha`, `subtotal`, `descuento`, `descuento_porcentaje`, `impuesto`, `total`, `estado`, `metodo_pago`, `nota`) VALUES
-(29, 18, 14, '2025-12-11 16:48:08', '150000.00', '0.00', '0.00', '0.00', '150000.00', 'PENDIENTE', 'EFECTIVO', ''),
-(30, 16, 14, '2025-12-11 16:50:42', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', ''),
-(35, 1, 14, '2025-12-11 17:13:33', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', ''),
-(36, 18, 14, '2025-12-11 17:25:17', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', '');
+INSERT INTO `ventas` (`id`, `id_cliente`, `id_caja`, `id_mesa`, `fecha`, `subtotal`, `descuento`, `descuento_porcentaje`, `impuesto`, `total`, `estado`, `metodo_pago`, `nota`) VALUES
+(29, 18, 14, NULL, '2025-12-11 16:48:08', '150000.00', '0.00', '0.00', '0.00', '150000.00', 'PENDIENTE', 'EFECTIVO', ''),
+(30, 16, 14, NULL, '2025-12-11 16:50:42', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', ''),
+(35, 1, 14, NULL, '2025-12-11 17:13:33', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', ''),
+(36, 18, 14, NULL, '2025-12-11 17:25:17', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', ''),
+(37, 18, 14, NULL, '2025-12-11 21:16:10', '77700.00', '0.00', '0.00', '0.00', '77700.00', 'PENDIENTE', 'EFECTIVO', ''),
+(38, 18, 14, NULL, '2025-12-12 02:41:08', '40000.00', '0.00', '0.00', '0.00', '40000.00', 'PENDIENTE', 'EFECTIVO', '');
 
 -- --------------------------------------------------------
 
@@ -643,7 +676,7 @@ CREATE TABLE `ventas_items` (
   `descuento_porcentaje` decimal(5,2) DEFAULT 0.00,
   `impuesto` decimal(12,2) DEFAULT 0.00,
   `subtotal` decimal(12,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `ventas_items`
@@ -656,7 +689,10 @@ INSERT INTO `ventas_items` (`id`, `id_venta`, `id_producto`, `cantidad`, `precio
 (56, 35, 15, '1.00', '75000.00', '0.00', '0.00', '0.00', '75000.00'),
 (57, 35, 14, '1.00', '2700.00', '0.00', '0.00', '0.00', '2700.00'),
 (58, 36, 14, '1.00', '2700.00', '0.00', '0.00', '0.00', '2700.00'),
-(59, 36, 15, '1.00', '75000.00', '0.00', '0.00', '0.00', '75000.00');
+(59, 36, 15, '1.00', '75000.00', '0.00', '0.00', '0.00', '75000.00'),
+(60, 37, 14, '1.00', '2700.00', '0.00', '0.00', '0.00', '2700.00'),
+(61, 37, 15, '1.00', '75000.00', '0.00', '0.00', '0.00', '75000.00'),
+(62, 38, 1, '2.00', '20000.00', '0.00', '0.00', '0.00', '40000.00');
 
 --
 -- Índices para tablas volcadas
@@ -758,7 +794,7 @@ ALTER TABLE `inventario_fisico_detalles`
 --
 ALTER TABLE `mesas`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `negocio_id` (`negocio_id`);
+  ADD KEY `fk_ventas_negocios` (`id_negocio`);
 
 --
 -- Indices de la tabla `movimientos_inventario`
@@ -782,7 +818,8 @@ ALTER TABLE `pagos`
 -- Indices de la tabla `personas`
 --
 ALTER TABLE `personas`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `identificacion` (`identificacion`);
 
 --
 -- Indices de la tabla `productos`
@@ -790,6 +827,7 @@ ALTER TABLE `personas`
 ALTER TABLE `productos`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `codigo_barra` (`codigo_barra`),
+  ADD UNIQUE KEY `codigo_barra_2` (`codigo_barra`),
   ADD KEY `id_categoria` (`id_categoria`);
 
 --
@@ -835,6 +873,7 @@ ALTER TABLE `ubicaciones`
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `email_2` (`email`),
   ADD KEY `usuarios_fk_negocio` (`id_negocio`),
   ADD KEY `fk_usuarios_persona` (`id_persona`);
 
@@ -843,7 +882,8 @@ ALTER TABLE `usuarios`
 --
 ALTER TABLE `ventas`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_cliente` (`id_cliente`);
+  ADD KEY `id_cliente` (`id_cliente`),
+  ADD KEY `fk_ventas_mesas` (`id_mesa`);
 
 --
 -- Indices de la tabla `ventas_items`
@@ -937,7 +977,7 @@ ALTER TABLE `inventario_fisico_detalles`
 -- AUTO_INCREMENT de la tabla `mesas`
 --
 ALTER TABLE `mesas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `movimientos_inventario`
@@ -955,7 +995,7 @@ ALTER TABLE `negocios`
 -- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `personas`
@@ -967,19 +1007,19 @@ ALTER TABLE `personas`
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT de la tabla `productos_imagenes`
 --
 ALTER TABLE `productos_imagenes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `productos_precios`
 --
 ALTER TABLE `productos_precios`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `producto_insumo`
@@ -1009,13 +1049,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `ventas`
 --
 ALTER TABLE `ventas`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT de la tabla `ventas_items`
 --
 ALTER TABLE `ventas_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- Restricciones para tablas volcadas
@@ -1071,7 +1111,7 @@ ALTER TABLE `empleados`
 -- Filtros para la tabla `mesas`
 --
 ALTER TABLE `mesas`
-  ADD CONSTRAINT `mesas_ibfk_1` FOREIGN KEY (`negocio_id`) REFERENCES `negocios` (`id`);
+  ADD CONSTRAINT `fk_ventas_negocios` FOREIGN KEY (`id_negocio`) REFERENCES `negocios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `productos`
@@ -1112,6 +1152,7 @@ ALTER TABLE `usuarios`
 -- Filtros para la tabla `ventas`
 --
 ALTER TABLE `ventas`
+  ADD CONSTRAINT `fk_ventas_mesas` FOREIGN KEY (`id_mesa`) REFERENCES `mesas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `ventas_ibfk_2` FOREIGN KEY (`id_cliente`) REFERENCES `personas` (`id`);
 COMMIT;
 

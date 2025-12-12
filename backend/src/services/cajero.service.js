@@ -172,14 +172,22 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
     const query = `
 SELECT *
 FROM personas
-WHERE tipo = 'cliente'
-  AND identificacion LIKE CONCAT('%', ?, '%')
+WHERE  identificacion LIKE CONCAT('%', ?, '%')
 LIMIT 20;
-
-
-
     `;    
     const  [rows] = await db.query(query, [datoscliente]);
+    
+    return rows;
+  },
+
+     mesas: async ( id_negocio ) => {
+    
+    const query = `
+    SELECT *
+    FROM mesas
+    WHERE id_negocio = ?
+    `;    
+    const  [rows] = await db.query(query, [id_negocio]);
     
     return rows;
   },

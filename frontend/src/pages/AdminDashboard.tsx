@@ -118,19 +118,21 @@ const AdminDashboard: React.FC = () => {
 
   // Contenido del sidebar
   const sidebarContent = (
-    <Paper
-      elevation={0}
-      sx={{
-        width: 220,
-        bgcolor: "#25313F",
-        color: "#9AA7B6",
-        height: "100%",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        fontFamily: FONT,
-      }}
-    >
+   <Paper
+  elevation={0}
+  sx={{
+    width: collapsed ? 60 : 220,
+    transition: "width 0.3s",
+    bgcolor: "#25313F",
+    color: "#9AA7B6",
+    height: "100%",
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    fontFamily: FONT,
+  }}
+>
+
       {/* HEADER */}
       <Box
         display="flex"
@@ -190,45 +192,51 @@ const AdminDashboard: React.FC = () => {
     const selected = modulo === menu.url;
 
     return (
-      <ListItemButton
-        key={menu.id}
-        selected={selected}
-        onClick={() => {
-          navigate(`/admin/${menu.url}`);
-          if (isSmallScreen) setDrawerOpen(false); // Cierra drawer en móvil al seleccionar
-        }}
-        sx={{
-          mb: 1,
-          borderRadius: 1,
-          px: 2, // siempre suficiente padding en móviles
-          color: selected ? "#FFFFFF" : "#9AA7B6",
-          "& .MuiListItemIcon-root": {
-            color: selected ? "#FFFFFF" : "#9AA7B6",
-            minWidth: 40,
-          },
-          "&.Mui-selected": { bgcolor: "rgba(255,255,255,0.08)" },
-          "&:hover": {
-            bgcolor: "rgba(255,255,255,0.12)",
-            color: "#FFFFFF",
-            "& .MuiListItemIcon-root": { color: "#FFFFFF" },
-          },
-        }}
-      >
-        <ListItemIcon sx={{ justifyContent: "center" }}>
-          {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
-        </ListItemIcon>
+      <Tooltip 
+  title={collapsed ? menu.nombre : ""} 
+  placement="right" 
+  arrow 
+>
+  <ListItemButton
+    key={menu.id}
+    selected={selected}
+    onClick={() => {
+      navigate(`/admin/${menu.url}`);
+      if (isSmallScreen) setDrawerOpen(false);
+    }}
+    sx={{
+      mb: 1,
+      borderRadius: 1,
+      px: 2,
+      color: selected ? "#FFFFFF" : "#9AA7B6",
+      "& .MuiListItemIcon-root": {
+        color: selected ? "#FFFFFF" : "#9AA7B6",
+        minWidth: 40,
+      },
+      "&.Mui-selected": { bgcolor: "rgba(255,255,255,0.08)" },
+      "&:hover": {
+        bgcolor: "rgba(255,255,255,0.12)",
+        color: "#FFFFFF",
+        "& .MuiListItemIcon-root": { color: "#FFFFFF" },
+      },
+    }}
+  >
+    <ListItemIcon sx={{ justifyContent: "center" }}>
+      {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
+    </ListItemIcon>
 
-        {/* Mostrar nombres siempre en móviles (Drawer) */}
-        {(!collapsed || (isSmallScreen && drawerOpen)) && (
-          <ListItemText
-            primary={menu.nombre}
-            sx={{
-              ml: 2,
-              ".MuiTypography-root": { fontFamily: FONT, fontSize: 14 },
-            }}
-          />
-        )}
-      </ListItemButton>
+    {!collapsed && (
+      <ListItemText
+        primary={menu.nombre}
+        sx={{
+          ml: 2,
+          ".MuiTypography-root": { fontFamily: FONT, fontSize: 14 },
+        }}
+      />
+    )}
+  </ListItemButton>
+</Tooltip>
+
     );
   })}
 </List>
@@ -280,7 +288,7 @@ const AdminDashboard: React.FC = () => {
               </IconButton>
             )}
 
-            <Box sx={{ display: "flex", gap: 1 }}>
+            <Box sx={{ display: "flex", gap: 1, ml: "auto", alignItems: "center" }}>
               <Tooltip title="Notificaciones">
                 <IconButton sx={{ color: "#9AA7B6" }}>
                   <NotificationsIcon />

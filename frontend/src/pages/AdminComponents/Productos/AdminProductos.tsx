@@ -194,7 +194,7 @@ const handleSubmit = async () => {
 
 
   return (
-    <Box p={3}>
+    <Box p={0} ml={0}>
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={onBack}
@@ -266,10 +266,11 @@ const handleSubmit = async () => {
           const imgIndex = imgIndices[p.id!] ?? 0;
 
           return (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={p.id}>
+            <Grid item xs={12} sm={6} md={3} lg={3} xl={3} key={p.id}>
               <Card
                 sx={{
-                  height: 400, // altura fija para todas las tarjetas
+                  width:200,
+                  height: 320, // altura fija para todas las tarjetas
                   display: "flex",
                   flexDirection: "column",
                   borderRadius: 3,
@@ -319,6 +320,7 @@ const handleSubmit = async () => {
                     position: "relative",
                     width: "100%",
                     height: 150,
+                    minWidth:10,
                     overflow: "hidden",
                     borderTopLeftRadius: 12,
                     borderTopRightRadius: 12,
@@ -380,7 +382,7 @@ const handleSubmit = async () => {
                       mt: 0.2,
                       p: 0.2,
                       width: "100%",
-                      minWidth: 222,
+                      minWidth: 80,
                       background: "#f5f5f5",
                       borderRadius: 1,
                       maxHeight: 90,

@@ -20,3 +20,6 @@ export const finalizar_venta = (payload: any) =>
 
 export const apibuscar_cliente = (payload: any) => 
   axios.post("/cajero/buscar-cliente", payload);
+
+export const apimesas = (payload: any) => 
+  axios.post("/cajero/mesas", payload);

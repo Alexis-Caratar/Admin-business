@@ -1,14 +1,14 @@
 /* ---------- /src/pages/CajeroDashboard.tsx ---------- */
 import React, { useEffect, useState } from "react";
-import { Avatar, Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse } from "@mui/material";
+import { Avatar, Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import SavingsIcon from "@mui/icons-material/Savings";
-
-import type { ProductoCajero, CategoriaCajero, Caja } from "../../../../types/cajero";
-import { apiListarProductos, apiAbrirCaja, apiArqueoCaja, apiCerrarCaja, estado_caja, finalizar_venta } from "../../../../api/cajero";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import type { ProductoCajero, CategoriaCajero, Caja, Mesa } from "../../../../types/cajero";
+import { apiListarProductos, apiAbrirCaja, apiArqueoCaja, apiCerrarCaja, estado_caja, finalizar_venta, apimesas } from "../../../../api/cajero";
 import Swal from "sweetalert2";
 import { Mesas } from "./components/Mesas";
 import { Carrito } from "./components/Carrito";
@@ -19,6 +19,7 @@ import { ProductosCategoriaModal } from "./components/ProductosCategoria";
 import { Categorias } from "./components/Categorias";
 import { CarritoMobile } from "./components/CarritoMobile";
 import PersonIcon from '@mui/icons-material/Person';
+import { motion } from "framer-motion";
 
 export const CajeroDashboard: React.FC = () => {
   const [categorias, setCategorias] = useState<CategoriaCajero[]>([]);
@@ -36,19 +37,28 @@ export const CajeroDashboard: React.FC = () => {
   const [arqueoInfo, setArqueoInfo] = useState<any | null>(null);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<CategoriaCajero | null>(null);
   const [modalProductosOpen, setModalProductosOpen] = useState(false);
+  const [openCarrito, setOpenCarrito] = useState(false);
 
-  const [mesas] = useState(
-    Array.from({ length: 18 }, (_, i) => ({
-      id: i + 1,
-      numero: i + 1,
-      estado: ["Disponible", "Ocupada", "Reservada"][Math.floor(Math.random() * 3)],
-    }))
-  );
-  const [mesaSeleccionada, setMesaSeleccionada] = useState<any | null>(null);
+const [mesas, setMesas] = useState<Mesa[]>([]);
+const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
 
   const idUsuario = localStorage.getItem("id_usuario");
+  const id_negocio = localStorage.getItem("id_negocio");
 
+useEffect(() => {
+  const cargarMesas = async () => {
+    try {
+      const { data } = await apimesas({ id_negocio: id_negocio });
+      if (data?.ok && Array.isArray(data.result)) {
+        setMesas(data.result);
+      }
+    } catch (err) {
+      console.error("Error cargando mesas:", err);
+    }
+  };
 
+  cargarMesas();
+}, []);
 
   const checkCaja = async () => {
     try {
@@ -74,7 +84,11 @@ export const CajeroDashboard: React.FC = () => {
     checkCaja();
   }, []);
 
-
+useEffect(() => {
+  if (carrito.length > 0) {
+    setOpenCarrito(true);
+  }
+}, [carrito]);
 
   useEffect(() => {
     let mounted = true;
@@ -492,7 +506,7 @@ const removeItem = (id: number) => {
         {/* === Categorías === */}
         <Box
           sx={{
-            width: { xs: "35%", md: "30%" },
+            width: { xs: "35%", sm: "35%", md: "30%"  },
             borderRight: { xs: "none", md: "1px solid #e0e0e0" },
             pr: { xs: 0, md: 1 },
             mb: { xs: 2, md: 0 }, // margen inferior en móvil
@@ -514,7 +528,7 @@ const removeItem = (id: number) => {
         {/* === MESAS === */}
         <Box
           sx={{
-            width: { xs: "100%", sm: "100%", md: "90%" }, // 🔥 MÓVIL 100% - ESCRITORIO 50%
+            width: { xs: "100%", sm: "100%", md: "80%" }, // 🔥 MÓVIL 100% - ESCRITORIO 50%
             px: 1,
             display: "flex",
             flexDirection: "column",
@@ -530,37 +544,79 @@ const removeItem = (id: number) => {
         </Box>
 
 
-        {/* === CARRITO === */}
-        {/* === CARRITO ESCRITORIO === */}
-        <Box
-          sx={{
-            width: "40%",
-            borderLeft: "1px solid #e0e0e0",
-            pl: 1,
-            display: { xs: "none", md: "flex" }, // ⬅️ OCULTAR EN MÓVIL, MOSTRAR EN DESKTOP
-            flexDirection: "column",
-            overflowY: "auto",
-          }}
-        >
-          <Carrito
-            carrito={carrito}
-            onRemove={removeItem}
-            onAdd={sumarCantidad}
-            onSub={restarCantidad}
-            onFinalizar={finalizarVenta}
-          />
-        </Box>
+       {/* === BOTÓN ABRIR CARRITO EN DESKTOP === */}
 
-        {/* === CARRITO MÓVIL (BOTÓN + MODAL) === */}
-        <Box sx={{ display: { xs: "block", md: "none" } }}>
-          <CarritoMobile
-            carrito={carrito}
-            onRemove={removeItem}
-            onAdd={sumarCantidad}
-            onSub={restarCantidad}
-            onFinalizar={finalizarVenta}
-          />
-        </Box>
+({!openCarrito&&
+<Box
+  component={motion.div}
+  initial={{ opacity: 0, y: 50 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.4 }}
+  sx={{
+    position: "fixed",
+    bottom: 24,
+    right: 24,
+     zIndex: 1400,
+    display: { xs: "none", md: "flex" },
+  }}
+>
+  <Fab
+    color="primary"
+    variant="extended"
+    onClick={() => setOpenCarrito(true)}
+    sx={{
+      boxShadow: "0px 4px 20px rgba(0,0,0,0.25)",
+      borderRadius: "24px",
+      fontWeight: "bold",
+      px: 3,
+      py: 1,
+      "&:hover": {
+        boxShadow: "0px 6px 28px rgba(0,0,0,0.35)",
+      },
+    }}
+  >
+    <ShoppingCartIcon sx={{ mr: 1 }} />
+    Ver Carrito ({carrito.length})
+  </Fab>
+</Box>
+})
+
+
+{/* === DRAWER / CARRITO ESCRITORIO === */}
+<Drawer
+  anchor="right"
+  open={openCarrito}
+  onClose={() => setOpenCarrito(false)}
+  sx={{
+    "& .MuiDrawer-paper": {
+      width: 400,
+      p: 2,
+      boxSizing: "border-box",
+    },
+  }}
+>
+  <Carrito
+    carrito={carrito}
+    onRemove={removeItem}
+    onAdd={sumarCantidad}
+    onSub={restarCantidad}
+    onFinalizar={(c, p) => {
+      finalizarVenta(c, p);
+      setOpenCarrito(false);
+    }}
+  />
+</Drawer>
+
+{/* === CARRITO MÓVIL === */}
+<Box sx={{ display: { xs: "block", md: "none" } }}>
+  <CarritoMobile
+    carrito={carrito}
+    onRemove={removeItem}
+    onAdd={sumarCantidad}
+    onSub={restarCantidad}
+    onFinalizar={finalizarVenta}
+  />
+</Box>
 
 
       </Box>
@@ -570,7 +626,12 @@ const removeItem = (id: number) => {
       <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} />
       <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
       <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} totalVentas= {caja.total_ventas} dineroTotal={caja.dinero_recaudado} onCerrar={cerrarCajaReal} />
-      <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada ?? undefined} onAgregar={addCart}
+<ProductosCategoriaModal
+  open={modalProductosOpen}
+  onClose={closeCategoria}
+  categoria={categoriaSeleccionada ?? undefined}
+  categorias={categorias}   // 🔥 NUEVO
+  onAgregar={addCart}
       />
     </Box>
 

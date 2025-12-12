@@ -10,6 +10,7 @@ router.post("/cerrar-caja", CajeroController.cerrarCaja);
 router.post("/arqueo", CajeroController.arqueo);
 router.post("/finalizar-venta", CajeroController.finalizarVenta);
 router.post("/buscar-cliente", CajeroController.buscarCliente);
+router.post("/mesas", CajeroController.mesas);
 
 
 

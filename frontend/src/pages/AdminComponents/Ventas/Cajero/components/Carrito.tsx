@@ -27,10 +27,10 @@ import "react-swipeable-list/dist/styles.css";
 import PersonIcon from "@mui/icons-material/Person";
 import BadgeIcon from "@mui/icons-material/Badge";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import {  apibuscar_cliente} from "../../../../../api/cajero";
 
+import { apibuscar_cliente } from "../../../../../api/cajero";
 
-// 👉 Importas tu modal EXACTA
+// Modal para crear cliente
 import { CrearClienteModal } from "./CrearClienteModal";
 
 type Cliente = {
@@ -46,12 +46,14 @@ type Props = {
   onRemove: (id: number) => void;
   onAdd: (id: number) => void;
   onSub: (id: number) => void;
-  onFinalizar: (idCliente: number | null,
+  onFinalizar: (
+    idCliente: number | null,
     pago: {
-    metodo_pago: string;
-    monto_recibido: number;
-    cambio: number;
-  }) => void;
+      metodo_pago: string;
+      monto_recibido: number;
+      cambio: number;
+    }
+  ) => void;
 };
 
 export const Carrito: React.FC<Props> = ({
@@ -60,24 +62,24 @@ export const Carrito: React.FC<Props> = ({
   onAdd,
   onSub,
   onFinalizar,
-
 }) => {
   const [clienteBuscado, setClienteBuscado] = useState("");
   const [resultados, setResultados] = useState<Cliente[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] =
     useState<Cliente | null>(null);
+
   const [openCrearModal, setOpenCrearModal] = useState(false);
 
-const [metodoPago, setMetodoPago] = useState("EFECTIVO");
+  const [metodoPago, setMetodoPago] = useState("EFECTIVO");
   const [montoRecibido, setMontoRecibido] = useState<number>(0);
 
-  // Total carrito
   const total = carrito.reduce(
     (acc, v) => acc + v.precio_venta * v.cantidad,
     0
   );
 
   const cambio = montoRecibido - total;
+
   const handleBuscar = async (term: string) => {
     setClienteBuscado(term);
 
@@ -86,16 +88,11 @@ const [metodoPago, setMetodoPago] = useState("EFECTIVO");
       return;
     }
 
-    const res = await apibuscar_cliente( { id_cliente: term });
-    console.log("res",res);
-    
+    const res = await apibuscar_cliente({ id_cliente: term });
     setResultados(res.data.result);
-    
   };
 
   const seleccionarCliente = (cli: Cliente) => {
-    console.log("setClienteSeleccionado",setClienteSeleccionado);
-    
     setClienteSeleccionado(cli);
     setResultados([]);
     setClienteBuscado("");
@@ -142,74 +139,75 @@ const [metodoPago, setMetodoPago] = useState("EFECTIVO");
         {resultados.length > 0 && (
           <Paper sx={{ mt: 1, maxHeight: 150, overflowY: "auto" }}>
             {resultados.map((cli) => (
-             <Box
-  key={cli.id}
-  sx={{
-    p: 1,
-    cursor: "pointer",
-    borderRadius: 1,
-    display: "flex",
-    alignItems: "center",
-    gap: 1.2,
-    "&:hover": {
-      backgroundColor: "#f0f4ff",
-    },
-  }}
-  onClick={() => seleccionarCliente(cli)}
->
-  <PersonIcon sx={{ fontSize: 26, color: "primary.main" }} />
+              <Box
+                key={cli.id}
+                sx={{
+                  p: 1,
+                  cursor: "pointer",
+                  borderRadius: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.2,
+                  "&:hover": { backgroundColor: "#f0f4ff" },
+                }}
+                onClick={() => seleccionarCliente(cli)}
+              >
+                <PersonIcon sx={{ fontSize: 26, color: "primary.main" }} />
 
-  <Box sx={{ flexGrow: 1 }}>
-    <Typography fontWeight={600} fontSize={11}>
-      {cli.nombres} {cli.apellidos}
-    </Typography>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography fontWeight={600} fontSize={11}>
+                    {cli.nombres} {cli.apellidos}
+                  </Typography>
 
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-      <BadgeIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-      <Typography variant="caption" color="text.secondary">
-        {cli.identificacion}
-      </Typography>
-    </Box>
-  </Box>
-</Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                    }}
+                  >
+                    <BadgeIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+                    <Typography variant="caption" color="text.secondary">
+                      {cli.identificacion}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
             ))}
           </Paper>
         )}
 
         {/* CLIENTE SELECCIONADO */}
         {clienteSeleccionado && (
-         
-<Box
-  mt={2}
-  p={1.5}
-  sx={{
-    background: "#e8f5e9",
-    borderRadius: 2,
-    display: "flex",
-    alignItems: "center",
-    gap: 1.5,
-    border: "1px solid #c8e6c9",
-  }}
->
-  {/* Icono Persona */}
-  <PersonIcon sx={{ fontSize: 30, color: "primary.main" }} />
+          <Box
+            mt={2}
+            p={1.5}
+            sx={{
+              background: "#e8f5e9",
+              borderRadius: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              border: "1px solid #c8e6c9",
+            }}
+          >
+            <PersonIcon sx={{ fontSize: 30, color: "primary.main" }} />
 
-  <Box sx={{ flexGrow: 1 }}>
-    <Typography fontWeight={600} fontSize={12}>
-      {clienteSeleccionado.nombres} {clienteSeleccionado.apellidos}
-    </Typography>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography fontWeight={600} fontSize={12}>
+                {clienteSeleccionado.nombres} {clienteSeleccionado.apellidos}
+              </Typography>
 
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-      <BadgeIcon sx={{ fontSize: 15, color: "text.secondary" }} />
-      <Typography variant="body2" color="text.secondary">
-        {clienteSeleccionado.identificacion}
-      </Typography>
-    </Box>
-  </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <BadgeIcon sx={{ fontSize: 15, color: "text.secondary" }} />
+                <Typography variant="body2" color="text.secondary">
+                  {clienteSeleccionado.identificacion}
+                </Typography>
+              </Box>
+            </Box>
 
-  {/* Check verde */}
-  <CheckCircleIcon sx={{ fontSize: 30, color: "#2ecc71" }} />
-</Box>
+            <CheckCircleIcon sx={{ fontSize: 30, color: "#2ecc71" }} />
+          </Box>
         )}
 
         <Button
@@ -222,12 +220,11 @@ const [metodoPago, setMetodoPago] = useState("EFECTIVO");
         </Button>
       </Card>
 
-      {/* MODAL */}
+      {/* MODAL CREAR CLIENTE */}
       <CrearClienteModal
         open={openCrearModal}
         onClose={() => setOpenCrearModal(false)}
         onCreated={(nuevo) => {
-          // Simular ID — tu API debe devolver el ID real
           const clienteFinal: Cliente = {
             ...nuevo,
             id: Date.now(),
@@ -245,12 +242,7 @@ const [metodoPago, setMetodoPago] = useState("EFECTIVO");
 
       <Card sx={{ p: 1, borderRadius: 2, boxShadow: 3 }}>
         {carrito.length === 0 ? (
-          <Typography
-            color="text.secondary"
-            px={1}
-            py={4}
-            align="center"
-          >
+          <Typography color="text.secondary" px={1} py={4} align="center">
             No hay productos.
           </Typography>
         ) : (
@@ -301,10 +293,7 @@ const [metodoPago, setMetodoPago] = useState("EFECTIVO");
                               -
                             </Button>
 
-                            <Typography
-                              fontSize={14}
-                              fontWeight={600}
-                            >
+                            <Typography fontSize={14} fontWeight={600}>
                               {item.cantidad}
                             </Typography>
 
@@ -349,16 +338,12 @@ const [metodoPago, setMetodoPago] = useState("EFECTIVO");
                 Total
               </Typography>
 
-              <Typography
-                fontWeight="bold"
-                color="success.main"
-                fontSize={16}
-              >
+              <Typography fontWeight="bold" color="success.main" fontSize={16}>
                 ${total.toLocaleString()}
               </Typography>
             </Stack>
 
-          {/* MÉTODO DE PAGO */}
+            {/* MÉTODO DE PAGO */}
             <TextField
               select
               fullWidth
@@ -369,9 +354,9 @@ const [metodoPago, setMetodoPago] = useState("EFECTIVO");
               onChange={(e) => setMetodoPago(e.target.value)}
             >
               <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
-                               <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
-                               <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-                              <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
+              <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
+              <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
+              <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
             </TextField>
 
             {/* MONTO RECIBIDO */}
@@ -398,35 +383,30 @@ const [metodoPago, setMetodoPago] = useState("EFECTIVO");
               </Typography>
             )}
 
-            {/* BOTÓN FINALIZAR */}
-        <Button
-  fullWidth
-  variant="contained"
-  color="success"
-  sx={{ mt: 2 }}
-  startIcon={<AddShoppingCartIcon />}
-  disabled={metodoPago === "EFECTIVO" && cambio < 0}
-  onClick={() => {
-    onFinalizar(
-      clienteSeleccionado ? clienteSeleccionado.id : null,
-      {
-        metodo_pago: metodoPago,
-        monto_recibido: montoRecibido,
-        cambio: Math.max(cambio, 0),
-      }
-    );
+            {/* FINALIZAR */}
+            <Button
+              fullWidth
+              variant="contained"
+              color="success"
+              sx={{ mt: 2 }}
+              startIcon={<AddShoppingCartIcon />}
+              disabled={metodoPago === "EFECTIVO" && cambio < 0}
+              onClick={() => {
+                onFinalizar(clienteSeleccionado?.id ?? null, {
+                  metodo_pago: metodoPago,
+                  monto_recibido: montoRecibido,
+                  cambio: Math.max(cambio, 0),
+                });
 
-    setClienteSeleccionado(null);
-    setClienteBuscado("");
-    setResultados([]);
-    setMetodoPago("EFECTIVO");
-    setMontoRecibido(0);
-  }}
->
-  Finalizar Venta
-</Button>
-
-
+                setClienteSeleccionado(null);
+                setClienteBuscado("");
+                setResultados([]);
+                setMetodoPago("EFECTIVO");
+                setMontoRecibido(0);
+              }}
+            >
+              Finalizar Venta
+            </Button>
           </>
         )}
       </Card>
