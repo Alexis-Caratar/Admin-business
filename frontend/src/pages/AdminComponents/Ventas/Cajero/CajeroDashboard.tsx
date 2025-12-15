@@ -1,6 +1,6 @@
 /* ---------- /src/pages/CajeroDashboard.tsx ---------- */
 import React, { useEffect, useState } from "react";
-import { Avatar, Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab } from "@mui/material";
+import { Avatar, Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab, useTheme, useMediaQuery, Badge } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
@@ -20,10 +20,13 @@ import { Categorias } from "./components/Categorias";
 import { CarritoMobile } from "./components/CarritoMobile";
 import PersonIcon from '@mui/icons-material/Person';
 import { motion } from "framer-motion";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import PaymentsIcon from "@mui/icons-material/Payments";
 
 export const CajeroDashboard: React.FC = () => {
   const [categorias, setCategorias] = useState<CategoriaCajero[]>([]);
-  const [caja, setCaja] = useState<Caja[]>([]);
+  const [caja, setCaja] = useState<Caja | null>(null);
+
   const [loadingCategorias, setLoadingCategorias] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [cajaAbierta, setCajaAbierta] = useState(false);
@@ -39,31 +42,39 @@ export const CajeroDashboard: React.FC = () => {
   const [modalProductosOpen, setModalProductosOpen] = useState(false);
   const [openCarrito, setOpenCarrito] = useState(false);
 
-const [mesas, setMesas] = useState<Mesa[]>([]);
-const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
+
+  const [mesas, setMesas] = useState<Mesa[]>([]);
+  const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const idUsuario = localStorage.getItem("id_usuario");
   const id_negocio = localStorage.getItem("id_negocio");
 
-useEffect(() => {
-  const cargarMesas = async () => {
-    try {
-      const { data } = await apimesas({ id_negocio: id_negocio });
-      if (data?.ok && Array.isArray(data.result)) {
-        setMesas(data.result);
-      }
-    } catch (err) {
-      console.error("Error cargando mesas:", err);
-    }
+  const abrirCarrito = () => {
+    setOpenCarrito(true);
   };
 
+ const cargarMesas = async () => {
+  try {
+    const { data } = await apimesas({ id_negocio });
+    if (data?.ok && Array.isArray(data.result)) {
+      setMesas(data.result);
+    }
+  } catch (err) {
+    console.error("Error cargando mesas:", err);
+  }
+};
+
+useEffect(() => {
   cargarMesas();
 }, []);
+
 
   const checkCaja = async () => {
     try {
       const idUsuario = localStorage.getItem("id_usuario");
-      const { data } = await estado_caja({ id_usuario: idUsuario });
+      const { data } = await estado_caja({ id_usuario: idUsuario });      
 
       if (data?.ok && data.estado.length > 0) {
         setCajaAbierta(true);
@@ -80,21 +91,16 @@ useEffect(() => {
   };
 
 
-   useEffect(() => {
+  useEffect(() => {
     checkCaja();
   }, []);
 
-useEffect(() => {
-  if (carrito.length > 0) {
-    setOpenCarrito(true);
-  }
-}, [carrito]);
 
   useEffect(() => {
     let mounted = true;
     async function load() {
       try {
-        setLoadingCategorias(true);
+        setLoadingCategorias(true); setOpenCarrito
         const res = await apiListarProductos();
         let data: any[] = [];
         if (res && res.data) {
@@ -115,12 +121,12 @@ useEffect(() => {
     };
   }, []);
 
-//  const totalVentas = ventas.length;
- // const dineroTotal = ventas.reduce((acc, v) => acc + Number(v.total ?? 0), 0);
+  //  const totalVentas = ventas.length;
+  // const dineroTotal = ventas.reduce((acc, v) => acc + Number(v.total ?? 0), 0);
 
   const getPrecio = (p: Partial<ProductoCajero>) => Number(p.precio_venta ?? 0);
 
-  
+
   const addCart = (p: ProductoCajero) => {
     const precio = getPrecio(p);
     setCarrito((prev) => {
@@ -140,44 +146,44 @@ useEffect(() => {
   };
 
 
-const sumarCantidad = (id: number) => {
-  setCarrito((prev) =>
-    prev.map((item) =>
-      item.id === id
-        ? { ...item, cantidad: item.cantidad + 1 }
-        : item
-    )
-  );
-};
-
-const restarCantidad = (id: number) => {
-  setCarrito((prev) =>
-    prev
-      .map((item) =>
+  const sumarCantidad = (id: number) => {
+    setCarrito((prev) =>
+      prev.map((item) =>
         item.id === id
-          ? { ...item, cantidad: item.cantidad - 1 }
+          ? { ...item, cantidad: item.cantidad + 1 }
           : item
       )
-      .filter((item) => item.cantidad > 0)
-  );
-};
+    );
+  };
 
-const removeItem = (id: number) => {
-  setCarrito((prev) =>
-    prev.filter((item) => item.id !== id)
-  );
-};
+  const restarCantidad = (id: number) => {
+    setCarrito((prev) =>
+      prev
+        .map((item) =>
+          item.id === id
+            ? { ...item, cantidad: item.cantidad - 1 }
+            : item
+        )
+        .filter((item) => item.cantidad > 0)
+    );
+  };
+
+  const removeItem = (id: number) => {
+    setCarrito((prev) =>
+      prev.filter((item) => item.id !== id)
+    );
+  };
 
 
   //Finalizar venta
-  const finalizarVenta = async (cliente:any,datos_adicionales:any) => {
-    console.log("cliente",cliente);
-        console.log("datos_adicionales",datos_adicionales);
+  const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
+    console.log("cliente", cliente);
+    console.log("datos_adicionales", datos_adicionales);
 
-    
+
     if (carrito.length === 0) return;
-    console.log("carrito",carrito);
-    
+    console.log("carrito", carrito);
+
 
     const subtotal = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
     const descuento = 0; // Si tienes lógica de descuento
@@ -186,8 +192,9 @@ const removeItem = (id: number) => {
     const total = subtotal - descuento + impuesto;
 
     const payload = {
-      id_cliente: cliente ? cliente : 18, 
+      id_cliente: cliente ? cliente : 18,
       id_caja: idCaja,
+      id_mesa: mesaSeleccionada?.id,  
       fecha: new Date().toISOString(),
       subtotal,
       descuento,
@@ -198,10 +205,10 @@ const removeItem = (id: number) => {
       nota: "",
       //para guardar en la tabla pagos
       metodo_pago: datos_adicionales.metodo_pago,
-      monto_pagado:total,
+      monto_pagado: total,
       monto_recibido: datos_adicionales.monto_recibido,
       cambio: datos_adicionales.cambio,
-    
+
       productos: carrito.map((p) => ({
         id_producto: p.id,
         cantidad: p.cantidad,
@@ -218,16 +225,18 @@ const removeItem = (id: number) => {
       if (data.ok) {
         setVentas((prev) => [...prev, { ...payload }]);
         setCarrito([]);
+        setMesaSeleccionada(null); 
         checkCaja();
+        cargarMesas();
 
-      Swal.fire({
-        icon: "success",
-        title: "¡Venta Registrada!",
-        text: "La operación se realizó correctamente.",
-        showConfirmButton: true,
-        confirmButtonColor: "#4CAF50",
-      });    
-  }
+        Swal.fire({
+          icon: "success",
+          title: "¡Venta Registrada!",
+          text: "La operación se realizó correctamente.",
+          showConfirmButton: true,
+          confirmButtonColor: "#4CAF50",
+        });
+      }
     } catch (err) {
       console.error("Error finalizando venta:", err);
     }
@@ -285,6 +294,7 @@ const removeItem = (id: number) => {
         setMontoApertura("");
         setIdCaja(null); // limpiamos el ID
         setModalCierre(false);
+        checkCaja();
       }
     } catch (err) {
       console.error("Error cerrarCajaReal:", err);
@@ -411,93 +421,150 @@ const removeItem = (id: number) => {
           </Card>
         </Grid>
 
-        {/* MÉTRICAS DE VENTAS */}
-        <Grid item xs={12} md={8}>
-          <Grid
-            container
-            spacing={1}
-            sx={{
-              display: "flex",
-              alignItems: "stretch"
-            }}
-          >
 
-            {/* CARD 1 */}
-            <Grid item xs={6}>
+        {/* ================= MÉTRICAS ================= */}
+        <Grid item xs={12} md={8}>
+          <Grid container spacing={2}>
+
+            {/* ===== MONTO INICIAL ===== */}
+            <Grid item xs={12} sm={4}>
               <Card
                 sx={{
-                  borderRadius: 2,
-                  boxShadow: 3,
-                  height: { xs: 90, sm: 110, md: "auto" },   // 🔥 Fuerza tamaño pequeño en celulares
-                  p: 1,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center"
+                  height: "100%",
+                  borderRadius: 3,
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
+                  transition: "all .25s",
+                  "&:hover": {
+                    transform: "translateY(-6px)",
+                    boxShadow: "0 12px 28px rgba(0,0,0,0.15)",
+                  },
                 }}
               >
-                <CardContent sx={{ p: 0 }}>
-                  <Typography
-                    fontWeight="bold"
+                <CardContent sx={{ textAlign: "center" }}>
+                  <Avatar
                     sx={{
-                      fontSize: { xs: "11px", sm: "13px", md: "16px" }
+                      bgcolor: "primary.light",
+                      color: "black",
+                      width: 48,
+                      height: 48,
+                      mx: "auto",
+                      mb: 1,
                     }}
                   >
-                    Cantidad de Ventas
-                  </Typography>
+                    <MonetizationOnIcon />
+                  </Avatar>
 
                   <Typography
-                    sx={{
-                      fontSize: { xs: "18px", sm: "24px", md: "30px" },
-                      fontWeight: "bold",
-                      color: "primary.main"
-                    }}
+                    variant="caption"
+                    sx={{ fontWeight: 700, color: "text.secondary" }}
                   >
-                    {caja.total_ventas}
+                    Monto inicial
                   </Typography>
+
+                  {caja && (
+                    <Typography>
+                      {new Intl.NumberFormat("es-CO", {
+                        style: "currency",
+                        currency: "COP",
+                        minimumFractionDigits: 0,
+                      }).format(caja.monto_inicial)}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* CARD 2 */}
-            <Grid item xs={6}>
+            {/* ===== TOTAL VENTAS ===== */}
+            <Grid item xs={12} sm={4}>
               <Card
                 sx={{
-                  borderRadius: 2,
-                  boxShadow: 3,
-                  height: { xs: 90, sm: 110, md: "auto" },   // 🔥 Igual altura, tamaño reducido
-                  p: 1,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  textAlign: "center"
+                  height: "100%",
+                  borderRadius: 3,
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
+                  transition: "all .25s",
+                  "&:hover": {
+                    transform: "translateY(-6px)",
+                    boxShadow: "0 12px 28px rgba(0,0,0,0.15)",
+                  },
                 }}
               >
-                <CardContent sx={{ p: 0 }}>
-                  <Typography
-                    fontWeight="bold"
+                <CardContent sx={{ textAlign: "center" }}>
+                  <Avatar
                     sx={{
-                      fontSize: { xs: "11px", sm: "13px", md: "16px" }
+                      bgcolor: "purple",
+                      color: "black",
+                      width: 48,
+                      height: 48,
+                      mx: "auto",
+                      mb: 1,
                     }}
                   >
-                    Dinero Recaudado
-                  </Typography>
+                    <ShoppingCartIcon />
+                  </Avatar>
 
                   <Typography
+                    variant="caption"
+                    sx={{ fontWeight: 700, color: "text.secondary" }}
+                  >
+                    Ventas realizadas
+                  </Typography>
+
+                  {caja && (
+                    <Typography>
+                      {caja.total_ventas}
+                    </Typography>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* ===== DINERO RECAUDADO ===== */}
+            <Grid item xs={12} sm={4}>
+              <Card
+                sx={{
+                  height: "100%",
+                  borderRadius: 3,
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
+                  transition: "all .25s",
+                  "&:hover": {
+                    transform: "translateY(-6px)",
+                    boxShadow: "0 12px 28px rgba(0,0,0,0.15)",
+                  },
+                }}
+              >
+                <CardContent sx={{ textAlign: "center" }}>
+                  <Avatar
                     sx={{
-                      fontSize: { xs: "18px", sm: "24px", md: "30px" },
-                      fontWeight: "bold",
-                      color: "success.main"
+                      bgcolor: "success.light",
+                      color: "white",
+                      width: 48,
+                      height: 48,
+                      mx: "auto",
+                      mb: 1,
                     }}
                   >
-                    {caja.dinero_recaudado}
+                    <PaymentsIcon />
+                  </Avatar>
+
+                  <Typography
+                    variant="caption"
+                    sx={{ fontWeight: 700, color: "text.secondary" }}
+                  >
+                    Dinero recaudado
                   </Typography>
+
+                  {caja && (
+                    <Typography>
+                    ${caja.dinero_recaudado}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
 
           </Grid>
         </Grid>
+
       </Grid>
 
 
@@ -506,7 +573,7 @@ const removeItem = (id: number) => {
         {/* === Categorías === */}
         <Box
           sx={{
-            width: { xs: "35%", sm: "35%", md: "30%"  },
+            width: { xs: "35%", sm: "35%", md: "30%" },
             borderRight: { xs: "none", md: "1px solid #e0e0e0" },
             pr: { xs: 0, md: 1 },
             mb: { xs: 2, md: 0 }, // margen inferior en móvil
@@ -539,84 +606,102 @@ const removeItem = (id: number) => {
 
           {/* MESAS */}
           <Box sx={{ flex: 1 }}>
-            <Mesas mesas={mesas} onSelect={(m) => setMesaSeleccionada(m)} />
+          <Mesas
+          mesas={mesas}
+          mesaSeleccionada={mesaSeleccionada}
+          onSelect={(m) => setMesaSeleccionada(m)}
+        />
+
           </Box>
         </Box>
 
 
-       {/* === BOTÓN ABRIR CARRITO EN DESKTOP === */}
+        {/* === BOTÓN ABRIR CARRITO EN DESKTOP === */}
 
-({!openCarrito&&
-<Box
-  component={motion.div}
-  initial={{ opacity: 0, y: 50 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.4 }}
-  sx={{
-    position: "fixed",
-    bottom: 24,
-    right: 24,
-     zIndex: 1400,
-    display: { xs: "none", md: "flex" },
-  }}
->
-  <Fab
-    color="primary"
-    variant="extended"
-    onClick={() => setOpenCarrito(true)}
-    sx={{
-      boxShadow: "0px 4px 20px rgba(0,0,0,0.25)",
-      borderRadius: "24px",
-      fontWeight: "bold",
-      px: 3,
-      py: 1,
-      "&:hover": {
-        boxShadow: "0px 6px 28px rgba(0,0,0,0.35)",
-      },
-    }}
-  >
-    <ShoppingCartIcon sx={{ mr: 1 }} />
-    Ver Carrito ({carrito.length})
-  </Fab>
-</Box>
-})
+        {!openCarrito && !isMobile && (
+          <Box
+            component={motion.div}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            sx={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+              zIndex: 1400,
+            }}
+          >
+            <Fab
+              color="primary"
+              variant="extended"
+              onClick={abrirCarrito}
+              sx={{ position: "relative" }}
+            >
+              <Badge
+                badgeContent={carrito.length}
+                color="error"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    fontWeight: "bold",
+                  },
+                }}
+              >
+                <ShoppingCartIcon sx={{ mr: 1 }} />
+              </Badge>
+              Ver Carrito
+            </Fab>
+
+          </Box>
+        )}
 
 
-{/* === DRAWER / CARRITO ESCRITORIO === */}
-<Drawer
-  anchor="right"
-  open={openCarrito}
-  onClose={() => setOpenCarrito(false)}
-  sx={{
-    "& .MuiDrawer-paper": {
-      width: 400,
-      p: 2,
-      boxSizing: "border-box",
-    },
-  }}
->
-  <Carrito
-    carrito={carrito}
-    onRemove={removeItem}
-    onAdd={sumarCantidad}
-    onSub={restarCantidad}
-    onFinalizar={(c, p) => {
-      finalizarVenta(c, p);
-      setOpenCarrito(false);
-    }}
-  />
-</Drawer>
 
-{/* === CARRITO MÓVIL === */}
-<Box sx={{ display: { xs: "block", md: "none" } }}>
-  <CarritoMobile
-    carrito={carrito}
-    onRemove={removeItem}
-    onAdd={sumarCantidad}
-    onSub={restarCantidad}
-    onFinalizar={finalizarVenta}
-  />
-</Box>
+        {/* === DRAWER / CARRITO ESCRITORIO === */}
+        <Drawer
+          anchor="right"
+          open={openCarrito && !isMobile}
+          onClose={() => setOpenCarrito(false)}
+          sx={{
+            "& .MuiDrawer-paper": {
+              width: 400,
+              p: 2,
+              boxSizing: "border-box",
+            },
+          }}
+        >
+          <Carrito
+            carrito={carrito}
+            onRemove={removeItem}
+            onAdd={sumarCantidad}
+            onSub={restarCantidad}
+            onFinalizar={(c, p) => {
+              finalizarVenta(c, p);
+              setOpenCarrito(false);
+            }}
+             mesaSeleccionada={mesaSeleccionada}
+
+          />
+        </Drawer>
+
+
+        {/* === CARRITO MÓVIL === */}
+        <Box sx={{ display: { xs: "block", md: "none" } }}>
+          {isMobile && (
+            <CarritoMobile
+              open={openCarrito}
+              onClose={() => setOpenCarrito(false)}
+              carrito={carrito}
+              onRemove={removeItem}
+              onAdd={sumarCantidad}
+              onSub={restarCantidad}
+              onFinalizar={(c, p) => {
+                finalizarVenta(c, p);
+                setOpenCarrito(false);
+              }}
+            />
+          )}
+
+        </Box>
 
 
       </Box>
@@ -625,14 +710,8 @@ const removeItem = (id: number) => {
       {/* === MODALES === */}
       <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} />
       <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
-      <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} totalVentas= {caja.total_ventas} dineroTotal={caja.dinero_recaudado} onCerrar={cerrarCajaReal} />
-<ProductosCategoriaModal
-  open={modalProductosOpen}
-  onClose={closeCategoria}
-  categoria={categoriaSeleccionada ?? undefined}
-  categorias={categorias}   // 🔥 NUEVO
-  onAgregar={addCart}
-      />
+      <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} totalVentas={caja?.total_ventas ?? 0} dineroTotal={caja?.dinero_recaudado ?? 0} onCerrar={cerrarCajaReal} />
+      <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada ?? undefined} categorias={categorias} onAgregar={addCart} />
     </Box>
 
 

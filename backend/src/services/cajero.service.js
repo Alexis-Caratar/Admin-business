@@ -6,17 +6,18 @@ const CajeroService = {
     try {
 
         const estado_caja = `
-     SELECT 
+        SELECT 
           c.*,
           COUNT(v.id) AS total_ventas,
-          IFNULL(SUM(v.total), 0) AS dinero_recaudado
+          FORMAT(IFNULL(SUM(v.total), 0), 0, 'es_CO') AS dinero_recaudado
       FROM caja c
       LEFT JOIN ventas v ON v.id_caja = c.id
       WHERE c.estado = 'ABIERTA'
         AND c.id_usuario = ?
       GROUP BY c.id
       ORDER BY c.fecha_apertura DESC
-      LIMIT 1;`
+      LIMIT 1;
+`
 
     const [rows ] = await db.query(estado_caja, [id_usuario]);
     return rows;
@@ -126,14 +127,22 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
     try {
       await conn.beginTransaction();
 
+      console.log("payload",payload);
+      
       const { id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado,
-          nota, productos, metodo_pago,monto_pagado,monto_recibido,cambio} = payload;
+          nota, productos, metodo_pago,monto_pagado,monto_recibido,cambio,id_mesa} = payload;
+
 
       // 1️⃣ Insertar en tabla ventas
       const [ventaResult] = await conn.query(
-        `INSERT INTO ventas (id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota)
-         VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, 'EFECTIVO', nota]
+        `INSERT INTO ventas (id_cliente, id_caja,id_mesa, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota)
+         VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
+        [id_cliente, id_caja,id_mesa, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, 'EFECTIVO', nota]
+      );
+
+        const [mesas] = await conn.query(
+        `update mesas set estado='Ocupada' where id=?`,
+        [ id_mesa]
       );
 
       const id_venta = ventaResult.insertId;

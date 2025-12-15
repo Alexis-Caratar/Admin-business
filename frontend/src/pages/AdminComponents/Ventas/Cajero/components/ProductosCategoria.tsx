@@ -17,9 +17,15 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  Divider,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
+
 import CloseIcon from "@mui/icons-material/Close";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import CategoryIcon from "@mui/icons-material/Category";
+import SearchIcon from "@mui/icons-material/Search";
 
 import type { CategoriaCajero, ProductoCajero } from "../../../../../types/cajero";
 
@@ -38,190 +44,269 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
   categorias,
   onAgregar,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   const [search, setSearch] = useState("");
-  const [categoriaActiva, setCategoriaActiva] = useState<CategoriaCajero | null>(categoria ?? null);
+  const [categoriaActiva, setCategoriaActiva] =
+    useState<CategoriaCajero | null>(null);
   const [productos, setProductos] = useState<ProductoCajero[]>([]);
 
-  const filteredPlatos =
-    productos.filter((prod) =>
-      (prod.nombre ?? "").toLowerCase().includes(search.toLowerCase())
-    ) ?? [];
-
-  // ⭐ Ajuste para evitar unión de productos entre categorías
+  /* ========= INIT ========= */
   useEffect(() => {
-    // Limpiar los productos cuando cambie la categoría activa
     if (categoria) {
       setCategoriaActiva(categoria);
-      setSearch(""); // Limpiar búsqueda cuando cambie la categoría
-      setProductos(categoria.platos); // Cargar productos de la nueva categoría
+      setProductos(categoria.platos);
     } else if (categorias.length > 0) {
-      setCategoriaActiva(categorias[0]); // Seleccionar la primera categoría
-      setProductos(categorias[0].platos); // Cargar productos de la primera categoría
+      setCategoriaActiva(categorias[0]);
+      setProductos(categorias[0].platos);
     }
+    setSearch("");
   }, [open, categoria, categorias]);
+
+  const filtered = productos.filter((p) =>
+    p.nombre?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleAgregar = (prod: ProductoCajero) => {
+    onAgregar({
+      ...prod,
+      precio_venta: Number(prod.precio_venta ?? 0),
+    });
+  };
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
+      fullScreen={isMobile}
       maxWidth="lg"
       fullWidth
-      PaperProps={{ sx: { borderRadius: 3, height: "90vh" } }}
+      PaperProps={{
+        sx: {
+          borderRadius: isMobile ? 0 : 4,
+          height: isMobile ? "100%" : "90vh",
+          zIndex: 1200,
+        },
+      }} sx={{
+        zIndex: 1200,
+      }}
     >
-      {/* Header */}
-      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography fontWeight={700}>Seleccionar Productos</Typography>
+      {/* ================= HEADER ================= */}
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          px: 3,
+          py: 2,
+          borderBottom: "1px solid #eee",
+        }}
+      >
+        <Box display="flex" alignItems="center" gap={1}>
+          <AddShoppingCartIcon color="primary" />
+          <Typography fontWeight={800}>Seleccionar Productos</Typography>
+        </Box>
+
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ height: "100%", display: "flex", gap: 2 }}>
-        {/* =============== CATEGORÍAS =============== */}
+      {/* ================= BODY ================= */}
+      <DialogContent
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          p: 0,
+        }}
+      >
+        {/* ================= CATEGORÍAS ================= */}
         <Box
           sx={{
-            width: { xs: "25%", md: "20%" },
-            borderRight: "1px solid #e0e0e0",
-            overflowY: "auto",
-            pr: 1,
+            width: isMobile ? "100%" : 260,
+            borderRight: isMobile ? "none" : "1px solid #eee",
+            borderBottom: isMobile ? "1px solid #eee" : "none",
+            overflowX: isMobile ? "auto" : "hidden",
+            p: 1,
           }}
         >
-          <Typography fontWeight={600} mb={1}>
+          <Typography
+            fontWeight={700}
+            display="flex"
+            alignItems="center"
+            gap={1}
+            mb={1}
+          >
+            <CategoryIcon fontSize="small" />
             Categorías
           </Typography>
 
-          <List dense>
-            {categorias.map((cat) => (
-              <ListItemButton
-                key={cat.id}
-                selected={categoriaActiva?.id === cat.id}
-                onClick={() => {
-                  // 💥 Limpia la categoría activa para evitar mezcla
-                  setCategoriaActiva(null);
+          <List
+            dense
+            sx={{
+              display: isMobile ? "flex" : "block",
+              gap: 1,
+            }}
+          >
+            {categorias.map((cat) => {
+              const active = categoriaActiva?.id === cat.id;
 
-                  // Limpia el buscador
-                  setSearch("");
-
-                  // Activa la nueva categoría sin mezclar
-                  setTimeout(() => {
+              return (
+                <ListItemButton
+                  key={cat.id}
+                  onClick={() => {
                     setCategoriaActiva(cat);
-                    setProductos(cat.platos); // Cargar los productos de la nueva categoría
-                  }, 0);
-                }}
-                sx={{
-                  borderRadius: 2,
-                  mb: 0.5,
-                }}
-              >
-                <ListItemText
-                  primary={cat.categoria}
-                  primaryTypographyProps={{
-                    fontWeight: categoriaActiva?.id === cat.id ? 700 : 500,
+                    setProductos(cat.platos);
+                    setSearch("");
                   }}
-                />
-              </ListItemButton>
-            ))}
+                  selected={active}
+                  sx={{
+                    borderRadius: 2,
+                    minWidth: isMobile ? 160 : "auto",
+                    mb: isMobile ? 0 : 0.5,
+                    "&.Mui-selected": {
+                      backgroundColor: "primary.main",
+                      color: "white",
+                    },
+                  }}
+                >
+                  <Avatar
+                    src={cat.imagen || undefined}
+                    alt={cat.categoria}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      mr: 1,
+                      bgcolor: active ? "white" : "primary.main",
+                      color: active ? "primary.main" : "white",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {/* Fallback si no hay imagen */}
+                    {!cat.imagen && cat.categoria?.[0]}
+                  </Avatar>
+
+
+                  <ListItemText
+                    primary={cat.categoria}
+                    secondary={`${cat.platos.length} platos`}
+                    secondaryTypographyProps={{
+                      fontSize: 11,
+                      color: active ? "white" : "text.secondary",
+                    }}
+                  />
+                </ListItemButton>
+              );
+            })}
           </List>
         </Box>
 
-        {/* ================== PRODUCTOS ================= */}
-        <Box sx={{ flex: 1, overflowY: "auto" }}>
-          {/* Nombre categoría */}
-          <Typography fontWeight={700} fontSize={18} mb={1}>
-            {categoriaActiva?.categoria ?? "Seleccione una categoría"}
+        {/* ================= PRODUCTOS ================= */}
+        <Box sx={{ flex: 1, p: 2, overflowY: "auto" }}>
+          <Typography fontWeight={800} fontSize={18}>
+            {categoriaActiva?.categoria}
           </Typography>
 
-          {/* Cantidad */}
-          <Typography variant="caption" color="text.secondary" mb={2} display="block">
-            {categoriaActiva ? `${productos.length} productos disponibles` : ""}
+          <Typography variant="caption" color="text.secondary" mb={1} display="block">
+            {filtered.length} productos disponibles
           </Typography>
 
-          {/* Buscador */}
           <TextField
             fullWidth
             size="small"
             placeholder="Buscar producto..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ mr: 1 }} />,
+            }}
             sx={{ mb: 2 }}
           />
 
-          {/* Grid productos */}
+          {/* ===== GRID RESPONSIVE ===== */}
           <Grid container spacing={2}>
-            {filteredPlatos.length > 0 ? (
-              filteredPlatos.map((prod) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={prod.id}>
-                  <Card
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      height: "100%",
-                      borderRadius: 2,
-                      transition: "0.25s",
-                      "&:hover": { boxShadow: 6, transform: "translateY(-4px)" },
-                    }}
-                  >
-                    {prod.imagen_plato ? (
-                      <CardMedia
-                        component="img"
-                        height={120}
-                        image={prod.imagen_plato}
-                        alt={prod.nombre}
-                        sx={{ objectFit: "cover" }}
-                      />
-                    ) : (
-                      <Box
-                        height={120}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        sx={{ background: "#f5f5f5" }}
-                      >
-                        <Avatar sx={{ width: 56, height: 56 }}>
-                          {prod.nombre?.[0] ?? "P"}
-                        </Avatar>
-                      </Box>
-                    )}
+            {filtered.map((prod) => (
+              <Grid
+                item
+                key={prod.id}
+                xs={6}     // 📱 2 por fila
+                md={3}     // 💻 4 por fila
+              >
+                <Card
+                  onClick={() => handleAgregar(prod)}
+                  sx={{
+                    cursor: "pointer",
+                    height: "100%",
+                    borderRadius: 3,
+                    overflow: "hidden",
+                    transition: "0.25s",
+                    "&:hover": {
+                      transform: "translateY(-6px)",
+                      boxShadow: 6,
+                    },
+                  }}
+                >
+                  {prod.imagen_plato ? (
+                    <CardMedia
+                      component="img"
+                      height={140}
+                      image={prod.imagen_plato}
+                      alt={prod.nombre}
+                    />
+                  ) : (
+                    <Box
+                      height={140}
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      bgcolor="#f5f5f5"
+                    >
+                      <Avatar sx={{ width: 56, height: 56 }}>
+                        {prod.nombre?.[0]}
+                      </Avatar>
+                    </Box>
+                  )}
 
-                    <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-                      <Typography fontWeight={600} noWrap>
-                        {prod.nombre}
-                      </Typography>
-                      <Typography variant="subtitle2" color="text.secondary" mt={0.5}>
-                        ${Number(prod.precio_venta).toLocaleString()}
-                      </Typography>
+                  <CardContent sx={{ p: 1.5 }}>
+                    <Typography fontWeight={700} fontSize={14} noWrap>
+                      {prod.nombre}
+                    </Typography>
 
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        color="success"
-                        startIcon={<AddShoppingCartIcon />}
-                        sx={{ mt: "auto" }}
-                        onClick={() =>
-                          onAgregar({
-                            ...prod,
-                            precio_venta: Number(prod.precio_venta ?? 0),
-                          })
-                        }
-                      >
-                        Agregar
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))
-            ) : (
-              <Grid item xs={12}>
-                <Typography color="text.secondary">
-                  No hay productos que coincidan con la búsqueda.
-                </Typography>
+                    <Typography
+                      fontSize={13}
+                      color="success.main"
+                      fontWeight={700}
+                    >
+                      ${Number(prod.precio_venta).toLocaleString()}
+                    </Typography>
+
+                    <Button
+                      fullWidth
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      startIcon={<AddShoppingCartIcon />}
+                      sx={{ mt: 1 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAgregar(prod);
+                      }}
+                    >
+                      Agregar
+                    </Button>
+                  </CardContent>
+                </Card>
               </Grid>
-            )}
+            ))}
           </Grid>
         </Box>
       </DialogContent>
 
-      <DialogActions>
+      <Divider />
+
+      {/* ================= FOOTER ================= */}
+      <DialogActions sx={{ px: 3, py: 2 }}>
         <Button onClick={onClose}>Cerrar</Button>
       </DialogActions>
     </Dialog>
