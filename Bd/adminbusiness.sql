@@ -2,10 +2,10 @@
 -- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost
--- Tiempo de generación: 16-12-2025 a las 00:27:33
--- Versión del servidor: 10.4.27-MariaDB
--- Versión de PHP: 8.2.0
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 02-03-2026 a las 04:57:51
+-- Versión del servidor: 10.4.24-MariaDB
+-- Versión de PHP: 8.1.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -42,7 +42,7 @@ CREATE TABLE `activos` (
   `estado` enum('BUENO','REGULAR','MALO','DADO DE BAJA') DEFAULT 'BUENO',
   `ubicacion` varchar(150) DEFAULT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -57,7 +57,7 @@ CREATE TABLE `app_modulos` (
   `icono` varchar(100) DEFAULT NULL,
   `orden` int(11) DEFAULT 1,
   `activo` tinyint(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `app_modulos`
@@ -83,7 +83,7 @@ CREATE TABLE `app_modulos_negocio` (
   `id_negocio` int(11) NOT NULL,
   `id_modulo` int(11) NOT NULL,
   `activo` tinyint(4) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `app_modulos_negocio`
@@ -111,7 +111,7 @@ CREATE TABLE `app_modulos_negocio_rol` (
   `estado` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `app_modulos_negocio_rol`
@@ -141,7 +141,7 @@ CREATE TABLE `caja` (
   `fecha_cierre` datetime DEFAULT NULL,
   `monto_final` decimal(12,2) DEFAULT NULL,
   `diferencia` decimal(12,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `caja`
@@ -173,7 +173,7 @@ CREATE TABLE `categorias` (
   `imagen` varchar(500) DEFAULT NULL,
   `descripcion` varchar(500) NOT NULL,
   `activo` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `categorias`
@@ -204,7 +204,7 @@ CREATE TABLE `compras` (
   `estado` varchar(20) DEFAULT 'pendiente',
   `metodo_pago` varchar(50) DEFAULT 'efectivo',
   `nota` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -222,7 +222,7 @@ CREATE TABLE `compras_items` (
   `descuento_porcentaje` decimal(5,2) DEFAULT 0.00,
   `impuesto` decimal(12,2) DEFAULT 0.00,
   `subtotal` decimal(12,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -238,7 +238,7 @@ CREATE TABLE `domicilios` (
   `estado` enum('pendiente','en camino','entregado','cancelado') DEFAULT 'pendiente',
   `total` decimal(10,2) DEFAULT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -254,7 +254,7 @@ CREATE TABLE `empleados` (
   `cargo` varchar(100) DEFAULT NULL,
   `telefono` varchar(50) DEFAULT NULL,
   `fecha_ingreso` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -267,7 +267,7 @@ CREATE TABLE `inventario` (
   `id_producto` int(11) NOT NULL,
   `id_negocio` int(11) NOT NULL,
   `cantidad_actual` decimal(10,2) DEFAULT 0.00
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -282,7 +282,7 @@ CREATE TABLE `inventario_fisico` (
   `nombre` varchar(500) NOT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
   `tipo` enum('PRODUCTOS','ACTIVOS','OTROS') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `inventario_fisico`
@@ -308,7 +308,7 @@ CREATE TABLE `inventario_fisico_detalles` (
   `diferencia` decimal(12,2) GENERATED ALWAYS AS (`cantidad_fisica` - `cantidad_sistema`) STORED,
   `observacion` text DEFAULT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `inventario_fisico_detalles`
@@ -331,7 +331,7 @@ CREATE TABLE `mesas` (
   `capacidad` int(11) NOT NULL DEFAULT 2,
   `estado` enum('Disponible','Ocupada','Reservada') DEFAULT 'Disponible',
   `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `mesas`
@@ -341,7 +341,8 @@ INSERT INTO `mesas` (`id`, `id_negocio`, `nombre`, `capacidad`, `estado`, `fecha
 (1, 1, 'Mesa1', 4, 'Ocupada', '2025-12-11 23:32:41'),
 (2, 1, 'Mesa 2', 4, 'Ocupada', '2025-12-11 23:41:26'),
 (3, 1, 'Mesa 3', 4, 'Reservada', '2025-12-11 23:41:42'),
-(4, 1, 'Mesa 4', 2, 'Ocupada', '2025-12-11 23:42:18');
+(4, 1, 'Mesa 4', 2, 'Ocupada', '2025-12-11 23:42:18'),
+(5, 1, 'Mesa 5', 4, 'Disponible', '2025-12-29 10:11:25');
 
 -- --------------------------------------------------------
 
@@ -357,7 +358,7 @@ CREATE TABLE `movimientos_inventario` (
   `cantidad` decimal(10,2) NOT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
   `detalle` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -372,7 +373,7 @@ CREATE TABLE `negocios` (
   `telefono` varchar(50) DEFAULT NULL,
   `descripcion` text DEFAULT NULL,
   `fecha_creacion` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `negocios`
@@ -397,7 +398,7 @@ CREATE TABLE `pagos` (
   `monto_recibido` decimal(10,2) DEFAULT NULL,
   `cambio` int(11) NOT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `pagos`
@@ -456,7 +457,7 @@ CREATE TABLE `personas` (
   `direccion` text DEFAULT NULL,
   `nota` text DEFAULT NULL,
   `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `personas`
@@ -492,7 +493,7 @@ CREATE TABLE `productos` (
   `publicacion_web` tinyint(1) DEFAULT 0,
   `creacion` datetime DEFAULT current_timestamp(),
   `actualizacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `productos`
@@ -524,7 +525,7 @@ CREATE TABLE `productos_imagenes` (
   `url` varchar(255) NOT NULL,
   `orden` int(11) DEFAULT 0,
   `activo` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `productos_imagenes`
@@ -563,7 +564,7 @@ CREATE TABLE `productos_precios` (
   `utilidad_porcentaje` decimal(6,2) GENERATED ALWAYS AS ((`precio_venta` - `precio_costo`) / `precio_costo` * 100) STORED,
   `usuario_modifico` varchar(100) DEFAULT NULL,
   `fecha_modificacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `productos_precios`
@@ -594,7 +595,7 @@ CREATE TABLE `producto_insumo` (
   `id_producto` int(10) UNSIGNED NOT NULL,
   `id_insumo` int(10) UNSIGNED NOT NULL,
   `cantidad` decimal(10,2) NOT NULL DEFAULT 1.00
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -613,7 +614,7 @@ CREATE TABLE `reservas` (
   `estado` enum('pendiente','confirmada','cancelada') DEFAULT 'pendiente',
   `observaciones` text DEFAULT NULL,
   `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -628,7 +629,7 @@ CREATE TABLE `ubicaciones` (
   `activo` tinyint(1) DEFAULT 1,
   `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
   `actualizado_en` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -645,7 +646,7 @@ CREATE TABLE `usuarios` (
   `id_negocio` int(11) NOT NULL,
   `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
   `imagen` varchar(255) NOT NULL DEFAULT 'https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png\r\n'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `usuarios`
@@ -676,7 +677,7 @@ CREATE TABLE `ventas` (
   `estado` varchar(20) DEFAULT 'pendiente',
   `metodo_pago` varchar(50) DEFAULT 'efectivo',
   `nota` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `ventas`
@@ -705,7 +706,7 @@ CREATE TABLE `ventas_items` (
   `descuento_porcentaje` decimal(5,2) DEFAULT 0.00,
   `impuesto` decimal(12,2) DEFAULT 0.00,
   `subtotal` decimal(12,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `ventas_items`
@@ -1004,7 +1005,7 @@ ALTER TABLE `inventario_fisico_detalles`
 -- AUTO_INCREMENT de la tabla `mesas`
 --
 ALTER TABLE `mesas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `movimientos_inventario`

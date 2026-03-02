@@ -606,12 +606,15 @@ useEffect(() => {
 
           {/* MESAS */}
           <Box sx={{ flex: 1 }}>
-          <Mesas
-          mesas={mesas}
-          mesaSeleccionada={mesaSeleccionada}
-          onSelect={(m) => setMesaSeleccionada(m)}
-        />
-
+         <Mesas
+    mesas={mesas}
+    mesaSeleccionada={mesaSeleccionada}
+    onSelect={(m) =>
+      setMesaSeleccionada((prev) =>
+        prev?.id === m.id ? null : m
+      )
+    }
+  />
           </Box>
         </Box>
 
