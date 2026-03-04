@@ -45,7 +45,8 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
   onAgregar,
 }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
   const [search, setSearch] = useState("");
   const [categoriaActiva, setCategoriaActiva] =
@@ -80,15 +81,17 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
       open={open}
       onClose={onClose}
       fullScreen={isMobile}
-      maxWidth="lg"
+      maxWidth="xl"
       fullWidth
       PaperProps={{
         sx: {
           borderRadius: isMobile ? 0 : 4,
-          height: isMobile ? "100%" : "90vh",
-          zIndex: 1200,
+          height: isMobile ? "100%" : "92vh",
+          display: "flex",
+          flexDirection: "column",
+		    zIndex: 1200,
         },
-      }} sx={{
+      }}sx={{
         zIndex: 1200,
       }}
     >
@@ -119,6 +122,8 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
           p: 0,
+          flex: 1,
+          overflow: "hidden",
         }}
       >
         {/* ================= CATEGORÍAS ================= */}
@@ -203,7 +208,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
         </Box>
 
         {/* ================= PRODUCTOS ================= */}
-        <Box sx={{ flex: 1, p: 2, overflowY: "auto" }}>
+        <Box sx={{ flex: 1, p: 2, overflowY: "auto", width: "100%" }}>
           <Typography fontWeight={800} fontSize={18}>
             {categoriaActiva?.categoria}
           </Typography>
@@ -225,13 +230,15 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
           />
 
           {/* ===== GRID RESPONSIVE ===== */}
-          <Grid container spacing={2}>
+          <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             {filtered.map((prod) => (
               <Grid
                 item
                 key={prod.id}
-                xs={6}     // 📱 2 por fila
-                md={3}     // 💻 4 por fila
+                xs={6}   // 👈 2 por fila SIEMPRE en móvil
+                sm={4}   // 3 en tablet
+                md={3}   // 4 en desktop
+                lg={2}   // 6 en pantallas grandes (más exacto que 2.4)
               >
                 <Card
                   onClick={() => handleAgregar(prod)}
@@ -240,9 +247,11 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                     height: "100%",
                     borderRadius: 3,
                     overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
                     transition: "0.25s",
                     "&:hover": {
-                      transform: "translateY(-6px)",
+                      transform: isMobile ? "none" : "translateY(-6px)",
                       boxShadow: 6,
                     },
                   }}
@@ -250,17 +259,27 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                   {prod.imagen_plato ? (
                     <CardMedia
                       component="img"
-                      height={140}
                       image={prod.imagen_plato}
                       alt={prod.nombre}
+                      sx={{
+                        width: "100%",
+                        height: {
+                          xs: 100,   // 📱 móvil
+                          sm: 120,   // 📲 tablet
+                          md: 150,   // 💻 desktop
+                        },
+                        objectFit: "cover",
+                      }}
                     />
                   ) : (
                     <Box
-                      height={140}
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      bgcolor="#f5f5f5"
+                      sx={{
+                        height: { xs: 120, sm: 140, md: 160 },
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: "#f5f5f5",
+                      }}
                     >
                       <Avatar sx={{ width: 56, height: 56 }}>
                         {prod.nombre?.[0]}
@@ -283,11 +302,15 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
 
                     <Button
                       fullWidth
-                      size="small"
+                      size={isMobile ? "medium" : "small"}
                       variant="contained"
                       color="success"
                       startIcon={<AddShoppingCartIcon />}
-                      sx={{ mt: 1 }}
+                      sx={{
+                        mt: 1,
+                        py: isMobile ? 1.2 : 0.6,
+                        fontSize: { xs: 12, sm: 13 },
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleAgregar(prod);

@@ -51,3 +51,8 @@ export const egresoEliminar = (id: number) => {
 
 export const actualiza_venta = (payload: any) => 
   axios.post("/cajero/actualizar_venta", payload);
+
+
+export const liberar_mesa = (id_mesa: any,id_negocio:any) => {
+  return axios.get(`/cajero/liberar_mesa/${id_mesa}/${id_negocio}`);
+};

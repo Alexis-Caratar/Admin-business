@@ -1,6 +1,6 @@
 /* ---------- /src/pages/CajeroDashboard.tsx ---------- */
 import React, { useEffect, useState } from "react";
-import { Avatar, Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog } from "@mui/material";
+import { Avatar, Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
@@ -23,6 +23,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import { motion } from "framer-motion";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import PaymentsIcon from "@mui/icons-material/Payments";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export const CajeroDashboard: React.FC = () => {
   const [categorias, setCategorias] = useState<CategoriaCajero[]>([]);
@@ -49,7 +51,7 @@ export const CajeroDashboard: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [openVentaRegistrada, setOpenVentaRegistrada] = useState(false);
   const [ventaPayload, setVentaPayload] = useState<any>(null);
-
+  const [showStats, setShowStats] = useState(false); // por defecto oculto
   const idUsuario = localStorage.getItem("id_usuario");
   const id_negocio = localStorage.getItem("id_negocio");
 
@@ -57,26 +59,44 @@ export const CajeroDashboard: React.FC = () => {
     setOpenCarrito(true);
   };
 
- const cargarMesas = async () => {
-  try {
-    const { data } = await apimesas({ id_negocio });
-    if (data?.ok && Array.isArray(data.result)) {
-      setMesas(data.result);
-    }
-  } catch (err) {
-    console.error("Error cargando mesas:", err);
-  }
-};
+  useEffect(() => {
+    const cargarMesas = async () => {
+      try {
+        const { data } = await apimesas({ id_negocio });
+        if (data?.ok && Array.isArray(data.result)) {
+          setMesas(data.result);
+        }
+      } catch (err) {
+        console.error("Error cargando mesas:", err);
+      }
+    };
 
-useEffect(() => {
-  cargarMesas();
-}, []);
+    cargarMesas(); // carga inicial
 
+    const ws = new WebSocket(import.meta.env.VITE_WS_URL);
+
+    ws.onopen = () => console.log("Conectado al WS de mesas");
+
+    ws.onmessage = (event) => {
+      console.log("evet", event);
+
+      const msg = JSON.parse(event.data);
+
+      if (msg.tipo === "mesas") {
+        setMesas(msg.mesas); // actualizaciones en tiempo real
+      }
+    };
+
+    ws.onclose = () => console.log("WS cerrado");
+    ws.onerror = (err) => console.error("WS error:", err);
+
+    return () => ws.close(); // cleanup
+  }, [id_negocio]);
 
   const checkCaja = async () => {
     try {
       const idUsuario = localStorage.getItem("id_usuario");
-      const { data } = await estado_caja({ id_usuario: idUsuario });      
+      const { data } = await estado_caja({ id_usuario: idUsuario });
 
       if (data?.ok && data.estado.length > 0) {
         setCajaAbierta(true);
@@ -178,58 +198,60 @@ useEffect(() => {
 
 
   //Finalizar venta
- const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
-  if (carrito.length === 0) return;
+  const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
+    if (carrito.length === 0) return;
 
-  const subtotal = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
-  const descuento = 0;
-  const impuesto = 0;
-  const total = subtotal - descuento + impuesto;
+    const subtotal = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
+    const descuento = 0;
+    const impuesto = 0;
+    const total = subtotal - descuento + impuesto;
 
-  const payload = {
-    id_cliente: cliente ? cliente : 18,
-    id_caja: idCaja,
-    id_mesa: mesaSeleccionada?.id,
-    fecha: new Date().toISOString(),
-    subtotal,
-    descuento,
-    descuento_porcentaje: 0,
-    impuesto,
-    total,
-    estado: "PENDIENTE",
-    nota: "",
-    metodo_pago: datos_adicionales.metodo_pago,
-    monto_pagado: total,
-    monto_recibido: datos_adicionales.monto_recibido,
-    cambio: datos_adicionales.cambio,
-    productos: carrito.map((p) => ({
-      id_producto: p.id,
-      cantidad: p.cantidad,
-      precio_unitario: p.precio_venta,
-      descuento: 0,
+    const payload = {
+      id_negocio: id_negocio,
+      id_cliente: cliente ? cliente : 18,
+      id_caja: idCaja,
+      id_mesa: mesaSeleccionada?.id,
+      fecha: new Date().toISOString(),
+      subtotal,
+      descuento,
       descuento_porcentaje: 0,
-      impuesto: 0,
-      subtotal: p.precio_venta * p.cantidad,
-    })),
-  };
+      impuesto,
+      total,
+      estado: "PENDIENTE",
+      nota: "",
+      metodo_pago: datos_adicionales.metodo_pago,
+      monto_pagado: total,
+      monto_recibido: datos_adicionales.monto_recibido,
+      cambio: datos_adicionales.cambio,
+      productos: carrito.map((p) => ({
+        id_producto: p.id,
+        cantidad: p.cantidad,
+        precio_unitario: p.precio_venta,
+        descuento: 0,
+        descuento_porcentaje: 0,
+        impuesto: 0,
+        subtotal: p.precio_venta * p.cantidad,
+      })),
+    };
 
-  try {
-    const { data } = await finalizar_venta(payload);
-    if (data.ok) {
-      setVentas((prev) => [...prev, { ...payload }]);
-      setCarrito([]);
-      setMesaSeleccionada(null);
-      checkCaja();
-      cargarMesas();
+    try {
+      const { data } = await finalizar_venta(payload);
+      if (data.ok) {
+        setVentas((prev) => [...prev, { ...payload }]);
+        setCarrito([]);
+        setMesaSeleccionada(null);
+        checkCaja();
+        //cargarMesas();
 
-      // Abrir diálogo en lugar de Swal
-      setVentaPayload(payload);
-      setOpenVentaRegistrada(true);
+        // Abrir diálogo en lugar de Swal
+        setVentaPayload(payload);
+        closeCategoria();
+        setOpenVentaRegistrada(true);
+      }
+    } catch (err) {
+      console.error("Error finalizando venta:", err);
     }
-  } catch (err) {
-    console.error("Error finalizando venta:", err);
-  }
-};
+  };
   //aperturar la caja 
   const abrirCajaReal = async () => {
     try {
@@ -304,303 +326,227 @@ useEffect(() => {
 
       <Typography
         sx={{
-          display: 'flex',         // Para que icono y texto queden en línea
-          alignItems: 'center',    // Centrar verticalmente
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between", // 👈 separa texto e icono
           borderRadius: 4,
           boxShadow: "0px 4px 20px rgba(0,0,0,0.12)",
           p: 1,
+          backgroundColor: cajaAbierta ? "success.main" : "error.main",
+          color: "white"
         }}
-        variant="h5"
+        variant="h6"
         fontWeight="bold"
         mb={2}
       >
-        <PersonIcon sx={{ mr: 1, color: 'primary.main' }} /> {/* mr: margen a la derecha */}
-        Perfil del Cajero
+        {/* Lado izquierdo */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+
+          }}
+        >
+          <PersonIcon sx={{ mr: 1 }} />
+          Perfil del Cajero
+        </Box>
+
+
+
+        {/* Lado derecho (ojito) */}
+        <IconButton
+          size="small"
+          title="Ver más detalles"
+          onClick={() => setShowStats(prev => !prev)}
+        >
+
+          {showStats ? <VisibilityOffIcon /> : <VisibilityIcon />}
+        </IconButton>
       </Typography>
 
       {/* === ESTADÍSTICAS SUPERIORES === */}
-      <Grid container spacing={2} mb={1}>
-        {/* Estado de Caja */}
+      <Stack spacing={1}>
+        <Collapse in={showStats} timeout="auto" unmountOnExit>
 
-        <Grid item xs={12} md={4}>
-          <Card
-            sx={{
-              borderRadius: 4,
-              boxShadow: "0px 4px 20px rgba(0,0,0,0.12)",
-              p: 1,
-            }}
-          >
-            <CardContent>
-              <Stack spacing={2}>
-                {/* ---------- TÍTULO ---------- */}
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Avatar
-                    sx={{
-                      bgcolor: cajaAbierta ? "success.light" : "error.light",
-                      width: 50,
-                      height: 50,
-                    }}
-                  >
-                    {cajaAbierta ? (
-                      <LockOpenIcon sx={{ fontSize: 30, color: "success.dark" }} />
-                    ) : (
-                      <LockIcon sx={{ fontSize: 30, color: "error.dark" }} />
-                    )}
-                  </Avatar>
+          {/* CONTENEDOR PRINCIPAL */}
+          <Grid container spacing={2}>
 
-                  <Stack>
-                    <Typography variant="body2" fontWeight="bold">
-                      Estado de Caja
-                    </Typography>
-                    <Chip
-                      label={cajaAbierta ? "Caja Abierta" : "Caja Cerrada"}
-                      color={cajaAbierta ? "success" : "error"}
-                      size="small"
-                      sx={{ mt: 0.5 }}
-                    />
-                  </Stack>
-                </Stack>
+            {/* ================= ESTADO DE CAJA ================= */}
+            <Grid item xs={12} md={4}>
+              <Card
+                sx={{
+                  borderRadius: 4,
+                  boxShadow: "0px 4px 20px rgba(0,0,0,0.12)",
+                  p: 1,
+                }}
+              >
+                <CardContent>
+                  <Stack spacing={2}>
 
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  startIcon={<LockOpenIcon />}
-                  onClick={() => {
-                    if (!cajaAbierta) setModalApertura(true);
-                    else setExpanded(!expanded); // expandir si la caja está abierta
-                  }}
-                  sx={{ py: 0.5, borderRadius: 3 }}
-                >
-                  {cajaAbierta ? (expanded ? "MENOS INFO" : "MAS INFO") : "Abrir Caja"}
-                </Button>
+                    {/* TÍTULO */}
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Avatar
+                        sx={{
+                          bgcolor: cajaAbierta ? "success.light" : "error.light",
+                          width: 50,
+                          height: 50,
+                        }}
+                      >
+                        {cajaAbierta ? (
+                          <LockOpenIcon sx={{ fontSize: 30, color: "success.dark" }} />
+                        ) : (
+                          <LockIcon sx={{ fontSize: 30, color: "error.dark" }} />
+                        )}
+                      </Avatar>
 
-                {/* ---------- BOTONES COLAPSABLES ---------- */}
-                <Collapse in={expanded} timeout="auto" unmountOnExit>
-                  <Stack spacing={1.5} sx={{ mt: 1 }}>
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      color="warning"
-                      startIcon={<ReceiptLongIcon />}
-                      onClick={() => {
-                        setModalArqueo(true);
-                        cargarArqueo();
-                      }}
-                      sx={{ py: 1.3, borderRadius: 3, fontWeight: "bold" }}
-                    >
-                      Arqueo
-                    </Button>
+                      <Stack>
+                        <Typography variant="body2" fontWeight="bold">
+                          Estado de Caja
+                        </Typography>
+                        <Chip
+                          label={cajaAbierta ? "Caja Abierta" : "Caja Cerrada"}
+                          color={cajaAbierta ? "success" : "error"}
+                          size="small"
+                          sx={{ mt: 0.5 }}
+                        />
+                      </Stack>
+                    </Stack>
 
+                    {/* BOTÓN PRINCIPAL */}
                     <Button
                       fullWidth
                       variant="contained"
-                      color="error"
-                      startIcon={<SavingsIcon />}
-                      onClick={() => setModalCierre(true)}
-                      sx={{ py: 1.3, borderRadius: 3, fontWeight: "bold" }}
+                      color="primary"
+                      startIcon={<LockOpenIcon />}
+                      onClick={() => {
+                        if (!cajaAbierta) setModalApertura(true);
+                        else setExpanded(!expanded);
+                      }}
+                      sx={{ py: 0.5, borderRadius: 3 }}
                     >
-                      Cerrar Caja
+                      {cajaAbierta
+                        ? expanded
+                          ? "MENOS INFO"
+                          : "MAS INFO"
+                        : "Abrir Caja"}
                     </Button>
+
+                    {/* BOTONES INTERNOS */}
+                    <Collapse in={expanded} timeout="auto" unmountOnExit>
+                      <Stack spacing={1.5} sx={{ mt: 1 }}>
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          color="warning"
+                          startIcon={<ReceiptLongIcon />}
+                          onClick={() => {
+                            setModalArqueo(true);
+                            cargarArqueo();
+                          }}
+                          sx={{ py: 1.3, borderRadius: 3, fontWeight: "bold" }}
+                        >
+                          Arqueo
+                        </Button>
+
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="error"
+                          startIcon={<SavingsIcon />}
+                          onClick={() => setModalCierre(true)}
+                          sx={{ py: 1.3, borderRadius: 3, fontWeight: "bold" }}
+                        >
+                          Cerrar Caja
+                        </Button>
+                      </Stack>
+                    </Collapse>
                   </Stack>
-                </Collapse>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-
-
-        {/* ================= MÉTRICAS ================= */}
-        <Grid item xs={12} md={8}>
-          <Grid container spacing={2}>
-
-            {/* ===== MONTO INICIAL ===== */}
-            <Grid item xs={12} sm={4}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderRadius: 3,
-                  boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-                  transition: "all .25s",
-                  "&:hover": {
-                    transform: "translateY(-6px)",
-                    boxShadow: "0 12px 28px rgba(0,0,0,0.15)",
-                  },
-                }}
-              >
-                <CardContent sx={{ textAlign: "center" }}>
-                  <Avatar
-                    sx={{
-                      bgcolor: "primary.light",
-                      color: "black",
-                      width: 48,
-                      height: 48,
-                      mx: "auto",
-                      mb: 1,
-                    }}
-                  >
-                    <MonetizationOnIcon />
-                  </Avatar>
-
-                  <Typography
-                    variant="caption"
-                    sx={{ fontWeight: 700, color: "text.secondary" }}
-                  >
-                    Monto inicial
-                  </Typography>
-
-                  {caja && (
-                    <Typography>
-                      {new Intl.NumberFormat("es-CO", {
-                        style: "currency",
-                        currency: "COP",
-                        minimumFractionDigits: 0,
-                      }).format(caja.monto_inicial)}
-                    </Typography>
-                  )}
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* ===== TOTAL VENTAS ===== */}
-            <Grid item xs={12} sm={4}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderRadius: 3,
-                  boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-                  transition: "all .25s",
-                  "&:hover": {
-                    transform: "translateY(-6px)",
-                    boxShadow: "0 12px 28px rgba(0,0,0,0.15)",
-                  },
-                }}
-              >
-                <CardContent sx={{ textAlign: "center" }}>
-                  <Avatar
-                    sx={{
-                      bgcolor: "purple",
-                      color: "black",
-                      width: 48,
-                      height: 48,
-                      mx: "auto",
-                      mb: 1,
-                    }}
-                  >
-                    <ShoppingCartIcon />
-                  </Avatar>
+            {/* ================= MÉTRICAS ================= */}
+            <Grid item xs={12} md={8}>
+              <Grid container spacing={2}>
 
-                  <Typography
-                    variant="caption"
-                    sx={{ fontWeight: 700, color: "text.secondary" }}
-                  >
-                    Ventas realizadas
-                  </Typography>
+                {/* Monto Inicial */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <Card sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}>
+                    <CardContent sx={{ textAlign: "center" }}>
+                      <Avatar sx={{ bgcolor: "primary.light", width: 48, height: 48, mx: "auto", mb: 1 }}>
+                        <MonetizationOnIcon />
+                      </Avatar>
+                      <Typography variant="caption" fontWeight={700} color="text.secondary">
+                        Monto inicial
+                      </Typography>
+                      {caja && (
+                        <Typography>
+                          {new Intl.NumberFormat("es-CO", {
+                            style: "currency",
+                            currency: "COP",
+                            minimumFractionDigits: 0,
+                          }).format(caja.monto_inicial)}
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
 
-                  {caja && (
-                    <Typography>
-                      {caja.total_ventas}
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
+                {/* Ventas */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <Card sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}>
+                    <CardContent sx={{ textAlign: "center" }}>
+                      <Avatar sx={{ bgcolor: "purple", width: 48, height: 48, mx: "auto", mb: 1 }}>
+                        <ShoppingCartIcon />
+                      </Avatar>
+                      <Typography variant="caption" fontWeight={700} color="text.secondary">
+                        Ventas realizadas
+                      </Typography>
+                      {caja && <Typography>{caja.total_ventas}</Typography>}
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Recaudado */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <Card sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}>
+                    <CardContent sx={{ textAlign: "center" }}>
+                      <Avatar sx={{ bgcolor: "success.light", width: 48, height: 48, mx: "auto", mb: 1 }}>
+                        <PaymentsIcon />
+                      </Avatar>
+                      <Typography variant="caption" fontWeight={700} color="text.secondary">
+                        Dinero recaudado
+                      </Typography>
+                      {caja && <Typography>${caja.dinero_recaudado}</Typography>}
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+                {/* Egresos */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <Card onClick={() => setOpenEgresos(true)} sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}>
+                    <CardContent sx={{ textAlign: "center" }}>
+                      <Avatar sx={{ bgcolor: "error.light", width: 48, height: 48, mx: "auto", mb: 1 }}>
+                        <PaymentsIcon />
+                      </Avatar>
+                      <Typography variant="caption" fontWeight={700} color="text.secondary">
+                        Egresos
+                      </Typography>
+                      {caja && (
+                        <Typography fontWeight={700} color="error.main">
+                          ${caja.total_egresos}
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+
+              </Grid>
             </Grid>
-
-            {/* ===== DINERO RECAUDADO ===== */}
-            <Grid item xs={12} sm={4}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderRadius: 3,
-                  boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-                  transition: "all .25s",
-                  "&:hover": {
-                    transform: "translateY(-6px)",
-                    boxShadow: "0 12px 28px rgba(0,0,0,0.15)",
-                  },
-                }}
-              >
-                <CardContent sx={{ textAlign: "center" }}>
-                  <Avatar
-                    sx={{
-                      bgcolor: "success.light",
-                      color: "white",
-                      width: 48,
-                      height: 48,
-                      mx: "auto",
-                      mb: 1,
-                    }}
-                  >
-                    <PaymentsIcon />
-                  </Avatar>
-
-                  <Typography
-                    variant="caption"
-                    sx={{ fontWeight: 700, color: "text.secondary" }}
-                  >
-                    Dinero recaudado
-                  </Typography>
-
-                  {caja && (
-                    <Typography>
-                    ${caja.dinero_recaudado}
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-
-              {/* ===== EGRESOS ===== */}
-         <Grid item xs={12} sm={4}>
-            <Card
-              onClick={() => setOpenEgresos(true)}
-              sx={{
-                height: "100%",
-                borderRadius: 3,
-                boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-                transition: "all .25s",
-                cursor: "pointer",
-                "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: "0 12px 28px rgba(0,0,0,0.15)",
-                },
-              }}
-            >
-              <CardContent sx={{ textAlign: "center" }}>
-                <Avatar
-                  sx={{
-                    bgcolor: "error.light",
-                    color: "white",
-                    width: 48,
-                    height: 48,
-                    mx: "auto",
-                    mb: 1,
-                  }}
-                >
-                  <PaymentsIcon />
-                </Avatar>
-
-                <Typography
-                  variant="caption"
-                  sx={{ fontWeight: 700, color: "text.secondary" }}
-                >
-                  Egresos
-                </Typography>
-
-                {caja && (
-                  <Typography fontWeight={700} color="error.main">
-                    ${caja.total_egresos}
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
 
           </Grid>
-        </Grid>
-
-      </Grid>
-
+        </Collapse>
+      </Stack>
 
       {/* === CONTENIDO PRINCIPAL === */}
       <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
@@ -640,13 +586,13 @@ useEffect(() => {
 
           {/* MESAS */}
           <Box sx={{ flex: 1 }}>
-      <Mesas
-      id_negocio={id_negocio}
-      mesas={mesas}
-      onSelect={(m) =>
-        setMesaSeleccionada((prev) => (prev?.id === m.id ? null : m))
-      }
-    />
+            <Mesas
+              id_negocio={id_negocio}
+              mesas={mesas}
+              onSelect={(m) =>
+                setMesaSeleccionada((prev) => (prev?.id === m.id ? null : m))
+              }
+            />
           </Box>
         </Box>
 
@@ -713,7 +659,7 @@ useEffect(() => {
               finalizarVenta(c, p);
               setOpenCarrito(false);
             }}
-             mesaSeleccionada={mesaSeleccionada}
+            mesaSeleccionada={mesaSeleccionada}
 
           />
         </Drawer>
@@ -747,9 +693,9 @@ useEffect(() => {
       <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
       <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} totalVentas={caja?.total_ventas ?? 0} dineroTotal={caja?.dinero_recaudado ?? 0} onCerrar={cerrarCajaReal} />
       <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada ?? undefined} categorias={categorias} onAgregar={addCart} />
-      <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)} id_negocio={id_negocio} id_caja={idCaja}/>
-   
-   {/* === DIALOG VENTA REGISTRADA === */}
+      <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)} id_negocio={id_negocio} id_caja={idCaja} />
+
+      {/* === DIALOG VENTA REGISTRADA === */}
       <Dialog
         open={openVentaRegistrada}
         onClose={() => setOpenVentaRegistrada(false)}

@@ -97,7 +97,7 @@ export const CarritoMobile: React.FC<Props> = ({
 
   // PAGO
   const total = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
-  const [metodoPago, setMetodoPago] = useState<string>("EFECTIVO");
+  const [metodoPago, setMetodoPago] = useState<string>("PENDIENTE");
   const [montoRecibido, setMontoRecibido] = useState<number>(0);
   const cambio = montoRecibido - total;
 
@@ -468,10 +468,12 @@ export const CarritoMobile: React.FC<Props> = ({
                     sx={{ mt: 1 }}
                     onChange={(e) => setMetodoPago(e.target.value)}
                   >
-                       <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
-                  <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
-                  <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-                 <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
+                <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
+                <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
+                <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
+                <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
+                <MenuItem value="NEQUI">📱 Nequi</MenuItem>
+                <MenuItem value="DAVIPLATA">🏦 DaviPlata</MenuItem>
                   </TextField>
 
                   {/* MONTO RECIBIDO: mostrar vacío cuando es 0 */}

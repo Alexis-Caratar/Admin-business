@@ -77,7 +77,7 @@ export const Carrito: React.FC<Props> = ({
 
   const [openCrearModal, setOpenCrearModal] = useState(false);
 
-  const [metodoPago, setMetodoPago] = useState("EFECTIVO");
+  const [metodoPago, setMetodoPago] = useState("PENDIENTE");
   const [montoRecibido, setMontoRecibido] = useState<number | "">("");
 
   const total = carrito.reduce(
@@ -444,10 +444,12 @@ export const Carrito: React.FC<Props> = ({
                 value={metodoPago}
                 onChange={(e) => setMetodoPago(e.target.value)}
               >
+                <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
                 <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
                 <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
                 <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-                <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
+                <MenuItem value="NEQUI">📱 Nequi</MenuItem>
+                <MenuItem value="DAVIPLATA">🏦 DaviPlata</MenuItem>
               </TextField>
 
               {/* MONTO RECIBIDO */}

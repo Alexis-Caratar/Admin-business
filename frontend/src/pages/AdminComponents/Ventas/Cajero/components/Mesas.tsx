@@ -13,6 +13,8 @@ import {
   Button,
   TextField,
   MenuItem,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
@@ -20,8 +22,7 @@ import EventSeatIcon from "@mui/icons-material/EventSeat";
 import CloseIcon from "@mui/icons-material/Close";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import type { Mesa } from "./../../../../../types/cajero";
-import { apidetallesMesa,actualiza_venta } from "../../../../../api/cajero";
-import axios from "axios";
+import { apidetallesMesa, actualiza_venta, liberar_mesa } from "../../../../../api/cajero";
 
 type Props = {
   id_negocio: bigint;
@@ -38,9 +39,8 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
   const [metodoPago, setMetodoPago] = useState("EFECTIVO");
   const [montoRecibido, setMontoRecibido] = useState<number | "">("");
   const [habilitarPago, setHabilitarPago] = useState(false);
-
-  console.log("measas",mesas);
-  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const getEstadoConfig = (estado: Mesa["estado"]) => {
     switch (estado) {
@@ -101,19 +101,35 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
     setHabilitarPago(true);
   };
 
+  const handleLiberarMesa = async () => {
+    try {
+      // Aquí llamas tu API para liberar la mesa
+      await liberar_mesa(mesaOrden?.id, id_negocio);
+
+      alert("✅ Mesa liberada correctamente");
+
+      setOpenOrden(false);
+      setDetalleVenta(null);
+    } catch (error) {
+      console.error(error);
+      alert("❌ Error al liberar mesa");
+    }
+  };
+
   const handleFinalizarVenta = async () => {
     if (!detalleVenta) return;
 
     const payload = {
+      id_negocio: id_negocio,
       id_venta: detalleVenta.id_pago,
-      id_mesa:mesaOrden?.id,
+      id_mesa: mesaOrden?.id,
       metodo_pago: metodoPago,
       monto_recibido: montoRecibido,
       cambio: cambioSeguro,
     };
 
     try {
-        const { data } = await actualiza_venta(payload );
+      const { data } = await actualiza_venta(payload);
       // Reiniciar modal
       setDetalleVenta(null);
       setHabilitarPago(false);
@@ -138,36 +154,84 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
           const config = getEstadoConfig(mesa.estado);
           const isSelected = mesaSeleccionada?.id === mesa.id;
           return (
-            <Grid item key={mesa.id} sx={{ flexBasis: "18%", maxWidth: "18%" }}>
+            <Grid
+              item
+              xs={6}
+              sm={6}
+              md={4}
+              lg={4}
+            >
+
               <Card
                 onClick={() => handleClickMesa(mesa)}
                 sx={{
                   position: "relative",
-                  p: 2,
-                  borderRadius: 4,
-                  minHeight: 160,
+                  p: { xs: 2, sm: 5 },
+                  borderRadius: 3,
+                  minHeight: { xs: 130, sm: 160 },
                   cursor: "pointer",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  background: isSelected ? "linear-gradient(135deg, rgba(25,118,210,.08), rgba(25,118,210,.02))" : "#fff",
+                  background: isSelected
+                    ? "linear-gradient(135deg, rgba(25,118,210,.08), rgba(25,118,210,.02))"
+                    : "#fff",
                   border: isSelected ? "2px solid" : "1px solid rgba(0,0,0,0.08)",
                   borderColor: isSelected ? "primary.main" : "rgba(0,0,0,0.08)",
-                  boxShadow: isSelected ? "0 0 0 3px rgba(25,118,210,.25)" : "0 10px 25px rgba(0,0,0,0.08)",
+                  boxShadow: isSelected
+                    ? "0 0 0 3px rgba(25,118,210,.25)"
+                    : { xs: "0 4px 12px rgba(0,0,0,0.08)", md: "0 10px 25px rgba(0,0,0,0.08)" },
                   transition: "all .25s ease",
-                  "&:hover": { transform: { xs: "none", md: "translateY(-6px)" }, boxShadow: "0 14px 30px rgba(0,0,0,0.15)" },
+                  "&:hover": {
+                    transform: { xs: "none", md: "translateY(-6px)" },
+                  },
                 }}
               >
-                <Chip label={mesa.estado} color={config.chipColor} size="small" sx={{ position: "absolute", top: 10, right: 10, fontWeight: 700, height: 24, px: 1.2, borderRadius: 2 }} />
-                <Box sx={{ mt: 4, width: 48, height: 48, borderRadius: "50%", background: `linear-gradient(135deg, ${config.iconBg})`, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", mb: 1.5 }}>
+                <Chip label={mesa.estado} color={config.chipColor} size="small" sx={{ position: "absolute", top: 11, right: 20, fontWeight: 700, height: 24, px: 3, borderRadius: 2 }} />
+                <Box
+                  sx={{
+                    mt: { xs: 3, sm: 4 },
+                    width: { xs: 38, sm: 48 },
+                    height: { xs: 38, sm: 48 },
+                    borderRadius: "50%",
+                    background: `linear-gradient(135deg, ${config.iconBg})`,
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 1,
+                  }}
+                >
                   {config.icon}
                 </Box>
                 <Box textAlign="center">
-                  <Typography fontWeight={800} fontSize={14} noWrap>{mesa.nombre}</Typography>
-                  <Typography variant="caption" color="text.secondary">Cap: · {mesa.capacidad} pers</Typography>
+                  <Typography
+                    fontWeight={800}
+                    sx={{ fontSize: { xs: 12, sm: 18 } }}
+                    noWrap
+                  >
+                    {mesa.nombre}
+                  </Typography>
+                  <Typography
+                    sx={{ fontSize: { xs: 12, sm: 15 } }}
+                    color="text.secondary"
+                  >
+                    Cap: {mesa.capacidad} pers
+                  </Typography>
                 </Box>
-                <Box flexGrow={1} />
-                {isSelected && <Chip label="Seleccionada" color="primary" size="small" sx={{ fontWeight: 700, borderRadius: 2, mb: 0.5 }} />}
+                <Box flexGrow={0} />
+                {isSelected && (
+                  <Chip
+                    label={isMobile ? "select.." : "Seleccionada"}
+                    color="primary"
+                    size="small"
+                    sx={{
+                      fontWeight: 700,
+                      borderRadius: 2,
+                      mb: 0.1,
+                    }}
+                  />
+                )}
               </Card>
             </Grid>
           );
@@ -207,14 +271,104 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
                 ))}
               </Box>
 
-              <Box sx={{ mt: 3, p: 2, borderRadius: 3, background: "linear-gradient(135deg, #111827, #1f2937)", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Box sx={{ mt: 2, p: 1, borderRadius: 3, background: "linear-gradient(135deg, #111827, #1f2937)", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Typography fontWeight={600}>Total</Typography>
                 <Typography variant="h6" fontWeight={700}>${Number(detalleVenta.venta_total).toLocaleString()}</Typography>
               </Box>
+              {detalleVenta.estado_pago == "PENDIENTE" ? (
 
-              <Button fullWidth variant="contained" color="primary" sx={{ mt: 2 }} onClick={handlePagarFactura}>Pagar Factura</Button>
+                <Box
+                  onClick={handlePagarFactura}
+                  sx={{
+                    mt: 3,
+                    p: 2,
+                    borderRadius: 3,
+                    background: "linear-gradient(135deg, #09a58e, #2e7d32)",
+                    color: "#fff",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    userSelect: "none",
+                    fontWeight: 700,
+                    boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+                    transition: "all 0.25s ease",
 
-              {habilitarPago && (
+                    // Hover (solo visible en desktop)
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 10px 25px rgba(0,0,0,0.35)",
+                    },
+
+                    // Cuando se presiona
+                    "&:active": {
+                      transform: "scale(0.97)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+                    },
+                  }}
+                >
+                  <Typography fontWeight={700} letterSpacing={0.5}>
+                    PAGAR FACTURA
+                  </Typography>
+                </Box>
+              ) : (
+                <Box
+                  onClick={handleLiberarMesa}
+                  sx={{
+                    mt: 3,
+                    p: 2,
+                    borderRadius: 3,
+                    background: "linear-gradient(135deg, #3d82a7, #0060e6)",
+                    color: "#fff",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    userSelect: "none",
+                    fontWeight: 700,
+                    letterSpacing: 0.5,
+                    boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+                    transition: "all 0.25s ease",
+                    position: "relative",
+                    overflow: "hidden",
+
+                    // Hover
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 10px 25px rgba(0, 96, 230, 0.45)",
+                    },
+
+                    // Click
+                    "&:active": {
+                      transform: "scale(0.96)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                    },
+
+                    // Brillo animado premium
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      top: 0,
+                      left: "-100%",
+                      width: "100%",
+                      height: "100%",
+                      background:
+                        "linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent)",
+                      transition: "0.6s",
+                    },
+                    "&:hover::after": {
+                      left: "100%",
+                    },
+                  }}
+                >
+                  <Typography fontWeight={700}>
+                    LIBERAR MESA
+                  </Typography>
+                </Box>
+              )}
+
+
+              {detalleVenta.estado_pago != "PENDIENTE" ||habilitarPago && (
                 <>
                   <TextField
                     select
