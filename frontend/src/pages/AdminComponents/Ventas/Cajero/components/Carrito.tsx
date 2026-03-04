@@ -153,7 +153,7 @@ export const Carrito: React.FC<Props> = ({
           <TextField
             fullWidth
             size="small"
-            placeholder="Buscar cliente..."
+            placeholder="Buscar por identificación o nombres"
             value={clienteBuscado}
             onChange={(e) => handleBuscar(e.target.value)}
             InputProps={{

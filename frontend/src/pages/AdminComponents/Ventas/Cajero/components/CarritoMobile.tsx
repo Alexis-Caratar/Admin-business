@@ -284,7 +284,7 @@ export const CarritoMobile: React.FC<Props> = ({
                   {/* Buscar cliente */}
                   <TextField
                     fullWidth
-                    placeholder="Buscar cliente por nombre o identificación..."
+                    placeholder="Buscar por identificación o nombres"
                     size="small"
                     value={clienteBuscado}
                     onChange={(e) => handleBuscar(e.target.value)}

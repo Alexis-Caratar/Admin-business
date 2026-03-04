@@ -11,6 +11,12 @@ router.post("/arqueo", CajeroController.arqueo);
 router.post("/finalizar-venta", CajeroController.finalizarVenta);
 router.post("/buscar-cliente", CajeroController.buscarCliente);
 router.post("/mesas", CajeroController.mesas);
+router.post("/detallesMesa", CajeroController.detallesMesa);
+router.get("/egresos/:id_negocio/:id_caja", CajeroController.listarEgresos);
+router.post("/egreso", CajeroController.crearEgreso);
+router.put("/egreso/:id", CajeroController.actualizarEgreso);
+router.delete("/egreso/:id", CajeroController.eliminarEgreso);
+router.post("/actualizar_venta", CajeroController.actualizaventa);
 
 
 

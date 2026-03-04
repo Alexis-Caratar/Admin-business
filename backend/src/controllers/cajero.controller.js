@@ -80,3 +80,157 @@ export const mesas = async (req, res) => {
   }
   
 };
+
+export const detallesMesa = async (req, res) => {
+  try {
+   const {id_negocio,mesaId} = req.body;   
+      const resultado = await CajeroService.detallesMesa(id_negocio,mesaId);
+    return res.json({ ok: true,result: resultado });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};
+
+export const listarEgresos = async (req, res) => {
+  try {
+    const { id_negocio, id_caja } = req.params;
+    console.log("req",req.params);
+    
+
+    const egresos = await CajeroService.listarEgresos(
+      id_negocio,
+      id_caja
+    );
+
+    res.json(egresos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al listar egresos" });
+  }
+};
+
+/* ===============================
+   CREAR EGRESO
+================================= */
+export const crearEgreso = async (req, res) => {
+  try {
+    console.log(req.body);
+    
+    const {
+      id_negocio,
+      id_caja,
+      descripcion,
+      metodo_pago,
+      monto,
+      observacion
+    } = req.body;
+
+    // 🔐 Validación obligatoria
+    if (!id_negocio || !descripcion || !monto) {
+      return res.status(400).json({
+        ok: false,
+        message: "id_negocio, id_caja, descripcion y monto son obligatorios",
+        body_recibido: req.body
+      });
+    }
+
+    const result = await CajeroService.crearEgreso({
+      id_negocio,
+      id_caja,
+      descripcion,
+      metodo_pago,
+      monto,
+      observacion
+    });
+
+    return res.json({
+      ok: true,
+      message: "Egreso creado correctamente",
+      id: result
+    });
+
+  } catch (error) {
+    console.error("Error crearEgreso:", error);
+    return res.status(500).json({
+      ok: false,
+      message: "Error interno al crear egreso"
+    });
+  }
+};
+
+
+
+/* ===============================
+   ACTUALIZAR EGRESO
+================================= */
+export const actualizarEgreso = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        ok: false,
+        message: "ID es obligatorio"
+      });
+    }
+
+    await CajeroService.actualizarEgreso(Number(id), req.body);
+
+    return res.json({
+      ok: true,
+      message: "Egreso actualizado correctamente"
+    });
+
+  } catch (error) {
+    console.error("Error actualizarEgreso:", error);
+    return res.status(500).json({
+      ok: false,
+      message: "Error al actualizar egreso"
+    });
+  }
+};
+
+/* ===============================
+   ELIMINAR EGRESO
+================================= */
+export const eliminarEgreso = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        ok: false,
+        message: "ID es obligatorio"
+      });
+    }
+
+    await CajeroService.eliminarEgreso(Number(id));
+
+    return res.json({
+      ok: true,
+      message: "Egreso eliminado correctamente"
+    });
+
+  } catch (error) {
+    console.error("Error eliminarEgreso:", error);
+    return res.status(500).json({
+      ok: false,
+      message: "Error al eliminar egreso"
+    });
+  }
+};
+
+export const actualizaventa = async (req, res) => {
+  try {
+   const payload = req.body;
+      const resultado = await CajeroService.actualizaventa(payload);
+    return res.json({ ok: true, result: resultado });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};
+
+
+

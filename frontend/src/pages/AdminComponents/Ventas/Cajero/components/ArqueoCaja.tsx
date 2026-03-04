@@ -28,9 +28,17 @@ type Props = {
 export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo }) => {
   const totalEnCaja =
     arqueoInfo
-      ? Number(arqueoInfo.monto_inicial) + Number(arqueoInfo.total_ventas)
+      ? Number(arqueoInfo.monto_inicial) + Number(arqueoInfo.total_ventas)-Number(arqueoInfo.total_egresos)
       : 0;
 
+        const formatCOP = (value: number | "") => {
+      if (!value) return "";
+      return new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0,
+      }).format(Number(value));
+    };
   return (
     <Dialog
       open={open}
@@ -67,7 +75,7 @@ export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo }) 
 
                 <Box>
                   <Typography fontSize={14} color="text.secondary">
-                    Monto Inicial
+                    Monto Inicial - BASE
                   </Typography>
                   <Typography fontSize={22} fontWeight="bold">
                     ${Number(arqueoInfo.monto_inicial).toLocaleString()}
@@ -93,6 +101,53 @@ export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo }) 
                 </Box>
               </CardContent>
             </Card>
+
+            <Divider />
+
+             {/* --- Egresos Totales --- */}
+          <Card
+            elevation={0}
+            sx={{
+              borderRadius: 4,
+              p: 2,
+              background: "linear-gradient(135deg, #fff 0%, #f9fafb 100%)",
+              border: "1px solid",
+              borderColor: "divider",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "translateY(-3px)",
+                boxShadow: 4,
+              },
+            }}
+          >
+      <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, p: "8px !important" }}>
+              
+              <Avatar
+                sx={{
+                  bgcolor: "error.light",
+                  color: "error.main",
+                  width: 56,
+                  height: 56,
+                }}
+              >
+                <PointOfSaleIcon fontSize="medium" />
+              </Avatar>
+
+              <Box>
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                  Egresos Diarios
+                </Typography>
+
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  sx={{ color: "error.main", mt: 0.5 }}
+                >
+                  {formatCOP(arqueoInfo.total_egresos)}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
 
             <Divider />
 

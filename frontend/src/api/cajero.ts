@@ -23,3 +23,31 @@ export const apibuscar_cliente = (payload: any) =>
 
 export const apimesas = (payload: any) => 
   axios.post("/cajero/mesas", payload);
+
+export const apidetallesMesa = (payload: any) => 
+  axios.post("/cajero/detallesMesa", payload);
+
+export const egresosListar = async (id_negocio: number,id_caja: number
+) => {
+  const { data } = await axios.get(`/cajero/egresos/${id_negocio}/${id_caja}` );
+  return data;
+};
+
+export const egresoCrear = (payload:any ) => {
+  return axios.post("/cajero/egreso", payload);
+};
+
+export const egresoActualizar = (
+  id: number,
+  payload:any 
+) => {
+  return axios.put(`/cajero/egreso/${id}`, payload);
+};
+
+export const egresoEliminar = (id: number) => {
+  return axios.delete(`/cajero/egreso/${id}`);
+};
+
+
+export const actualiza_venta = (payload: any) => 
+  axios.post("/cajero/actualizar_venta", payload);

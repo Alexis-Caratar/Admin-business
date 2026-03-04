@@ -1,6 +1,6 @@
 /* ---------- /src/pages/CajeroDashboard.tsx ---------- */
 import React, { useEffect, useState } from "react";
-import { Avatar, Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab, useTheme, useMediaQuery, Badge } from "@mui/material";
+import { Avatar, Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
@@ -18,6 +18,7 @@ import { CierreCajaModal } from "./components/CierreCaja";
 import { ProductosCategoriaModal } from "./components/ProductosCategoria";
 import { Categorias } from "./components/Categorias";
 import { CarritoMobile } from "./components/CarritoMobile";
+import Egresos from "./components/Egresos";
 import PersonIcon from '@mui/icons-material/Person';
 import { motion } from "framer-motion";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
@@ -41,12 +42,13 @@ export const CajeroDashboard: React.FC = () => {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<CategoriaCajero | null>(null);
   const [modalProductosOpen, setModalProductosOpen] = useState(false);
   const [openCarrito, setOpenCarrito] = useState(false);
-
-
+  const [openEgresos, setOpenEgresos] = useState(false);
   const [mesas, setMesas] = useState<Mesa[]>([]);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [openVentaRegistrada, setOpenVentaRegistrada] = useState(false);
+  const [ventaPayload, setVentaPayload] = useState<any>(null);
 
   const idUsuario = localStorage.getItem("id_usuario");
   const id_negocio = localStorage.getItem("id_negocio");
@@ -176,72 +178,58 @@ useEffect(() => {
 
 
   //Finalizar venta
-  const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
-    console.log("cliente", cliente);
-    console.log("datos_adicionales", datos_adicionales);
+ const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
+  if (carrito.length === 0) return;
 
+  const subtotal = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
+  const descuento = 0;
+  const impuesto = 0;
+  const total = subtotal - descuento + impuesto;
 
-    if (carrito.length === 0) return;
-    console.log("carrito", carrito);
-
-
-    const subtotal = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
-    const descuento = 0; // Si tienes lógica de descuento
-    const descuento_porcentaje = 0;
-    const impuesto = 0;
-    const total = subtotal - descuento + impuesto;
-
-    const payload = {
-      id_cliente: cliente ? cliente : 18,
-      id_caja: idCaja,
-      id_mesa: mesaSeleccionada?.id,  
-      fecha: new Date().toISOString(),
-      subtotal,
-      descuento,
-      descuento_porcentaje,
-      impuesto,
-      total,
-      estado: "PENDIENTE",
-      nota: "",
-      //para guardar en la tabla pagos
-      metodo_pago: datos_adicionales.metodo_pago,
-      monto_pagado: total,
-      monto_recibido: datos_adicionales.monto_recibido,
-      cambio: datos_adicionales.cambio,
-
-      productos: carrito.map((p) => ({
-        id_producto: p.id,
-        cantidad: p.cantidad,
-        precio_unitario: p.precio_venta,
-        descuento: 0,
-        descuento_porcentaje: 0,
-        impuesto: 0,
-        subtotal: p.precio_venta * p.cantidad,
-      })),
-    };
-
-    try {
-      const { data } = await finalizar_venta(payload);
-      if (data.ok) {
-        setVentas((prev) => [...prev, { ...payload }]);
-        setCarrito([]);
-        setMesaSeleccionada(null); 
-        checkCaja();
-        cargarMesas();
-
-        Swal.fire({
-          icon: "success",
-          title: "¡Venta Registrada!",
-          text: "La operación se realizó correctamente.",
-          showConfirmButton: true,
-          confirmButtonColor: "#4CAF50",
-        });
-      }
-    } catch (err) {
-      console.error("Error finalizando venta:", err);
-    }
+  const payload = {
+    id_cliente: cliente ? cliente : 18,
+    id_caja: idCaja,
+    id_mesa: mesaSeleccionada?.id,
+    fecha: new Date().toISOString(),
+    subtotal,
+    descuento,
+    descuento_porcentaje: 0,
+    impuesto,
+    total,
+    estado: "PENDIENTE",
+    nota: "",
+    metodo_pago: datos_adicionales.metodo_pago,
+    monto_pagado: total,
+    monto_recibido: datos_adicionales.monto_recibido,
+    cambio: datos_adicionales.cambio,
+    productos: carrito.map((p) => ({
+      id_producto: p.id,
+      cantidad: p.cantidad,
+      precio_unitario: p.precio_venta,
+      descuento: 0,
+      descuento_porcentaje: 0,
+      impuesto: 0,
+      subtotal: p.precio_venta * p.cantidad,
+    })),
   };
 
+  try {
+    const { data } = await finalizar_venta(payload);
+    if (data.ok) {
+      setVentas((prev) => [...prev, { ...payload }]);
+      setCarrito([]);
+      setMesaSeleccionada(null);
+      checkCaja();
+      cargarMesas();
+
+      // Abrir diálogo en lugar de Swal
+      setVentaPayload(payload);
+      setOpenVentaRegistrada(true);
+    }
+  } catch (err) {
+    console.error("Error finalizando venta:", err);
+  }
+};
   //aperturar la caja 
   const abrirCajaReal = async () => {
     try {
@@ -562,6 +550,52 @@ useEffect(() => {
               </Card>
             </Grid>
 
+              {/* ===== EGRESOS ===== */}
+         <Grid item xs={12} sm={4}>
+            <Card
+              onClick={() => setOpenEgresos(true)}
+              sx={{
+                height: "100%",
+                borderRadius: 3,
+                boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
+                transition: "all .25s",
+                cursor: "pointer",
+                "&:hover": {
+                  transform: "translateY(-6px)",
+                  boxShadow: "0 12px 28px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              <CardContent sx={{ textAlign: "center" }}>
+                <Avatar
+                  sx={{
+                    bgcolor: "error.light",
+                    color: "white",
+                    width: 48,
+                    height: 48,
+                    mx: "auto",
+                    mb: 1,
+                  }}
+                >
+                  <PaymentsIcon />
+                </Avatar>
+
+                <Typography
+                  variant="caption"
+                  sx={{ fontWeight: 700, color: "text.secondary" }}
+                >
+                  Egresos
+                </Typography>
+
+                {caja && (
+                  <Typography fontWeight={700} color="error.main">
+                    ${caja.total_egresos}
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
           </Grid>
         </Grid>
 
@@ -606,15 +640,13 @@ useEffect(() => {
 
           {/* MESAS */}
           <Box sx={{ flex: 1 }}>
-         <Mesas
-    mesas={mesas}
-    mesaSeleccionada={mesaSeleccionada}
-    onSelect={(m) =>
-      setMesaSeleccionada((prev) =>
-        prev?.id === m.id ? null : m
-      )
-    }
-  />
+      <Mesas
+      id_negocio={id_negocio}
+      mesas={mesas}
+      onSelect={(m) =>
+        setMesaSeleccionada((prev) => (prev?.id === m.id ? null : m))
+      }
+    />
           </Box>
         </Box>
 
@@ -715,6 +747,65 @@ useEffect(() => {
       <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
       <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} totalVentas={caja?.total_ventas ?? 0} dineroTotal={caja?.dinero_recaudado ?? 0} onCerrar={cerrarCajaReal} />
       <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada ?? undefined} categorias={categorias} onAgregar={addCart} />
+      <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)} id_negocio={id_negocio} id_caja={idCaja}/>
+   
+   {/* === DIALOG VENTA REGISTRADA === */}
+      <Dialog
+        open={openVentaRegistrada}
+        onClose={() => setOpenVentaRegistrada(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            p: 3,
+            minWidth: 360,
+            maxWidth: 420,
+            textAlign: "center",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+          },
+        }}
+      >
+        <Box mb={2}>
+          <Box
+            sx={{
+              bgcolor: "success.main",
+              color: "white",
+              borderRadius: "50%",
+              width: 60,
+              height: 60,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 2,
+              fontSize: 32,
+            }}
+          >
+            ✅
+          </Box>
+
+          <Typography variant="h6" fontWeight={600} gutterBottom>
+            ¡Venta Registrada!
+          </Typography>
+
+          {ventaPayload && (
+            <Typography variant="body2" color="text.secondary">
+              Total: <strong>${ventaPayload.total.toLocaleString()}</strong>
+              <br />
+              Método de pago: <strong>{ventaPayload.metodo_pago}</strong>
+            </Typography>
+          )}
+        </Box>
+
+        <Stack direction="row" justifyContent="center" spacing={2} mt={4}>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => setOpenVentaRegistrada(false)}
+            sx={{ borderRadius: 3, px: 4, textTransform: "none" }}
+          >
+            Aceptar
+          </Button>
+        </Stack>
+      </Dialog>
     </Box>
 
 

@@ -8,13 +8,38 @@ const CajeroService = {
         const estado_caja = `
         SELECT 
           c.*,
-          COUNT(v.id) AS total_ventas,
-          FORMAT(IFNULL(SUM(v.total), 0), 0, 'es_CO') AS dinero_recaudado
+
+          -- Ventas
+          IFNULL(v.total_ventas, 0) AS total_ventas,
+          IFNULL(v.dinero_recaudado, 0) AS dinero_recaudado,
+
+          -- Egresos
+          IFNULL(e.total_egresos, 0) AS total_egresos
+
       FROM caja c
-      LEFT JOIN ventas v ON v.id_caja = c.id
+
+      -- Subconsulta de ventas (agregadas correctamente)
+      LEFT JOIN (
+          SELECT 
+              id_caja,
+              COUNT(id) AS total_ventas,
+              SUM(total) AS dinero_recaudado
+          FROM ventas
+          GROUP BY id_caja
+      ) v ON v.id_caja = c.id
+
+      -- Subconsulta de egresos (agregados correctamente)
+      LEFT JOIN (
+          SELECT 
+              id_caja,
+              SUM(monto) AS total_egresos
+          FROM egresos
+          GROUP BY id_caja
+      ) e ON e.id_caja = c.id
+
       WHERE c.estado = 'ABIERTA'
         AND c.id_usuario = ?
-      GROUP BY c.id
+
       ORDER BY c.fecha_apertura DESC
       LIMIT 1;
 `
@@ -107,13 +132,43 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
   arqueo: async ({ id_caja }) => {
     
     const query = `
-      SELECT 
+     SELECT 
         c.monto_inicial,
-        COALESCE(SUM(v.total), 0) AS total_ventas
-      FROM caja c
-      LEFT JOIN ventas v ON v.id_caja = c.id
-      WHERE c.id = ?
-      GROUP BY c.monto_inicial;
+
+        -- Ventas
+        IFNULL(v.total_ventas, 0) AS total_ventas,
+
+        -- Egresos
+        IFNULL(e.total_egresos, 0) AS total_egresos,
+
+        -- Saldo real en caja
+        (
+            c.monto_inicial 
+            + IFNULL(v.total_ventas, 0)
+            - IFNULL(e.total_egresos, 0)
+        ) AS saldo_actual
+
+    FROM caja c
+
+    -- Subconsulta ventas
+    LEFT JOIN (
+        SELECT 
+            id_caja,
+            SUM(total) AS total_ventas
+        FROM ventas
+        GROUP BY id_caja
+    ) v ON v.id_caja = c.id
+
+    -- Subconsulta egresos
+    LEFT JOIN (
+        SELECT 
+            id_caja,
+            SUM(monto) AS total_egresos
+        FROM egresos
+        GROUP BY id_caja
+    ) e ON e.id_caja = c.id
+
+    WHERE c.id = ?;
     `;    
     const  [rows] = await db.query(query, [id_caja]);
     console.log("rows",rows);
@@ -125,7 +180,7 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
   finalizarVenta: async (payload) => {
     const conn = await db.getConnection();
     try {
-      await conn.beginTransaction();
+     // await conn.beginTransaction();
 
       console.log("payload",payload);
       
@@ -140,15 +195,23 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
         [id_cliente, id_caja,id_mesa, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, 'EFECTIVO', nota]
       );
 
+            console.log("ventaResult",ventaResult);
+
         const [mesas] = await conn.query(
         `update mesas set estado='Ocupada' where id=?`,
         [ id_mesa]
       );
 
+                  console.log("mesas",mesas);
+
       const id_venta = ventaResult.insertId;
 
+        console.log("id_ventamesas",id_venta);
+        
       // 2️⃣ Insertar en tabla ventas_items
       for (const p of productos) {
+        console.log("ingresando a guardar platos");
+        
         await conn.query(
           `INSERT INTO ventas_items (id_venta, id_producto, cantidad, precio_unitario, descuento, descuento_porcentaje, impuesto, subtotal)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -156,6 +219,11 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
         );
       }
 
+console.log(
+        `INSERT INTO pagos (id_venta, metodo_pago, monto_pagado, monto_recibido, cambio)
+         VALUES ( ?, ?, ?, ?, ?)`,
+        [id_venta, metodo_pago,monto_pagado,monto_recibido,cambio]
+      );
 
  const [venta_pago] = await conn.query(
         `INSERT INTO pagos (id_venta, metodo_pago, monto_pagado, monto_recibido, cambio)
@@ -163,11 +231,12 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
         [id_venta, metodo_pago,monto_pagado,monto_recibido,cambio]
       );
 
-      
-      await conn.commit();
+       console.log("venta_pago",venta_pago);
+
+    //  await conn.commit();
       return { id_venta, productos };
     } catch (err) {
-      await conn.rollback();
+    //  await conn.rollback();
       throw err;
     } finally {
       conn.release();
@@ -175,19 +244,22 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
   },
 
 
-   buscarCliente: async ( datoscliente ) => {
-    
-    
-    const query = `
-SELECT *
-FROM personas
-WHERE  identificacion LIKE CONCAT('%', ?, '%')
-LIMIT 20;
-    `;    
-    const  [rows] = await db.query(query, [datoscliente]);
-    
-    return rows;
-  },
+buscarCliente: async (datoscliente) => {
+
+  const query = `
+    SELECT *
+    FROM personas
+    WHERE identificacion LIKE ?
+       OR CONCAT(nombres, ' ', apellidos) LIKE ?
+    LIMIT 20
+  `;
+
+  const valor = `%${datoscliente}%`;
+
+  const [rows] = await db.query(query, [valor, valor]);
+
+  return rows;
+},
 
      mesas: async ( id_negocio ) => {
     
@@ -201,6 +273,194 @@ LIMIT 20;
     return rows;
   },
 
-};
+  detallesMesa: async ( id_negocio,mesaId ) => {
+    
+    const query = `
+ SELECT  
+    m.id AS id_mesa,
+    v.id AS id_venta,
+    p.id as id_pago,
+    per.identificacion AS identificacion_cliente,
+    CONCAT(per.nombres, ' ', per.apellidos) AS nombre_completo,
+    v.subtotal AS venta_total,
 
+    CONCAT(
+        '[',
+        GROUP_CONCAT(
+            CONCAT(
+                '{',
+                '"id_producto":', vi.id_producto, ',',
+                '"url_imagen":"', prod_i.url, '",',
+                '"nombre":"', pro.nombre, '",',
+                '"cantidad":', vi.cantidad, ',',
+                '"subtotal":', vi.subtotal,
+                '}'
+            )
+        ),
+        ']'
+    ) AS productos
+
+FROM mesas m
+INNER JOIN ventas v ON v.id_mesa = m.id
+INNER JOIN ventas_items vi ON v.id = vi.id_venta
+INNER JOIN productos pro ON vi.id_producto = pro.id
+INNER JOIN productos_imagenes  prod_i on pro.id=prod_i.id_producto
+INNER JOIN pagos p ON v.id = p.id_venta
+INNER JOIN personas per ON v.id_cliente = per.id
+
+WHERE p.metodo_pago = 'PENDIENTE'
+  AND m.id_negocio = ?
+  AND m.id = ?
+
+GROUP BY 
+    m.id,
+    v.id,
+    per.identificacion,
+    per.nombres,
+    per.apellidos,
+    v.subtotal;
+    `;    
+    const  [rows] = await db.query(query, [id_negocio,mesaId]);
+    
+    return rows;
+  },
+
+
+
+listarEgresos : async (id_negocio, id_caja) => {
+  const [rows] = await db.query(
+    `
+    SELECT 
+      id,
+      descripcion,
+      metodo_pago,
+      monto,
+      observacion,
+      created_at
+    FROM egresos
+    WHERE id_negocio = ? 
+      AND id_caja = ?
+    ORDER BY created_at DESC
+    `,
+    [id_negocio, id_caja]
+  );
+
+  return rows;
+},
+
+
+/* ===============================
+   CREAR EGRESO
+================================= */
+ crearEgreso : async (data) => {
+  console.log("data",data);
+  
+  const sql = `
+    INSERT INTO egresos
+    (
+      id_negocio,
+      id_caja,
+      fecha,
+      descripcion,
+      metodo_pago,
+      monto,
+      estado,
+      observacion,
+      created_at,
+      updated_at
+    )
+    VALUES (?, ?, NOW(), ?, ?,  ?, 'ACTIVO', ?, NOW(), NOW())
+  `;
+
+  const [result] = await db.query(sql, [
+    data.id_negocio,
+    data.id_caja,
+    data.descripcion,
+    data.metodo_pago || null,
+    data.monto,
+    data.observacion || null
+  ]);
+
+  return result.insertId;
+},
+
+
+
+/* ===============================
+   ACTUALIZAR EGRESO
+================================= */
+ actualizarEgreso: async (id, data) => {
+
+  const sql = `
+    UPDATE egresos
+    SET
+      descripcion = ?,
+      metodo_pago = ?,
+      monto = ?,
+      observacion = ?,
+      updated_at = NOW()
+    WHERE id = ?
+  `;
+
+  await db.query(sql, [
+    data.descripcion,
+    data.metodo_pago,
+    data.monto,
+    data.observacion,
+    id
+  ]);
+},
+
+
+/* ===============================
+   ELIMINAR EGRESO
+================================= */
+ eliminarEgreso: async (id) => {
+
+  const sql = `DELETE FROM egresos WHERE id = ?`;
+  await db.query(sql, [id]);
+},
+
+
+actualizaventa: async (payload) => {
+  const conn = await db.getConnection();
+  try {
+    console.log("payload", payload);
+
+    const { id_venta, metodo_pago, monto_recibido, cambio,id_mesa } = payload;
+
+    // Actualizar la venta
+    const sqlUpdate = `
+      UPDATE pagos
+      SET metodo_pago = ?,
+          monto_recibido = ?,
+          cambio = ?,
+          fecha_actualizacion = NOW()
+      WHERE id = ?;
+    `;
+
+
+    const result = await conn.query(sqlUpdate, [metodo_pago, monto_recibido, cambio, id_venta]);
+
+    if (result[0].affectedRows === 0) {
+      throw new Error("No se encontró la venta con el id proporcionado");
+    }
+
+    // Traer la fila actualizada
+    const rows = await conn.query("update mesas set estado='Disponible' where id = ?", [id_mesa]);
+
+    console.log("Venta actualizada:", rows[0]);
+
+    return rows[0];
+  } catch (err) {
+    console.error("Error actualizando venta:", err.message);
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+
+
+
+}
 export default CajeroService;
