@@ -1,4 +1,5 @@
 import { db } from "../config/db.js";
+import { notificarMesas } from "../server.js"; // ajusta la ruta según tu proyecto
 
 
 const CajeroService = {
@@ -184,7 +185,7 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
 
       console.log("payload",payload);
       
-      const { id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado,
+      const { id_negocio,id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado,
           nota, productos, metodo_pago,monto_pagado,monto_recibido,cambio,id_mesa} = payload;
 
 
@@ -195,18 +196,11 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
         [id_cliente, id_caja,id_mesa, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, 'EFECTIVO', nota]
       );
 
-            console.log("ventaResult",ventaResult);
-
-        const [mesas] = await conn.query(
-        `update mesas set estado='Ocupada' where id=?`,
-        [ id_mesa]
-      );
-
-                  console.log("mesas",mesas);
+        const [mesas] = await conn.query( `update mesas set estado='Ocupada' where id=?`,[ id_mesa]);
+         await notificarMesas(id_negocio);
 
       const id_venta = ventaResult.insertId;
 
-        console.log("id_ventamesas",id_venta);
         
       // 2️⃣ Insertar en tabla ventas_items
       for (const p of productos) {
@@ -283,7 +277,7 @@ buscarCliente: async (datoscliente) => {
     per.identificacion AS identificacion_cliente,
     CONCAT(per.nombres, ' ', per.apellidos) AS nombre_completo,
     v.subtotal AS venta_total,
-
+    p.metodo_pago as estado_pago,
     CONCAT(
         '[',
         GROUP_CONCAT(
@@ -308,7 +302,7 @@ INNER JOIN productos_imagenes  prod_i on pro.id=prod_i.id_producto
 INNER JOIN pagos p ON v.id = p.id_venta
 INNER JOIN personas per ON v.id_cliente = per.id
 
-WHERE p.metodo_pago = 'PENDIENTE'
+WHERE m.estado = 'ocupada'
   AND m.id_negocio = ?
   AND m.id = ?
 
@@ -318,7 +312,8 @@ GROUP BY
     per.identificacion,
     per.nombres,
     per.apellidos,
-    v.subtotal;
+    v.subtotal
+    order by p.id desc limit 1;
     `;    
     const  [rows] = await db.query(query, [id_negocio,mesaId]);
     
@@ -349,11 +344,7 @@ listarEgresos : async (id_negocio, id_caja) => {
 },
 
 
-/* ===============================
-   CREAR EGRESO
-================================= */
  crearEgreso : async (data) => {
-  console.log("data",data);
   
   const sql = `
     INSERT INTO egresos
@@ -385,10 +376,6 @@ listarEgresos : async (id_negocio, id_caja) => {
 },
 
 
-
-/* ===============================
-   ACTUALIZAR EGRESO
-================================= */
  actualizarEgreso: async (id, data) => {
 
   const sql = `
@@ -411,10 +398,6 @@ listarEgresos : async (id_negocio, id_caja) => {
   ]);
 },
 
-
-/* ===============================
-   ELIMINAR EGRESO
-================================= */
  eliminarEgreso: async (id) => {
 
   const sql = `DELETE FROM egresos WHERE id = ?`;
@@ -425,9 +408,7 @@ listarEgresos : async (id_negocio, id_caja) => {
 actualizaventa: async (payload) => {
   const conn = await db.getConnection();
   try {
-    console.log("payload", payload);
-
-    const { id_venta, metodo_pago, monto_recibido, cambio,id_mesa } = payload;
+    const { id_negocio,id_venta, metodo_pago, monto_recibido, cambio,id_mesa } = payload;
 
     // Actualizar la venta
     const sqlUpdate = `
@@ -448,7 +429,7 @@ actualizaventa: async (payload) => {
 
     // Traer la fila actualizada
     const rows = await conn.query("update mesas set estado='Disponible' where id = ?", [id_mesa]);
-
+    await notificarMesas(id_negocio);
     console.log("Venta actualizada:", rows[0]);
 
     return rows[0];
@@ -458,7 +439,14 @@ actualizaventa: async (payload) => {
   } finally {
     conn.release();
   }
-}
+},
+
+liberar_mesa : async (id_mesa,id_negocio) => {
+  const conn = await db.getConnection();
+  const [mesas] = await conn.query( `update mesas set estado='Disponible' where id=?`,[ id_mesa]);
+   await notificarMesas(id_negocio);
+  return mesas;
+},
 
 
 

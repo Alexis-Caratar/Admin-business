@@ -110,9 +110,6 @@ export const listarEgresos = async (req, res) => {
   }
 };
 
-/* ===============================
-   CREAR EGRESO
-================================= */
 export const crearEgreso = async (req, res) => {
   try {
     console.log(req.body);
@@ -159,11 +156,6 @@ export const crearEgreso = async (req, res) => {
   }
 };
 
-
-
-/* ===============================
-   ACTUALIZAR EGRESO
-================================= */
 export const actualizarEgreso = async (req, res) => {
   try {
     const { id } = req.params;
@@ -191,9 +183,6 @@ export const actualizarEgreso = async (req, res) => {
   }
 };
 
-/* ===============================
-   ELIMINAR EGRESO
-================================= */
 export const eliminarEgreso = async (req, res) => {
   try {
     const { id } = req.params;
@@ -232,5 +221,18 @@ export const actualizaventa = async (req, res) => {
   
 };
 
+
+export const liberar_mesa = async (req, res) => {
+  try {
+    const { id_mesa,id_negocio } = req.params;
+    console.log("req.params",req.params);
+    
+    const respuesta = await CajeroService.liberar_mesa(id_mesa,id_negocio);
+    res.json(respuesta);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al actualizar mesas" });
+  }
+};
 
 
