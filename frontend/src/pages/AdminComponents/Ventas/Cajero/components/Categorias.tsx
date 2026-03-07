@@ -6,30 +6,44 @@ type Props = {
   categorias: CategoriaCajero[];
   loading: boolean;
   onOpen: (c: CategoriaCajero) => void;
+  modo?: "dashboard" | "carrito"; // 👈 nuevo
 };
 
-export const Categorias: React.FC<Props> = ({ categorias, loading, onOpen }) => {
+export const Categorias: React.FC<Props> = ({
+  categorias,
+  loading,
+  onOpen,
+  modo = "dashboard",
+}) => {
+  const esCarrito = modo === "carrito";
+
   return (
     <Box>
-     <Typography
-  variant="h6"
-  fontWeight="bold"
-  mb={2}
-  sx={{
-    fontSize: { xs: 16, md: 20 }, // 🔹 Más pequeño en móviles, más grande en escritorio
-  }}
->
-  Categorías
-</Typography>
+      <Typography
+        variant="h6"
+        fontWeight="bold"
+        mb={2}
+        sx={{
+          fontSize: { xs: 16, md: 20 },
+        }}
+      >
+        Categorías
+      </Typography>
 
       {loading ? (
-        <Typography color="text.secondary">Cargando categorías...</Typography>
+        <Typography color="text.secondary">
+          Cargando categorías...
+        </Typography>
       ) : (
         <Box
           sx={{
             display: "grid",
             gap: 1.2,
-            gridTemplateColumns: "1fr", // Siempre una por fila
+
+            // 👇 AQUÍ ESTA LA MAGIA
+            gridTemplateColumns: esCarrito
+              ? { xs: "repeat(3, 1fr)", md: "2" } // 📱 3 por fila en carrito
+              : "1fr", // Dashboard normal
           }}
         >
           {categorias.map((cat) => (
@@ -38,15 +52,21 @@ export const Categorias: React.FC<Props> = ({ categorias, loading, onOpen }) => 
               onClick={() => onOpen(cat)}
               sx={{
                 display: "flex",
-                flexDirection: { xs: "column", md: "row" }, // Columna en móvil, fila en escritorio
+
+                flexDirection: esCarrito
+                  ? "column"
+                  : { xs: "column", md: "row" },
+
                 alignItems: "center",
-                justifyContent: { xs: "center", md: "flex-start" },
-                p: 1.3,
+                justifyContent: "center",
+
+                p: esCarrito ? 1 : 1.3,
                 borderRadius: 3,
                 cursor: "pointer",
                 transition: "0.25s",
                 boxShadow: 2,
                 border: "1px solid #e5e5e5",
+
                 "&:hover": {
                   boxShadow: 5,
                   transform: "translateY(-3px)",
@@ -56,19 +76,33 @@ export const Categorias: React.FC<Props> = ({ categorias, loading, onOpen }) => 
               <Avatar
                 src={cat.imagen}
                 sx={{
-                  width: { xs: 50, md: 40 },
-                  height: { xs: 50, md: 40 },
-                  mb: { xs: 1, md: 0 },
-                  mr: { xs: 0, md: 2 },
+                  width: esCarrito
+                    ? 38
+                    : { xs: 50, md: 40 },
+
+                  height: esCarrito
+                    ? 38
+                    : { xs: 50, md: 40 },
+
+                  mb: esCarrito ? 0.5 : { xs: 1, md: 0 },
+
+                  mr: esCarrito
+                    ? 0
+                    : { xs: 0, md: 2 },
+
                   borderRadius: 2,
                   bgcolor: "#f5f5f5",
                 }}
               />
 
               <Typography
-                fontSize={{ xs: 12, md: 14 }} // 🔹 Letra más pequeña en móviles
+                fontSize={
+                  esCarrito
+                    ? 11
+                    : { xs: 12, md: 14 }
+                }
                 fontWeight={600}
-                textAlign={{ xs: "center", md: "left" }}
+                textAlign="center"
               >
                 {cat.categoria}
               </Typography>

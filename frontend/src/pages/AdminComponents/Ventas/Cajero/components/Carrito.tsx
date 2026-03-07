@@ -33,7 +33,8 @@ import { apibuscar_cliente } from "../../../../../api/cajero";
 
 // Modal para crear cliente
 import { CrearClienteModal } from "./CrearClienteModal";
-import type{ Mesa } from "../../../../../types/cajero"; // ajusta la ruta
+import type { Mesa } from "../../../../../types/cajero"; // ajusta la ruta
+import { Categorias } from "./Categorias";
 
 type Cliente = {
   id: number;
@@ -47,6 +48,7 @@ type Cliente = {
 type Props = {
   carrito: any[];
   onRemove: (id: number) => void;
+  onClear: () => void;
   onAdd: (id: number) => void;
   onSub: (id: number) => void;
   onFinalizar: (
@@ -58,16 +60,23 @@ type Props = {
     }
   ) => void;
   mesaSeleccionada: Mesa | null;
+  categorias: any[];
+  onOpenCategoria: (categoria: any) => void;
+  loadingCategorias: boolean;
 };
 
 
 export const Carrito: React.FC<Props> = ({
   carrito,
   onRemove,
+  onClear,
   onAdd,
   onSub,
   onFinalizar,
   mesaSeleccionada,
+  categorias,
+  onOpenCategoria,
+  loadingCategorias
 }) => {
 
   const [clienteBuscado, setClienteBuscado] = useState("");
@@ -84,6 +93,8 @@ export const Carrito: React.FC<Props> = ({
     (acc, v) => acc + v.precio_venta * v.cantidad,
     0
   );
+
+  console.log("carrtito", carrito);
 
   const monto = Number(montoRecibido) || 0;
   const cambio = monto - total;
@@ -268,80 +279,111 @@ export const Carrito: React.FC<Props> = ({
         />
 
         {/* CARRITO */}
-        <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-          <AddShoppingCartIcon color="primary" />
-          <Typography variant="h6" fontWeight="bold">
-            Carrito de Ventas
-          </Typography>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={1}
+        >
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <AddShoppingCartIcon color="primary" />
+            <Typography variant="h6" fontWeight="bold">
+              Carrito de Ventas
+            </Typography>
+          </Stack>
+
+          {carrito.length > 0 && (
+            <Button
+              size="small"
+              color="error"
+              variant="outlined"
+              onClick={onClear}
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600
+              }}
+            >
+              Vaciar carrito
+            </Button>
+          )}
         </Stack>
 
-     {mesaSeleccionada && (
-  <Card
-    sx={{
-      mb: 2,
-      p: 1.5,
-      borderRadius: 2,
-      display: "flex",
-      alignItems: "center",
-      gap: 1.5,
-      background: "linear-gradient(135deg, #e3f2fd, #f1f8ff)",
-      border: "1px solid #bbdefb",
-    }}
-  >
-    <Avatar
-      sx={{
-        bgcolor: "primary.main",
-        width: 42,
-        height: 42,
-      }}
-    >
-      🪑
-    </Avatar>
+        {mesaSeleccionada && (
+          <Card
+            sx={{
+              mb: 2,
+              p: 1.5,
+              borderRadius: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              background: "linear-gradient(135deg, #e3f2fd, #f1f8ff)",
+              border: "1px solid #bbdefb",
+            }}
+          >
+            <Avatar
+              sx={{
+                bgcolor: "primary.main",
+                width: 42,
+                height: 42,
+              }}
+            >
+              🪑
+            </Avatar>
 
-    <Box sx={{ flexGrow: 1 }}>
-      <Typography fontWeight={700} fontSize={13}>
-        Mesa seleccionada
-      </Typography>
-      <Typography fontSize={14} color="text.secondary">
-        {mesaSeleccionada.nombre} · Capacidad {mesaSeleccionada.capacidad}
-      </Typography>
-    </Box>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography fontWeight={700} fontSize={13}>
+                Mesa seleccionada
+              </Typography>
+              <Typography fontSize={14} color="text.secondary">
+                {mesaSeleccionada.nombre} · Capacidad {mesaSeleccionada.capacidad}
+              </Typography>
+            </Box>
 
-    <Chip
-      label={mesaSeleccionada.estado}
-      color={
-        mesaSeleccionada.estado === "Disponible"
-          ? "success"
-          : mesaSeleccionada.estado === "Ocupada"
-          ? "error"
-          : "warning"
-      }
-      size="small"
-      sx={{ fontWeight: 600 }}
-    />
-  </Card>
-)}
+            <Chip
+              label={mesaSeleccionada.estado}
+              color={
+                mesaSeleccionada.estado === "Disponible"
+                  ? "success"
+                  : mesaSeleccionada.estado === "Ocupada"
+                    ? "error"
+                    : "warning"
+              }
+              size="small"
+              sx={{ fontWeight: 600 }}
+            />
+          </Card>
+        )}
 
 
         <Card sx={{ p: 1, borderRadius: 2, boxShadow: 3 }}>
           {carrito.length === 0 ? (
-            <Typography color="text.secondary" px={1} py={4} align="center">
-              No hay productos.
-            </Typography>
+            <Box>
+              <Typography color="text.secondary" px={1} py={4} align="center">
+                No hay productos.
+              </Typography>
+              <Categorias
+                categorias={categorias}
+                loading={loadingCategorias}
+                onOpen={onOpenCategoria}
+                modo="carrito"
+              />
+            </Box>
           ) : (
             <>
 
-       
 
-<Typography
-  color="text.secondary"
-  align="left"
-  sx={{ display: "flex", alignItems: "center", gap: 1 }}
->
-  <ShoppingBasketOutlinedIcon fontSize="small" />
-  Productos
-</Typography>   
-            <SwipeableList>
+
+              <Typography
+                color="text.secondary"
+                align="left"
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+              >
+                <ShoppingBasketOutlinedIcon fontSize="small" />
+                Productos
+              </Typography>
+              <SwipeableList>
                 {carrito.map((item) => (
                   <SwipeableListItem
                     key={item.id}
@@ -358,7 +400,7 @@ export const Carrito: React.FC<Props> = ({
                     >
                       <ListItemAvatar>
                         <Avatar
-                          src={item.imagen}
+                          src={item.imagen_plato}
                           alt={item.nombre}
                           variant="rounded"
                           sx={{ width: 50, height: 50, mr: 1 }}

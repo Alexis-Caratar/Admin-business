@@ -1,5 +1,5 @@
 // CarritoMobile.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Drawer,
@@ -18,9 +18,11 @@ import {
   Paper,
   TextField,
   MenuItem,
+  Chip,
+  Card,
 } from "@mui/material";
 
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonIcon from "@mui/icons-material/Person";
@@ -29,7 +31,18 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PaymentIcon from "@mui/icons-material/Payment";
 import { motion, AnimatePresence } from "framer-motion";
 import { CrearClienteModal } from "./CrearClienteModal";
+import type { Mesa } from "../../../../../types/cajero"; // ajusta la ruta
+import { Categorias } from "./Categorias";
 import { apibuscar_cliente } from "../../../../../api/cajero";
+import {
+  LeadingActions,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from "react-swipeable-list";
+
+import "react-swipeable-list/dist/styles.css";
 
 type Cliente = {
   id: number;
@@ -48,10 +61,15 @@ type ProductoCarrito = {
 };
 
 type Props = {
+  open: boolean;
+  onClose: () => void;
+
   carrito: ProductoCarrito[];
   onRemove: (id: number) => void;
+  onClear: () => void;
   onAdd: (id: number) => void;
   onSub: (id: number) => void;
+
   onFinalizar: (
     idCliente: number | null,
     pago: {
@@ -60,6 +78,11 @@ type Props = {
       cambio: number;
     }
   ) => void;
+
+  mesaSeleccionada: Mesa | null;
+  categorias: any[];
+  onOpenCategoria: (categoria: any) => void;
+  loadingCategorias: boolean;
 };
 
 const slideVariants = {
@@ -78,14 +101,20 @@ const slideVariants = {
 };
 
 export const CarritoMobile: React.FC<Props> = ({
+  open,
+  onClose,
   carrito,
   onRemove,
+  onClear,
   onAdd,
   onSub,
   onFinalizar,
+  mesaSeleccionada,
+  categorias,
+  onOpenCategoria,
+  loadingCategorias
 }) => {
-  const [open, setOpen] = useState(false);
-  // 0 = Cliente + Pedido, 1 = Pago
+
   const [tab, setTab] = useState<number>(0);
   const [direction, setDirection] = useState<number>(1);
 
@@ -94,13 +123,60 @@ export const CarritoMobile: React.FC<Props> = ({
   const [resultados, setResultados] = useState<Cliente[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
   const [openCrearModal, setOpenCrearModal] = useState(false);
-
+const [resetCliente, setResetCliente] = useState(0);
   // PAGO
   const total = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
   const [metodoPago, setMetodoPago] = useState<string>("PENDIENTE");
   const [montoRecibido, setMontoRecibido] = useState<number>(0);
   const cambio = montoRecibido - total;
+  const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
 
+  const trailingActions = (id: number) => (
+    <TrailingActions>
+      <SwipeAction destructive onClick={() => onRemove(id)}>
+        <Box
+          sx={{
+            height: "100%",
+            background: "#e53935",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            px: 3,
+            borderRadius: 2,
+          }}
+        >
+          <DeleteIcon />
+        </Box>
+      </SwipeAction>
+    </TrailingActions>
+  );
+
+
+
+ 
+  useEffect(() => {
+  if (carrito.length === 0) {
+    setClienteSeleccionado(null);
+    setMetodoPago("PENDIENTE");
+    setMontoRecibido(0);
+  }
+}, [carrito]);
+
+
+useEffect(() => {
+  if (open) {
+    setTab(0);
+    setDirection(1);
+  }
+}, [open]);
+
+useEffect(() => {
+  if (open) {
+    setTab(0);
+    setDirection(1);
+  }
+}, [open]);
   // Buscar cliente (llamada a la API)
   const handleBuscar = async (term: string) => {
     setClienteBuscado(term);
@@ -144,6 +220,8 @@ export const CarritoMobile: React.FC<Props> = ({
 
   // Finalizar: llamar al padre y resetear estados
   const handleFinalizar = () => {
+    if (carrito.length === 0) return;
+
     const pago = {
       metodo_pago: metodoPago,
       monto_recibido: montoRecibido,
@@ -151,88 +229,156 @@ export const CarritoMobile: React.FC<Props> = ({
     };
 
     onFinalizar(clienteSeleccionado ? clienteSeleccionado.id : null, pago);
-
+    onClear();
+    toastr.success("Venta registrada correctamente");
     // Reset states
     setClienteSeleccionado(null);
     setClienteBuscado("");
     setResultados([]);
+    setResetCliente(prev => prev + 1);
     setMetodoPago("EFECTIVO");
     setMontoRecibido(0);
-    setOpen(false);
+    onClose();
     setTab(0);
     setDirection(1);
+
+
   };
+
+  const formatCOP = (value: number) =>
+    new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0,
+    }).format(value);
 
   return (
     <>
-      {/* Floating FAB (visible solo en xs) */}
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: 20,
-          right: 20,
-          zIndex: 8000,
-          display: { xs: "flex", md: "none" },
-        }}
-      >
-        <Badge badgeContent={carrito.length} color="error">
-          <Fab
-            color="primary"
-            onClick={() => {
-              setOpen(true);
-              setTab(0);
-              setDirection(1);
-            }}
-            sx={{ boxShadow: 6 }}
-          >
-            <ShoppingCartIcon />
-          </Fab>
-        </Badge>
-      </Box>
 
       {/* Drawer */}
-    <Drawer
-  anchor="bottom"
-  open={open}
-  onClose={() => setOpen(false)}
-  sx={{
-    //zIndex: 1800, // ⬅️ Más alto que cualquier modal/overlay normal
-    "& .MuiBackdrop-root": {
-      backgroundColor: "rgba(0,0,0,0.2)", // Más elegante
-    },
-  }}
-  PaperProps={{
-    sx: {
-      zIndex: 1801, // ⬅️ El paper SIEMPRE debe estar por encima del backdrop
-      borderTopLeftRadius: 22,
-      borderTopRightRadius: 22,
-      height: "87vh",
-      p: 1.6,
-      overflow: "hidden",
-      boxShadow: "0px -4px 18px rgba(0,0,0,0.18)", // sombra superior profesional
-      background: "#fff", // blanco limpio
-    },
-  }}
->
+      <Drawer
+        anchor="bottom"
+        open={open}
+        onClose={onClose}
+        ModalProps={{
+          keepMounted: false
+        }}
+        sx={{
+          //zIndex: 1800, // ⬅️ Más alto que cualquier modal/overlay normal
+          "& .MuiBackdrop-root": {
+            backgroundColor: "rgba(0,0,0,0.2)", // Más elegante
+          },
+        }}
+        PaperProps={{
+          sx: {
+            zIndex: 1801, // ⬅️ El paper SIEMPRE debe estar por encima del backdrop
+            borderTopLeftRadius: 22,
+            borderTopRightRadius: 22,
+            height: "87vh",
+            p: 1.6,
+            overflow: "hidden",
+            boxShadow: "0px -4px 18px rgba(0,0,0,0.18)", // sombra superior profesional
+            background: "#fff", // blanco limpio
+          },
+        }}
+      >
 
-        {/* Header */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-          <Typography fontWeight="bold" fontSize={18}>
-            Venta
-          </Typography>
+        {/* CARRITO */}
 
-          <Stack direction="row" spacing={1} alignItems="center">
-            {/* tab buttons styled with icons */}
+        <Stack>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            mb={1}
+          >
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <AddShoppingCartIcon color="primary" />
+              <Typography variant="h6" fontWeight="bold">
+                Carrito de Ventas
+              </Typography>
+            </Stack>
+
+            <IconButton onClick={onClose}>
+              <CloseIcon />
+            </IconButton>
+
+            {carrito.length > 0 && (
+              <Button
+                size="small"
+                color="error"
+                variant="outlined"
+                onClick={onClear}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600
+                }}
+              >
+                Vaciar carrito
+              </Button>
+            )}
+          </Stack>
+
+          {mesaSeleccionada && (
+            <Card
+              sx={{
+                mb: 2,
+                p: 1.5,
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                background: "linear-gradient(135deg, #e3f2fd, #f1f8ff)",
+                border: "1px solid #bbdefb",
+              }}
+            >
+              <Avatar
+                sx={{
+                  bgcolor: "primary.main",
+                  width: 42,
+                  height: 42,
+                }}
+              >
+                🪑
+              </Avatar>
+
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography fontWeight={700} fontSize={13}>
+                  Mesa seleccionada
+                </Typography>
+                <Typography fontSize={14} color="text.secondary">
+                  {mesaSeleccionada.nombre} · Capacidad {mesaSeleccionada.capacidad}
+                </Typography>
+              </Box>
+
+              <Chip
+                label={mesaSeleccionada.estado}
+                color={
+                  mesaSeleccionada.estado === "Disponible"
+                    ? "success"
+                    : mesaSeleccionada.estado === "Ocupada"
+                      ? "error"
+                      : "warning"
+                }
+                size="small"
+                sx={{ fontWeight: 600 }}
+              />
+            </Card>
+          )}
+
+
+          <Stack direction="row" spacing={1} alignItems="center" width="100%">
             <Button
               variant={tab === 0 ? "contained" : "outlined"}
-              size="small"
               startIcon={<PersonIcon />}
               onClick={() => goToTab(0)}
               sx={{
+                flex: 1,
                 textTransform: "none",
                 borderRadius: 2,
-                px: 1.5,
-                minWidth: 110,
+                py: 1,
+                fontWeight: 500,
               }}
             >
               Cliente & Pedido
@@ -240,22 +386,18 @@ export const CarritoMobile: React.FC<Props> = ({
 
             <Button
               variant={tab === 1 ? "contained" : "outlined"}
-              size="small"
               startIcon={<PaymentIcon />}
               onClick={() => goToTab(1)}
               sx={{
+                flex: 1,
                 textTransform: "none",
                 borderRadius: 2,
-                px: 1.5,
-                minWidth: 80,
+                py: 1,
+                fontWeight: 400,
               }}
             >
               Pago
             </Button>
-
-            <IconButton onClick={() => setOpen(false)}>
-              <CloseIcon />
-            </IconButton>
           </Stack>
         </Stack>
 
@@ -271,24 +413,26 @@ export const CarritoMobile: React.FC<Props> = ({
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.28, ease: "easeOut" }}
+              transition={{ type: "spring", stiffness: 260, damping: 24 }}
               style={{ position: "absolute", width: "100%", top: 0, left: 0 }}
-              drag="x"
+              drag={tab === 1 ? "x" : false}
               dragConstraints={{ left: 0, right: 0 }}
-              onDragEnd={(_, info) => handlePanEnd(_, info)}
-              onPanEnd={(_, info) => handlePanEnd(_, info)}
+              onDragEnd={(_, info) => {
+                if (tab === 1) handlePanEnd(_, info);
+              }}
             >
               {/* ----- TAB 0: CLIENTE + PEDIDO ----- */}
               {tab === 0 && (
                 <Box sx={{ px: 0.5 }}>
                   {/* Buscar cliente */}
                   <TextField
-                    fullWidth
-                    placeholder="Buscar por identificación o nombres"
-                    size="small"
-                    value={clienteBuscado}
-                    onChange={(e) => handleBuscar(e.target.value)}
-                  />
+                      key={resetCliente}
+                      fullWidth
+                      placeholder="Buscar por identificación o nombres"
+                      size="small"
+                      value={clienteBuscado}
+                      onChange={(e) => handleBuscar(e.target.value)}
+                    />
 
                   {/* Resultados */}
                   {resultados.length > 0 && (
@@ -365,89 +509,131 @@ export const CarritoMobile: React.FC<Props> = ({
                   <Divider sx={{ my: 2 }} />
 
                   {/* Carrito list */}
-                  <Box sx={{ maxHeight: "38vh", overflowY: "auto" }}>
+                  <Box sx={{ maxHeight: "38vh", overflowY: "auto", scrollbarWidth: "thin" }}>
                     {carrito.length === 0 ? (
-                      <Typography align="center" color="text.secondary" mt={2}>
-                        No hay productos.
-                      </Typography>
+                      <Box>
+                        <Typography color="text.secondary" px={1} py={4} align="center">
+                          No hay productos.
+                        </Typography>
+                        <Categorias
+                          categorias={categorias}
+                          loading={loadingCategorias}
+                          onOpen={onOpenCategoria}
+                          modo="carrito"
+                        />
+                      </Box>
                     ) : (
-                      <List>
+                      <SwipeableList threshold={0.25}>
                         {carrito.map((item) => (
-                          <ListItem
+                          <SwipeableListItem
                             key={item.id}
-                            secondaryAction={
-                              <IconButton onClick={() => onRemove(item.id)}>
-                                <DeleteIcon color="error" />
-                              </IconButton>
-                            }
-                            sx={{ py: 1 }}
+                            trailingActions={trailingActions(item.id)}
                           >
-                            <ListItemAvatar>
-                              <Avatar
-                                src={item.imagen}
-                                variant="rounded"
-                                sx={{ width: 48, height: 48 }}
-                              />
-                            </ListItemAvatar>
+                            <ListItem sx={{ py: 1 }}>
 
-                            <ListItemText
-                              primary={<Typography fontWeight={600}>{item.nombre}</Typography>}
-                              secondary={
-                                <Stack spacing={1}>
-                                  <Stack direction="row" spacing={1} alignItems="center">
-                                    <Button
-                                      size="small"
-                                      variant="outlined"
-                                      onClick={() => onSub(item.id)}
-                                      sx={{ minWidth: 30 }}
-                                    >
-                                      -
-                                    </Button>
+                              <ListItemAvatar>
+                                <Avatar
+                                  src={item.imagen_plato}
+                                  variant="rounded"
+                                  sx={{ width: 48, height: 48 }}
+                                />
+                              </ListItemAvatar>
 
-                                    <Typography fontWeight="bold">{item.cantidad}</Typography>
+                              <ListItemText
+                                primary={<Typography fontWeight={600}>{item.nombre}</Typography>}
+                                secondary={
+                                  <Stack spacing={1}>
+                                    <Stack direction="row" spacing={1} alignItems="center">
 
-                                    <Button
-                                      size="small"
-                                      variant="outlined"
-                                      onClick={() => onAdd(item.id)}
-                                      sx={{ minWidth: 30 }}
-                                    >
-                                      +
-                                    </Button>
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={() => onSub(item.id)}
+                                        sx={{ minWidth: 30 }}
+                                      >
+                                        -
+                                      </Button>
+
+                                      <Typography fontWeight="bold">{item.cantidad}</Typography>
+
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={() => onAdd(item.id)}
+                                        sx={{ minWidth: 30 }}
+                                      >
+                                        +
+                                      </Button>
+
+                                    </Stack>
+
+                                    <Typography color="primary">
+                                      Subtotal: ${(item.precio_venta * item.cantidad).toLocaleString()}
+                                    </Typography>
                                   </Stack>
+                                }
+                              />
 
-                                  <Typography color="primary">
-                                    Subtotal: ${(item.precio_venta * item.cantidad).toLocaleString()}
-                                  </Typography>
-                                </Stack>
-                              }
-                            />
-                          </ListItem>
+                            </ListItem>
+                          </SwipeableListItem>
                         ))}
-                      </List>
+                      </SwipeableList>
                     )}
                   </Box>
 
-                  <Divider sx={{ my: 1 }} />
+                  <Box
+                    sx={{
 
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography fontWeight="bold">Total</Typography>
-                    <Typography fontWeight="bold" color="success.main">
-                      ${total.toLocaleString()}
-                    </Typography>
-                  </Stack>
-
-                  {/* Quick button go to Pago */}
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    sx={{ mt: 2 }}
-                    onClick={() => goToTab(1)}
-                    disabled={carrito.length === 0}
+                      position: "sticky",
+                      bottom: 0,
+                      background: "#fff",
+                      borderTop: "1px solid #eee",
+                      pt: 1,
+                      pb: 1,
+                    }}
                   >
-                    Ir a Pago
-                  </Button>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography fontWeight="bold">Total</Typography>
+                      <Typography fontWeight="bold" color="success.main">
+                        {formatCOP(total)}
+                      </Typography>
+                    </Stack>
+
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      onClick={() => goToTab(1)}
+                      disabled={carrito.length === 0}
+                      sx={{
+                        mt: 1.2,
+                        py: 1.4,
+                        borderRadius: 3,
+                        fontWeight: "bold",
+                        fontSize: 15,
+                        letterSpacing: 0.5,
+                        textTransform: "none",
+                        background: "linear-gradient(135deg, #09a58e, #2e7d32)",
+                        boxShadow: "0 6px 14px rgba(0,0,0,0.15)",
+                        transition: "all .25s ease",
+                        "&:hover": {
+                          background: "linear-gradient(135deg, #0bb79d, #388e3c)",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
+                        },
+                        "&:active": {
+                          transform: "scale(0.97)",
+                        },
+                        "&.Mui-disabled": {
+                          background: "#cfcfcf",
+                          color: "#888",
+                          boxShadow: "none",
+                        },
+                      }}
+                    >
+                      Ir a Pago
+                    </Button>
+                  </Box>
+
                 </Box>
               )}
 
@@ -468,12 +654,12 @@ export const CarritoMobile: React.FC<Props> = ({
                     sx={{ mt: 1 }}
                     onChange={(e) => setMetodoPago(e.target.value)}
                   >
-                <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
-                <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
-                <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
-                <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-                <MenuItem value="NEQUI">📱 Nequi</MenuItem>
-                <MenuItem value="DAVIPLATA">🏦 DaviPlata</MenuItem>
+                    <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
+                    <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
+                    <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
+                    <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
+                    <MenuItem value="NEQUI">📱 Nequi</MenuItem>
+                    <MenuItem value="DAVIPLATA">🏦 DaviPlata</MenuItem>
                   </TextField>
 
                   {/* MONTO RECIBIDO: mostrar vacío cuando es 0 */}
@@ -504,15 +690,41 @@ export const CarritoMobile: React.FC<Props> = ({
                   )}
 
                   {/* FINALIZAR */}
+
                   <Button
                     fullWidth
                     variant="contained"
-                    color="success"
-                    sx={{ mt: 3 }}
-                    disabled={metodoPago === "EFECTIVO" && cambio < 0}
-                    onClick={() => {
-                      handleFinalizar();
+                    startIcon={<CheckCircleIcon />}
+                    sx={{
+                      mt: 3,
+                      py: 1.5,
+                      borderRadius: 3,
+                      fontWeight: "bold",
+                      fontSize: 16,
+                      letterSpacing: 0.6,
+                      textTransform: "none",
+                      background: "linear-gradient(135deg, #09a58e, #2e7d32)",
+                      boxShadow: "0 8px 18px rgba(0,0,0,0.18)",
+                      transition: "all .25s ease",
+                      "&:hover": {
+                        background: "linear-gradient(135deg, #0bb79d, #388e3c)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 12px 24px rgba(0,0,0,0.22)",
+                      },
+                      "&:active": {
+                        transform: "scale(0.97)",
+                      },
+                      "&.Mui-disabled": {
+                        background: "#d6d6d6",
+                        color: "#888",
+                        boxShadow: "none",
+                      },
                     }}
+                    disabled={
+                      carrito.length === 0 ||
+                      (metodoPago === "EFECTIVO" && cambio < 0)
+                    }
+                    onClick={handleFinalizar}
                   >
                     Finalizar Venta
                   </Button>

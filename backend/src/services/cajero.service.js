@@ -1,52 +1,54 @@
 import { db } from "../config/db.js";
-import { notificarMesas } from "../server.js"; // ajusta la ruta según tu proyecto
+import { notificarCaja, notificarMesas } from "../websockets.js"; // ajusta la ruta según tu proyecto
 
 
 const CajeroService = {
- estadoCaja: async ({id_usuario}) => {
+  estadoCaja: async ({ id_usuario }) => {
     try {
 
-        const estado_caja = `
-        SELECT 
-          c.*,
+      const estado_caja = `
+  SELECT 
+    c.*,
 
-          -- Ventas
-          IFNULL(v.total_ventas, 0) AS total_ventas,
-          IFNULL(v.dinero_recaudado, 0) AS dinero_recaudado,
+    -- Ventas
+    IFNULL(CAST(v.total_ventas AS UNSIGNED), 0) AS total_ventas,
+    IFNULL(CAST(v.dinero_recaudado AS UNSIGNED), 0) AS dinero_recaudado,
 
-          -- Egresos
-          IFNULL(e.total_egresos, 0) AS total_egresos
+    -- Egresos
+    IFNULL(CAST(e.total_egresos AS UNSIGNED), 0) AS total_egresos
 
-      FROM caja c
+FROM caja c
 
-      -- Subconsulta de ventas (agregadas correctamente)
-      LEFT JOIN (
-          SELECT 
-              id_caja,
-              COUNT(id) AS total_ventas,
-              SUM(total) AS dinero_recaudado
-          FROM ventas
-          GROUP BY id_caja
-      ) v ON v.id_caja = c.id
+-- Subconsulta de ventas
+LEFT JOIN (
+    SELECT 
+        ve.id_caja,
+        COUNT(ve.id) AS total_ventas,
+        SUM(ve.total) AS dinero_recaudado
+    FROM ventas ve
+    INNER JOIN pagos pe on ve.id=pe.id_venta
+    where pe.estado_pago=1
+    GROUP BY ve.id_caja
+) v ON v.id_caja = c.id
 
-      -- Subconsulta de egresos (agregados correctamente)
-      LEFT JOIN (
-          SELECT 
-              id_caja,
-              SUM(monto) AS total_egresos
-          FROM egresos
-          GROUP BY id_caja
-      ) e ON e.id_caja = c.id
+-- Subconsulta de egresos
+LEFT JOIN (
+    SELECT 
+        id_caja,
+        SUM(monto) AS total_egresos
+    FROM egresos
+    GROUP BY id_caja
+) e ON e.id_caja = c.id
 
-      WHERE c.estado = 'ABIERTA'
-        AND c.id_usuario = ?
+WHERE c.estado = 'ABIERTA'
+  AND c.id_usuario = ?
 
-      ORDER BY c.fecha_apertura DESC
-      LIMIT 1;
+ORDER BY c.fecha_apertura DESC
+LIMIT 1;
 `
 
-    const [rows ] = await db.query(estado_caja, [id_usuario]);
-    return rows;
+      const [rows] = await db.query(estado_caja, [id_usuario]);
+      return rows;
 
     } catch (error) {
       console.error("Error obteniendo estado de caja:", error);
@@ -54,17 +56,17 @@ const CajeroService = {
     }
   },
 
-  
-listarProductos: async () => {
-  // 1. OBTENER CATEGORÍAS
-  const [categorias] = await db.query(`
+
+  listarProductos: async () => {
+    // 1. OBTENER CATEGORÍAS
+    const [categorias] = await db.query(`
     SELECT id, nombre, imagen
     FROM categorias
     WHERE id_negocio = 1
   `);
 
-  // 2. OBTENER PRODUCTOS
-  const [productos] = await db.query(`
+    // 2. OBTENER PRODUCTOS
+    const [productos] = await db.query(`
     SELECT 
       p.id as id_producto,
       p.nombre as nombre_producto,
@@ -77,61 +79,61 @@ listarProductos: async () => {
     WHERE p.estado = true
   `);
 
-  // 3. ARMAR EL JSON AGRUPADO POR CATEGORÍA
-  const resultado = categorias.map(cat => {
-    const platos = productos.filter(p => p.id_categoria === cat.id);
+    // 3. ARMAR EL JSON AGRUPADO POR CATEGORÍA
+    const resultado = categorias.map(cat => {
+      const platos = productos.filter(p => p.id_categoria === cat.id);
 
-    return {
-      id: cat.id,
-      categoria: cat.nombre,
-      imagen: cat.imagen,
-      platos: platos.map(pl => ({
-        id: pl.id_producto,
-        nombre: pl.nombre_producto,
-        precio_venta: pl.precio_venta,
-        imagen_plato: pl.imagen
-      }))
-    };
-  });
+      return {
+        id: cat.id,
+        categoria: cat.nombre,
+        imagen: cat.imagen,
+        platos: platos.map(pl => ({
+          id: pl.id_producto,
+          nombre: pl.nombre_producto,
+          precio_venta: pl.precio_venta,
+          imagen_plato: pl.imagen
+        }))
+      };
+    });
 
-  return resultado;
-},
+    return resultado;
+  },
 
   abrirCaja: async ({ id_usuario, monto_inicial }) => {
-   const query = `
+    const query = `
   INSERT INTO caja (id_usuario, monto_inicial, estado, fecha_apertura)
   VALUES (?, ?, 'ABIERTA', NOW());
 `;
 
-const [insert] = await db.execute(query, [id_usuario, monto_inicial]);
+    const [insert] = await db.execute(query, [id_usuario, monto_inicial]);
 
-const [rows] = await db.execute("SELECT * FROM caja WHERE id = ?", [
-  insert.insertId,
-]);
+    const [rows] = await db.execute("SELECT * FROM caja WHERE id = ?", [
+      insert.insertId,
+    ]);
 
-return rows[0];
+    return rows[0];
 
-  },    
+  },
 
-cerrarCaja: async ({ id_caja, monto_final }) => {
-  // 1️⃣ Actualizar la caja
-  const update = `
+  cerrarCaja: async ({ id_caja, monto_final }) => {
+    // 1️⃣ Actualizar la caja
+    const update = `
     UPDATE caja 
     SET estado='CERRADA', fecha_cierre=NOW(), monto_final=?
     WHERE id=?
   `;
-  const [result] = await db.query(update, [monto_final, id_caja]);
+    const [result] = await db.query(update, [monto_final, id_caja]);
 
-  // 2️⃣ Consultar la caja actualizada
-  const [rows] = await db.query('SELECT * FROM caja WHERE id=?', [id_caja]);
+    // 2️⃣ Consultar la caja actualizada
+    const [rows] = await db.query('SELECT * FROM caja WHERE id=?', [id_caja]);
 
-  // 3️⃣ Retornar la fila actualizada
-  return rows[0];
-},
+    // 3️⃣ Retornar la fila actualizada
+    return rows[0];
+  },
 
 
   arqueo: async ({ id_caja }) => {
-    
+
     const query = `
      SELECT 
         c.monto_inicial,
@@ -154,10 +156,12 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
     -- Subconsulta ventas
     LEFT JOIN (
         SELECT 
-            id_caja,
-            SUM(total) AS total_ventas
-        FROM ventas
-        GROUP BY id_caja
+            ve.id_caja,
+            SUM(ve.total) AS total_ventas
+        FROM ventas ve
+        INNER JOIN pagos pe on ve.id=pe.id_venta
+        where pe.estado_pago=1
+        GROUP BY ve.id_caja
     ) v ON v.id_caja = c.id
 
     -- Subconsulta egresos
@@ -170,10 +174,10 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
     ) e ON e.id_caja = c.id
 
     WHERE c.id = ?;
-    `;    
-    const  [rows] = await db.query(query, [id_caja]);
-    console.log("rows",rows);
-    
+    `;
+    const [rows] = await db.query(query, [id_caja]);
+    console.log("rows", rows);
+
     return rows[0];
   },
 
@@ -181,31 +185,41 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
   finalizarVenta: async (payload) => {
     const conn = await db.getConnection();
     try {
-     // await conn.beginTransaction();
-
-      console.log("payload",payload);
-      
-      const { id_negocio,id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado,
-          nota, productos, metodo_pago,monto_pagado,monto_recibido,cambio,id_mesa} = payload;
 
 
-      // 1️⃣ Insertar en tabla ventas
+      console.log("payload", payload);
+
+      const {idUsuario, id_negocio, id_cliente, id_caja, subtotal, descuento, descuento_porcentaje, impuesto, total, estado,
+        nota, productos, metodo_pago, monto_pagado, monto_recibido, cambio, id_mesa } = payload;
+
+
+      // 1️⃣ Obtener el siguiente consecutivo
+      const [consecutivo] = await conn.query(`
+            SELECT IFNULL(MAX(numero_consecutivo),0) + 1 AS siguiente
+            FROM ventas
+          `);
+
+      const numeroConsecutivo = consecutivo[0].siguiente;
+      const numeroFactura = `POS-${numeroConsecutivo.toString().padStart(6, '0')}`;
+
+
+      // 2️⃣ Insertar en tabla ventas
       const [ventaResult] = await conn.query(
-        `INSERT INTO ventas (id_cliente, id_caja,id_mesa, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota)
-         VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
-        [id_cliente, id_caja,id_mesa, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, 'EFECTIVO', nota]
+        `INSERT INTO ventas 
+            (numero_consecutivo, numero_factura, id_cliente, id_caja, id_mesa, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, metodo_pago, nota)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [numeroConsecutivo, numeroFactura, id_cliente, id_caja, id_mesa, subtotal, descuento, descuento_porcentaje, impuesto, total, estado, 'EFECTIVO', nota]
       );
 
-        const [mesas] = await conn.query( `update mesas set estado='Ocupada' where id=?`,[ id_mesa]);
-         await notificarMesas(id_negocio);
+      const [mesas] = await conn.query(`update mesas set estado='Ocupada' where id=?`, [id_mesa]);
+      await notificarMesas(id_negocio);
 
       const id_venta = ventaResult.insertId;
 
-        
+
       // 2️⃣ Insertar en tabla ventas_items
       for (const p of productos) {
-        console.log("ingresando a guardar platos");
-        
+
         await conn.query(
           `INSERT INTO ventas_items (id_venta, id_producto, cantidad, precio_unitario, descuento, descuento_porcentaje, impuesto, subtotal)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -213,24 +227,21 @@ cerrarCaja: async ({ id_caja, monto_final }) => {
         );
       }
 
-console.log(
-        `INSERT INTO pagos (id_venta, metodo_pago, monto_pagado, monto_recibido, cambio)
-         VALUES ( ?, ?, ?, ?, ?)`,
-        [id_venta, metodo_pago,monto_pagado,monto_recibido,cambio]
+      let estado_pago_id = 0
+      if (metodo_pago != 'PENDIENTE') estado_pago_id = 1
+
+      const [venta_pago] = await conn.query(
+        `INSERT INTO pagos (id_venta,estado_pago, metodo_pago, monto_pagado, monto_recibido, cambio)
+            VALUES ( ?,?, ?, ?, ?, ?)`,
+        [id_venta, estado_pago_id, metodo_pago, monto_pagado, monto_recibido, cambio]
       );
+      await notificarCaja(idUsuario);
 
- const [venta_pago] = await conn.query(
-        `INSERT INTO pagos (id_venta, metodo_pago, monto_pagado, monto_recibido, cambio)
-         VALUES ( ?, ?, ?, ?, ?)`,
-        [id_venta, metodo_pago,monto_pagado,monto_recibido,cambio]
-      );
 
-       console.log("venta_pago",venta_pago);
-
-    //  await conn.commit();
+      await conn.commit();
       return { id_venta, productos };
     } catch (err) {
-    //  await conn.rollback();
+      await conn.rollback();
       throw err;
     } finally {
       conn.release();
@@ -238,9 +249,9 @@ console.log(
   },
 
 
-buscarCliente: async (datoscliente) => {
+  buscarCliente: async (datoscliente) => {
 
-  const query = `
+    const query = `
     SELECT *
     FROM personas
     WHERE identificacion LIKE ?
@@ -248,32 +259,33 @@ buscarCliente: async (datoscliente) => {
     LIMIT 20
   `;
 
-  const valor = `%${datoscliente}%`;
+    const valor = `%${datoscliente}%`;
 
-  const [rows] = await db.query(query, [valor, valor]);
+    const [rows] = await db.query(query, [valor, valor]);
 
-  return rows;
-},
+    return rows;
+  },
 
-     mesas: async ( id_negocio ) => {
-    
+  mesas: async (id_negocio) => {
+
     const query = `
     SELECT *
     FROM mesas
     WHERE id_negocio = ?
-    `;    
-    const  [rows] = await db.query(query, [id_negocio]);
-    
+    `;
+    const [rows] = await db.query(query, [id_negocio]);
+
     return rows;
   },
 
-  detallesMesa: async ( id_negocio,mesaId ) => {
-    
+  detallesMesa: async (id_negocio, mesaId) => {
+
     const query = `
  SELECT  
     m.id AS id_mesa,
     v.id AS id_venta,
     p.id as id_pago,
+    v.numero_factura,
     per.identificacion AS identificacion_cliente,
     CONCAT(per.nombres, ' ', per.apellidos) AS nombre_completo,
     v.subtotal AS venta_total,
@@ -314,19 +326,20 @@ GROUP BY
     per.apellidos,
     v.subtotal
     order by p.id desc limit 1;
-    `;    
-    const  [rows] = await db.query(query, [id_negocio,mesaId]);
-    
+    `;
+    const [rows] = await db.query(query, [id_negocio, mesaId]);
+
     return rows;
   },
 
 
 
-listarEgresos : async (id_negocio, id_caja) => {
-  const [rows] = await db.query(
-    `
+  listarEgresos: async (id_negocio, id_caja) => {
+    const [rows] = await db.query(
+      `
     SELECT 
       id,
+      numero_egreso,
       descripcion,
       metodo_pago,
       monto,
@@ -337,48 +350,62 @@ listarEgresos : async (id_negocio, id_caja) => {
       AND id_caja = ?
     ORDER BY created_at DESC
     `,
-    [id_negocio, id_caja]
-  );
+      [id_negocio, id_caja]
+    );
 
-  return rows;
-},
-
-
- crearEgreso : async (data) => {
-  
-  const sql = `
-    INSERT INTO egresos
-    (
-      id_negocio,
-      id_caja,
-      fecha,
-      descripcion,
-      metodo_pago,
-      monto,
-      estado,
-      observacion,
-      created_at,
-      updated_at
-    )
-    VALUES (?, ?, NOW(), ?, ?,  ?, 'ACTIVO', ?, NOW(), NOW())
-  `;
-
-  const [result] = await db.query(sql, [
-    data.id_negocio,
-    data.id_caja,
-    data.descripcion,
-    data.metodo_pago || null,
-    data.monto,
-    data.observacion || null
-  ]);
-
-  return result.insertId;
-},
+    return rows;
+  },
 
 
- actualizarEgreso: async (id, data) => {
+  crearEgreso: async (data) => {
 
-  const sql = `
+    // 1️⃣ Obtener el último consecutivo
+    const [[row]] = await db.query(
+      `SELECT IFNULL(MAX(numero_consecutivo),0) + 1 AS next FROM egresos`
+    );
+
+    const numeroConsecutivo = row.next;
+    const numeroEgreso = `EGR-${String(numeroConsecutivo).padStart(6, "0")}`;
+
+    // 2️⃣ Insertar egreso
+    const sql = `
+  INSERT INTO egresos
+  (
+    id_negocio,
+    id_caja,
+    numero_consecutivo,
+    numero_egreso,
+    fecha,
+    descripcion,
+    metodo_pago,
+    monto,
+    estado,
+    observacion,
+    created_at,
+    updated_at
+  )
+  VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, 'ACTIVO', ?, NOW(), NOW())
+`;
+
+    const [result] = await db.query(sql, [
+      data.id_negocio,
+      data.id_caja,
+      numeroConsecutivo,
+      numeroEgreso,
+      data.descripcion,
+      data.metodo_pago || null,
+      data.monto,
+      data.observacion || null
+    ]);
+
+    await notificarCaja(data.idUsuario);
+    return result.insertId;
+  },
+
+
+  actualizarEgreso: async (id, data) => {
+
+    const sql = `
     UPDATE egresos
     SET
       descripcion = ?,
@@ -389,31 +416,32 @@ listarEgresos : async (id_negocio, id_caja) => {
     WHERE id = ?
   `;
 
-  await db.query(sql, [
-    data.descripcion,
-    data.metodo_pago,
-    data.monto,
-    data.observacion,
-    id
-  ]);
-},
+    await db.query(sql, [data.descripcion,data.metodo_pago,data.monto,data.observacion,id
+    ]);
+     await notificarCaja(idUsuario);
+  },
 
- eliminarEgreso: async (id) => {
+  eliminarEgreso: async (id) => {
 
-  const sql = `DELETE FROM egresos WHERE id = ?`;
-  await db.query(sql, [id]);
-},
+    const sql = `DELETE FROM egresos WHERE id = ?`;
+    await db.query(sql, [id]);
+     await notificarCaja(idUsuario);
+  },
 
 
-actualizaventa: async (payload) => {
-  const conn = await db.getConnection();
-  try {
-    const { id_negocio,id_venta, metodo_pago, monto_recibido, cambio,id_mesa } = payload;
+  actualizaventa: async (payload) => {
+    const conn = await db.getConnection();
+    try {
+      const {idUsuario, id_negocio, id_venta, metodo_pago, monto_recibido, cambio, id_mesa } = payload;
 
-    // Actualizar la venta
-    const sqlUpdate = `
+      // Actualizar la venta
+      let estado_pago_id = 0
+      if (metodo_pago != 'PENDIENTE') estado_pago_id = 1
+
+      const sqlUpdate = `
       UPDATE pagos
-      SET metodo_pago = ?,
+      SET estado_pago=?,
+          metodo_pago = ?,
           monto_recibido = ?,
           cambio = ?,
           fecha_actualizacion = NOW()
@@ -421,34 +449,99 @@ actualizaventa: async (payload) => {
     `;
 
 
-    const result = await conn.query(sqlUpdate, [metodo_pago, monto_recibido, cambio, id_venta]);
+      const result = await conn.query(sqlUpdate, [estado_pago_id, metodo_pago, monto_recibido, cambio, id_venta]);
 
-    if (result[0].affectedRows === 0) {
-      throw new Error("No se encontró la venta con el id proporcionado");
+      if (result[0].affectedRows === 0) {
+        throw new Error("No se encontró la venta con el id proporcionado");
+      }
+
+      // Traer la fila actualizada
+      const rows = await conn.query("update mesas set estado='Disponible' where id = ?", [id_mesa]);
+      await notificarCaja(idUsuario);
+      await notificarMesas(id_negocio);
+      console.log("Venta actualizada:", rows[0]);
+
+      return rows[0];
+    } catch (err) {
+      console.error("Error actualizando venta:", err.message);
+      throw err;
+    } finally {
+      conn.release();
     }
+  },
 
-    // Traer la fila actualizada
-    const rows = await conn.query("update mesas set estado='Disponible' where id = ?", [id_mesa]);
+  liberar_mesa: async (id_mesa, id_negocio) => {
+    const conn = await db.getConnection();
+    const [mesas] = await conn.query(`update mesas set estado='Disponible' where id=?`, [id_mesa]);
     await notificarMesas(id_negocio);
-    console.log("Venta actualizada:", rows[0]);
+    return mesas;
+  },
 
-    return rows[0];
-  } catch (err) {
-    console.error("Error actualizando venta:", err.message);
-    throw err;
-  } finally {
-    conn.release();
-  }
+
+facturaPorCaja: async (id_caja) => {
+
+const sql = `
+SELECT  
+    v.id AS id_venta,
+    p.id AS id_pago,
+    v.numero_factura,
+    DATE_FORMAT(p.fecha,'%H:%i') AS fecha,
+
+    per.identificacion AS identificacion_cliente,
+    CONCAT(per.nombres,' ',per.apellidos) AS nombre_completo,
+
+    v.subtotal AS venta_total,
+    p.estado_pago,
+    p.metodo_pago
+
+FROM ventas v
+
+INNER JOIN pagos p 
+    ON p.id_venta = v.id
+
+INNER JOIN personas per 
+    ON per.id = v.id_cliente
+
+WHERE v.id_caja = ?
+
+ORDER BY p.id DESC
+`;
+
+const [rows] = await db.query(sql,[id_caja]);
+
+return rows.length ? rows : [];
+
 },
+facturaPordetalle: async (id_venta) => {
 
-liberar_mesa : async (id_mesa,id_negocio) => {
-  const conn = await db.getConnection();
-  const [mesas] = await conn.query( `update mesas set estado='Disponible' where id=?`,[ id_mesa]);
-   await notificarMesas(id_negocio);
-  return mesas;
+const sql = `
+SELECT  
+    vi.id_producto,
+    pro.nombre,
+    vi.cantidad,
+    vi.subtotal,
+    IFNULL(pi.url,'') AS url_imagen
+
+FROM ventas_items vi
+
+INNER JOIN productos pro 
+    ON pro.id = vi.id_producto
+
+LEFT JOIN productos_imagenes pi 
+    ON pi.id_producto = pro.id
+
+WHERE vi.id_venta = ?
+`;
+
+const [rows] = await db.query(sql,[id_venta]);
+
+return rows;
+
 },
-
-
-
 }
+
+
+
+
+
 export default CajeroService;

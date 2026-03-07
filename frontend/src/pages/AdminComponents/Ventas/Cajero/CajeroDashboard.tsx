@@ -1,37 +1,31 @@
 /* ---------- /src/pages/CajeroDashboard.tsx ---------- */
 import React, { useEffect, useState } from "react";
-import { Avatar, Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog, IconButton } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import LockOpenIcon from "@mui/icons-material/LockOpen";
-import LockIcon from "@mui/icons-material/Lock";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import SavingsIcon from "@mui/icons-material/Savings";
+import {  Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog, IconButton, DialogContent, Paper, DialogActions } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import type { ProductoCajero, CategoriaCajero, Caja, Mesa } from "../../../../types/cajero";
 import { apiListarProductos, apiAbrirCaja, apiArqueoCaja, apiCerrarCaja, estado_caja, finalizar_venta, apimesas } from "../../../../api/cajero";
-import Swal from "sweetalert2";
 import { Mesas } from "./components/Mesas";
 import { Carrito } from "./components/Carrito";
 import { AperturaCajaModal } from "./components/AperturaCaja";
-import { ArqueoCajaModal } from "./components/ArqueoCaja";
-import { CierreCajaModal } from "./components/CierreCaja";
+import { ArqueoCajaModal } from "./components/Estados_dasboard/ArqueoCaja";
+import { CierreCajaModal } from "./components/Estados_dasboard/CierreCaja";
 import { ProductosCategoriaModal } from "./components/ProductosCategoria";
 import { Categorias } from "./components/Categorias";
 import { CarritoMobile } from "./components/CarritoMobile";
-import Egresos from "./components/Egresos";
+import Egresos from "./components/Estados_dasboard/Egresos";
 import PersonIcon from '@mui/icons-material/Person';
 import { motion } from "framer-motion";
-import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import PaymentsIcon from "@mui/icons-material/Payments";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import VentasDetalles from "./components/Estados_dasboard/ventasDetalles";
+import CajaPanel from "./components/Estados_dasboard/CajaPanel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export const CajeroDashboard: React.FC = () => {
   const [categorias, setCategorias] = useState<CategoriaCajero[]>([]);
   const [caja, setCaja] = useState<Caja | null>(null);
 
   const [loadingCategorias, setLoadingCategorias] = useState(true);
-  const [expanded, setExpanded] = useState(false);
   const [cajaAbierta, setCajaAbierta] = useState(false);
   const [montoApertura, setMontoApertura] = useState("");
   const [idCaja, setIdCaja] = useState<number | null>(null);
@@ -54,44 +48,50 @@ export const CajeroDashboard: React.FC = () => {
   const [showStats, setShowStats] = useState(false); // por defecto oculto
   const idUsuario = localStorage.getItem("id_usuario");
   const id_negocio = localStorage.getItem("id_negocio");
+  const [openVentasDetalles, setOpenVentasDetalles] = useState(false);
+  
 
   const abrirCarrito = () => {
     setOpenCarrito(true);
   };
+  const cerrarCarrito = () => setOpenCarrito(false);
 
   useEffect(() => {
-    const cargarMesas = async () => {
-      try {
-        const { data } = await apimesas({ id_negocio });
-        if (data?.ok && Array.isArray(data.result)) {
-          setMesas(data.result);
-        }
-      } catch (err) {
-        console.error("Error cargando mesas:", err);
-      }
-    };
+  const ws = new WebSocket(import.meta.env.VITE_WS_URL);
+  ws.onopen = () => {
+    console.log("WS conectado");
+    ws.send(JSON.stringify({
+      tipo: "suscribirse_mesas",
+      id_negocio
+    }));
 
-    cargarMesas(); // carga inicial
-
-    const ws = new WebSocket(import.meta.env.VITE_WS_URL);
-
-    ws.onopen = () => console.log("Conectado al WS de mesas");
-
-    ws.onmessage = (event) => {
-      console.log("evet", event);
-
-      const msg = JSON.parse(event.data);
-
-      if (msg.tipo === "mesas") {
-        setMesas(msg.mesas); // actualizaciones en tiempo real
-      }
-    };
-
-    ws.onclose = () => console.log("WS cerrado");
-    ws.onerror = (err) => console.error("WS error:", err);
-
-    return () => ws.close(); // cleanup
-  }, [id_negocio]);
+    ws.send(JSON.stringify({
+      tipo: "suscribirse_caja",
+      id_usuario: idUsuario
+    }));
+  };
+  ws.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    // MESAS
+    if (msg.tipo === "mesas") {
+      console.log("Mesas actualizadas", msg.mesas);
+      setMesas(msg.mesas);
+    }
+    // CAJA
+    if (msg.tipo === "actualizar_caja") {
+   console.log("Mesas actualizadas", msg.caja);
+      const c = msg.caja;
+      if (!c) return;
+      setCaja(c);
+      setCajaAbierta(c.estado === "ABIERTA");
+      setIdCaja(c.id);
+      setMontoApertura(String(c.monto_inicial));
+    }
+  };
+  ws.onclose = () => console.log("WS cerrado");
+  ws.onerror = (err) => console.error("WS error", err);
+  return () => ws.close();
+}, [id_negocio, idUsuario]);
 
   const checkCaja = async () => {
     try {
@@ -111,7 +111,6 @@ export const CajeroDashboard: React.FC = () => {
       setModalApertura(true);
     }
   };
-
 
   useEffect(() => {
     checkCaja();
@@ -142,31 +141,19 @@ export const CajeroDashboard: React.FC = () => {
       mounted = false;
     };
   }, []);
-
-  //  const totalVentas = ventas.length;
-  // const dineroTotal = ventas.reduce((acc, v) => acc + Number(v.total ?? 0), 0);
-
   const getPrecio = (p: Partial<ProductoCajero>) => Number(p.precio_venta ?? 0);
-
-
   const addCart = (p: ProductoCajero) => {
     const precio = getPrecio(p);
     setCarrito((prev) => {
-      // Buscamos si ya existe exactamente el mismo producto
       const existe = prev.find((x) => x.id === p.id);
-
       if (existe) {
-        // Si existe, incrementamos cantidad
         return prev.map((x) =>
           x.id === p.id ? { ...x, cantidad: x.cantidad + 1 } : x
         );
       }
-
-      // Si no existe, lo agregamos como un nuevo item
       return [...prev, { ...p, cantidad: 1, precio_venta: precio }];
     });
   };
-
 
   const sumarCantidad = (id: number) => {
     setCarrito((prev) =>
@@ -196,17 +183,20 @@ export const CajeroDashboard: React.FC = () => {
     );
   };
 
+const clearCarrito = () => {
+  setCarrito([]);
+};
 
   //Finalizar venta
   const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
     if (carrito.length === 0) return;
-
     const subtotal = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
     const descuento = 0;
     const impuesto = 0;
     const total = subtotal - descuento + impuesto;
 
     const payload = {
+      idUsuario:idUsuario,
       id_negocio: id_negocio,
       id_cliente: cliente ? cliente : 18,
       id_caja: idCaja,
@@ -241,9 +231,6 @@ export const CajeroDashboard: React.FC = () => {
         setCarrito([]);
         setMesaSeleccionada(null);
         checkCaja();
-        //cargarMesas();
-
-        // Abrir diálogo en lugar de Swal
         setVentaPayload(payload);
         closeCategoria();
         setOpenVentaRegistrada(true);
@@ -260,8 +247,6 @@ export const CajeroDashboard: React.FC = () => {
         setCajaAbierta(true);
         setIdCaja(data.result.id);
         setModalApertura(false);
-
-        // Llamamos arqueo usando el ID recién recibido
         cargarArqueo(data.result.id);
         cerrarCajaReal(data.result.id);
       }
@@ -286,7 +271,6 @@ export const CajeroDashboard: React.FC = () => {
       console.error("No hay una caja abierta para cerrar.");
       return;
     }
-
     try {
       const montoFinal =
         Number(montoApertura) +
@@ -310,8 +294,6 @@ export const CajeroDashboard: React.FC = () => {
       console.error("Error cerrarCajaReal:", err);
     }
   };
-
-
   const openCategoria = (categoria: CategoriaCajero) => {
     setCategoriaSeleccionada(categoria);
     setModalProductosOpen(true);
@@ -320,6 +302,16 @@ export const CajeroDashboard: React.FC = () => {
     setCategoriaSeleccionada(null);
     setModalProductosOpen(false);
   };
+
+
+    // utils/format.ts
+    const formatCOP = (value: number) =>
+      new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(value);
 
   return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", p: 0, ml: 0 }}>
@@ -351,8 +343,6 @@ export const CajeroDashboard: React.FC = () => {
           Perfil del Cajero
         </Box>
 
-
-
         {/* Lado derecho (ojito) */}
         <IconButton
           size="small"
@@ -364,189 +354,20 @@ export const CajeroDashboard: React.FC = () => {
         </IconButton>
       </Typography>
 
-      {/* === ESTADÍSTICAS SUPERIORES === */}
-      <Stack spacing={1}>
-        <Collapse in={showStats} timeout="auto" unmountOnExit>
-
-          {/* CONTENEDOR PRINCIPAL */}
-          <Grid container spacing={2}>
-
-            {/* ================= ESTADO DE CAJA ================= */}
-            <Grid item xs={12} md={4}>
-              <Card
-                sx={{
-                  borderRadius: 4,
-                  boxShadow: "0px 4px 20px rgba(0,0,0,0.12)",
-                  p: 1,
-                }}
-              >
-                <CardContent>
-                  <Stack spacing={2}>
-
-                    {/* TÍTULO */}
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <Avatar
-                        sx={{
-                          bgcolor: cajaAbierta ? "success.light" : "error.light",
-                          width: 50,
-                          height: 50,
-                        }}
-                      >
-                        {cajaAbierta ? (
-                          <LockOpenIcon sx={{ fontSize: 30, color: "success.dark" }} />
-                        ) : (
-                          <LockIcon sx={{ fontSize: 30, color: "error.dark" }} />
-                        )}
-                      </Avatar>
-
-                      <Stack>
-                        <Typography variant="body2" fontWeight="bold">
-                          Estado de Caja
-                        </Typography>
-                        <Chip
-                          label={cajaAbierta ? "Caja Abierta" : "Caja Cerrada"}
-                          color={cajaAbierta ? "success" : "error"}
-                          size="small"
-                          sx={{ mt: 0.5 }}
-                        />
-                      </Stack>
-                    </Stack>
-
-                    {/* BOTÓN PRINCIPAL */}
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      startIcon={<LockOpenIcon />}
-                      onClick={() => {
-                        if (!cajaAbierta) setModalApertura(true);
-                        else setExpanded(!expanded);
-                      }}
-                      sx={{ py: 0.5, borderRadius: 3 }}
-                    >
-                      {cajaAbierta
-                        ? expanded
-                          ? "MENOS INFO"
-                          : "MAS INFO"
-                        : "Abrir Caja"}
-                    </Button>
-
-                    {/* BOTONES INTERNOS */}
-                    <Collapse in={expanded} timeout="auto" unmountOnExit>
-                      <Stack spacing={1.5} sx={{ mt: 1 }}>
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          color="warning"
-                          startIcon={<ReceiptLongIcon />}
-                          onClick={() => {
-                            setModalArqueo(true);
-                            cargarArqueo();
-                          }}
-                          sx={{ py: 1.3, borderRadius: 3, fontWeight: "bold" }}
-                        >
-                          Arqueo
-                        </Button>
-
-                        <Button
-                          fullWidth
-                          variant="contained"
-                          color="error"
-                          startIcon={<SavingsIcon />}
-                          onClick={() => setModalCierre(true)}
-                          sx={{ py: 1.3, borderRadius: 3, fontWeight: "bold" }}
-                        >
-                          Cerrar Caja
-                        </Button>
-                      </Stack>
-                    </Collapse>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* ================= MÉTRICAS ================= */}
-            <Grid item xs={12} md={8}>
-              <Grid container spacing={2}>
-
-                {/* Monto Inicial */}
-                <Grid item xs={12} sm={6} md={3}>
-                  <Card sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}>
-                    <CardContent sx={{ textAlign: "center" }}>
-                      <Avatar sx={{ bgcolor: "primary.light", width: 48, height: 48, mx: "auto", mb: 1 }}>
-                        <MonetizationOnIcon />
-                      </Avatar>
-                      <Typography variant="caption" fontWeight={700} color="text.secondary">
-                        Monto inicial
-                      </Typography>
-                      {caja && (
-                        <Typography>
-                          {new Intl.NumberFormat("es-CO", {
-                            style: "currency",
-                            currency: "COP",
-                            minimumFractionDigits: 0,
-                          }).format(caja.monto_inicial)}
-                        </Typography>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Ventas */}
-                <Grid item xs={12} sm={6} md={3}>
-                  <Card sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}>
-                    <CardContent sx={{ textAlign: "center" }}>
-                      <Avatar sx={{ bgcolor: "purple", width: 48, height: 48, mx: "auto", mb: 1 }}>
-                        <ShoppingCartIcon />
-                      </Avatar>
-                      <Typography variant="caption" fontWeight={700} color="text.secondary">
-                        Ventas realizadas
-                      </Typography>
-                      {caja && <Typography>{caja.total_ventas}</Typography>}
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Recaudado */}
-                <Grid item xs={12} sm={6} md={3}>
-                  <Card sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}>
-                    <CardContent sx={{ textAlign: "center" }}>
-                      <Avatar sx={{ bgcolor: "success.light", width: 48, height: 48, mx: "auto", mb: 1 }}>
-                        <PaymentsIcon />
-                      </Avatar>
-                      <Typography variant="caption" fontWeight={700} color="text.secondary">
-                        Dinero recaudado
-                      </Typography>
-                      {caja && <Typography>${caja.dinero_recaudado}</Typography>}
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Egresos */}
-                <Grid item xs={12} sm={6} md={3}>
-                  <Card onClick={() => setOpenEgresos(true)} sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.08)" }}>
-                    <CardContent sx={{ textAlign: "center" }}>
-                      <Avatar sx={{ bgcolor: "error.light", width: 48, height: 48, mx: "auto", mb: 1 }}>
-                        <PaymentsIcon />
-                      </Avatar>
-                      <Typography variant="caption" fontWeight={700} color="text.secondary">
-                        Egresos
-                      </Typography>
-                      {caja && (
-                        <Typography fontWeight={700} color="error.main">
-                          ${caja.total_egresos}
-                        </Typography>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-              </Grid>
-            </Grid>
-
-          </Grid>
-        </Collapse>
-      </Stack>
+{/* === PANEL SUPERIOR DE CAJA === */}
+      <CajaPanel
+        showStats={showStats}
+        cajaAbierta={cajaAbierta}
+        caja={caja}
+        formatCOP={formatCOP}
+        onVentas={() => setOpenVentasDetalles(true)}
+        onEgresos={() => setOpenEgresos(true)}
+        onArqueo={() => {
+          setModalArqueo(true);
+          cargarArqueo();
+        }}
+        onCerrar={() => setModalCierre(true)}
+      />
 
       {/* === CONTENIDO PRINCIPAL === */}
       <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
@@ -567,11 +388,9 @@ export const CajeroDashboard: React.FC = () => {
             categorias={categorias}
             loading={loadingCategorias}
             onOpen={openCategoria}
+             modo="dashboard"
           />
         </Box>
-
-
-
         {/* === MESAS === */}
         <Box
           sx={{
@@ -583,10 +402,10 @@ export const CajeroDashboard: React.FC = () => {
             maxHeight: "100%",
           }}
         >
-
           {/* MESAS */}
           <Box sx={{ flex: 1 }}>
             <Mesas
+              idUsuario={idUsuario}
               id_negocio={id_negocio}
               mesas={mesas}
               onSelect={(m) =>
@@ -596,9 +415,7 @@ export const CajeroDashboard: React.FC = () => {
           </Box>
         </Box>
 
-
         {/* === BOTÓN ABRIR CARRITO EN DESKTOP === */}
-
         {!openCarrito && !isMobile && (
           <Box
             component={motion.div}
@@ -635,7 +452,22 @@ export const CajeroDashboard: React.FC = () => {
           </Box>
         )}
 
-
+        {!openCarrito && isMobile && (
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: 20,
+              right: 20,
+              zIndex: 1400,
+            }}
+          >
+            <Badge badgeContent={carrito.length} color="error">
+              <Fab color="primary" onClick={abrirCarrito}>
+                <ShoppingCartIcon />
+              </Fab>
+            </Badge>
+          </Box>
+        )}
 
         {/* === DRAWER / CARRITO ESCRITORIO === */}
         <Drawer
@@ -653,6 +485,7 @@ export const CajeroDashboard: React.FC = () => {
           <Carrito
             carrito={carrito}
             onRemove={removeItem}
+            onClear={clearCarrito}
             onAdd={sumarCantidad}
             onSub={restarCantidad}
             onFinalizar={(c, p) => {
@@ -660,102 +493,144 @@ export const CajeroDashboard: React.FC = () => {
               setOpenCarrito(false);
             }}
             mesaSeleccionada={mesaSeleccionada}
-
+            categorias={categorias}
+            onOpenCategoria={(categoria) => {
+            setOpenCarrito(false);  
+            openCategoria(categoria); 
+          }}
+          loadingCategorias={loadingCategorias}
           />
         </Drawer>
-
 
         {/* === CARRITO MÓVIL === */}
         <Box sx={{ display: { xs: "block", md: "none" } }}>
           {isMobile && (
-            <CarritoMobile
-              open={openCarrito}
-              onClose={() => setOpenCarrito(false)}
-              carrito={carrito}
-              onRemove={removeItem}
-              onAdd={sumarCantidad}
-              onSub={restarCantidad}
-              onFinalizar={(c, p) => {
-                finalizarVenta(c, p);
-                setOpenCarrito(false);
-              }}
-            />
+           <CarritoMobile
+            open={openCarrito}
+            onClose={cerrarCarrito}
+            carrito={carrito}
+            onRemove={removeItem}
+            onClear={clearCarrito}
+            onAdd={sumarCantidad}
+            onSub={restarCantidad}
+            onFinalizar={(c, p) => {
+              finalizarVenta(c, p);
+              setOpenCarrito(false);
+            }}
+            mesaSeleccionada={mesaSeleccionada}
+            categorias={categorias}
+             onOpenCategoria={(categoria) => {
+            setOpenCarrito(false);  
+            openCategoria(categoria); 0
+          }}
+            loadingCategorias={loadingCategorias}
+          />
           )}
-
         </Box>
-
-
       </Box>
-
 
       {/* === MODALES === */}
       <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} />
       <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
       <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} totalVentas={caja?.total_ventas ?? 0} dineroTotal={caja?.dinero_recaudado ?? 0} onCerrar={cerrarCajaReal} />
       <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada ?? undefined} categorias={categorias} onAgregar={addCart} />
-      <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)} id_negocio={id_negocio} id_caja={idCaja} />
-
+      <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)}idUsuario={idUsuario} id_negocio={id_negocio}  id_caja={idCaja} />
+      <VentasDetalles open={openVentasDetalles} onClose={() => setOpenVentasDetalles(false)} id_caja={idCaja}/>
+     
       {/* === DIALOG VENTA REGISTRADA === */}
-      <Dialog
-        open={openVentaRegistrada}
-        onClose={() => setOpenVentaRegistrada(false)}
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            p: 3,
-            minWidth: 360,
-            maxWidth: 420,
-            textAlign: "center",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
-          },
+     <Dialog
+  open={openVentaRegistrada}
+  onClose={() => setOpenVentaRegistrada(false)}
+  PaperProps={{
+    sx: {
+      borderRadius: 4,
+      overflow: "hidden",
+      minWidth: 380,
+      maxWidth: 420,
+      boxShadow: "0 15px 40px rgba(0,0,0,0.12)"
+    }
+  }}
+>
+  {/* HEADER */}
+  <Box
+    sx={{
+      background: "linear-gradient(135deg,#16a34a,#22c55e)",
+      color: "white",
+      py: 3,
+      px: 2,
+      textAlign: "center"
+    }}
+  >
+    <CheckCircleIcon sx={{ fontSize: 48 }} />
+    <Typography variant="h6" fontWeight="bold">
+      Venta registrada con éxito
+    </Typography>
+  </Box>
+
+
+  {/* CONTENIDO */}
+  <DialogContent sx={{ textAlign: "center", py: 3 }}>
+    {ventaPayload && (
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          borderRadius: 3,
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0"
         }}
       >
-        <Box mb={2}>
-          <Box
-            sx={{
-              bgcolor: "success.main",
-              color: "white",
-              borderRadius: "50%",
-              width: 60,
-              height: 60,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              mb: 2,
-              fontSize: 32,
-            }}
-          >
-            ✅
-          </Box>
+        <Stack spacing={1} alignItems="center">
 
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            ¡Venta Registrada!
+          <Typography fontSize={13} color="text.secondary">
+            Total de la venta
           </Typography>
 
-          {ventaPayload && (
-            <Typography variant="body2" color="text.secondary">
-              Total: <strong>${ventaPayload.total.toLocaleString()}</strong>
-              <br />
-              Método de pago: <strong>{ventaPayload.metodo_pago}</strong>
-            </Typography>
-          )}
-        </Box>
-
-        <Stack direction="row" justifyContent="center" spacing={2} mt={4}>
-          <Button
-            variant="contained"
-            color="success"
-            onClick={() => setOpenVentaRegistrada(false)}
-            sx={{ borderRadius: 3, px: 4, textTransform: "none" }}
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            color="success.main"
           >
-            Aceptar
-          </Button>
+            ${ventaPayload.total.toLocaleString()}
+          </Typography>
+
+          <Chip
+            label={`Pago: ${ventaPayload.metodo_pago}`}
+            color="success"
+            size="small"
+            sx={{ fontWeight: 500 }}
+          />
+
         </Stack>
-      </Dialog>
+      </Paper>
+    )}
+  </DialogContent>
+
+  {/* FOOTER */}
+  <DialogActions
+    sx={{
+      justifyContent: "center",
+      pb: 3
+    }}
+  >
+    <Button
+      variant="contained"
+      onClick={() => setOpenVentaRegistrada(false)}
+      sx={{
+        borderRadius: 3,
+        px: 5,
+        py: 1,
+        textTransform: "none",
+        fontWeight: "bold",
+        background: "linear-gradient(90deg,#16a34a,#22c55e)",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.15)"
+      }}
+    >
+      Continuar
+    </Button>
+  </DialogActions>
+</Dialog>
     </Box>
-
-
-
   );
 };
 

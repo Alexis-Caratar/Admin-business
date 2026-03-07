@@ -56,3 +56,11 @@ export const actualiza_venta = (payload: any) =>
 export const liberar_mesa = (id_mesa: any,id_negocio:any) => {
   return axios.get(`/cajero/liberar_mesa/${id_mesa}/${id_negocio}`);
 };
+
+export const facturaPorCaja = (data:any) => {
+  return axios.post(`cajero/factura-por-caja`, data);
+};
+
+export const productosPorVenta = (data:any) => {
+  return axios.post(`cajero/factura-por-detalle`, data);
+};

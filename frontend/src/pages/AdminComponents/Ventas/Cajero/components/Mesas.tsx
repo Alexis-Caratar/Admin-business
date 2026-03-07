@@ -23,14 +23,17 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import type { Mesa } from "./../../../../../types/cajero";
 import { apidetallesMesa, actualiza_venta, liberar_mesa } from "../../../../../api/cajero";
+import Swal from "sweetalert2";
 
 type Props = {
+  idUsuario: bigint;
   id_negocio: bigint;
   mesas: Mesa[];
   onSelect?: (m: Mesa | null) => void;
 };
 
-export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
+
+export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas, onSelect }) => {
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
   const [mesaOrden, setMesaOrden] = useState<Mesa | null>(null);
   const [openOrden, setOpenOrden] = useState(false);
@@ -45,13 +48,13 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
   const getEstadoConfig = (estado: Mesa["estado"]) => {
     switch (estado) {
       case "Disponible":
-        return { chipColor: "success" as const, iconBg: "#2e7d32", icon: <CheckCircleIcon /> };
+        return { chipColor: "linear-gradient(135deg, #09a58e, #2e7d32)" as const, iconBg: "#1eab35", icon: <CheckCircleIcon /> };
       case "Ocupada":
-        return { chipColor: "error" as const, iconBg: "#c62828", icon: <RestaurantIcon /> };
+        return { chipColor: "linear-gradient(135deg, #ff416c, #ff4b2b)" as const, iconBg: "#221d1d", icon: <RestaurantIcon /> };
       case "Reservada":
-        return { chipColor: "warning" as const, iconBg: "#ef6c00", icon: <EventSeatIcon /> };
+        return { chipColor: "linear-gradient(135deg, #f7971e, #ffd200)" as const, iconBg: "#ef6c00", icon: <EventSeatIcon /> };
       default:
-        return { chipColor: "default" as const, iconBg: "#616161", icon: <EventSeatIcon /> };
+        return { chipColor: "#616161" as const, iconBg: "#616161", icon: <EventSeatIcon /> };
     }
   };
 
@@ -99,6 +102,9 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
 
   const handlePagarFactura = () => {
     setHabilitarPago(true);
+    setTimeout(() => {
+      document.getElementById("formPago")?.scrollIntoView({ behavior: "smooth" });
+    }, 200);
   };
 
   const handleLiberarMesa = async () => {
@@ -120,6 +126,7 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
     if (!detalleVenta) return;
 
     const payload = {
+      idUsuario: idUsuario,
       id_negocio: id_negocio,
       id_venta: detalleVenta.id_pago,
       id_mesa: mesaOrden?.id,
@@ -136,10 +143,39 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
       setMontoRecibido("");
       setMetodoPago("EFECTIVO");
       setOpenOrden(false);
-      alert("✅ Venta registrada correctamente!");
+
+      Swal.fire({
+        title: "Venta registrada",
+        html: `
+        <b style="font-size:18px;color:#16a34a">
+          ✅ Operación exitosa
+        </b>
+        <br/><br/>
+        La venta se guardó correctamente
+    `,
+        icon: "success",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#16a34a",
+        showClass: {
+          popup: "animate__animated animate__zoomIn"
+        },
+        hideClass: {
+          popup: "animate__animated animate__zoomOut"
+        }
+      });
+
     } catch (err) {
       console.error("Error al actualizar venta:", err);
-      alert("❌ Error al registrar la venta.");
+
+      Swal.fire({
+        icon: "error",
+        title: "Error al registrar la venta",
+        text: "Ocurrió un problema al guardar la venta. Intente nuevamente.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#d32f2f",
+        background: "#ffffff",
+        color: "#1e293b"
+      });
     }
   };
 
@@ -187,8 +223,21 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
                   },
                 }}
               >
-                <Chip label={mesa.estado} color={config.chipColor} size="small" sx={{ position: "absolute", top: 11, right: 20, fontWeight: 700, height: 24, px: 3, borderRadius: 2 }} />
-                <Box
+                <Chip
+                  label={mesa.estado}
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    top: 11,
+                    right: 20,
+                    fontWeight: 700,
+                    height: 24,
+                    px: 3,
+                    borderRadius: 2,
+                    background: config.chipColor,
+                    color: "#fff"
+                  }}
+                />                <Box
                   sx={{
                     mt: { xs: 3, sm: 4 },
                     width: { xs: 38, sm: 48 },
@@ -250,9 +299,47 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
         <DialogContent dividers sx={{ bgcolor: "#f8fafc" }}>
           {!loadingDetalle && detalleVenta && (
             <>
-              <Box sx={{ p: 2, mb: 2, borderRadius: 3, bgcolor: "#fff", border: "1px solid #e5e7eb" }}>
-                <Typography fontWeight={700}>{detalleVenta.nombre_completo}</Typography>
-                <Typography variant="body2" color="text.secondary">Documento: {detalleVenta.identificacion_cliente}</Typography>
+              <Box
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  borderRadius: 3,
+                  bgcolor: "#fff",
+                  border: "1px solid #e5e7eb",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}
+              >
+                {/* Cliente */}
+                <Box>
+                  <Typography fontWeight={700}>
+                    {detalleVenta.nombre_completo}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Documento: {detalleVenta.identificacion_cliente}
+                  </Typography>
+                </Box>
+
+                {/* Numero factura */}
+                <Box
+                  sx={{
+                    px: { xs: 1.5, sm: 2 },
+                    py: { xs: 0.6, sm: 0.8 },
+                    borderRadius: { xs: 1.5, sm: 2 },
+                    background: "linear-gradient(135deg,#1e293b,#111827)",
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: { xs: "0.75rem", sm: "0.85rem", md: "0.9rem" },
+                    letterSpacing: { xs: 0.5, sm: 1 },
+                    boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
+                    textAlign: "center",
+                    maxWidth: "100%",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {detalleVenta.numero_factura}
+                </Box>
               </Box>
 
               <Typography fontWeight={600} mb={1}>Detalle de Productos</Typography>
@@ -275,43 +362,7 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
                 <Typography fontWeight={600}>Total</Typography>
                 <Typography variant="h6" fontWeight={700}>${Number(detalleVenta.venta_total).toLocaleString()}</Typography>
               </Box>
-              {detalleVenta.estado_pago == "PENDIENTE" ? (
-
-                <Box
-                  onClick={handlePagarFactura}
-                  sx={{
-                    mt: 3,
-                    p: 2,
-                    borderRadius: 3,
-                    background: "linear-gradient(135deg, #09a58e, #2e7d32)",
-                    color: "#fff",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    userSelect: "none",
-                    fontWeight: 700,
-                    boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
-                    transition: "all 0.25s ease",
-
-                    // Hover (solo visible en desktop)
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: "0 10px 25px rgba(0,0,0,0.35)",
-                    },
-
-                    // Cuando se presiona
-                    "&:active": {
-                      transform: "scale(0.97)",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
-                    },
-                  }}
-                >
-                  <Typography fontWeight={700} letterSpacing={0.5}>
-                    PAGAR FACTURA
-                  </Typography>
-                </Box>
-              ) : (
+              {detalleVenta.estado_pago != "PENDIENTE" && (
                 <Box
                   onClick={handleLiberarMesa}
                   sx={{
@@ -368,7 +419,7 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
               )}
 
 
-              {detalleVenta.estado_pago != "PENDIENTE" ||habilitarPago && (
+              {detalleVenta.estado_pago == "PENDIENTE" && (
                 <>
                   <TextField
                     select
@@ -388,9 +439,14 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
                   {metodoPago === "EFECTIVO" && (
                     <TextField
                       fullWidth
+                      autoFocus
                       label="Monto recibido"
                       size="small"
                       type="text"
+                      inputProps={{
+                        inputMode: "numeric",
+                        pattern: "[0-9]*"
+                      }}
                       sx={{ mt: 2 }}
                       value={montoRecibido === "" ? "" : formatCOP(montoRecibido)}
                       onChange={(e) => {
@@ -406,17 +462,57 @@ export const Mesas: React.FC<Props> = ({ id_negocio, mesas, onSelect }) => {
                     </Typography>
                   )}
 
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="success"
-                    sx={{ mt: 2 }}
-                    startIcon={<AddShoppingCartIcon />}
-                    disabled={metodoPago === "EFECTIVO" && cambio < 0}
-                    onClick={handleFinalizarVenta}
+
+
+
+                  <Box
+                    onClick={!(metodoPago === "EFECTIVO" && cambio < 0) ? handleFinalizarVenta : null}
+                    sx={{
+                      mt: 3,
+                      p: 2,
+                      borderRadius: 3,
+                      background:
+                        metodoPago === "EFECTIVO" && cambio < 0
+                          ? "#9e9e9e"
+                          : "linear-gradient(135deg, #09a58e, #2e7d32)",
+                      color: "#fff",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 1,
+                      cursor: metodoPago === "EFECTIVO" && cambio < 0 ? "not-allowed" : "pointer",
+                      userSelect: "none",
+                      fontWeight: 700,
+                      boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+                      transition: "all 0.25s ease",
+
+                      width: "90%",
+
+                      // Responsive
+                      fontSize: {
+                        xs: "0.9rem",
+                        sm: "1rem"
+                      },
+
+                      // Hover solo si está habilitado
+                      "&:hover": metodoPago === "EFECTIVO" && cambio < 0
+                        ? {}
+                        : {
+                          transform: "translateY(-4px)",
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.35)"
+                        },
+
+                      "&:active": {
+                        transform: "scale(0.97)",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.25)"
+                      }
+                    }}
                   >
-                    Finalizar Venta
-                  </Button>
+                    <AddShoppingCartIcon />
+                    <Typography fontWeight={700} letterSpacing={0.5}>
+                      PAGAR FACTURA
+                    </Typography>
+                  </Box>
                 </>
               )}
             </>

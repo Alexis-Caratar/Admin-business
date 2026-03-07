@@ -114,14 +114,7 @@ export const crearEgreso = async (req, res) => {
   try {
     console.log(req.body);
     
-    const {
-      id_negocio,
-      id_caja,
-      descripcion,
-      metodo_pago,
-      monto,
-      observacion
-    } = req.body;
+    const {idUsuario,id_negocio,id_caja,descripcion,metodo_pago,monto,observacion} = req.body;
 
     // 🔐 Validación obligatoria
     if (!id_negocio || !descripcion || !monto) {
@@ -131,16 +124,7 @@ export const crearEgreso = async (req, res) => {
         body_recibido: req.body
       });
     }
-
-    const result = await CajeroService.crearEgreso({
-      id_negocio,
-      id_caja,
-      descripcion,
-      metodo_pago,
-      monto,
-      observacion
-    });
-
+    const result = await CajeroService.crearEgreso({idUsuario,id_negocio,id_caja,descripcion,metodo_pago,monto,observacion });
     return res.json({
       ok: true,
       message: "Egreso creado correctamente",
@@ -233,6 +217,36 @@ export const liberar_mesa = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Error al actualizar mesas" });
   }
+};
+
+export const facturaPorCaja = async (req, res) => {
+  try {
+    const { id_caja } = req.body;
+    const result = await CajeroService.facturaPorCaja(id_caja);
+
+    res.json({ok: true, result});
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      msg: "Error obteniendo factura"
+    });
+  }
+
+};
+
+export const facturaPordetalle = async (req, res) => {
+  try {
+    const { id_venta } = req.body;
+    const result = await CajeroService.facturaPordetalle(id_venta);
+
+    res.json({ok: true, result});
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      msg: "Error obteniendo factura"
+    });
+  }
+
 };
 
 

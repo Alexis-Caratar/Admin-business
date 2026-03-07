@@ -21,12 +21,18 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-
 import CloseIcon from "@mui/icons-material/Close";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import CategoryIcon from "@mui/icons-material/Category";
 import SearchIcon from "@mui/icons-material/Search";
-
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
+toastr.options = {
+  positionClass: "toast-top-right",
+  timeOut: 2000,
+  progressBar: true,
+  closeButton: false,
+};
 import type { CategoriaCajero, ProductoCajero } from "../../../../../types/cajero";
 
 type Props = {
@@ -45,8 +51,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
   onAgregar,
 }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [search, setSearch] = useState("");
   const [categoriaActiva, setCategoriaActiva] =
@@ -69,29 +74,29 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
     p.nombre?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleAgregar = (prod: ProductoCajero) => {
-    onAgregar({
-      ...prod,
-      precio_venta: Number(prod.precio_venta ?? 0),
-    });
-  };
+const handleAgregar = (prod: ProductoCajero) => {
+  onAgregar({
+    ...prod,
+    precio_venta: Number(prod.precio_venta ?? 0),
+  });
+
+  toastr.success(`${prod.nombre} agregado`);
+};
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
       fullScreen={isMobile}
-      maxWidth="xl"
+      maxWidth="lg"
       fullWidth
       PaperProps={{
         sx: {
           borderRadius: isMobile ? 0 : 4,
-          height: isMobile ? "100%" : "92vh",
-          display: "flex",
-          flexDirection: "column",
-		    zIndex: 1200,
+          height: isMobile ? "100%" : "90vh",
+          zIndex: 1200,
         },
-      }}sx={{
+      }} sx={{
         zIndex: 1200,
       }}
     >
@@ -122,8 +127,6 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
           p: 0,
-          flex: 1,
-          overflow: "hidden",
         }}
       >
         {/* ================= CATEGORÍAS ================= */}
@@ -208,7 +211,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
         </Box>
 
         {/* ================= PRODUCTOS ================= */}
-        <Box sx={{ flex: 1, p: 2, overflowY: "auto", width: "100%" }}>
+        <Box sx={{ flex: 1, p: 2, overflowY: "auto" }}>
           <Typography fontWeight={800} fontSize={18}>
             {categoriaActiva?.categoria}
           </Typography>
@@ -229,100 +232,96 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
             sx={{ mb: 2 }}
           />
 
-          {/* ===== GRID RESPONSIVE ===== */}
-          <Grid container spacing={{ xs: 1.5, sm: 2 }}>
-            {filtered.map((prod) => (
-              <Grid
-                item
-                key={prod.id}
-                xs={6}   // 👈 2 por fila SIEMPRE en móvil
-                sm={4}   // 3 en tablet
-                md={3}   // 4 en desktop
-                lg={2}   // 6 en pantallas grandes (más exacto que 2.4)
-              >
-                <Card
-                  onClick={() => handleAgregar(prod)}
-                  sx={{
-                    cursor: "pointer",
-                    height: "100%",
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    transition: "0.25s",
-                    "&:hover": {
-                      transform: isMobile ? "none" : "translateY(-6px)",
-                      boxShadow: 6,
-                    },
-                  }}
-                >
-                  {prod.imagen_plato ? (
-                    <CardMedia
-                      component="img"
-                      image={prod.imagen_plato}
-                      alt={prod.nombre}
-                      sx={{
-                        width: "100%",
-                        height: {
-                          xs: 100,   // 📱 móvil
-                          sm: 120,   // 📲 tablet
-                          md: 150,   // 💻 desktop
-                        },
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <Box
-                      sx={{
-                        height: { xs: 120, sm: 140, md: 160 },
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: "#f5f5f5",
-                      }}
-                    >
-                      <Avatar sx={{ width: 56, height: 56 }}>
-                        {prod.nombre?.[0]}
-                      </Avatar>
-                    </Box>
-                  )}
+          
+<Grid container spacing={1.2}>
+  {filtered.map((prod) => (
+    <Grid
+      item
+      key={prod.id}
+      xs={4}   // 📱 3 productos por fila
+      sm={4}
+      md={3}   // 💻 4 por fila en escritorio
+    >
+      <Card
+        onClick={() => handleAgregar(prod)}
+        sx={{
+          cursor: "pointer",
+          height: "100%",
+          borderRadius: 3,
+          overflow: "hidden",
+          transition: "0.2s",
+          boxShadow: 2,
+          "&:hover": {
+            transform: "translateY(-4px)",
+            boxShadow: 5,
+          },
+        }}
+      >
+        {prod.imagen_plato ? (
+          <CardMedia
+            component="img"
+            height={isMobile ? 90 : 140}   // 🔹 más pequeño en móvil
+            image={prod.imagen_plato}
+            alt={prod.nombre}
+          />
+        ) : (
+          <Box
+            height={isMobile ? 90 : 140}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            bgcolor="#f6f6f6"
+          >
+            <Avatar sx={{ width: 44, height: 44 }}>
+              {prod.nombre?.[0]}
+            </Avatar>
+          </Box>
+        )}
 
-                  <CardContent sx={{ p: 1.5 }}>
-                    <Typography fontWeight={700} fontSize={14} noWrap>
-                      {prod.nombre}
-                    </Typography>
+        <CardContent
+          sx={{
+            p: isMobile ? 1 : 1.5,
+          }}
+        >
+          <Typography
+            fontWeight={700}
+            fontSize={isMobile ? 12 : 14}
+            noWrap
+          >
+            {prod.nombre}
+          </Typography>
 
-                    <Typography
-                      fontSize={13}
-                      color="success.main"
-                      fontWeight={700}
-                    >
-                      ${Number(prod.precio_venta).toLocaleString()}
-                    </Typography>
+          <Typography
+            fontSize={isMobile ? 12 : 13}
+            color="success.main"
+            fontWeight={800}
+          >
+            ${Number(prod.precio_venta).toLocaleString()}
+          </Typography>
 
-                    <Button
-                      fullWidth
-                      size={isMobile ? "medium" : "small"}
-                      variant="contained"
-                      color="success"
-                      startIcon={<AddShoppingCartIcon />}
-                      sx={{
-                        mt: 1,
-                        py: isMobile ? 1.2 : 0.6,
-                        fontSize: { xs: 12, sm: 13 },
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAgregar(prod);
-                      }}
-                    >
-                      Agregar
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+          <Button
+            fullWidth
+            size="small"
+            variant="contained"
+            color="success"
+            startIcon={<AddShoppingCartIcon />}
+            sx={{
+              mt: 0.7,
+              fontSize: isMobile ? 11 : 12,
+              py: 0.4,
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAgregar(prod);
+            }}
+          >
+            Agregar
+          </Button>
+        </CardContent>
+      </Card>
+    </Grid>
+  ))}
+</Grid>
         </Box>
       </DialogContent>
 
