@@ -267,15 +267,14 @@ const clearCarrito = () => {
   const cerrarCajaReal = async () => {
     console.log("id caja", idCaja);
 
+    console.log("montoFinal",caja?.dinero_recaudado);
+    
     if (!idCaja) {
       console.error("No hay una caja abierta para cerrar.");
       return;
     }
     try {
-      const montoFinal =
-        Number(montoApertura) +
-        carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
-
+      const montoFinal =caja?.dinero_recaudado
       const { data } = await apiCerrarCaja({
         id_caja: idCaja,
         monto_final: montoFinal,
@@ -366,7 +365,10 @@ const clearCarrito = () => {
           setModalArqueo(true);
           cargarArqueo();
         }}
-        onCerrar={() => setModalCierre(true)}
+        onCerrar={() =>{ setModalCierre(true)
+             cargarArqueo();
+        }
+        }
       />
 
       {/* === CONTENIDO PRINCIPAL === */}
@@ -532,8 +534,14 @@ const clearCarrito = () => {
       {/* === MODALES === */}
       <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} />
       <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
-      <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} totalVentas={caja?.total_ventas ?? 0} dineroTotal={caja?.dinero_recaudado ?? 0} onCerrar={cerrarCajaReal} />
-      <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada ?? undefined} categorias={categorias} onAgregar={addCart} />
+     <CierreCajaModal
+  open={modalCierre}
+  onClose={() => setModalCierre(false)}
+  arqueoInfo={arqueoInfo}
+  formatCOP={formatCOP}
+  onCerrar={cerrarCajaReal}
+/>
+       <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada ?? undefined} categorias={categorias} onAgregar={addCart} />
       <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)}idUsuario={idUsuario} id_negocio={id_negocio}  id_caja={idCaja} />
       <VentasDetalles open={openVentasDetalles} onClose={() => setOpenVentasDetalles(false)} id_caja={idCaja}/>
      

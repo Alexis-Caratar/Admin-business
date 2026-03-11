@@ -132,39 +132,39 @@ LIMIT 1;
   },
 
 
-  arqueo: async ({ id_caja }) => {
+arqueo: async ({ id_caja }) => {
 
-    const query = `
-     SELECT 
+  /* ===============================
+     1️⃣ RESUMEN DE CAJA
+  =============================== */
+
+  const resumenQuery = `
+    SELECT 
         c.monto_inicial,
 
-        -- Ventas
-        IFNULL(v.total_ventas, 0) AS total_ventas,
+        IFNULL(v.total_ventas,0) AS total_ventas,
 
-        -- Egresos
-        IFNULL(e.total_egresos, 0) AS total_egresos,
+        IFNULL(e.total_egresos,0) AS total_egresos,
 
-        -- Saldo real en caja
         (
             c.monto_inicial 
-            + IFNULL(v.total_ventas, 0)
-            - IFNULL(e.total_egresos, 0)
+            + IFNULL(v.total_ventas,0)
+            - IFNULL(e.total_egresos,0)
         ) AS saldo_actual
 
     FROM caja c
 
-    -- Subconsulta ventas
     LEFT JOIN (
         SELECT 
             ve.id_caja,
-            SUM(ve.total) AS total_ventas
+            SUM(pe.monto_pagado) AS total_ventas
         FROM ventas ve
-        INNER JOIN pagos pe on ve.id=pe.id_venta
-        where pe.estado_pago=1
+        INNER JOIN pagos pe 
+            ON pe.id_venta = ve.id
+        WHERE pe.estado_pago = 1
         GROUP BY ve.id_caja
     ) v ON v.id_caja = c.id
 
-    -- Subconsulta egresos
     LEFT JOIN (
         SELECT 
             id_caja,
@@ -173,14 +173,125 @@ LIMIT 1;
         GROUP BY id_caja
     ) e ON e.id_caja = c.id
 
-    WHERE c.id = ?;
-    `;
-    const [rows] = await db.query(query, [id_caja]);
-    console.log("rows", rows);
+    WHERE c.id = ?
+  `;
 
-    return rows[0];
-  },
+  /* ===============================
+     2️⃣ PRODUCTOS VENDIDOS
+  =============================== */
 
+  const productosQuery = `
+    SELECT 
+        c.id AS id_categoria,
+        c.nombre AS categoria,
+        p.id AS id_producto,
+        p.nombre AS producto,
+        SUM(vd.cantidad) AS cantidad_vendida,
+        SUM(vd.subtotal) AS total_vendido
+    FROM ventas v
+    INNER JOIN pagos pa 
+        ON pa.id_venta = v.id
+    INNER JOIN ventas_items vd 
+        ON vd.id_venta = v.id
+    INNER JOIN productos p 
+        ON p.id = vd.id_producto
+    INNER JOIN categorias c 
+        ON c.id = p.id_categoria
+    WHERE v.id_caja = ?
+    AND pa.estado_pago = 1
+    GROUP BY 
+        c.id,
+        c.nombre,
+        p.id,
+        p.nombre
+    ORDER BY 
+        c.nombre,
+        p.nombre
+  `;
+
+  /* ===============================
+     3️⃣ VENTAS POR METODO DE PAGO
+  =============================== */
+
+  const pagosQuery = `
+    SELECT
+
+    SUM(CASE 
+        WHEN pa.metodo_pago = 'EFECTIVO' AND pa.estado_pago = 1
+        THEN pa.monto_pagado ELSE 0 END) AS efectivo,
+
+    SUM(CASE 
+        WHEN pa.metodo_pago = 'TARJETA' AND pa.estado_pago = 1
+        THEN pa.monto_pagado ELSE 0 END) AS tarjeta,
+
+    SUM(CASE 
+        WHEN pa.metodo_pago = 'TRANSFERENCIA' AND pa.estado_pago = 1
+        THEN pa.monto_pagado ELSE 0 END) AS transferencia,
+
+    SUM(CASE 
+        WHEN pa.metodo_pago = 'NEQUI' AND pa.estado_pago = 1
+        THEN pa.monto_pagado ELSE 0 END) AS nequi,
+
+    SUM(CASE 
+        WHEN pa.metodo_pago = 'DAVIPLATA' AND pa.estado_pago = 1
+        THEN pa.monto_pagado ELSE 0 END) AS daviplata,
+
+    SUM(CASE 
+        WHEN pa.estado_pago = 0
+        THEN pa.monto_pagado ELSE 0 END) AS pendiente,
+
+    SUM(CASE 
+        WHEN pa.estado_pago = 1
+        THEN pa.monto_pagado ELSE 0 END) AS total_ventas
+
+FROM ventas v
+INNER JOIN pagos pa
+    ON pa.id_venta = v.id
+WHERE v.id_caja = ?
+  `;
+
+  /* ===============================
+     4️⃣ EGRESOS DETALLADOS
+  =============================== */
+
+  const egresosQuery = `
+    SELECT 
+      id,
+      numero_egreso,
+      descripcion,
+      metodo_pago,
+      monto,
+      observacion,
+      created_at
+    FROM egresos
+    WHERE id_caja = ?
+    ORDER BY created_at DESC
+  `;
+
+  const [resumenRows] = await db.query(resumenQuery, [id_caja]);
+  const [productosRows] = await db.query(productosQuery, [id_caja]);
+  const [pagosRows] = await db.query(pagosQuery, [id_caja]);
+
+    const pagos = pagosRows[0] || {};
+   const ventas_metodos = [
+    { metodo_pago: "EFECTIVO", total: pagos.efectivo || 0 },
+    { metodo_pago: "TARJETA", total: pagos.tarjeta || 0 },
+    { metodo_pago: "TRANSFERENCIA", total: pagos.transferencia || 0 },
+    { metodo_pago: "NEQUI", total: pagos.nequi || 0 },
+    { metodo_pago: "DAVIPLATA", total: pagos.daviplata || 0 },
+    { metodo_pago: "PENDIENTE", total: pagos.pendiente || 0 }
+  ];
+
+
+  const [egresosRows] = await db.query(egresosQuery, [id_caja]);
+
+  return {
+    ...resumenRows[0],
+    ventas_metodos,
+    productos: productosRows,
+    egresos: egresosRows
+  };
+},
 
   finalizarVenta: async (payload) => {
     const conn = await db.getConnection();

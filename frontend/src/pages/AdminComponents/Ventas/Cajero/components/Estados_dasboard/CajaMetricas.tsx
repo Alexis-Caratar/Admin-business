@@ -21,18 +21,13 @@ export default function CajaMetricas({
       icon: <MonetizationOnIcon />,
       color: "primary.light"
     },
-    {
-      label: "Ventas",
+      {
+      label: "Ventas / Recaudado",
       value: caja?.total_ventas,
+      extra: caja?.dinero_recaudado,
       icon: <ShoppingCartIcon />,
       color: "#7c4dff",
       click: onVentas
-    },
-    {
-      label: "Recaudado",
-      value: caja?.dinero_recaudado,
-      icon: <PaymentsIcon />,
-      color: "success.light"
     },
     {
       label: "Egresos",
@@ -43,14 +38,14 @@ export default function CajaMetricas({
     },
     {
       label: "Arqueo",
-      value: "-",
+      value: null,
       icon: <ReceiptLongIcon />,
       color: "warning.light",
       click: onArqueo
     },
     {
       label: "Cerrar Caja",
-      value: "-",
+      value: null,
       icon: <SavingsIcon />,
       color: "error.light",
       click: onCerrar
@@ -75,24 +70,37 @@ export default function CajaMetricas({
             }}
           >
             <CardContent>
-              <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} alignItems="center">
 
-                <Avatar sx={{ bgcolor: item.color, width: 44, height: 44 }}>
-                  {item.icon}
-                </Avatar>
+    <Avatar sx={{ bgcolor: item.color, width: 44, height: 44 }}>
+      {item.icon}
+    </Avatar>
 
-                <Box>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                    {item.label}
-                  </Typography>
+    <Box>
 
-                  <Typography fontWeight={700}>
-                    {item.value != null ? formatCOP(item.value) : "-"}
-                  </Typography>
-                </Box>
+      {/* LABEL */}
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        fontWeight={600}
+      >
+        {item.label}
+      </Typography>
 
-              </Stack>
-            </CardContent>
+        <Typography fontWeight={700} fontSize={16}>
+  {item.extra != null && item.value != null
+    ? `${formatCOP(item.value)} - ${formatCOP(item.extra)}`
+    : item.value != null
+    ? formatCOP(item.value)
+    : ""
+  }
+</Typography>
+    
+
+    </Box>
+
+  </Stack>
+</CardContent>
           </Card>
         </Grid>
       ))}
