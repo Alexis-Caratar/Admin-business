@@ -448,51 +448,54 @@ AND (
   detallesMesa: async (id_negocio, mesaId) => {
 
     const query = `
- SELECT  
-    m.id AS id_mesa,
-    v.id AS id_venta,
-    p.id as id_pago,
-    v.numero_factura,
-    per.identificacion AS identificacion_cliente,
-    CONCAT(per.nombres, ' ', per.apellidos) AS nombre_completo,
-    v.subtotal AS venta_total,
-    p.metodo_pago as estado_pago,
-    CONCAT(
-        '[',
-        GROUP_CONCAT(
-            CONCAT(
-                '{',
-                '"id_producto":', vi.id_producto, ',',
-                '"url_imagen":"', prod_i.url, '",',
-                '"nombre":"', pro.nombre, '",',
-                '"cantidad":', vi.cantidad, ',',
-                '"subtotal":', vi.subtotal,
-                '}'
-            )
-        ),
-        ']'
-    ) AS productos
+      SELECT  
+          m.id AS id_mesa,
+          v.id AS id_venta,
+          MAX(p.id) as id_pago,
+          v.numero_factura,
+          per.identificacion AS identificacion_cliente,
+          CONCAT(per.nombres, ' ', per.apellidos) AS nombre_completo,
+          v.subtotal AS venta_total,
+          MAX(p.metodo_pago) as estado_pago,
+          CONCAT(
+              '[',
+              GROUP_CONCAT(
+                  CONCAT(
+                      '{',
+                      '"id_producto":', vi.id_producto, ',',
+                      '"url_imagen":"', prod_i.url, '",',
+                      '"nombre":"', pro.nombre, '",',
+                      '"cantidad":', vi.cantidad, ',',
+                      '"subtotal":', vi.subtotal,
+                      '}'
+                  )
+              ),
+              ']'
+          ) AS productos
 
-FROM mesas m
-INNER JOIN ventas v ON v.id_mesa = m.id
-INNER JOIN ventas_items vi ON v.id = vi.id_venta
-INNER JOIN productos pro ON vi.id_producto = pro.id
-INNER JOIN productos_imagenes  prod_i on pro.id=prod_i.id_producto
-INNER JOIN pagos p ON v.id = p.id_venta
-INNER JOIN personas per ON v.id_cliente = per.id
+      FROM mesas m
+      INNER JOIN ventas v ON v.id_mesa = m.id
+      INNER JOIN ventas_items vi ON v.id = vi.id_venta
+      INNER JOIN productos pro ON vi.id_producto = pro.id
+      INNER JOIN productos_imagenes prod_i ON pro.id = prod_i.id_producto
+      INNER JOIN pagos p ON v.id = p.id_venta
+      INNER JOIN personas per ON v.id_cliente = per.id
 
-WHERE m.estado = 'ocupada'
-  AND m.id_negocio = ?
-  AND m.id = ?
+      WHERE m.estado = 'ocupada'
+        AND m.id_negocio = ?
+        AND m.id = ?
 
-GROUP BY 
-    m.id,
-    v.id,
-    per.identificacion,
-    per.nombres,
-    per.apellidos,
-    v.subtotal
-    order by p.id desc limit 1;
+      GROUP BY 
+          m.id,
+          v.id,
+          v.numero_factura,
+          per.identificacion,
+          per.nombres,
+          per.apellidos,
+          v.subtotal
+
+      ORDER BY MAX(p.id) DESC
+      LIMIT 1;
     `;
     const [rows] = await db.query(query, [id_negocio, mesaId]);
 

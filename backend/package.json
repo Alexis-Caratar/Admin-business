@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
+    "build": "vite build",
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
