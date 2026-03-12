@@ -5,7 +5,6 @@ import {
   AppBar,
   Toolbar,
   Button,
-  Grid,
   Card,
   CardContent,
   CardMedia,
@@ -99,10 +98,10 @@ const Home: React.FC = () => {
         <Typography variant="h4" sx={{ fontWeight: "bold", textAlign: "center", mb: 6 ,color:"black"}}>
           Nuestros Menús
         </Typography>
-        <Grid container spacing={4}>
-          {menus.map((menu, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 4 }}>
+  {menus.map((menu, index) => (
+    <Box key={index} sx={{ width: 300 }}>
+      <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
                 <Card
                   sx={{
                     height: "100%",
@@ -127,9 +126,9 @@ const Home: React.FC = () => {
                   </CardContent>
                 </Card>
               </motion.div>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
 
       {/* Platos Especiales */}
@@ -138,9 +137,9 @@ const Home: React.FC = () => {
           <Typography variant="h4" sx={{ fontWeight: "bold", textAlign: "center", mb: 6,color:"black" }}>
             Platos Especiales
           </Typography>
-          <Grid container spacing={4}>
-            {especiales.map((plato, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
+              <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 4 }}>
+        {especiales.map((plato, index) => (
+          <Box key={index} sx={{ width: 300 }}>
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -171,9 +170,9 @@ const Home: React.FC = () => {
                     </CardContent>
                   </Card>
                 </motion.div>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         </Container>
       </Box>
 

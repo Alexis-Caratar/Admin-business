@@ -202,8 +202,8 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
         <Box
           key={mesa.id}
           sx={{
-            flex: "1 1 150px", // mínimo 150px, crece según contenedor
-            maxWidth: 320,     // opcional, evita que se estire demasiado
+            flex: { xs: "1 1 45%", sm: "1 1 150px" },
+            maxWidth: { xs: "45%", sm: 320 },
           }}
         >
           <Card
