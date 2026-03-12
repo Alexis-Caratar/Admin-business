@@ -1,9 +1,9 @@
 /* ---------- /src/pages/CajeroDashboard.tsx ---------- */
 import React, { useEffect, useState } from "react";
-import {  Box, Grid, Card, CardContent, Typography, Stack, Chip, Button, TextField, InputAdornment, Collapse, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog, IconButton, DialogContent, Paper, DialogActions } from "@mui/material";
+import {  Box, Typography, Stack, Chip, Button, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog, DialogContent, Paper, DialogActions } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import type { ProductoCajero, CategoriaCajero, Caja, Mesa } from "../../../../types/cajero";
-import { apiListarProductos, apiAbrirCaja, apiArqueoCaja, apiCerrarCaja, estado_caja, finalizar_venta, apimesas } from "../../../../api/cajero";
+import { apiListarProductos, apiAbrirCaja, apiArqueoCaja, apiCerrarCaja, estado_caja, finalizar_venta } from "../../../../api/cajero";
 import { Mesas } from "./components/Mesas";
 import { Carrito } from "./components/Carrito";
 import { AperturaCajaModal } from "./components/AperturaCaja";
@@ -20,6 +20,10 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VentasDetalles from "./components/Estados_dasboard/ventasDetalles";
 import CajaPanel from "./components/Estados_dasboard/CajaPanel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+interface AnimItem {
+  img: string;
+  start: { left: number; top: number };
+}
 
 export const CajeroDashboard: React.FC = () => {
   const [categorias, setCategorias] = useState<CategoriaCajero[]>([]);
@@ -29,7 +33,7 @@ export const CajeroDashboard: React.FC = () => {
   const [cajaAbierta, setCajaAbierta] = useState(false);
   const [montoApertura, setMontoApertura] = useState("");
   const [idCaja, setIdCaja] = useState<number | null>(null);
-  const [ventas, setVentas] = useState<any[]>([]);
+  const [, setVentas] = useState<any[]>([]);
   const [carrito, setCarrito] = useState<(ProductoCajero & { cantidad: number; precio_venta: number })[]>([]);
   const [modalApertura, setModalApertura] = useState(false);
   const [modalCierre, setModalCierre] = useState(false);
@@ -49,6 +53,7 @@ export const CajeroDashboard: React.FC = () => {
   const idUsuario = localStorage.getItem("id_usuario");
   const id_negocio = localStorage.getItem("id_negocio");
   const [openVentasDetalles, setOpenVentasDetalles] = useState(false);
+  const [animItem, setAnimItem] = useState<AnimItem | null>(null);
   
 
   const abrirCarrito = () => {
@@ -85,7 +90,20 @@ export const CajeroDashboard: React.FC = () => {
       setCaja(c);
       setCajaAbierta(c.estado === "ABIERTA");
       setIdCaja(c.id);
-      setMontoApertura(String(c.monto_inicial));
+      if (msg.tipo === "actualizar_caja") {
+  const c = msg.caja;
+  if (!c) return;
+
+  setCaja(c);
+  setCajaAbierta(c.estado === "ABIERTA");
+  setIdCaja(c.id);
+
+  if (c.estado === "ABIERTA") {
+    setMontoApertura(String(c.monto_inicial));
+  } else {
+    setMontoApertura("");
+  }
+}
     }
   };
   ws.onclose = () => console.log("WS cerrado");
@@ -121,7 +139,7 @@ export const CajeroDashboard: React.FC = () => {
     let mounted = true;
     async function load() {
       try {
-        setLoadingCategorias(true); setOpenCarrito
+        setLoadingCategorias(true);
         const res = await apiListarProductos();
         let data: any[] = [];
         if (res && res.data) {
@@ -186,6 +204,9 @@ export const CajeroDashboard: React.FC = () => {
 const clearCarrito = () => {
   setCarrito([]);
 };
+const clearMesa = () => {
+  setMesaSeleccionada(null);
+};
 
   //Finalizar venta
   const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
@@ -240,20 +261,35 @@ const clearCarrito = () => {
     }
   };
   //aperturar la caja 
-  const abrirCajaReal = async () => {
-    try {
-      const { data } = await apiAbrirCaja({ id_usuario: idUsuario, monto_inicial: Number(montoApertura) });
-      if (data?.ok) {
-        setCajaAbierta(true);
-        setIdCaja(data.result.id);
-        setModalApertura(false);
-        cargarArqueo(data.result.id);
-        cerrarCajaReal(data.result.id);
-      }
-    } catch (err) {
-      console.error("Error abrirCajaReal:", err);
+const abrirCajaReal = async () => {
+  try {
+    const { data } = await apiAbrirCaja({
+      id_usuario: idUsuario,
+      monto_inicial: Number(montoApertura)
+    });
+
+    if (data?.ok) {
+
+      // limpiar estados anteriores
+      setVentas([]);
+      setCarrito([]);
+      setMesaSeleccionada(null);
+      setArqueoInfo(null);
+
+      // nueva caja
+      setCajaAbierta(true);
+      setCaja(data.result);
+      setIdCaja(data.result.id);
+
+      setModalApertura(false);
+
+      cargarArqueo(data.result.id);
     }
-  };
+
+  } catch (err) {
+    console.error("Error abrirCajaReal:", err);
+  }
+};
 
   const cargarArqueo = async (id_caja_param?: number) => {
     try {
@@ -264,35 +300,41 @@ const clearCarrito = () => {
     }
   };
 
-  const cerrarCajaReal = async () => {
-    console.log("id caja", idCaja);
+const cerrarCajaReal = async (cierreData: any) => {
+  if (!idCaja) {
+    console.error("No hay una caja abierta para cerrar.");
+    return;
+  }
 
-    console.log("montoFinal",caja?.dinero_recaudado);
-    
-    if (!idCaja) {
-      console.error("No hay una caja abierta para cerrar.");
-      return;
-    }
-    try {
-      const montoFinal =caja?.dinero_recaudado
-      const { data } = await apiCerrarCaja({
-        id_caja: idCaja,
-        monto_final: montoFinal,
-      });
+  try {
+    const { dinero_esperado, dinero_contado, diferencia, base_caja,venta_libre, observacion } = cierreData;
 
-      if (data?.ok) {
-        setCajaAbierta(false);
-        setVentas([]);
-        setCarrito([]);
-        setMontoApertura("");
-        setIdCaja(null); // limpiamos el ID
-        setModalCierre(false);
-        checkCaja();
-      }
-    } catch (err) {
-      console.error("Error cerrarCajaReal:", err);
+    const { data } = await apiCerrarCaja({
+      id_caja: idCaja,
+      monto_final: dinero_contado,
+      dinero_esperado,
+      base_caja,
+      venta_libre,
+      diferencia,
+      nota: observacion,
+      estado: "CERRADA"
+    });
+
+    if (data?.ok) {
+      // Limpiar estados locales
+      setCajaAbierta(false);
+      setVentas([]);
+      setCarrito([]);
+      setMontoApertura("");
+      setIdCaja(null);
+      setModalCierre(false);
+      checkCaja(); // refresca la información
     }
-  };
+
+  } catch (err) {
+    console.error("Error cerrarCajaReal:", err);
+  }
+};
   const openCategoria = (categoria: CategoriaCajero) => {
     setCategoriaSeleccionada(categoria);
     setModalProductosOpen(true);
@@ -312,48 +354,59 @@ const clearCarrito = () => {
         maximumFractionDigits: 0,
       }).format(value);
 
+      
+      const animarAlCarrito = (img: string, rect: DOMRect) => {
+  setAnimItem({ img, start: rect });
+
+  setTimeout(() => {
+    setAnimItem(null);
+  }, 700);
+};
+
   return (
+    
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", p: 0, ml: 0 }}>
 
-      <Typography
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between", // 👈 separa texto e icono
-          borderRadius: 4,
-          boxShadow: "0px 4px 20px rgba(0,0,0,0.12)",
-          p: 1,
-          backgroundColor: cajaAbierta ? "success.main" : "error.main",
-          color: "white"
-        }}
-        variant="h6"
-        fontWeight="bold"
-        mb={2}
-      >
-        {/* Lado izquierdo */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
+    <Box
+  onClick={() => setShowStats(prev => !prev)}
+  sx={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 4,
+    boxShadow: "0px 4px 20px rgba(0,0,0,0.12)",
+    p: 1.5,
+    backgroundColor: cajaAbierta ? "success.main" : "error.main",
+    color: "white",
+    cursor: "pointer",
+    userSelect: "none",
+    transition: "all 0.25s ease",
 
-          }}
-        >
-          <PersonIcon sx={{ mr: 1 }} />
-          Perfil del Cajero
-        </Box>
+    "&:hover": {
+      transform: "translateY(-2px)",
+      boxShadow: "0px 8px 25px rgba(0,0,0,0.2)"
+    }
+  }}
+>
+  {/* Lado izquierdo */}
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "center"
+    }}
+  >
+    <PersonIcon sx={{ mr: 1 }} />
+    <Typography variant="h6" fontWeight="bold">
+      Perfil del Cajero
+    </Typography>
+  </Box>
 
-        {/* Lado derecho (ojito) */}
-        <IconButton
-          size="small"
-          title="Ver más detalles"
-          onClick={() => setShowStats(prev => !prev)}
-        >
-
-          {showStats ? <VisibilityOffIcon /> : <VisibilityIcon />}
-        </IconButton>
-      </Typography>
+  {/* Lado derecho */}
+  {showStats ? <VisibilityOffIcon /> : <VisibilityIcon />}
+</Box>
 
 {/* === PANEL SUPERIOR DE CAJA === */}
+ {cajaAbierta && (
       <CajaPanel
         showStats={showStats}
         cajaAbierta={cajaAbierta}
@@ -370,6 +423,7 @@ const clearCarrito = () => {
         }
         }
       />
+ )}
 
       {/* === CONTENIDO PRINCIPAL === */}
       <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
@@ -407,11 +461,12 @@ const clearCarrito = () => {
           {/* MESAS */}
           <Box sx={{ flex: 1 }}>
             <Mesas
-              idUsuario={idUsuario}
-              id_negocio={id_negocio}
+              idUsuario={Number(idUsuario) || 0}
+             id_negocio={Number(id_negocio) || 0}
               mesas={mesas}
+              mesaSeleccionada={mesaSeleccionada}
               onSelect={(m) =>
-                setMesaSeleccionada((prev) => (prev?.id === m.id ? null : m))
+                setMesaSeleccionada((prev) => (prev?.id === m?.id ? null : m))
               }
             />
           </Box>
@@ -437,17 +492,17 @@ const clearCarrito = () => {
               onClick={abrirCarrito}
               sx={{ position: "relative" }}
             >
-              <Badge
-                badgeContent={carrito.length}
-                color="error"
-                sx={{
-                  "& .MuiBadge-badge": {
-                    fontWeight: "bold",
-                  },
-                }}
-              >
-                <ShoppingCartIcon sx={{ mr: 1 }} />
-              </Badge>
+             <Badge
+            badgeContent={carrito.reduce((total, item) => total + item.cantidad, 0)}
+            color="error"
+            sx={{
+              "& .MuiBadge-badge": {
+                fontWeight: "bold",
+              },
+            }}
+          >
+            <ShoppingCartIcon sx={{ mr: 1 }} />
+          </Badge>
               Ver Carrito
             </Fab>
 
@@ -472,61 +527,59 @@ const clearCarrito = () => {
         )}
 
         {/* === DRAWER / CARRITO ESCRITORIO === */}
-        <Drawer
-          anchor="right"
-          open={openCarrito && !isMobile}
-          onClose={() => setOpenCarrito(false)}
-          sx={{
-            "& .MuiDrawer-paper": {
-              width: 400,
-              p: 2,
-              boxSizing: "border-box",
-            },
-          }}
-        >
-          <Carrito
-            carrito={carrito}
-            onRemove={removeItem}
-            onClear={clearCarrito}
-            onAdd={sumarCantidad}
-            onSub={restarCantidad}
-            onFinalizar={(c, p) => {
-              finalizarVenta(c, p);
-              setOpenCarrito(false);
-            }}
-            mesaSeleccionada={mesaSeleccionada}
-            categorias={categorias}
-            onOpenCategoria={(categoria) => {
-            setOpenCarrito(false);  
-            openCategoria(categoria); 
-          }}
-          loadingCategorias={loadingCategorias}
-          />
-        </Drawer>
+      <Drawer
+  anchor="right"
+  open={openCarrito && !isMobile}
+  onClose={() => setOpenCarrito(false)}
+  sx={{
+    "& .MuiDrawer-paper": { width: 400, p: 2, boxSizing: "border-box" },
+  }}
+>
+  <Carrito
+    carrito={carrito}
+    onRemove={removeItem}
+    onClear={clearCarrito}
+    onAdd={sumarCantidad}
+    onSub={restarCantidad}
+    onFinalizar={(c, p) => {
+      finalizarVenta(c, p);
+      setOpenCarrito(false);
+    }}
+    mesaSeleccionada={mesaSeleccionada}
+    onClearMesa={clearMesa} // <-- aquí
+    categorias={categorias}
+    onOpenCategoria={(categoria) => {
+      setOpenCarrito(false);
+      openCategoria(categoria);
+    }}
+    loadingCategorias={loadingCategorias}
+  />
+</Drawer>
 
         {/* === CARRITO MÓVIL === */}
         <Box sx={{ display: { xs: "block", md: "none" } }}>
           {isMobile && (
-           <CarritoMobile
-            open={openCarrito}
-            onClose={cerrarCarrito}
-            carrito={carrito}
-            onRemove={removeItem}
-            onClear={clearCarrito}
-            onAdd={sumarCantidad}
-            onSub={restarCantidad}
-            onFinalizar={(c, p) => {
-              finalizarVenta(c, p);
-              setOpenCarrito(false);
-            }}
-            mesaSeleccionada={mesaSeleccionada}
-            categorias={categorias}
-             onOpenCategoria={(categoria) => {
-            setOpenCarrito(false);  
-            openCategoria(categoria); 0
-          }}
-            loadingCategorias={loadingCategorias}
-          />
+        <CarritoMobile
+  open={openCarrito}
+  onClose={cerrarCarrito}
+  carrito={carrito}
+  onRemove={removeItem}
+  onClear={clearCarrito}
+  onAdd={sumarCantidad}
+  onSub={restarCantidad}
+  onFinalizar={(c, p) => {
+    finalizarVenta(c, p);
+    setOpenCarrito(false);
+  }}
+  mesaSeleccionada={mesaSeleccionada}
+  onClearMesa={clearMesa} // <-- aquí
+  categorias={categorias}
+  onOpenCategoria={(categoria) => {
+    setOpenCarrito(false);
+    openCategoria(categoria);
+  }}
+  loadingCategorias={loadingCategorias}
+/>
           )}
         </Box>
       </Box>
@@ -534,15 +587,9 @@ const clearCarrito = () => {
       {/* === MODALES === */}
       <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} />
       <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
-     <CierreCajaModal
-  open={modalCierre}
-  onClose={() => setModalCierre(false)}
-  arqueoInfo={arqueoInfo}
-  formatCOP={formatCOP}
-  onCerrar={cerrarCajaReal}
-/>
-       <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada ?? undefined} categorias={categorias} onAgregar={addCart} />
-      <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)}idUsuario={idUsuario} id_negocio={id_negocio}  id_caja={idCaja} />
+      <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} arqueoInfo={arqueoInfo} formatCOP={formatCOP} onCerrar={cerrarCajaReal}/>
+      <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada} categorias={categorias} onAgregar={addCart} animarAlCarrito={animarAlCarrito}/>
+      <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)}  idUsuario={idUsuario != null ? Number(idUsuario) : null} id_negocio={id_negocio != null ? Number(id_negocio) : null}  id_caja={idCaja} />
       <VentasDetalles open={openVentasDetalles} onClose={() => setOpenVentasDetalles(false)} id_caja={idCaja}/>
      
       {/* === DIALOG VENTA REGISTRADA === */}
@@ -638,6 +685,35 @@ const clearCarrito = () => {
     </Button>
   </DialogActions>
 </Dialog>
+
+ {/* 👇 AQUÍ VA LA ANIMACIÓN */}
+  {animItem && (
+    <Box
+      component="img"
+      src={animItem.img}
+      sx={{
+        position: "fixed",
+        left: animItem.start.left,
+        top: animItem.start.top,
+        width: 60,
+        height: 60,
+        borderRadius: "50%",
+        pointerEvents: "none",
+        zIndex: 2000,
+        animation: "flyToCart 0.7s ease-in-out forwards",
+        "@keyframes flyToCart": {
+          "0%": {
+            transform: "scale(1)",
+            opacity: 1,
+          },
+          "100%": {
+            transform: "translate(-600px, 500px) scale(0.2)",
+            opacity: 0,
+          },
+        },
+      }}
+    />
+  )}
     </Box>
   );
 };

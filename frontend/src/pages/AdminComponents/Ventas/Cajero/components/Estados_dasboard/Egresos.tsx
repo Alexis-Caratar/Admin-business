@@ -3,7 +3,6 @@ import {
   Button,
   Dialog,
   DialogContent,
-  DialogTitle,
   Typography,
   IconButton,
   Stack,
@@ -30,9 +29,9 @@ import {
 } from "../../../../../../api/cajero";
 
 type Props = {
-  idUsuario: void;
-  id_negocio: number;
-  id_caja: number;
+  idUsuario: number | null;
+  id_negocio: number | null; 
+  id_caja: number | null;
   open: boolean;
   onClose: () => void;
 };
@@ -56,10 +55,13 @@ export default function Egresos({ idUsuario,id_negocio, id_caja, open, onClose }
     cargarEgresos();
   }, [open, id_negocio, id_caja]);
 
-  const cargarEgresos = async () => {
-    const data = await egresosListar(id_negocio, id_caja);
-    setEgresos(data);
-  };
+const cargarEgresos = async () => {
+  // Si cualquiera es null, no hacemos la llamada
+  if (id_negocio === null || id_caja === null) return;
+
+  const data = await egresosListar(id_negocio, id_caja);
+  setEgresos(data);
+};
 
   const total = useMemo(() => {
     return egresos.reduce((acc, e) => acc + Number(e.monto), 0);

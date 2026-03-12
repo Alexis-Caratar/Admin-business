@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Grid,
   Card,
   Typography,
   Box,
@@ -9,8 +8,6 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
-  Divider,
-  Button,
   TextField,
   MenuItem,
   useTheme,
@@ -26,22 +23,21 @@ import { apidetallesMesa, actualiza_venta, liberar_mesa } from "../../../../../a
 import Swal from "sweetalert2";
 
 type Props = {
-  idUsuario: bigint;
-  id_negocio: bigint;
+  idUsuario: number|null;
+  id_negocio: number|null;
   mesas: Mesa[];
+  mesaSeleccionada: Mesa | null;
   onSelect?: (m: Mesa | null) => void;
 };
 
-
-export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas, onSelect }) => {
-  const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
+export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSeleccionada, onSelect }) => {
   const [mesaOrden, setMesaOrden] = useState<Mesa | null>(null);
   const [openOrden, setOpenOrden] = useState(false);
   const [detalleVenta, setDetalleVenta] = useState<any | null>(null);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
   const [metodoPago, setMetodoPago] = useState("EFECTIVO");
   const [montoRecibido, setMontoRecibido] = useState<number | "">("");
-  const [habilitarPago, setHabilitarPago] = useState(false);
+  const [, setHabilitarPago] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -66,7 +62,6 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas, onSelect 
 
   const handleClickMesa = async (mesa: Mesa) => {
     if (mesa.estado === "Disponible") {
-      setMesaSeleccionada(prev => (prev?.id === mesa.id ? null : mesa));
       onSelect?.(mesa);
       return;
     }
@@ -100,20 +95,22 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas, onSelect 
     }
   };
 
-  const handlePagarFactura = () => {
-    setHabilitarPago(true);
-    setTimeout(() => {
-      document.getElementById("formPago")?.scrollIntoView({ behavior: "smooth" });
-    }, 200);
-  };
 
   const handleLiberarMesa = async () => {
     try {
       // Aquí llamas tu API para liberar la mesa
       await liberar_mesa(mesaOrden?.id, id_negocio);
 
-      alert("✅ Mesa liberada correctamente");
-
+            Swal.fire({
+        icon: "success",
+        title: "Mesa liberada",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2800,
+        timerProgressBar: true
+      });
+      onSelect?.(null);
       setOpenOrden(false);
       setDetalleVenta(null);
     } catch (error) {
@@ -138,6 +135,10 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas, onSelect 
     try {
       const { data } = await actualiza_venta(payload);
       // Reiniciar modal
+        if (data?.ok) {
+      // 🔥 limpiar mesa seleccionada
+      onSelect?.(null);
+    }
       setDetalleVenta(null);
       setHabilitarPago(false);
       setMontoRecibido("");
@@ -180,112 +181,114 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas, onSelect 
   };
 
   return (
-    <Box width="100%">
-      <Typography fontWeight={700} mb={1} sx={{ fontSize: { xs: 16, md: 22 } }}>
-        Mesas del Restaurante
-      </Typography>
+  <Box width="100%">
+  <Typography fontWeight={700} mb={1} sx={{ fontSize: { xs: 16, md: 22 } }}>
+    Mesas del Restaurante
+  </Typography>
 
-      <Grid container spacing={2}>
-        {mesas.map(mesa => {
-          const config = getEstadoConfig(mesa.estado);
-          const isSelected = mesaSeleccionada?.id === mesa.id;
-          return (
-            <Grid
-              item
-              xs={6}
-              sm={6}
-              md={4}
-              lg={4}
+  {/* MESAS EN FLEXBOX */}
+  <Box
+    sx={{
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 2, // espacio entre cards
+    }}
+  >
+    {mesas.map((mesa) => {
+      const config = getEstadoConfig(mesa.estado);
+      const isSelected = mesaSeleccionada?.id === mesa.id;
+
+      return (
+        <Box
+          key={mesa.id}
+          sx={{
+            flex: "1 1 150px", // mínimo 150px, crece según contenedor
+            maxWidth: 320,     // opcional, evita que se estire demasiado
+          }}
+        >
+          <Card
+            onClick={() => handleClickMesa(mesa)}
+            sx={{
+              position: "relative",
+              p: { xs: 2, sm: 5 },
+              borderRadius: 3,
+              minHeight: { xs: 130, sm: 160 },
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              background: isSelected
+                ? "linear-gradient(135deg, rgba(25,118,210,.08), rgba(25,118,210,.02))"
+                : "#fff",
+              border: isSelected ? "2px solid" : "1px solid rgba(0,0,0,0.08)",
+              borderColor: isSelected ? "primary.main" : "rgba(0,0,0,0.08)",
+              boxShadow: isSelected
+                ? "0 0 0 3px rgba(25,118,210,.25)"
+                : { xs: "0 4px 12px rgba(0,0,0,0.08)", md: "0 10px 25px rgba(0,0,0,0.08)" },
+              transition: "all .25s ease",
+              "&:hover": {
+                transform: { xs: "none", md: "translateY(-6px)" },
+              },
+            }}
+          >
+            <Chip
+              label={mesa.estado}
+              size="small"
+              sx={{
+                position: "absolute",
+                top: 11,
+                right: 20,
+                fontWeight: 700,
+                height: 24,
+                px: 3,
+                borderRadius: 2,
+                background: config.chipColor,
+                color: "#fff",
+              }}
+            />
+
+            <Box
+              sx={{
+                mt: { xs: 3, sm: 4 },
+                width: { xs: 38, sm: 48 },
+                height: { xs: 38, sm: 48 },
+                borderRadius: "50%",
+                background: `linear-gradient(135deg, ${config.iconBg})`,
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mb: 1,
+              }}
             >
+              {config.icon}
+            </Box>
 
-              <Card
-                onClick={() => handleClickMesa(mesa)}
-                sx={{
-                  position: "relative",
-                  p: { xs: 2, sm: 5 },
-                  borderRadius: 3,
-                  minHeight: { xs: 130, sm: 160 },
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  background: isSelected
-                    ? "linear-gradient(135deg, rgba(25,118,210,.08), rgba(25,118,210,.02))"
-                    : "#fff",
-                  border: isSelected ? "2px solid" : "1px solid rgba(0,0,0,0.08)",
-                  borderColor: isSelected ? "primary.main" : "rgba(0,0,0,0.08)",
-                  boxShadow: isSelected
-                    ? "0 0 0 3px rgba(25,118,210,.25)"
-                    : { xs: "0 4px 12px rgba(0,0,0,0.08)", md: "0 10px 25px rgba(0,0,0,0.08)" },
-                  transition: "all .25s ease",
-                  "&:hover": {
-                    transform: { xs: "none", md: "translateY(-6px)" },
-                  },
-                }}
-              >
-                <Chip
-                  label={mesa.estado}
-                  size="small"
-                  sx={{
-                    position: "absolute",
-                    top: 11,
-                    right: 20,
-                    fontWeight: 700,
-                    height: 24,
-                    px: 3,
-                    borderRadius: 2,
-                    background: config.chipColor,
-                    color: "#fff"
-                  }}
-                />                <Box
-                  sx={{
-                    mt: { xs: 3, sm: 4 },
-                    width: { xs: 38, sm: 48 },
-                    height: { xs: 38, sm: 48 },
-                    borderRadius: "50%",
-                    background: `linear-gradient(135deg, ${config.iconBg})`,
-                    color: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    mb: 1,
-                  }}
-                >
-                  {config.icon}
-                </Box>
-                <Box textAlign="center">
-                  <Typography
-                    fontWeight={800}
-                    sx={{ fontSize: { xs: 12, sm: 18 } }}
-                    noWrap
-                  >
-                    {mesa.nombre}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: { xs: 12, sm: 15 } }}
-                    color="text.secondary"
-                  >
-                    Cap: {mesa.capacidad} pers
-                  </Typography>
-                </Box>
-                <Box flexGrow={0} />
-                {isSelected && (
-                  <Chip
-                    label={isMobile ? "select.." : "Seleccionada"}
-                    color="primary"
-                    size="small"
-                    sx={{
-                      fontWeight: 700,
-                      borderRadius: 2,
-                      mb: 0.1,
-                    }}
-                  />
-                )}
-              </Card>
-            </Grid>
-          );
-        })}
-      </Grid>
+            <Box textAlign="center">
+              <Typography fontWeight={800} sx={{ fontSize: { xs: 12, sm: 18 } }} noWrap>
+                {mesa.nombre}
+              </Typography>
+              <Typography sx={{ fontSize: { xs: 12, sm: 15 } }} color="text.secondary">
+                Cap: {mesa.capacidad} pers
+              </Typography>
+            </Box>
+
+            <Box flexGrow={0} />
+
+            {isSelected && (
+              <Chip
+                label={isMobile ? "select.." : "Seleccionada"}
+                color="primary"
+                size="small"
+                sx={{ fontWeight: 700, borderRadius: 2, mb: 0.1 }}
+              />
+            )}
+          </Card>
+        </Box>
+      );
+    })}
+  </Box>
+
 
       {/* Modal Orden */}
       <Dialog open={openOrden} onClose={() => setOpenOrden(false)} maxWidth="sm" fullWidth>
@@ -466,8 +469,7 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas, onSelect 
 
 
                   <Box
-                    onClick={!(metodoPago === "EFECTIVO" && cambio < 0) ? handleFinalizarVenta : null}
-                    sx={{
+                    onClick={!(metodoPago === "EFECTIVO" && cambio < 0) ? handleFinalizarVenta : undefined}                    sx={{
                       mt: 3,
                       p: 2,
                       borderRadius: 3,

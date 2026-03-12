@@ -3,12 +3,9 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Drawer,
-  Fab,
-  Badge,
   Typography,
   IconButton,
   Stack,
-  List,
   ListItem,
   ListItemAvatar,
   Avatar,
@@ -35,7 +32,6 @@ import type { Mesa } from "../../../../../types/cajero"; // ajusta la ruta
 import { Categorias } from "./Categorias";
 import { apibuscar_cliente } from "../../../../../api/cajero";
 import {
-  LeadingActions,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
@@ -52,19 +48,11 @@ type Cliente = {
   tipo: string;
 };
 
-type ProductoCarrito = {
-  id: number;
-  nombre: string;
-  imagen: string;
-  cantidad: number;
-  precio_venta: number;
-};
 
 type Props = {
   open: boolean;
   onClose: () => void;
-
-  carrito: ProductoCarrito[];
+   carrito: any[];
   onRemove: (id: number) => void;
   onClear: () => void;
   onAdd: (id: number) => void;
@@ -80,6 +68,7 @@ type Props = {
   ) => void;
 
   mesaSeleccionada: Mesa | null;
+  onClearMesa: () => void;
   categorias: any[];
   onOpenCategoria: (categoria: any) => void;
   loadingCategorias: boolean;
@@ -110,6 +99,7 @@ export const CarritoMobile: React.FC<Props> = ({
   onSub,
   onFinalizar,
   mesaSeleccionada,
+  onClearMesa,
   categorias,
   onOpenCategoria,
   loadingCategorias
@@ -129,8 +119,6 @@ const [resetCliente, setResetCliente] = useState(0);
   const [metodoPago, setMetodoPago] = useState<string>("PENDIENTE");
   const [montoRecibido, setMontoRecibido] = useState<number>(0);
   const cambio = montoRecibido - total;
-  const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
-
   const trailingActions = (id: number) => (
     <TrailingActions>
       <SwipeAction destructive onClick={() => onRemove(id)}>
@@ -230,8 +218,6 @@ useEffect(() => {
 
     onFinalizar(clienteSeleccionado ? clienteSeleccionado.id : null, pago);
     onClear();
-    toastr.success("Venta registrada correctamente");
-    // Reset states
     setClienteSeleccionado(null);
     setClienteBuscado("");
     setResultados([]);
@@ -320,53 +306,66 @@ useEffect(() => {
             )}
           </Stack>
 
-          {mesaSeleccionada && (
-            <Card
-              sx={{
-                mb: 2,
-                p: 1.5,
-                borderRadius: 2,
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                background: "linear-gradient(135deg, #e3f2fd, #f1f8ff)",
-                border: "1px solid #bbdefb",
-              }}
-            >
-              <Avatar
-                sx={{
-                  bgcolor: "primary.main",
-                  width: 42,
-                  height: 42,
-                }}
-              >
-                🪑
-              </Avatar>
+{mesaSeleccionada && (
+  <Card
+    sx={{
+      mb: 2,
+      p: 1.5,
+      borderRadius: 2,
+      display: "flex",
+      alignItems: "center",
+      gap: 1.5,
+      background: "linear-gradient(135deg, #e3f2fd, #f1f8ff)",
+      border: "1px solid #bbdefb",
+    }}
+  >
+    <Avatar
+      sx={{
+        bgcolor: "primary.main",
+        width: 42,
+        height: 42,
+      }}
+    >
+      🪑
+    </Avatar>
 
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography fontWeight={700} fontSize={13}>
-                  Mesa seleccionada
-                </Typography>
-                <Typography fontSize={14} color="text.secondary">
-                  {mesaSeleccionada.nombre} · Capacidad {mesaSeleccionada.capacidad}
-                </Typography>
-              </Box>
+    <Box sx={{ flexGrow: 1 }}>
+      <Typography fontWeight={700} fontSize={13}>
+        Mesa seleccionada
+      </Typography>
+      <Typography fontSize={14} color="text.secondary">
+        {mesaSeleccionada.nombre} · Capacidad {mesaSeleccionada.capacidad}
+      </Typography>
+    </Box>
 
-              <Chip
-                label={mesaSeleccionada.estado}
-                color={
-                  mesaSeleccionada.estado === "Disponible"
-                    ? "success"
-                    : mesaSeleccionada.estado === "Ocupada"
-                      ? "error"
-                      : "warning"
-                }
-                size="small"
-                sx={{ fontWeight: 600 }}
-              />
-            </Card>
-          )}
+    {/* Contenedor Chip + X */}
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <Chip
+        label={mesaSeleccionada.estado}
+        color={
+          mesaSeleccionada.estado === "Disponible"
+            ? "success"
+            : mesaSeleccionada.estado === "Ocupada"
+            ? "error"
+            : "warning"
+        }
+        size="small"
+        sx={{ fontWeight: 600 }}
+      />
 
+      <IconButton
+        size="small"
+        onClick={onClearMesa}
+        sx={{
+          bgcolor: "#f5f5f5",
+          "&:hover": { bgcolor: "#e0e0e0" },
+        }}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </Box>
+  </Card>
+)}
 
           <Stack direction="row" spacing={1} alignItems="center" width="100%">
             <Button
@@ -533,7 +532,7 @@ useEffect(() => {
 
                               <ListItemAvatar>
                                 <Avatar
-                                  src={item.imagen_plato}
+                                  src={item.imagen_plato??undefined}
                                   variant="rounded"
                                   sx={{ width: 48, height: 48 }}
                                 />

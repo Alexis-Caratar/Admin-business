@@ -1,5 +1,5 @@
 import axios from "./axios";
-import type { Venta, VentaPayload, VentaItem } from "../types/ventas";
+import type { Venta, VentaPayload } from "../types/ventas";
 
 // -------------------------------------------------------------------
 // GET: Listar ventas

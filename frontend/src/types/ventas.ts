@@ -41,7 +41,7 @@ export interface VentaPayload {
 
 export interface Venta {
   id: number;
-  id_cliente: number;
+  id_cliente: number|null;
   fecha: string;
   total: number;
   estado: string;

@@ -14,6 +14,7 @@ import {
   Paper,
   MenuItem,
   Chip,
+  IconButton,
 } from "@mui/material";
 
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
@@ -30,6 +31,7 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ShoppingBasketOutlinedIcon from "@mui/icons-material/ShoppingBasketOutlined";
 import { apibuscar_cliente } from "../../../../../api/cajero";
+import CloseIcon from "@mui/icons-material/Close";
 
 // Modal para crear cliente
 import { CrearClienteModal } from "./CrearClienteModal";
@@ -60,6 +62,7 @@ type Props = {
     }
   ) => void;
   mesaSeleccionada: Mesa | null;
+  onClearMesa: () => void;
   categorias: any[];
   onOpenCategoria: (categoria: any) => void;
   loadingCategorias: boolean;
@@ -74,6 +77,7 @@ export const Carrito: React.FC<Props> = ({
   onSub,
   onFinalizar,
   mesaSeleccionada,
+  onClearMesa,
   categorias,
   onOpenCategoria,
   loadingCategorias
@@ -82,25 +86,18 @@ export const Carrito: React.FC<Props> = ({
   const [clienteBuscado, setClienteBuscado] = useState("");
   const [resultados, setResultados] = useState<Cliente[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] =
-    useState<Cliente | null>(null);
-
+  useState<Cliente | null>(null);
   const [openCrearModal, setOpenCrearModal] = useState(false);
-
   const [metodoPago, setMetodoPago] = useState("PENDIENTE");
   const [montoRecibido, setMontoRecibido] = useState<number | "">("");
-
   const total = carrito.reduce(
     (acc, v) => acc + v.precio_venta * v.cantidad,
     0
   );
-
-  console.log("carrtito", carrito);
-
   const monto = Number(montoRecibido) || 0;
   const cambio = monto - total;
-
   const cambioSeguro = Math.max(cambio, 0);
-
+  const pagoBloqueado = metodoPago === "EFECTIVO" && cambio < 0;
 
   const formatCOP = (value: number) =>
     new Intl.NumberFormat("es-CO", {
@@ -309,53 +306,67 @@ export const Carrito: React.FC<Props> = ({
           )}
         </Stack>
 
-        {mesaSeleccionada && (
-          <Card
-            sx={{
-              mb: 2,
-              p: 1.5,
-              borderRadius: 2,
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              background: "linear-gradient(135deg, #e3f2fd, #f1f8ff)",
-              border: "1px solid #bbdefb",
-            }}
-          >
-            <Avatar
-              sx={{
-                bgcolor: "primary.main",
-                width: 42,
-                height: 42,
-              }}
-            >
-              🪑
-            </Avatar>
+    {mesaSeleccionada && (
 
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography fontWeight={700} fontSize={13}>
-                Mesa seleccionada
-              </Typography>
-              <Typography fontSize={14} color="text.secondary">
-                {mesaSeleccionada.nombre} · Capacidad {mesaSeleccionada.capacidad}
-              </Typography>
-            </Box>
+<Card
+  sx={{
+    mb: 2,
+    p: 1.5,
+    borderRadius: 2,
+    display: "flex",
+    alignItems: "center",
+    gap: 1.5,
+    background: "linear-gradient(135deg, #e3f2fd, #f1f8ff)",
+    border: "1px solid #bbdefb",
+  }}
+>
+  <Avatar
+    sx={{
+      bgcolor: "primary.main",
+      width: 42,
+      height: 42,
+    }}
+  >
+    🪑
+  </Avatar>
 
-            <Chip
-              label={mesaSeleccionada.estado}
-              color={
-                mesaSeleccionada.estado === "Disponible"
-                  ? "success"
-                  : mesaSeleccionada.estado === "Ocupada"
-                    ? "error"
-                    : "warning"
-              }
-              size="small"
-              sx={{ fontWeight: 600 }}
-            />
-          </Card>
-        )}
+  <Box sx={{ flexGrow: 1 }}>
+    <Typography fontWeight={700} fontSize={13}>
+      Mesa seleccionada
+    </Typography>
+    <Typography fontSize={14} color="text.secondary">
+      {mesaSeleccionada.nombre} · Capacidad {mesaSeleccionada.capacidad}
+    </Typography>
+  </Box>
 
+  {/* Contenedor para Chip + X */}
+  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+    <Chip
+      label={mesaSeleccionada.estado}
+      color={
+        mesaSeleccionada.estado === "Disponible"
+          ? "success"
+          : mesaSeleccionada.estado === "Ocupada"
+          ? "error"
+          : "warning"
+      }
+      size="small"
+      sx={{ fontWeight: 600 }}
+    />
+
+    <IconButton
+      size="small"
+      sx={{
+        bgcolor: "rgba(0,0,0,0.05)",
+        "&:hover": { bgcolor: "rgba(0,0,0,0.1)" },
+      }}
+      onClick={onClearMesa}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  </Box>
+</Card>
+)}
 
         <Card sx={{ p: 1, borderRadius: 2, boxShadow: 3 }}>
           {carrito.length === 0 ? (
@@ -538,31 +549,68 @@ export const Carrito: React.FC<Props> = ({
 
               )}
 
-              {/* FINALIZAR */}
-              <Button
-                fullWidth
-                variant="contained"
-                color="success"
-                sx={{ mt: 2 }}
-                startIcon={<AddShoppingCartIcon />}
-                disabled={metodoPago === "EFECTIVO" && cambio < 0}
-                onClick={() => {
-                  onFinalizar(clienteSeleccionado?.id ?? null, {
-                    metodo_pago: metodoPago,
-                    monto_recibido: montoRecibido,
-                    cambio: Math.max(cambio, 0),
-                  });
+      
+<Box
+  onClick={
+    !pagoBloqueado
+      ? () => {
+          onFinalizar(clienteSeleccionado?.id ?? null, {
+            metodo_pago: metodoPago,
+            monto_recibido: montoRecibido,
+            cambio: Math.max(cambio, 0),
+          });
 
-                  setClienteSeleccionado(null);
-                  setClienteBuscado("");
-                  setResultados([]);
-                  setMetodoPago("EFECTIVO");
-                  setMontoRecibido(0);
-                }}
-              >
-                Finalizar Venta
-              </Button>
+          setClienteSeleccionado(null);
+          setClienteBuscado("");
+          setResultados([]);
+          setMetodoPago("EFECTIVO");
+          setMontoRecibido(0);
+        }
+      : undefined
+  }
+  sx={{
+    mt: 2,
+    p: 2,
+    borderRadius: 3,
+    background: pagoBloqueado
+      ? "#9e9e9e"
+      : "linear-gradient(135deg,#09a58e,#2e7d32)",
+    color: "#fff",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 1.2,
+    cursor: pagoBloqueado ? "not-allowed" : "pointer",
+    userSelect: "none",
+    fontWeight: 700,
+    boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+    transition: "all 0.25s ease",
+    width: "90%",
 
+    fontSize: {
+      xs: "0.95rem",
+      sm: "1rem",
+    },
+
+    "&:hover": pagoBloqueado
+      ? {}
+      : {
+          transform: "translateY(-4px)",
+          boxShadow: "0 10px 25px rgba(0,0,0,0.35)",
+        },
+
+    "&:active": {
+      transform: "scale(0.97)",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+    },
+  }}
+>
+  <AddShoppingCartIcon />
+
+  <Typography fontWeight={700} letterSpacing={0.5}>
+    FINALIZAR VENTA
+  </Typography>
+</Box>
 
             </>
           )}

@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Button,
   Card,
   CardContent,
   CardMedia,
-  Grid,
   Typography,
   Dialog,
   DialogActions,
@@ -30,10 +29,11 @@ import {
 } from "../../../api/categorias";
 
 import Swal from "sweetalert2";
-import AdminProductos from "../productos/AdminProductos"; 
+import AdminProductos from "../Productos/AdminProductos"; 
+import type { Categoria } from "../../../types/categorias";
 
 const AdminCategorias = () => {
-  const [categorias, setCategorias] = useState([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const itemsPerPage = 6;
@@ -89,7 +89,7 @@ const AdminCategorias = () => {
     if (editingId) {
       await actualizarCategoria(editingId, form);
     } else {
-      await crearCategoria({ ...form, id_negocio });
+      await crearCategoria({ ...form, id_negocio: Number(id_negocio)  });
     }
 
     cleanForm();
@@ -177,67 +177,74 @@ const AdminCategorias = () => {
             </Box>
           </Box>
 
-          {/* GRID CATEGORIAS */}
-          <Grid container spacing={3}>
-            {paginated.map((c: any) => (
-              <Grid item xs={12} sm={6} md={4} key={c.id}>
-                <Card
-                  sx={{
-                    transition: "transform .2s, box-shadow .2s",
-                    cursor: "pointer",
-                    "&:hover": {
-                      transform: "translateY(-6px)",
-                      boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
-                    },
-                  }}
-                >
-                  <div onClick={() => handleOpenProductos(c.id)}>
-                    <CardMedia
-                      component="img"
-                      height="150"
-                      image={c.imagen || "https://via.placeholder.com/150"}
-                      sx={{ objectFit: "cover" }}
-                    />
-                  </div>
+     {/* GRID CATEGORIAS */}
+<Box display="flex" flexWrap="wrap" gap={3}>
+  {paginated.map((c: any) => (
+    <Box
+      key={c.id}
+      flex="1 1 calc(100% - 24px)" // xs: 1 por fila
+      sx={{
+        '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' }, // sm: 2 por fila
+        '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 24px)' }, // md: 3 por fila
+      }}
+    >
+      <Card
+        sx={{
+          transition: "transform .2s, box-shadow .2s",
+          cursor: "pointer",
+          "&:hover": {
+            transform: "translateY(-6px)",
+            boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
+          },
+        }}
+      >
+        <div onClick={() => handleOpenProductos(c.id)}>
+          <CardMedia
+            component="img"
+            height="150"
+            image={c.imagen || "https://via.placeholder.com/150"}
+            sx={{ objectFit: "cover" }}
+          />
+        </div>
 
-                  <CardContent>
-                    <Typography variant="h6">{c.nombre}</Typography>
-                    <Typography variant="body2">{c.descripcion}</Typography>
+        <CardContent>
+          <Typography variant="h6">{c.nombre}</Typography>
+          <Typography variant="body2">{c.descripcion}</Typography>
 
-                    <Box mt={1} display="flex" gap={1}>
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingId(c.id);
+          <Box mt={1} display="flex" gap={1}>
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingId(c.id);
 
-                          setForm({
-                            nombre: c.nombre || "",
-                            descripcion: c.descripcion || "",
-                            imagen: c.imagen || "",
-                            activo: c.activo ?? 1,
-                          });
+                setForm({
+                  nombre: c.nombre || "",
+                  descripcion: c.descripcion || "",
+                  imagen: c.imagen || "",
+                  activo: c.activo ?? 1,
+                });
 
-                          setOpenModal(true);
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
+                setOpenModal(true);
+              }}
+            >
+              <EditIcon />
+            </IconButton>
 
-                      <IconButton
-                        color="error"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(c.id);
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+            <IconButton
+              color="error"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(c.id);
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
+  ))}
+</Box>
 
           {/* PAGINACIÓN */}
           <Box mt={4} display="flex" justifyContent="center">

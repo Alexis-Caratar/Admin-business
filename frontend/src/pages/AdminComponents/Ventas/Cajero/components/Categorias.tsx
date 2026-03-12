@@ -74,7 +74,7 @@ export const Categorias: React.FC<Props> = ({
               }}
             >
               <Avatar
-                src={cat.imagen}
+                src={cat.imagen ?? undefined}
                 sx={{
                   width: esCarrito
                     ? 38

@@ -58,7 +58,7 @@ const AdminDashboard: React.FC = () => {
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
-  const [id_negocio, setIdNegocio] = useState<string>("");
+  const [, setIdNegocio] = useState<string>("");
   const [nombre_negocio, setNombreNegocio] = useState<string>("Mi Negocio");
   const [nombre, setNombre] = useState<string>("Administrador");
   const [rol, setRol] = useState<string>("admin");

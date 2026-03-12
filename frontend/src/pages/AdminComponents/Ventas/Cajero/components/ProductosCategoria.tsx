@@ -6,7 +6,6 @@ import {
   DialogActions,
   Button,
   IconButton,
-  Grid,
   Card,
   CardMedia,
   CardContent,
@@ -27,6 +26,7 @@ import CategoryIcon from "@mui/icons-material/Category";
 import SearchIcon from "@mui/icons-material/Search";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
+import InputAdornment from "@mui/material/InputAdornment";
 toastr.options = {
   positionClass: "toast-top-right",
   timeOut: 2000,
@@ -41,22 +41,27 @@ type Props = {
   categoria?: CategoriaCajero | null;
   categorias: CategoriaCajero[];
   onAgregar: (p: ProductoCajero) => void;
+  animarAlCarrito?: (img: string, rect: DOMRect) => void;
 };
+
 
 export const ProductosCategoriaModal: React.FC<Props> = ({
   open,
   onClose,
   categoria,
   categorias,
-  onAgregar,
+  onAgregar
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
   const [search, setSearch] = useState("");
   const [categoriaActiva, setCategoriaActiva] =
     useState<CategoriaCajero | null>(null);
   const [productos, setProductos] = useState<ProductoCajero[]>([]);
+  const [animItem, setAnimItem] = useState<{
+  img: string;
+  start: DOMRect;
+} | null>(null);
 
   /* ========= INIT ========= */
   useEffect(() => {
@@ -74,7 +79,27 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
     p.nombre?.toLowerCase().includes(search.toLowerCase())
   );
 
-const handleAgregar = (prod: ProductoCajero) => {
+  const animarAlCarrito = (img: string, rect: DOMRect) => {
+  setAnimItem({ img, start: rect });
+
+  setTimeout(() => {
+    setAnimItem(null);
+  }, 700);
+};
+
+
+const handleAgregar = (
+  prod: ProductoCajero,
+  event?: React.MouseEvent<HTMLButtonElement | HTMLDivElement>
+) => {
+
+  if (event) {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+animarAlCarrito(
+  prod.imagen_plato ?? "https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
+  rect
+);  }
+
   onAgregar({
     ...prod,
     precio_venta: Number(prod.precio_venta ?? 0),
@@ -107,7 +132,7 @@ const handleAgregar = (prod: ProductoCajero) => {
           justifyContent: "space-between",
           alignItems: "center",
           px: 3,
-          py: 2,
+          py: 2,//
           borderBottom: "1px solid #eee",
         }}
       >
@@ -210,127 +235,169 @@ const handleAgregar = (prod: ProductoCajero) => {
           </List>
         </Box>
 
-        {/* ================= PRODUCTOS ================= */}
-        <Box sx={{ flex: 1, p: 2, overflowY: "auto" }}>
-          <Typography fontWeight={800} fontSize={18}>
-            {categoriaActiva?.categoria}
-          </Typography>
+ {/* ================= PRODUCTOS ================= */}
+<Box sx={{ flex: 1, p: 2, overflowY: "auto" }}>
+  <Typography fontWeight={800} fontSize={18}>
+    {categoriaActiva?.categoria}
+  </Typography>
 
-          <Typography variant="caption" color="text.secondary" mb={1} display="block">
-            {filtered.length} productos disponibles
-          </Typography>
+  <Typography
+    variant="caption"
+    color="text.secondary"
+    mb={1}
+    display="block"
+  >
+    {filtered.length} productos disponibles
+  </Typography>
 
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Buscar producto..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1 }} />,
-            }}
-            sx={{ mb: 2 }}
-          />
+  <TextField
+    fullWidth
+    size="small"
+    placeholder="Buscar producto..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <SearchIcon />
+        </InputAdornment>
+      ),
+    }}
+    sx={{ mb: 2 }}
+  />
 
-          
-<Grid container spacing={1.2}>
-  {filtered.map((prod) => (
-    <Grid
-      item
-      key={prod.id}
-      xs={4}   // 📱 3 productos por fila
-      sm={4}
-      md={3}   // 💻 4 por fila en escritorio
-    >
-      <Card
-        onClick={() => handleAgregar(prod)}
+  {/* PRODUCTOS EN FLEXBOX */}
+  <Box
+    sx={{
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 2, // espacio entre cards
+    }}
+  >
+    {filtered.map((prod) => (
+      <Box
+        key={prod.id}
         sx={{
-          cursor: "pointer",
-          height: "100%",
-          borderRadius: 3,
-          overflow: "hidden",
-          transition: "0.2s",
-          boxShadow: 2,
-          "&:hover": {
-            transform: "translateY(-4px)",
-            boxShadow: 5,
-          },
+          flex: "1 1 150px", // mínimo 150px, crece según el contenedor
+          maxWidth: 220, // opcional, evita que se estire demasiado
         }}
       >
-        {prod.imagen_plato ? (
-          <CardMedia
-            component="img"
-            height={isMobile ? 90 : 140}   // 🔹 más pequeño en móvil
-            image={prod.imagen_plato}
-            alt={prod.nombre}
-          />
-        ) : (
-          <Box
-            height={isMobile ? 90 : 140}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            bgcolor="#f6f6f6"
-          >
-            <Avatar sx={{ width: 44, height: 44 }}>
-              {prod.nombre?.[0]}
-            </Avatar>
-          </Box>
-        )}
-
-        <CardContent
+        <Card
+          onClick={(e) => handleAgregar(prod, e)}
           sx={{
-            p: isMobile ? 1 : 1.5,
+            cursor: "pointer",
+            height: "100%",
+            borderRadius: 3,
+            overflow: "hidden",
+            transition: "0.2s",
+            boxShadow: 2,
+            "&:hover": {
+              transform: "translateY(-4px)",
+              boxShadow: 5,
+            },
           }}
         >
-          <Typography
-            fontWeight={700}
-            fontSize={isMobile ? 12 : 14}
-            noWrap
-          >
-            {prod.nombre}
-          </Typography>
+          {prod.imagen_plato ? (
+            <CardMedia
+              component="img"
+              height={isMobile ? 90 : 140}
+              image={prod.imagen_plato}
+              alt={prod.nombre}
+            />
+          ) : (
+            <Box
+              height={isMobile ? 90 : 140}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              bgcolor="#f6f6f6"
+            >
+              <Avatar sx={{ width: 44, height: 44 }}>
+                {prod.nombre?.[0]}
+              </Avatar>
+            </Box>
+          )}
 
-          <Typography
-            fontSize={isMobile ? 12 : 13}
-            color="success.main"
-            fontWeight={800}
-          >
-            ${Number(prod.precio_venta).toLocaleString()}
-          </Typography>
+          <CardContent sx={{ p: isMobile ? 1 : 1.5 }}>
+            <Typography
+              fontWeight={700}
+              fontSize={isMobile ? 12 : 14}
+              noWrap
+            >
+              {prod.nombre}
+            </Typography>
 
-          <Button
-            fullWidth
-            size="small"
-            variant="contained"
-            color="success"
-            startIcon={<AddShoppingCartIcon />}
-            sx={{
-              mt: 0.7,
-              fontSize: isMobile ? 11 : 12,
-              py: 0.4,
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAgregar(prod);
-            }}
-          >
-            Agregar
-          </Button>
-        </CardContent>
-      </Card>
-    </Grid>
-  ))}
-</Grid>
-        </Box>
+            <Typography
+              fontSize={isMobile ? 12 : 13}
+              color="success.main"
+              fontWeight={800}
+            >
+              ${Number(prod.precio_venta).toLocaleString()}
+            </Typography>
+
+            <Button
+              fullWidth
+              size="small"
+              variant="contained"
+              color="success"
+              startIcon={<AddShoppingCartIcon />}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAgregar(prod, e);
+              }}
+              sx={{
+                mt: 0.7,
+                fontSize: isMobile ? 11 : 12,
+                py: 0.4,
+              }}
+            >
+              Agregar
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
+    ))}
+  </Box>
+</Box>
       </DialogContent>
 
       <Divider />
 
       {/* ================= FOOTER ================= */}
-      <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button onClick={onClose}>Cerrar</Button>
-      </DialogActions>
+     <DialogActions sx={{ px: 3, py: 2 }}>
+  <Button onClick={onClose}>Cerrar</Button>
+</DialogActions>
+
+{/* ANIMACIÓN */}
+{animItem && (
+  <Box
+    component="img"
+    src={animItem.img}
+    sx={{
+      position: "fixed",
+      left: animItem.start.left,
+      top: animItem.start.top,
+      width: 60,
+      height: 60,
+      borderRadius: "50%",
+      pointerEvents: "none",
+      zIndex: 9999,
+      animation: "flyToCart 0.7s ease-in-out forwards",
+      "@keyframes flyToCart": {
+        "0%": {
+          transform: "scale(1)",
+          opacity: 1,
+        },
+        "100%": {
+          transform: "translate(500px, 300px) scale(0.2)",
+          opacity: 0,
+        },
+      },
+    }}
+  />
+)}
     </Dialog>
+
+    
   );
 };

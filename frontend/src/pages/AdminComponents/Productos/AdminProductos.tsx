@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import type { Producto, ProductoImagen } from "../../../types/index";
+import type { Producto } from "../../../types/index";
 import {
   getProductos,
   crearProducto,
@@ -16,7 +16,6 @@ import {
   CardMedia,
   Typography,
   IconButton,
-  Grid,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -45,7 +44,7 @@ interface Props {
 }
 
 const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
-  const [productos, setProductos] = useState<Producto[]>([]);
+  const [productos, setProductos] = useState<(Producto & { showDesc?: boolean })[]>([]);
   const [form, setForm] = useState<Producto>({
     codigo_barra: "",
     nombre: "",
@@ -117,7 +116,7 @@ const handleOpenModal = (producto?: Producto) => {
       stock_actual: 0,
       stock_minimo: 0,
       stock_maximo: 0,
-      estado: "activo", // por defecto
+      estado:1, // por defecto
       publicacion_web: "no", // por defecto
       precios: { id_producto: 0, precio_venta: 0, precio_costo: 0 },
       imagenes: [],
@@ -145,7 +144,7 @@ const handleSubmit = async () => {
     },
     productos_precios: form.precios ? [{ ...form.precios }] : [],
     productos_imagenes: form.imagenes ? [...form.imagenes] : [],
-  };
+  }as any;
 
   try {
     if (editingId) {
@@ -218,14 +217,14 @@ const handleSubmit = async () => {
           Administrar Productos
         </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<ShoppingBagIcon />}
-          onClick={handleOpenModal}
-        >
-          Crear Producto
-        </Button>
+            <Button
+        variant="contained"
+        color="primary"
+        startIcon={<ShoppingBagIcon />}
+        onClick={() => handleOpenModal()} // ✅ envolvemos la función
+      >
+        Crear Producto
+      </Button>
       </Box>
 
       {/* Buscador */}
@@ -256,133 +255,199 @@ const handleSubmit = async () => {
         </Box>
       </Box>
 
-      {/* Grid productos */}
-      <Grid container spacing={3}>
-        {paginated.map((p) => {
-          const imgs: string[] =
-            p.imagenes && p.imagenes.length > 0
-              ? p.imagenes.map((i) => i.url)
-              : [defaultImage];
-          const imgIndex = imgIndices[p.id!] ?? 0;
+  {/* Grid productos reemplazado por Box */}
+<Box display="flex" flexWrap="wrap" gap={3}>
+  {paginated.map((p) => {
+    const imgIndex = imgIndices[p.id!] ?? 0;
 
-          return (
-            <Grid item xs={12} sm={6} md={3} lg={3} xl={3} key={p.id}>
-              <Card
-                sx={{
-                  width:200,
-                  height: 320, // altura fija para todas las tarjetas
-                  display: "flex",
-                  flexDirection: "column",
-                  borderRadius: 3,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  transition: "all 0.3s ease",
-                  position: "relative",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+    return (
+      <Box
+        key={p.id}
+        flex="1 1 calc(100% - 24px)" // xs: full width
+        sx={{
+          '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' },  // sm: 2 por fila
+          '@media (min-width:900px)': { flex: '1 1 calc(25% - 24px)' },  // md: 4 por fila
+          maxWidth: 200, // opcional: ancho máximo para las tarjetas
+        }}
+      >
+        <Card
+          sx={{
+            width: "100%",
+            height: 320,
+            display: "flex",
+            flexDirection: "column",
+            borderRadius: 3,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            transition: "all 0.3s ease",
+            position: "relative",
+            "&:hover": {
+              transform: "translateY(-4px)",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+            },
+          }}
+        >
+          {/* ESTADO */}
+          {p.estado !== undefined && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                px: 1.5,
+                py: 0.5,
+                zIndex: 1,
+                borderRadius: 1,
+                bgcolor:
+                  p.estado === 1
+                    ? "success.main"
+                    : p.estado === 2
+                      ? "error.main"
+                      : "grey.500",
+                color: "#fff",
+                fontWeight: 600,
+                fontSize: 12,
+              }}
+            >
+              {p.estado === 1
+                ? "Activo"
+                : p.estado === 2
+                  ? "Descontinuado"
+                  : "Inactivo"}
+            </Box>
+          )}
 
-                  },
-                }}
-              >
-                {/* ESTADO */}
-                {p.estado !== undefined && (
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 8,
-                      right: 8,
-                      px: 1.5,
-                      py: 0.5,
-                      zIndex: 1,
-                      borderRadius: 1,
-                      bgcolor:
-                        p.estado === 1
-                          ? "success.main"
-                          : p.estado === 2
-                            ? "error.main"
-                            : "grey.500",
-                      color: "#fff",
-                      fontWeight: 600,
-                      fontSize: 12,
-                    }}
-                  >
-                    {p.estado === 1
-                      ? "Activo"
-                      : p.estado === 2
-                        ? "Descontinuado"
-                        : "Inactivo"}
-                  </Box>
-                )}
-
-                {/* CARRUSEL DE IMÁGENES */}
-                <Box
+          {/* CARRUSEL DE IMÁGENES */}
+          <Box
+            sx={{
+              position: "relative",
+              width: "100%",
+              height: 150,
+              minWidth:10,
+              overflow: "hidden",
+              borderTopLeftRadius: 12,
+              borderTopRightRadius: 12,
+            }}
+          >
+            <CardMedia
+              component="img"
+              image={p.imagenes && p.imagenes.length > 0 ? p.imagenes[imgIndex].url : defaultImage}
+              alt={p.nombre}
+              sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+            {p.imagenes && p.imagenes.length > 1 && (
+              <>
+                <IconButton
                   sx={{
-                    position: "relative",
-                    width: "100%",
-                    height: 150,
-                    minWidth:10,
-                    overflow: "hidden",
-                    borderTopLeftRadius: 12,
-                    borderTopRightRadius: 12,
+                    position: "absolute",
+                    top: "50%",
+                    left: 4,
+                    transform: "translateY(-50%)",
+                    bgcolor: "rgba(0,0,0,0.3)",
+                    color: "#fff",
+                    "&:hover": { bgcolor: "rgba(0,0,0,0.5)" },
                   }}
+                  size="small"
+                  onClick={() => prevImage(p.id!, p.imagenes!.length)}
                 >
-                  <CardMedia
-                    component="img"
-                    image={p.imagenes && p.imagenes.length > 0 ? p.imagenes[imgIndex].url : defaultImage}
-                    alt={p.nombre}
-                    sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  <ArrowBackIosNewIcon fontSize="small" />
+                </IconButton>
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    right: 4,
+                    transform: "translateY(-50%)",
+                    bgcolor: "rgba(0,0,0,0.3)",
+                    color: "#fff",
+                    "&:hover": { bgcolor: "rgba(0,0,0,0.5)" },
+                  }}
+                  size="small"
+                  onClick={() => nextImage(p.id!, p.imagenes!.length)}
+                >
+                  <ArrowForwardIosIcon fontSize="small" />
+                </IconButton>
+              </>
+            )}
+          </Box>
+
+          {/* CONTENIDO PRINCIPAL */}
+          <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Typography variant="subtitle2" color="textSecondary" noWrap>
+              <QrCode2Icon fontSize="small" sx={{ color: "#fb8c00" }} />
+              Codigo:<b>{p.codigo_barra}</b>
+            </Typography>
+
+            <Box
+              sx={{
+                mt: 0.2,
+                p: 0.2,
+                width: "100%",
+                minWidth: 80,
+                background: "#f5f5f5",
+                borderRadius: 1,
+                maxHeight: 90,
+                overflowY: "auto",
+                fontSize: 13,
+              }}
+            >
+              <Typography variant="body1" fontWeight={700} noWrap>
+                {p.nombre}
+              </Typography>
+            </Box>
+
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              {p.stock_actual !== undefined && (
+                <Typography
+                  variant="body2"
+                  color={p.stock_actual <= 5 ? "error.main" : "textSecondary"}
+                >
+                  Stock: {p.stock_actual}
+                </Typography>
+              )}
+              <Typography variant="body1" fontWeight={1000} color="success.main">
+                {p.precios?.precio_venta != null
+                  ? new Intl.NumberFormat("es-CO", {
+                    style: "currency",
+                    currency: "COP",
+                    minimumFractionDigits: 2,
+                  }).format(Number(p.precios.precio_venta))
+                  : "$0.00"}
+              </Typography>
+            </Box>
+
+            <Typography variant="body2">Unidad: {p.unidad_medida || "N/A"}</Typography>
+
+            {p.descripcion && (
+              <Box mt={0.5}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={0.5}
+                  sx={{ cursor: "pointer" }}
+                  onClick={() =>
+                    setProductos((prev) =>
+                      prev.map((x) => (x.id === p.id ? { ...x, showDesc: !x.showDesc } : x))
+                    )
+                  }
+                >
+                  <ExpandMoreIcon
+                    sx={{
+                      transition: "0.3s",
+                      transform: p.showDesc ? "rotate(180deg)" : "rotate(0deg)",
+                      color: "#1976d2",
+                    }}
                   />
-
-                  {p.imagenes && p.imagenes.length > 1 && (
-                    <>
-                      <IconButton
-                        sx={{
-                          position: "absolute",
-                          top: "50%",
-                          left: 4,
-                          transform: "translateY(-50%)",
-                          bgcolor: "rgba(0,0,0,0.3)",
-                          color: "#fff",
-                          "&:hover": { bgcolor: "rgba(0,0,0,0.5)" },
-                        }}
-                        size="small"
-                        onClick={() => prevImage(p.id!, p.imagenes!.length)}
-                      >
-                        <ArrowBackIosNewIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        sx={{
-                          position: "absolute",
-                          top: "50%",
-                          right: 4,
-                          transform: "translateY(-50%)",
-                          bgcolor: "rgba(0,0,0,0.3)",
-                          color: "#fff",
-                          "&:hover": { bgcolor: "rgba(0,0,0,0.5)" },
-                        }}
-                        size="small"
-                        onClick={() => nextImage(p.id!, p.imagenes!.length)}
-                      >
-                        <ArrowForwardIosIcon fontSize="small" />
-                      </IconButton>
-                    </>
-                  )}
-                </Box>
-
-                {/* CONTENIDO PRINCIPAL */}
-                {/* CONTENIDO PRINCIPAL */}
-                <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
-                  <Typography variant="subtitle2" color="textSecondary" noWrap>
-                    <QrCode2Icon fontSize="small" sx={{ color: "#fb8c00" }} />
-                    Codigo:<b>{p.codigo_barra}</b>
+                  <Typography variant="body2" fontWeight={600} color="primary">
+                    Descripción
                   </Typography>
-
+                </Box>
+                {p.showDesc && (
                   <Box
                     sx={{
-                      mt: 0.2,
-                      p: 0.2,
+                      mt: 1,
+                      p: 1,
                       width: "100%",
-                      minWidth: 80,
+                      maxWidth: 200,
                       background: "#f5f5f5",
                       borderRadius: 1,
                       maxHeight: 90,
@@ -390,107 +455,38 @@ const handleSubmit = async () => {
                       fontSize: 13,
                     }}
                   >
-                    <Typography variant="body1" fontWeight={700} noWrap>
-                      {p.nombre}
-                    </Typography>
+                    {p.descripcion || "Sin descripción"}
                   </Box>
+                )}
+              </Box>
+            )}
 
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    {p.stock_actual !== undefined && (
-                      <Typography
-                        variant="body2"
-                        color={p.stock_actual <= 5 ? "error.main" : "textSecondary"}
-                      >
-                        Stock: {p.stock_actual}
-                      </Typography>
-                    )}
-                    <Typography variant="body1" fontWeight={1000} color="success.main">
-                      {p.precios?.precio_venta != null
-                        ? new Intl.NumberFormat("es-CO", {
-                          style: "currency",
-                          currency: "COP",
-                          minimumFractionDigits: 2,
-                        }).format(Number(p.precios.precio_venta))
-                        : "$0.00"}
-                    </Typography>
-                  </Box>
-
-                  <Typography variant="body2">Unidad: {p.unidad_medida || "N/A"}</Typography>
-
-                  {/* Descripción expandible */}
-                  {p.descripcion && (
-                    <Box mt={0.5}>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        gap={0.5}
-                        sx={{ cursor: "pointer" }}
-                        onClick={() =>
-                          setProductos((prev) =>
-                            prev.map((x) => (x.id === p.id ? { ...x, showDesc: !x.showDesc } : x))
-                          )
-                        }
-                      >
-                        <ExpandMoreIcon
-                          sx={{
-                            transition: "0.3s",
-                            transform: p.showDesc ? "rotate(180deg)" : "rotate(0deg)",
-                            color: "#1976d2",
-                          }}
-                        />
-                        <Typography variant="body2" fontWeight={600} color="primary">
-                          Descripción
-                        </Typography>
-                      </Box>
-                      {p.showDesc && (
-                        <Box
-                          sx={{
-                            mt: 1,
-                            p: 1,
-                            width: "100%",
-                            maxWidth: 200,
-                            background: "#f5f5f5",
-                            borderRadius: 1,
-                            maxHeight: 90,
-                            overflowY: "auto",
-                            fontSize: 13,
-                          }}
-                        >
-                          {p.descripcion || "Sin descripción"}
-                        </Box>
-                      )}
-                    </Box>
-                  )}
-
-                  {/* ACCIONES SUBIDAS */}
-                  <Box display="flex" justifyContent="flex-end" mt={1}>
-                    <IconButton color="primary" onClick={() => handleEdit(p)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(p.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-
-              </Card>
-            </Grid>
-
-          );
-        })}
-      </Grid>
+            {/* ACCIONES SUBIDAS */}
+            <Box display="flex" justifyContent="flex-end" mt={1}>
+              <IconButton color="primary" onClick={() => handleEdit(p)}>
+                <EditIcon />
+              </IconButton>
+              <IconButton color="error" onClick={() => handleDelete(p.id)}>
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  })}
+</Box>
 
       {/* Paginación */}
-      <Box display="flex" justifyContent="center" mt={4}>
+        <Box display="flex" justifyContent="center" mt={4}>
         <Pagination
           count={totalPages}
           page={page}
-          onChange={(e, value) => setPage(value)}
+          onChange={(_e: React.ChangeEvent<unknown>, value: number) => setPage(value)}
           color="primary"
           shape="rounded"
         />
       </Box>
-
       {/* Modal */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
   <DialogTitle>{editingId ? "Editar Producto" : "Crear Producto"}</DialogTitle>
@@ -506,11 +502,11 @@ const handleSubmit = async () => {
       required
     />
 
-    <TextField
+        <TextField
       label="Nombre"
       value={form.nombre}
       onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-      fullFullWidth
+      fullWidth      
       required
     />
 
@@ -523,14 +519,18 @@ const handleSubmit = async () => {
       rows={2}
     />
 
-    <Autocomplete
-      freeSolo
-      options={unidades}
-      value={form.unidad_medida || ""}
-      onChange={(event, newValue) => setForm({ ...form, unidad_medida: newValue || "" })}
-      onInputChange={(event, newInputValue) => setForm({ ...form, unidad_medida: newInputValue })}
-      renderInput={(params) => <TextField {...params} label="Unidad de medida" fullWidth />}
-    />
+<Autocomplete<string, false, false, true>
+  freeSolo
+  options={unidades}
+  value={form.unidad_medida || ""}
+  onChange={(_, newValue: string | null) =>
+    setForm({ ...form, unidad_medida: newValue || "" })
+  }
+  onInputChange={(_, newInputValue: string) =>
+    setForm({ ...form, unidad_medida: newInputValue })
+  }
+  renderInput={(params) => <TextField {...params} label="Unidad de medida" fullWidth />}
+/>
 
     {/* Tipo de Producto */}
     <TextField
@@ -591,7 +591,7 @@ const handleSubmit = async () => {
       select
       label="Publicación Web"
       value={form.publicacion_web ?? 0}
-      onChange={(e) => setForm({ ...form, publicacion_web: Number(e.target.value) })}
+      onChange={(e) => setForm({ ...form, publicacion_web: String(e.target.value) })}
       fullWidth
     >
       <MenuItem value={0}>No</MenuItem>

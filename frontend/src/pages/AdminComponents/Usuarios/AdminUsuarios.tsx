@@ -10,7 +10,6 @@ import {
   TextField,
   Card,
   CardContent,
-  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -320,67 +319,73 @@ const AdminUsuarios: React.FC = () => {
         Total: <strong>{filtered.length}</strong> usuarios encontrados.
       </Typography>
 
-      {/* LISTA DE TARJETAS */}
-      <Grid container spacing={2}>
-        <AnimatePresence>
-          {paginated.map((u) => (
-            <Grid item xs={12} md={4} key={u.id_usuario}>
-              <motion.div
-                variants={cardVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                whileHover={{
-                  scale: 1.04,
-                  transition: { duration: 0.25 },
-                }}
-              >
-                <Card sx={{ borderRadius: 3 }}>
-                  <CardContent>
-                    <Box display="flex" justifyContent="center">
-                      <Avatar
-                        src={u.imagen || ""}
-                        sx={{ width: 80, height: 80, fontSize: 28 }}
-                      >
-                        {!u.imagen && u.nombres.charAt(0)}
-                      </Avatar>
-                    </Box>
+    <Box display="flex" flexWrap="wrap" gap={2}>
+  <AnimatePresence>
+    {paginated.map((u) => (
+      <Box
+        key={u.id_usuario}
+        flex="1 1 calc(100% - 16px)" // xs: full width
+        sx={{
+          '@media (min-width:600px)': { flex: '1 1 calc(50% - 16px)' },  // sm: 2 por fila
+          '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 16px)' }, // md: 3 por fila
+        }}
+      >
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          whileHover={{
+            scale: 1.04,
+            transition: { duration: 0.25 },
+          }}
+        >
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Box display="flex" justifyContent="center">
+                <Avatar
+                  src={u.imagen || ""}
+                  sx={{ width: 80, height: 80, fontSize: 28 }}
+                >
+                  {!u.imagen && u.nombres.charAt(0)}
+                </Avatar>
+              </Box>
 
-                    <Typography align="center" fontWeight="bold">
-                      {u.nombres} {u.apellidos}
-                    </Typography>
+              <Typography align="center" fontWeight="bold">
+                {u.nombres} {u.apellidos}
+              </Typography>
 
-                    <Typography align="center">
-                      {u.tipo_identificacion}-{u.identificacion}
-                    </Typography>
+              <Typography align="center">
+                {u.tipo_identificacion}-{u.identificacion}
+              </Typography>
 
-                    <Typography align="center">{u.email}</Typography>
+              <Typography align="center">{u.email}</Typography>
 
-                    <Typography align="center" variant="caption" fontWeight="bold">
-                      <strong>Rol:</strong> {u.rol}
-                    </Typography>
+              <Typography align="center" variant="caption" fontWeight="bold">
+                <strong>Rol:</strong> {u.rol}
+              </Typography>
 
-                    {/* BOTONES */}
-                    <Stack direction="row" spacing={1} justifyContent="center" mt={2}>
-                      <IconButton color="primary" onClick={() => handleEdit(u)}>
-                        <EditIcon />
-                      </IconButton>
+              {/* BOTONES */}
+              <Stack direction="row" spacing={1} justifyContent="center" mt={2}>
+                <IconButton color="primary" onClick={() => handleEdit(u)}>
+                  <EditIcon />
+                </IconButton>
 
-                      <IconButton color="error" onClick={() => handleDeleteUser(u.id_usuario)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
-          ))}
-        </AnimatePresence>
-      </Grid>
+                <IconButton color="error" onClick={() => handleDeleteUser(u.id_usuario)}>
+                  <DeleteIcon />
+                </IconButton>
+              </Stack>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </Box>
+    ))}
+  </AnimatePresence>
+</Box>
 
       {/* PAGINACIÓN */}
       <Box display="flex" justifyContent="center" mt={3}>
-        <Pagination count={totalPages} page={page} onChange={(e, v) => setPage(v)} />
+        <Pagination count={totalPages} page={page} onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPage(value)} />
       </Box>
 
       {/* MODAL */}

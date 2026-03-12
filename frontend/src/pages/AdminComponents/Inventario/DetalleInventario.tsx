@@ -4,7 +4,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Chip,
   Button,
   Stack,
@@ -108,29 +107,35 @@ const InventarioDetalles: React.FC<Props> = ({ id, onBack }) => {
       </Card>
 
       {/* TARJETAS DE TOTALES */}
-      <Grid container spacing={2} mb={3}>
-        {[
-          { label: "Coincidencias", value: totales.coinciden, color: "success" },
-          { label: "Sobrantes", value: totales.sobrantes, color: "info" },
-          { label: "Faltantes", value: totales.faltantes, color: "error" },
-        ].map((item) => (
-          <Grid item xs={12} md={4} key={item.label}>
-            <Card
-              sx={{
-                borderRadius: 4,
-                p: 2,
-                textAlign: "center",
-                boxShadow: 2,
-              }}
-            >
-              <Typography variant="caption">{item.label}</Typography>
-              <Typography variant="h4" color={item.color}>
-                {item.value}
-              </Typography>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+   <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
+  {[
+    { label: "Coincidencias", value: totales.coinciden, color: "success.main" },
+    { label: "Sobrantes", value: totales.sobrantes, color: "info.main" },
+    { label: "Faltantes", value: totales.faltantes, color: "error.main" },
+  ].map((item) => (
+    <Box
+      key={item.label}
+      flex="1 1 calc(100% - 16px)"           // xs: full width
+      sx={{
+        '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 16px)' }, // md: 3 por fila
+      }}
+    >
+      <Card
+        sx={{
+          borderRadius: 4,
+          p: 2,
+          textAlign: "center",
+          boxShadow: 2,
+        }}
+      >
+        <Typography variant="caption">{item.label}</Typography>
+        <Typography variant="h4" color={item.color}>
+          {item.value}
+        </Typography>
+      </Card>
+    </Box>
+  ))}
+</Box>
 
       <Divider sx={{ mb: 2 }} />
 

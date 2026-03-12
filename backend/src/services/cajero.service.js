@@ -115,22 +115,38 @@ LIMIT 1;
 
   },
 
-  cerrarCaja: async ({ id_caja, monto_final }) => {
-    // 1️⃣ Actualizar la caja
-    const update = `
+ cerrarCaja: async ({id_caja,monto_final,dinero_esperado,base_caja,venta_libre,diferencia,nota
+}) => {
+  // 1️⃣ Actualizar la caja con todos los campos
+  const update = `
     UPDATE caja 
-    SET estado='CERRADA', fecha_cierre=NOW(), monto_final=?
-    WHERE id=?
+    SET 
+      estado = 'CERRADA',
+      fecha_cierre = NOW(),
+      monto_final = ?,
+      dinero_esperado = ?,
+      base_caja = ?,
+      venta_libre=?,
+      diferencia = ?,
+      nota = ?
+    WHERE id = ?
   `;
-    const [result] = await db.query(update, [monto_final, id_caja]);
+  const [result] = await db.query(update, [
+    monto_final,
+    dinero_esperado,
+    base_caja,
+    venta_libre,
+    diferencia,
+    nota,
+    id_caja
+  ]);
 
-    // 2️⃣ Consultar la caja actualizada
-    const [rows] = await db.query('SELECT * FROM caja WHERE id=?', [id_caja]);
+  // 2️⃣ Consultar la caja actualizada
+  const [rows] = await db.query('SELECT * FROM caja WHERE id = ?', [id_caja]);
 
-    // 3️⃣ Retornar la fila actualizada
-    return rows[0];
-  },
-
+  // 3️⃣ Retornar la fila actualizada
+  return rows[0];
+},
 
 arqueo: async ({ id_caja }) => {
 
@@ -268,6 +284,41 @@ WHERE v.id_caja = ?
     ORDER BY created_at DESC
   `;
 
+
+  /* ===============================
+     5 Mesas Ocupadas
+  =============================== */
+
+  const mesas_estadoQuery = `
+ SELECT ve.*, p.*, m.*
+FROM ventas ve
+INNER JOIN mesas m ON ve.id_mesa = m.id
+LEFT JOIN pagos p ON ve.id = p.id_venta
+WHERE ve.id = (
+    SELECT MAX(v2.id)
+    FROM ventas v2
+    WHERE v2.id_mesa = ve.id_mesa
+)
+AND ve.id_caja = ?
+AND (
+      p.estado_pago = 0
+      OR m.estado != 'DISPONIBLE'
+);
+  `;
+
+    /* ===============================
+     6 facturas_pendientes
+  =============================== */
+
+  const facturas_pendientesQuery = `
+    selecT DISTINCT *
+    from ventas ve 
+        INNER JOIN pagos p on ve.id=p.id_venta
+        LEFT JOIN mesas m on ve.id_mesa=m.id
+        where  p.estado_pago=0
+        and ve.id_caja=?
+  `;
+
   const [resumenRows] = await db.query(resumenQuery, [id_caja]);
   const [productosRows] = await db.query(productosQuery, [id_caja]);
   const [pagosRows] = await db.query(pagosQuery, [id_caja]);
@@ -284,12 +335,17 @@ WHERE v.id_caja = ?
 
 
   const [egresosRows] = await db.query(egresosQuery, [id_caja]);
+  const [mesasRows] = await db.query(mesas_estadoQuery, [id_caja]);
+    const [facturasRows] = await db.query(facturas_pendientesQuery, [id_caja]);
+
 
   return {
     ...resumenRows[0],
     ventas_metodos,
     productos: productosRows,
-    egresos: egresosRows
+    egresos: egresosRows,
+    mesasOcupadas: mesasRows,
+    facturasPendientes: facturasRows
   };
 },
 

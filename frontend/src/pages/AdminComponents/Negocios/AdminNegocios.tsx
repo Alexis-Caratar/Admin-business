@@ -17,7 +17,6 @@ import {
   CardMedia,
   Typography,
   IconButton,
-  Grid,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -221,71 +220,80 @@ const AdminNegocios: React.FC = () => {
 
 
 
-      {/* GRID DE TARJETAS */}
-      <Grid container spacing={3}>
-        {negociosPaginated.map((n) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={n.id}>
-            <Card
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                height: 350,
-                transition: "0.2s",
-                "&:hover": {
-                  transform: "translateY(-5px)",
-                  boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
-                },
-              }}
-            >
-              <CardMedia
-                component="img"
-                height="150"
-                image={
-                  n.imagen ||
-                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQde1Zuns3SWsvZyR31zNW6hWWyf8N20bmBFA&s"
-                }
-                alt={n.nombre}
-              />
+   {/* GRID DE TARJETAS */}
+<Box display="flex" flexWrap="wrap" gap={3}>
+  {negociosPaginated.map((n) => (
+    <Box
+      key={n.id}
+      flex="1 1 calc(100% - 24px)" // xs: 1 por fila
+      sx={{
+        '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' },  // sm: 2 por fila
+        '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 24px)' }, // md: 3 por fila
+        '@media (min-width:1200px)': { flex: '1 1 calc(25% - 24px)' },  // lg: 4 por fila
+        maxWidth: 350, // opcional: ancho máximo de la tarjeta
+      }}
+    >
+      <Card
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          height: 350,
+          transition: "0.2s",
+          "&:hover": {
+            transform: "translateY(-5px)",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+          },
+        }}
+      >
+        <CardMedia
+          component="img"
+          height="150"
+          image={
+            n.imagen ||
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQde1Zuns3SWsvZyR31zNW6hWWyf8N20bmBFA&s"
+          }
+          alt={n.nombre}
+        />
 
-              <CardContent sx={{ flex: 1 }}>
-                <Typography variant="h6" fontWeight={600} noWrap>
-                  {n.nombre}
-                </Typography>
+        <CardContent sx={{ flex: 1 }}>
+          <Typography variant="h6" fontWeight={600} noWrap>
+            {n.nombre}
+          </Typography>
 
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  sx={{
-                    mt: 1,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                  }}
-                >
-                  {n.descripcion || "Sin descripción"}
-                </Typography>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{
+              mt: 1,
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {n.descripcion || "Sin descripción"}
+          </Typography>
 
-                <Typography variant="body2" sx={{ mt: 1, fontSize: 14 }}>
-                  📍 {n.direccion}
-                  <br />
-                  📞 {n.telefono}
-                </Typography>
-              </CardContent>
+          <Typography variant="body2" sx={{ mt: 1, fontSize: 14 }}>
+            📍 {n.direccion}
+            <br />
+            📞 {n.telefono}
+          </Typography>
+        </CardContent>
 
-              <CardActions sx={{ justifyContent: "flex-end" }}>
-                <IconButton color="primary" onClick={() => openEditModal(n)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton color="error" onClick={() => handleDelete(n.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+        <CardActions sx={{ justifyContent: "flex-end" }}>
+          <IconButton color="primary" onClick={() => openEditModal(n)}>
+            <EditIcon />
+          </IconButton>
+          <IconButton color="error" onClick={() => handleDelete(n.id)}>
+            <DeleteIcon />
+          </IconButton>
+        </CardActions>
+      </Card>
+    </Box>
+  ))}
+</Box>
 
       {/* PAGINACIÓN */}
       <Box display="flex" justifyContent="center" mt={4}>

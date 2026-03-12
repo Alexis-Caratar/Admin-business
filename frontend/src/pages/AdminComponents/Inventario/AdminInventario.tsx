@@ -6,7 +6,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
+//  DialogActions,
   TextField,
   Select,
   MenuItem,
@@ -14,7 +14,6 @@ import {
   InputLabel,
   Card,
   CardContent,
-  Grid,
   IconButton,
   Stack
 } from "@mui/material";
@@ -31,7 +30,7 @@ import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 
 import {
-  crearInventario,
+ // crearInventario,
   getInventarios,
   deleteInventario,
   
@@ -66,12 +65,12 @@ const AdminInventario: React.FC = () => {
   }, []);
 
   // Crear inventario
-  const handleSubmit = async () => {
+/*   const handleSubmit = async () => {
     await crearInventario(form);
     setOpenModal(false);
     setForm({ nombre: "", tipo: "PRODUCTOS", id_negocio: idNegocio, id_persona: idPersona });
     fetchData();
-  };
+  }; */
 
   // Eliminar inventario
   const handleDelete = async (id: number) => {
@@ -127,75 +126,77 @@ const AdminInventario: React.FC = () => {
         </Button>
       </Box>
 
-      {/* LISTA INVENTARIOS */}
-      <Grid container spacing={2}>
-        {inventarios.map((inv) => (
-          <Grid key={inv.id} item xs={12} md={4}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card
-                onClick={() => setDetalleId(inv.id)}     // 👈 ABRIR DETALLES AL HACER CLICK
-                sx={{
-                  borderRadius: 3,
-                  boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
-                  cursor: "pointer",                     // 👈 MOUSE POINTER
-                  transition: "0.2s",
-                  "&:hover": {
-                    boxShadow: "0px 6px 18px rgba(0,0,0,0.18)",
-                    transform: "translateY(-3px)",
-                  },
-                  position: "relative",
+{/* LISTA INVENTARIOS */}
+<Box display="flex" flexWrap="wrap" gap={2}>
+  {inventarios.map((inv) => (
+    <Box
+      key={inv.id}
+      flex="1 1 calc(100% - 16px)" // xs: 1 por fila
+      sx={{
+        '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 16px)' }, // md: 3 por fila
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Card
+          onClick={() => setDetalleId(inv.id)} // 👈 ABRIR DETALLES AL HACER CLICK
+          sx={{
+            borderRadius: 3,
+            boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
+            cursor: "pointer", // 👈 MOUSE POINTER
+            transition: "0.2s",
+            "&:hover": {
+              boxShadow: "0px 6px 18px rgba(0,0,0,0.18)",
+              transform: "translateY(-3px)",
+            },
+            position: "relative",
+          }}
+        >
+          <CardContent>
+            {/* Icono + Tipo */}
+            <Box display="flex" alignItems="center" gap={1}>
+              {iconoTipo(inv.tipo)}
+              <Typography variant="h6">{tituloTipo(inv.tipo)}</Typography>
+            </Box>
+
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              {inv.nombre}
+            </Typography>
+
+            <Typography variant="caption" color="text.secondary">
+              Fecha: {new Date(inv.fecha).toLocaleString()}
+            </Typography>
+
+            {/* Botones */}
+            <Stack direction="row" spacing={1} mt={2}>
+              <IconButton
+                color="error"
+                onClick={(e) => {
+                  e.stopPropagation(); // 🔒 EVITA QUE SE ABRA LA TARJETA
+                  handleDelete(inv.id);
                 }}
               >
-                <CardContent>
-                  {/* Icono + Tipo */}
-                  <Box display="flex" alignItems="center" gap={1}>
-                    {iconoTipo(inv.tipo)}
-                    <Typography variant="h6">{tituloTipo(inv.tipo)}</Typography>
-                  </Box>
+                <DeleteIcon />
+              </IconButton>
 
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    {inv.nombre}
-                  </Typography>
-
-                  <Typography variant="caption" color="text.secondary">
-                    Fecha: {new Date(inv.fecha).toLocaleString()}
-                  </Typography>
-
-                  {/* Botones */}
-                  <Stack direction="row" spacing={1} mt={2}>
-                    {/* ❗️EVITAR QUE EL CLICK DEL BOTÓN ACTIVE EL CLICK DE LA TARJETA */}
-                  
-
-                    <IconButton
-                      color="error"
-                      onClick={(e) => {
-                        e.stopPropagation(); // 🔒 EVITA QUE SE ABRA LA TARJETA
-                        handleDelete(inv.id);
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-
-                      <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation(); // 🔒 EVITA QUE SE ABRA LA TARJETA
-                        setDetalleId(inv.id);
-                      }}
-                    >
-                      <ExpandMoreIcon />
-                    </IconButton>
-                    
-                  </Stack>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
-        ))}
-      </Grid>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation(); // 🔒 EVITA QUE SE ABRA LA TARJETA
+                  setDetalleId(inv.id);
+                }}
+              >
+                <ExpandMoreIcon />
+              </IconButton>
+            </Stack>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </Box>
+  ))}
+</Box>
 
 
       {/* MODAL CREAR INVENTARIO */}
@@ -223,12 +224,12 @@ const AdminInventario: React.FC = () => {
           </FormControl>
         </DialogContent>
 
-        <DialogActions>
+       {/*  <DialogActions>
           <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
           <Button variant="contained" sx={{ background: "#0D47A1" }} onClick={handleSubmit}>
             Crear
           </Button>
-        </DialogActions>
+        </DialogActions> */}
       </Dialog>
     </Box>
   );
