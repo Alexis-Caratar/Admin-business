@@ -451,12 +451,13 @@ AND (
       SELECT  
           m.id AS id_mesa,
           v.id AS id_venta,
-          MAX(p.id) as id_pago,
+          p.id_pago,
           v.numero_factura,
           per.identificacion AS identificacion_cliente,
-          CONCAT(per.nombres, ' ', per.apellidos) AS nombre_completo,
+          CONCAT(per.nombres,' ',per.apellidos) AS nombre_completo,
           v.subtotal AS venta_total,
-          MAX(p.metodo_pago) as estado_pago,
+          p.metodo_pago AS estado_pago,
+
           CONCAT(
               '[',
               GROUP_CONCAT(
@@ -477,24 +478,37 @@ AND (
       INNER JOIN ventas v ON v.id_mesa = m.id
       INNER JOIN ventas_items vi ON v.id = vi.id_venta
       INNER JOIN productos pro ON vi.id_producto = pro.id
-      INNER JOIN productos_imagenes prod_i ON pro.id = prod_i.id_producto
-      INNER JOIN pagos p ON v.id = p.id_venta
+
+      LEFT JOIN (
+          SELECT id_producto, MIN(url) AS url
+          FROM productos_imagenes
+          GROUP BY id_producto
+      ) prod_i ON pro.id = prod_i.id_producto
+
+      LEFT JOIN (
+          SELECT id_venta, MAX(id) AS id_pago, MAX(metodo_pago) AS metodo_pago
+          FROM pagos
+          GROUP BY id_venta
+      ) p ON v.id = p.id_venta
+
       INNER JOIN personas per ON v.id_cliente = per.id
 
       WHERE m.estado = 'ocupada'
-        AND m.id_negocio = ?
-        AND m.id = ?
+      AND m.id_negocio = ?
+      AND m.id = ?
 
       GROUP BY 
           m.id,
           v.id,
+          p.id_pago,
           v.numero_factura,
           per.identificacion,
           per.nombres,
           per.apellidos,
-          v.subtotal
+          v.subtotal,
+          p.metodo_pago
 
-      ORDER BY MAX(p.id) DESC
+      ORDER BY p.id_pago DESC
       LIMIT 1;
     `;
     const [rows] = await db.query(query, [id_negocio, mesaId]);
