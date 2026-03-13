@@ -397,6 +397,9 @@ AND (
       let estado_pago_id = 0
       if (metodo_pago != 'PENDIENTE') estado_pago_id = 1
 
+      monto_recibido = monto_recibido ? Number(monto_recibido) : null;
+      monto_pagado = monto_pagado ? Number(monto_pagado) : null;
+      cambio = cambio ? Number(cambio) : null;
       const [venta_pago] = await conn.query(
         `INSERT INTO pagos (id_venta,estado_pago, metodo_pago, monto_pagado, monto_recibido, cambio)
             VALUES ( ?,?, ?, ?, ?, ?)`,
