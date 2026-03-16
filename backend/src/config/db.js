@@ -1,14 +1,23 @@
-import mysql from "mysql2/promise";
+import pkg from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-// No usar await en el top-level, solo crear el pool (no requiere await)
-export const db = mysql.createPool({
+const { Pool } = pkg;
+
+const pool = new Pool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
+  port: process.env.DB_PORT,
+  max: 10,
 });
+
+// Wrapper para simular mysql2
+export const db = {
+  query: async (text, params) => {
+    const result = await pool.query(text, params);
+    return [result.rows];
+  }
+};

@@ -232,7 +232,7 @@ const clearMesa = () => {
       nota: "",
       metodo_pago: datos_adicionales.metodo_pago,
       monto_pagado: total,
-      monto_recibido: datos_adicionales.monto_recibido,
+      monto_recibido: Number(datos_adicionales.monto_recibido || 0),
       cambio: datos_adicionales.cambio,
       productos: carrito.map((p) => ({
         id_producto: p.id,
