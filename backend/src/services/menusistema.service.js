@@ -7,10 +7,10 @@ export const listar = async (id_negocio, rol) => {
      FROM app_modulos m
      JOIN app_modulos_negocio mn ON m.id = mn.id_modulo
      JOIN app_modulos_negocio_rol mr ON mn.id = mr.id_app_modulos_negocio
-     WHERE mr.rol = ?
-       AND mn.id_negocio = ?
-       AND m.activo = 1
-       AND mr.estado = 1
+     WHERE mr.rol = $1
+       AND mn.id_negocio = $2
+       AND m.activo = true
+       AND mr.estado =true
      ORDER BY m.orden`,
     [rol, id_negocio]
   );

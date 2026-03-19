@@ -44,8 +44,8 @@ export const egresoActualizar = (
   return axios.put(`/cajero/egreso/${id}`, payload);
 };
 
-export const egresoEliminar = (id: number) => {
-  return axios.delete(`/cajero/egreso/${id}`);
+export const egresoEliminar = (id: number,idUsuario:number) => {
+  return axios.delete(`/cajero/egreso/${id}/${idUsuario}`);
 };
 
 

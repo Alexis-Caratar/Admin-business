@@ -82,24 +82,41 @@ export default function VentasDetalles({ open, onClose, id_caja, idUsuario, id_n
   const imprimir = useCallback(() => window.print(), []);
 
   /* ================= METRICAS ================= */
-  const metrics = useMemo(() => {
-    const totalPagadas = ventas.filter(v => Number(v.estado_pago) === 1).length;
-    const totalPendientes = ventas.filter(v => Number(v.estado_pago) === 0).length;
-    const totalVentas = ventas.filter(v => Number(v.estado_pago) === 1)
-                              .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
-    const pendiente_pago = ventas.filter(v => Number(v.estado_pago) === 0)
-                                .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
-    return { totalPagadas, totalPendientes, totalVentas, pendiente_pago };
-  }, [ventas]);
+const metrics = useMemo(() => {
+  const totalPagadas = ventas.filter(v => v.estado_pago === true).length;
+  const totalPendientes = ventas.filter(v => v.estado_pago === false).length;
+
+  const totalVentas = ventas
+    .filter(v => v.estado_pago === true)
+    .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
+
+  const pendiente_pago = ventas
+    .filter(v => v.estado_pago === false)
+    .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
+
+  return { totalPagadas, totalPendientes, totalVentas, pendiente_pago };
+}, [ventas]);
 
   /* ================= FILTROS ================= */
-  const ventasFiltradas = useMemo(() => {
-    let data = [...ventas];
-    if (filtro === "pagadas") data = data.filter(v => Number(v.estado_pago) === 1);
-    if (filtro === "pendientes") data = data.filter(v => Number(v.estado_pago) === 0);
-    if (busqueda) data = data.filter(v => v.numero_factura?.toLowerCase().includes(busqueda.toLowerCase()));
-    return data;
-  }, [ventas, filtro, busqueda]);
+const ventasFiltradas = useMemo(() => {
+  let data = [...ventas];
+
+  if (filtro === "pagadas") {
+    data = data.filter(v => v.estado_pago === true);
+  }
+
+  if (filtro === "pendientes") {
+    data = data.filter(v => v.estado_pago === false);
+  }
+
+  if (busqueda) {
+    data = data.filter(v =>
+      v.numero_factura?.toLowerCase().includes(busqueda.toLowerCase())
+    );
+  }
+
+  return data;
+}, [ventas, filtro, busqueda]);
 
   const totalPaginas = Math.ceil(ventasFiltradas.length / porPagina);
   const ventasPagina = ventasFiltradas.slice((pagina - 1) * porPagina, pagina * porPagina);
@@ -268,7 +285,7 @@ export default function VentasDetalles({ open, onClose, id_caja, idUsuario, id_n
               <Box flex={1} />
               <Chip
                 label={venta.metodo_pago}
-                color={venta.estado_pago === 1 ? "success" : "warning"}
+                color={venta.estado_pago === true ? "success" : "warning"}
                 size="small"
               />
             </Stack>
@@ -322,7 +339,7 @@ export default function VentasDetalles({ open, onClose, id_caja, idUsuario, id_n
               <Typography fontWeight={700}>{ventaSeleccionada?.nombre_completo}</Typography>
             </Box>
             <Box flex={1} />
-            <Chip label={ventaSeleccionada?.estado_pago === 1 ? "Pagado" : "Pendiente"} color={ventaSeleccionada?.estado_pago === 1 ? "success" : "warning"} size="small" />
+            <Chip label={ventaSeleccionada?.estado_pago === true ? "Pagado" : "Pendiente"} color={ventaSeleccionada?.estado_pago === true ? "success" : "warning"} size="small" />
           </Stack>
 
           <Box sx={{ maxHeight: 260, overflowY: "auto", px: 1 }}>
@@ -354,7 +371,7 @@ export default function VentasDetalles({ open, onClose, id_caja, idUsuario, id_n
 
         <DialogActions sx={{ p: 2 }}>
           <Stack spacing={1} width="100%">
-            {ventaSeleccionada?.estado_pago === 0 && (
+            {ventaSeleccionada?.estado_pago === false && (
               <Button fullWidth variant="contained" color="success" size="large" startIcon={<PaymentsIcon />} sx={{ borderRadius: 3, fontWeight: 700 }} onClick={() => setOpenPago(true)}>Finalizar Venta</Button>
             )}
             <Button fullWidth startIcon={<PrintIcon />} variant="outlined" sx={{ borderRadius: 3 }} onClick={imprimir}>Imprimir Factura</Button>

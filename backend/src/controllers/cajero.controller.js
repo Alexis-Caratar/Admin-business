@@ -169,7 +169,7 @@ export const actualizarEgreso = async (req, res) => {
 
 export const eliminarEgreso = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id,idUsuario} = req.params;
 
     if (!id) {
       return res.status(400).json({
@@ -178,7 +178,7 @@ export const eliminarEgreso = async (req, res) => {
       });
     }
 
-    await CajeroService.eliminarEgreso(Number(id));
+    await CajeroService.eliminarEgreso(Number(id),Number(idUsuario));
 
     return res.json({
       ok: true,

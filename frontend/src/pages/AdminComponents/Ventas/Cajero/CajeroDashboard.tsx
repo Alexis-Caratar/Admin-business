@@ -219,7 +219,7 @@ const clearMesa = () => {
     const payload = {
       idUsuario:idUsuario,
       id_negocio: id_negocio,
-      id_cliente: cliente ? cliente : 18,
+      id_cliente: cliente ? cliente : 1,
       id_caja: idCaja,
       id_mesa: mesaSeleccionada?.id,
       fecha: new Date().toISOString(),
