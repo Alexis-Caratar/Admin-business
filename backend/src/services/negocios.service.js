@@ -1,10 +1,10 @@
-import { db } from "../config/db.js";
+import { db, pool } from "../config/db.js";
 
 const TABLE = "negocios";
 
 // Listar todos los negocios
 export const listar = async () => {
-  const [rows] = await db.query(`SELECT id,nombre,direccion,descripcion,telefono FROM ${TABLE}`);
+  const [rows] = await db.query(`SELECT id,nombre,direccion,descripcion,telefono,imagen FROM ${TABLE}`);
   return rows;
 };
 
@@ -19,42 +19,63 @@ export const obtener = async (id) => {
 
 // Crear un negocio
 export const crear = async (payload) => {
-  const keys = Object.keys(payload).join(", ");
-  const placeholders = Object.keys(payload).map(() => "?").join(", ");
-  const values = Object.values(payload);
+  if (!payload || Object.keys(payload).length === 0) {
+    throw new Error("No hay datos para insertar");
+  }
 
-  const sql = `INSERT INTO ${TABLE} (${keys}) VALUES (${placeholders})`;
-
-  const [result] = await db.query(sql, values);
-
-  return {
-    id: result.insertId,
-    ...payload
+  // 🧹 LIMPIEZA DE DATOS
+  const cleanPayload = {
+    ...payload,
+    imagen: payload.imagen?.trim() === "" ? null : payload.imagen,
   };
+
+  const keys = Object.keys(cleanPayload);
+  const values = Object.values(cleanPayload);
+
+  const placeholders = keys.map((_, i) => `$${i + 1}`).join(", ");
+
+  const sql = `
+    INSERT INTO ${TABLE} (${keys.join(", ")})
+    VALUES (${placeholders})
+    RETURNING *
+  `;
+
+  const { rows } = await pool.query(sql, values);
+
+  console.log("roes",rows);
+  
+  return rows[0];
 };
 
 // Actualizar negocio
 export const actualizar = async (id, payload) => {
-  const sets = Object.keys(payload)
-    .map(key => `${key} = ?`)
-    .join(", ");
+  const { nombre, direccion, descripcion, telefono,imagen } = payload;
+  if (!id) {
+    throw new Error("El id es obligatorio");
+  }
 
-  const values = Object.values(payload);
+  const  {rows}  = await pool.query(
+    `
+    UPDATE ${TABLE}
+    SET 
+      nombre = $1,
+      direccion = $2,
+      descripcion = $3,
+      telefono = $4,
+      imagen=$5
+    WHERE id = $6
+    RETURNING *
+    `,
+    [nombre, direccion, descripcion, telefono,imagen, id]
+  );
 
-  const sql = `UPDATE ${TABLE} SET ${sets} WHERE id = ?`;
-
-  await db.query(sql, [...values, id]);
-
-  return {
-    id,
-    ...payload
-  };
+  return rows[0];
 };
 
 // Eliminar negocio
 export const eliminar = async (id) => {
   await db.query(
-    `DELETE FROM ${TABLE} WHERE id = ?`,
+    `DELETE FROM ${TABLE} WHERE id = $1`,
     [id]
   );
 };

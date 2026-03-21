@@ -37,11 +37,11 @@ export interface Producto {
   stock_maximo?: number;
 
   // Estado del producto
-  estado?: number;
+  estado?: boolean;
   creacion?: string;
   actualizacion?: string;
   tipo_producto?: string;
-  publicacion_web?: string;
+  publicacion_web?: boolean;
   // Precios
   precios?: ProductoPrecio | null;
 

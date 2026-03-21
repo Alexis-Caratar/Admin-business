@@ -47,8 +47,6 @@ export default function Egresos({ idUsuario,id_negocio, id_caja, open, onClose }
   // Estados para dialogo de confirmación
   const [openConfirm, setOpenConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-
-  console.log("id_usuario",idUsuario);
   
   useEffect(() => {
     if (!open) return;
@@ -98,7 +96,7 @@ const cargarEgresos = async () => {
 
   const handleConfirmDelete = async () => {
     if (!deleteId) return;
-    await egresoEliminar(deleteId);
+    await egresoEliminar(deleteId,Number(idUsuario));
     await cargarEgresos();
     setOpenConfirm(false);
   };

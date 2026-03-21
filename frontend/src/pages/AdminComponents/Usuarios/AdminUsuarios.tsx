@@ -17,7 +17,9 @@ import {
   Pagination,
   IconButton,
   Avatar,
-  Stack
+  Stack,
+  Checkbox,
+  CircularProgress
 } from "@mui/material";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,37 +28,53 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SortIcon from "@mui/icons-material/Sort";
 import PeopleIcon from "@mui/icons-material/People";
 import SearchIcon from "@mui/icons-material/Search";
-
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import PersonIcon from "@mui/icons-material/Person";
+import BadgeIcon from "@mui/icons-material/Badge";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import HomeIcon from "@mui/icons-material/Home";
+import WorkIcon from "@mui/icons-material/Work";
+import ImageIcon from "@mui/icons-material/Image";
+import InputAdornment from "@mui/material/InputAdornment";
 import Swal from "sweetalert2";
 
 import {
   getUsuarios,
   createUsuarioCompleto,
   updateUsuarioCompleto,
-  deleteUsuario
+  deleteUsuario,
+  getMenusNegocio,
+  getMenusUsuario,
+  asignarMenuUsuario
 } from "../../../api/usuarios";
 
 import type { User } from "../../../types";
+import { iconMap } from "../../../utils/mapIcons";
 
 const AdminUsuarios: React.FC = () => {
   const idNegocioLS = localStorage.getItem("id_negocio") || "";
 
   const [usuarios, setUsuarios] = useState<User[]>([]);
   const [search, setSearch] = useState("");
-
   const [sortField] = useState<keyof User>("nombres");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 6;
-
   const [openModal, setOpenModal] = useState(false);
+  const [openPermisos, setOpenPermisos] = useState(false);
+  const [menusNegocio, setMenusNegocio] = useState<{ id: number; nombre: string, icono: string, url: string }[]>([]);
+  const [menusUsuario, setMenusUsuario] = useState<number[]>([]);
+  const [selectedUsuario, setSelectedUsuario] = useState<User | null>(null);
+  const [loadingPermisos, setLoadingPermisos] = useState(false);
+  const [savingPermisos, setSavingPermisos] = useState(false);
 
   /** FORMULARIO con tipado real */
   const [form, setForm] = useState({
     id_usuario: 0,
     id_persona: 0,
-    tipo_identificacion:"",
+    tipo_identificacion: "",
     identificacion: "",
     nombres: "",
     apellidos: "",
@@ -89,7 +107,7 @@ const AdminUsuarios: React.FC = () => {
       const term = search.toLowerCase();
 
       result = result.filter((u) => {
-        const fullName = `${u.nombres ?? ""} ${u.apellidos ?? ""}${u.rol?? ""} ${u.identificacion?? ""} `.toLowerCase();
+        const fullName = `${u.nombres ?? ""} ${u.apellidos ?? ""}${u.rol ?? ""} ${u.identificacion ?? ""} `.toLowerCase();
         const email = u.email?.toLowerCase() ?? "";
         return fullName.includes(term) || email.includes(term);
       });
@@ -129,23 +147,31 @@ const AdminUsuarios: React.FC = () => {
           return;
         }
 
-        const ultimos4 = form.identificacion.slice(-4);
+        console.log("form email",form.email);
+        let email;
+        
+        if(form.email==''){
+             const ultimos4 = form.identificacion.slice(-4);
         const nombresUsuario = `${form.nombres.split(" ")[0]}${ultimos4}`
           .replace(/ /g, "")
           .toLowerCase();
-        const email = `${nombresUsuario}@gmail.com`;
-        const password = ultimos4;
 
-        console.log("form",form);
-        
+          email = `${nombresUsuario}@gmail.com`;
+        }else{
+           email=form.email
+        }
+         const password = `${form.identificacion}*`;
+
+
         const payload = {
           persona: {
-            tipo_identificacion:form.tipo_identificacion,
+            tipo_identificacion: form.tipo_identificacion,
             identificacion: form.identificacion,
             nombres: form.nombres,
             apellidos: form.apellidos,
             telefono: form.telefono || null,
             direccion: form.direccion || null,
+            email:email,
           },
           usuario: {
             email,
@@ -164,24 +190,25 @@ const AdminUsuarios: React.FC = () => {
         const payload = {
           persona: {
             id: form.id_persona,
-            tipo_identificacion:form.tipo_identificacion,
+            tipo_identificacion: form.tipo_identificacion,
             identificacion: form.identificacion,
             nombres: form.nombres,
             apellidos: form.apellidos,
             telefono: form.telefono,
             direccion: form.direccion,
+            email: form.email
           },
           usuario: {
             id: form.id_usuario,
             email: form.email,
             rol: form.rol,
             imagen: form.imagen,
-            password:'12345'
+            password: '12345'
           },
         };
 
         await updateUsuarioCompleto(payload);
-        Swal.fire("Éxito", "Usuario actualizado correctamente", "success");
+        Swal.fire("Éxito", "Usuario actualizado correctamente ", "success");
       }
 
       setOpenModal(false);
@@ -231,7 +258,7 @@ const AdminUsuarios: React.FC = () => {
     setForm({
       id_usuario: u.id_usuario,
       id_persona: u.id_persona,
-      tipo_identificacion:u.tipo_identificacion,
+      tipo_identificacion: u.tipo_identificacion,
       identificacion: u.identificacion,
       nombres: u.nombres,
       apellidos: u.apellidos,
@@ -245,215 +272,600 @@ const AdminUsuarios: React.FC = () => {
     setOpenModal(true);
   };
 
+
+  const handlePermisos = async (u: User) => {
+    setSelectedUsuario(u);
+    setLoadingPermisos(true);
+    setOpenPermisos(true);
+
+    try {
+      const [allMenus, userMenus] = await Promise.all([
+        getMenusNegocio(Number(idNegocioLS)),    // tu API que trae todos los menús del negocio
+        getMenusUsuario(u.id_usuario, Number(idNegocioLS)), // tu API que trae los menús que tiene el usuario
+      ]);
+
+      setMenusNegocio(allMenus);
+      setMenusUsuario(userMenus.map((m: any) => m.id));
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "No se pudieron cargar los permisos", "error");
+    } finally {
+      setLoadingPermisos(false);
+    }
+  };
+
+  const toggleMenuUsuario = (idMenu: number) => {
+    setMenusUsuario(prev =>
+      prev.includes(idMenu) ? prev.filter(m => m !== idMenu) : [...prev, idMenu]
+    );
+  };
+
+  const savePermisos = async () => {
+    if (!selectedUsuario) return;
+    setSavingPermisos(true);
+    try {
+      await asignarMenuUsuario(selectedUsuario.id_usuario, menusUsuario); // tu API para guardar permisos
+      Swal.fire("Éxito", "Permisos actualizados", "success");
+      setOpenPermisos(false);
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "No se pudieron guardar los permisos", "error");
+    } finally {
+      setSavingPermisos(false);
+    }
+  };
+
   return (
-    <Box p={1}>
-      {/* HEADER */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight={600} display="flex" gap={1}>
-          <PeopleIcon /> Administrar Usuarios
+    <>
+      <Box p={1}>
+        {/* HEADER */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h5" fontWeight={600} display="flex" gap={1}>
+            <PeopleIcon /> Administrar Usuarios
+          </Typography>
+
+          <Button
+            variant="contained"
+            startIcon={<PeopleIcon />}
+            onClick={() => {
+              setForm({
+                id_usuario: 0,
+                id_persona: 0,
+                tipo_identificacion: "",
+                identificacion: "",
+                nombres: "",
+                apellidos: "",
+                telefono: "",
+                direccion: "",
+                email: "",
+                rol: "empleado",
+                imagen: "",
+              });
+              setOpenModal(true);
+            }}
+            component={motion.button}
+            whileHover={{ scale: 1.05 }}
+          >
+            Adicionar Usuario
+          </Button>
+        </Box>
+
+        {/* BUSCADOR */}
+        <Box mb={3}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              background: "#f1f3f4",
+              px: 2,
+              borderRadius: 5,
+              width: 450,
+              height: 38,
+            }}
+          >
+            <SearchIcon sx={{ opacity: 0.6, mr: 1 }} />
+            <TextField
+              variant="standard"
+              placeholder="Buscar..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              InputProps={{ disableUnderline: true }}
+              fullWidth
+            />
+          </Box>
+        </Box>
+
+        {/* ORDENAMIENTO */}
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<SortIcon />}
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          sx={{ mb: 2 }}
+        >
+          Ordenar
+        </Button>
+
+        <Typography mb={2}>
+          Total: <strong>{filtered.length}</strong> usuarios encontrados.
         </Typography>
 
-        <Button
-          variant="contained"
-          startIcon={<PeopleIcon />}
-          onClick={() => {
-            setForm({
-              id_usuario: 0,
-              id_persona: 0,
-              tipo_identificacion: "",
-              identificacion: "",
-              nombres: "",
-              apellidos: "",
-              telefono: "",
-              direccion: "",
-              email: "",
-              rol: "empleado",
-              imagen: "",
-            });
-            setOpenModal(true);
-          }}
-          component={motion.button}
-          whileHover={{ scale: 1.05 }}
-        >
-          Adicionar Usuario
-        </Button>
-      </Box>
-
-      {/* BUSCADOR */}
-      <Box mb={3}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            background: "#f1f3f4",
-            px: 2,
-            borderRadius: 5,
-            width: 450,
-            height: 38,
-          }}
-        >
-          <SearchIcon sx={{ opacity: 0.6, mr: 1 }} />
-          <TextField
-            variant="standard"
-            placeholder="Buscar..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            InputProps={{ disableUnderline: true }}
-            fullWidth
-          />
-        </Box>
-      </Box>
-
-      {/* ORDENAMIENTO */}
-      <Button
-        variant="outlined"
-        size="small"
-        startIcon={<SortIcon />}
-        onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-        sx={{ mb: 2 }}
-      >
-        Ordenar
-      </Button>
-
-      <Typography mb={2}>
-        Total: <strong>{filtered.length}</strong> usuarios encontrados.
-      </Typography>
-
-    <Box display="flex" flexWrap="wrap" gap={2}>
-  <AnimatePresence>
-    {paginated.map((u) => (
-      <Box
-        key={u.id_usuario}
-        flex="1 1 calc(100% - 16px)" // xs: full width
-        sx={{
-          '@media (min-width:600px)': { flex: '1 1 calc(50% - 16px)' },  // sm: 2 por fila
-          '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 16px)' }, // md: 3 por fila
-        }}
-      >
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          whileHover={{
-            scale: 1.04,
-            transition: { duration: 0.25 },
-          }}
-        >
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Box display="flex" justifyContent="center">
-                <Avatar
-                  src={u.imagen || ""}
-                  sx={{ width: 80, height: 80, fontSize: 28 }}
+        <Box display="flex" flexWrap="wrap" gap={2}>
+          <AnimatePresence>
+            {paginated.map((u) => (
+              <Box
+                key={u.id_usuario}
+                flex="1 1 calc(100% - 16px)" // xs: full width
+                sx={{
+                  '@media (min-width:600px)': { flex: '1 1 calc(50% - 16px)' },  // sm: 2 por fila
+                  '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 16px)' }, // md: 3 por fila
+                }}
+              >
+                <motion.div
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  whileHover={{
+                    scale: 1.04,
+                    transition: { duration: 0.25 },
+                  }}
                 >
-                  {!u.imagen && u.nombres.charAt(0)}
-                </Avatar>
+                  <Card sx={{ borderRadius: 3 }}>
+                    <CardContent>
+                      <Box display="flex" justifyContent="center">
+                        <Avatar
+                          src={u.imagen || ""}
+                          sx={{ width: 80, height: 80, fontSize: 28 }}
+                        >
+                          {!u.imagen && u.nombres.charAt(0)}
+                        </Avatar>
+                      </Box>
+
+                      <Typography align="center" fontWeight="bold">
+                        {u.nombres} {u.apellidos}
+                      </Typography>
+
+                      <Typography align="center">
+                        {u.tipo_identificacion}-{u.identificacion}
+                      </Typography>
+
+                      <Typography align="center">{u.email}</Typography>
+
+                      <Typography align="center" variant="caption" fontWeight="bold">
+                        <strong>Rol:</strong> {u.rol}
+                      </Typography>
+
+                      {/* BOTONES */}
+                      <Stack direction="row" spacing={1} justifyContent="center" mt={2}>
+                        <IconButton color="primary" onClick={() => handleEdit(u)}>
+                          <EditIcon />
+                        </IconButton>
+
+                        <IconButton color="error" onClick={() => handleDeleteUser(u.id_usuario)}>
+                          <DeleteIcon />
+                        </IconButton>
+                        <IconButton color="secondary" onClick={() => handlePermisos(u)}>
+                          <MenuBookIcon />
+                        </IconButton>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </Box>
+            ))}
+          </AnimatePresence>
+        </Box>
 
-              <Typography align="center" fontWeight="bold">
-                {u.nombres} {u.apellidos}
-              </Typography>
+        {/* PAGINACIÓN */}
+        <Box display="flex" justifyContent="center" mt={3}>
+          <Pagination count={totalPages} page={page} onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPage(value)} />
+        </Box>
 
-              <Typography align="center">
-                {u.tipo_identificacion}-{u.identificacion}
-              </Typography>
+      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="md">
+  {/* HEADER */}
+  <DialogTitle sx={{ p: 0 }}>
+    <Box
+      px={3}
+      py={2}
+      sx={{
+        bgcolor: "#f9fafb",
+        borderBottom: "1px solid #e5e7eb",
+      }}
+    >
+      <Typography fontWeight={600} fontSize={18}>
+        {form.id_usuario === 0 ? "Nuevo Usuario" : "Editar Usuario"}
+      </Typography>
+      <Typography fontSize={13} color="text.secondary">
+        Completa la información del usuario
+      </Typography>
+    </Box>
+  </DialogTitle>
 
-              <Typography align="center">{u.email}</Typography>
+  {/* CONTENIDO DEL FORMULARIO*/}
+<Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="md">
+  
+  {/* HEADER */}
+  <DialogTitle sx={{ p: 0 }}>
+    <Box px={3} py={2} sx={{ bgcolor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
+      <Typography fontWeight={600} fontSize={18}>
+        {form.id_usuario === 0 ? "Nuevo Usuario" : "Editar Usuario"}
+      </Typography>
+      <Typography fontSize={13} color="text.secondary">
+        Completa la información del usuario
+      </Typography>
+    </Box>
+  </DialogTitle>
 
-              <Typography align="center" variant="caption" fontWeight="bold">
-                <strong>Rol:</strong> {u.rol}
-              </Typography>
+  <DialogContent sx={{ py: 3 }}>
+    <Box display="flex" flexDirection="column" gap={3}>
 
-              {/* BOTONES */}
-              <Stack direction="row" spacing={1} justifyContent="center" mt={2}>
-                <IconButton color="primary" onClick={() => handleEdit(u)}>
-                  <EditIcon />
-                </IconButton>
+      {/* PERFIL */}
+      <Box display="flex" alignItems="center" gap={2}>
+        <Avatar src={form.imagen || ""} sx={{ width: 60, height: 60 }}>
+          {form.nombres?.charAt(0)}
+        </Avatar>
 
-                <IconButton color="error" onClick={() => handleDeleteUser(u.id_usuario)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Stack>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <TextField
+          fullWidth
+          label="Imagen"
+          name="imagen"
+          value={form.imagen}
+          onChange={handleChange}
+          size="small"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <ImageIcon color="primary"/>
+              </InputAdornment>
+            ),
+          }}
+        />
       </Box>
-    ))}
-  </AnimatePresence>
-</Box>
 
-      {/* PAGINACIÓN */}
-      <Box display="flex" justifyContent="center" mt={3}>
-        <Pagination count={totalPages} page={page} onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPage(value)} />
-      </Box>
+      {/* ========================= */}
+      {/* INFO PERSONAL */}
+      {/* ========================= */}
+      <Box>
+        <Typography fontWeight={600} mb={1} display="flex" alignItems="center" gap={1}>
+          <PersonIcon fontSize="small"  color="primary"/> Información personal
+        </Typography>
 
-      {/* MODAL */}
-      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
-        <DialogTitle>
-          {form.id_usuario === 0 ? "Adicionar Usuario" : "Editar Usuario"}
-        </DialogTitle>
-
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-         <FormControl fullWidth>
-  <InputLabel>Tipo de Identificación</InputLabel>
-  <Select
-    name="tipo_identificacion"
-    label="Tipo de Identificación"
-    value={form.tipo_identificacion}
-    onChange={handleChange}
-  >
-    <MenuItem value="CC">Cédula de Ciudadanía</MenuItem>
-    <MenuItem value="CE">Cédula de Extranjería</MenuItem>
-    <MenuItem value="VISA">VISA</MenuItem>
-  </Select>
-</FormControl>
-
-<TextField
-  label="Identificación"
-  name="identificacion"
-  value={form.identificacion}
-  onChange={handleChange}
-/>
+        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+          
+          <FormControl fullWidth size="small">
+            <InputLabel>Tipo ID</InputLabel>
+            <Select name="tipo_identificacion" value={form.tipo_identificacion} label="Tipo ID" onChange={handleChange}>
+              <MenuItem value="CC">Cédula</MenuItem>
+              <MenuItem value="CE">Extranjería</MenuItem>
+              <MenuItem value="VISA">VISA</MenuItem>
+            </Select>
+          </FormControl>
 
           <TextField
             label="Identificación"
             name="identificacion"
             value={form.identificacion}
             onChange={handleChange}
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start" >
+                  <BadgeIcon  color="primary"/>
+                </InputAdornment>
+              ),
+            }}
           />
-          <TextField label="Nombres" name="nombres" value={form.nombres} onChange={handleChange} />
-          <TextField label="Apellidos" name="apellidos" value={form.apellidos} onChange={handleChange} />
-          <TextField label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
-          <TextField label="Dirección" name="direccion" value={form.direccion} onChange={handleChange} />
 
-          <FormControl fullWidth>
+          <TextField
+            label="Nombres"
+            name="nombres"
+            value={form.nombres}
+            onChange={handleChange}
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PersonIcon color="primary"/>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <TextField
+            label="Apellidos"
+            name="apellidos"
+            value={form.apellidos}
+            onChange={handleChange}
+            size="small"
+          />
+
+          <TextField
+            label="Teléfono"
+            name="telefono"
+            value={form.telefono}
+            onChange={handleChange}
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PhoneIcon color="primary"/>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <TextField
+            label="Dirección"
+            name="direccion"
+            value={form.direccion}
+            onChange={handleChange}
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <HomeIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+      </Box>
+
+      {/* ========================= */}
+      {/* CUENTA */}
+      {/* ========================= */}
+      <Box>
+        <Typography fontWeight={600} mb={1} display="flex" alignItems="center" gap={1}>
+          <WorkIcon fontSize="small" color="primary" /> Cuenta de acceso
+        </Typography>
+
+        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
+          
+          <FormControl fullWidth size="small">
             <InputLabel>Rol</InputLabel>
             <Select name="rol" value={form.rol} label="Rol" onChange={handleChange}>
               <MenuItem value="admin">Admin</MenuItem>
               <MenuItem value="cliente">Cliente</MenuItem>
-              <MenuItem value="empleado">Empleado</MenuItem>
+              <MenuItem value="cajero">Cajero</MenuItem>
+              <MenuItem value="mesero">Mesero</MenuItem>
+              <MenuItem value="cocina">Cocina</MenuItem>
             </Select>
           </FormControl>
 
-          <TextField label="Email usuario" name="email" value={form.email} onChange={handleChange} />
-
           <TextField
-            label="URL Imagen (opcional)"
-            name="imagen"
-            value={form.imagen}
+            label="Email"
+            name="email"
+            value={form.email}
             onChange={handleChange}
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EmailIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
           />
+        </Box>
+      </Box>
+
+    </Box>
+  </DialogContent>
+
+  {/* FOOTER */}
+  <DialogActions sx={{ px: 3, py: 2 }}>
+    <Button onClick={() => setOpenModal(false)} color="inherit">
+      Cancelar
+    </Button>
+
+    <Button
+      variant="contained"
+      onClick={handleSubmit}
+      sx={{ textTransform: "none", px: 3, borderRadius: 2 }}
+    >
+      Guardar
+    </Button>
+  </DialogActions>
+</Dialog>
+
+  {/* FOOTER */}
+  <DialogActions sx={{ px: 3, py: 2 }}>
+    <Button onClick={() => setOpenModal(false)} color="inherit">
+      Cancelar
+    </Button>
+
+    <Button
+      variant="contained"
+      onClick={handleSubmit}
+      sx={{
+        textTransform: "none",
+        px: 3,
+        borderRadius: 2,
+      }}
+    >
+      Guardar
+    </Button>
+  </DialogActions>
+</Dialog>
+      </Box>
+   {/* MODAL PARA PERMISOS DE LA PERSONA O MODULOS*/}
+      <Dialog
+        open={openPermisos}
+        onClose={() => setOpenPermisos(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        {/* HEADER */}
+        <DialogTitle sx={{ p: 0 }}>
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={2}
+            px={3}
+            py={2}
+            sx={{
+              bgcolor: "#f9fafb",
+              borderBottom: "1px solid #e5e7eb",
+            }}
+          >
+            {/* AVATAR */}
+            <Avatar
+              src={selectedUsuario?.imagen || ""}
+              sx={{ width: 50, height: 50, fontSize: 20 }}
+            >
+              {selectedUsuario?.nombres?.charAt(0)}
+            </Avatar>
+
+            {/* INFO */}
+            <Box flex={1}>
+              <Typography fontWeight={600} fontSize={16}>
+                {selectedUsuario?.nombres} {selectedUsuario?.apellidos}
+              </Typography>
+
+              <Typography fontSize={13} color="text.secondary">
+                {selectedUsuario?.email}
+              </Typography>
+
+              <Typography fontSize={12} color="text.secondary">
+                {selectedUsuario?.tipo_identificacion} -{" "}
+                {selectedUsuario?.identificacion}
+              </Typography>
+            </Box>
+
+            {/* ROL */}
+            <Box
+              sx={{
+                bgcolor: "primary.main",
+                color: "#fff",
+                px: 2,
+                py: 0.5,
+                borderRadius: 2,
+                fontSize: 12,
+                fontWeight: 500,
+              }}
+            >
+              {selectedUsuario?.rol}
+            </Box>
+          </Box>
+
+          {/* SUBTÍTULO */}
+          <Box px={3} py={1}>
+            <Typography variant="body2" color="text.secondary">
+              Asigna los módulos disponibles en el sistema
+            </Typography>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {loadingPermisos ? (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          ) : menusNegocio.length === 0 ? (
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              py={5}
+              color="text.secondary"
+            >
+              <StorefrontIcon sx={{ fontSize: 40, mb: 1, opacity: 0.6 }} />
+              <Typography fontWeight={500}>
+                Ningún módulo disponible
+              </Typography>
+              <Typography fontSize={13}>
+                No hay módulos configurados para este negocio
+              </Typography>
+            </Box>
+          ) : (
+            <Box display="flex" flexDirection="column" gap={1.2}>
+              {menusNegocio.map((menu) => {
+                const checked = menusUsuario.includes(menu.id);
+                const Icon = iconMap[menu.icono ?? "default"] || StorefrontIcon;
+
+                return (
+                  <Box
+                    key={menu.id}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    px={2}
+                    py={1.5}
+                    borderRadius={2}
+                    sx={{
+                      bgcolor: checked ? "rgba(25,118,210,0.08)" : "#f9fafb",
+                      border: "1px solid",
+                      borderColor: checked ? "primary.main" : "#e5e7eb",
+                      transition: "all 0.2s ease",
+                      cursor: "pointer",
+                      "&:hover": {
+                        bgcolor: "rgba(25,118,210,0.12)",
+                      },
+                    }}
+                    onClick={() => toggleMenuUsuario(menu.id)}
+                  >
+
+
+
+                    {/* IZQUIERDA */}
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Box
+                        sx={{
+                          bgcolor: checked ? "primary.main" : "#e5e7eb",
+                          color: checked ? "#fff" : "#6b7280",
+                          borderRadius: 2,
+                          p: 1,
+                          display: "flex",
+                        }}
+                      >
+
+                      </Box>
+
+                      <Box>
+                        <Typography fontSize={14} fontWeight={500}>
+                          {menu.nombre}
+                        </Typography>
+                        <Typography fontSize={12} color="text.secondary">
+                          /{menu.url}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* DERECHA */}
+                    <Checkbox
+                      checked={checked}
+                      onChange={() => toggleMenuUsuario(menu.id)}
+                    />
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            Guardar
+        {/* FOOTER */}
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={() => setOpenPermisos(false)} color="inherit">
+            Cancelar
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={savePermisos}
+            disabled={savingPermisos}
+            sx={{
+              textTransform: "none",
+              px: 3,
+              borderRadius: 2,
+            }}
+          >
+            {savingPermisos ? "Guardando..." : "Guardar cambios"}
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </>
   );
 };
 

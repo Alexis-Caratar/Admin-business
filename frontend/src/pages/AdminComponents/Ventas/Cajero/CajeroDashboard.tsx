@@ -84,7 +84,7 @@ export const CajeroDashboard: React.FC = () => {
     }
     // CAJA
     if (msg.tipo === "actualizar_caja") {
-   console.log("Mesas actualizadas", msg.caja);
+   console.log("caja actualizadas", msg.caja);
       const c = msg.caja;
       if (!c) return;
       setCaja(c);
@@ -107,7 +107,7 @@ export const CajeroDashboard: React.FC = () => {
     }
   };
   ws.onclose = () => console.log("WS cerrado");
-  ws.onerror = (err) => console.error("WS error", err);
+ // ws.onerror = (err) => console.error("WS error", err);
   return () => ws.close();
 }, [id_negocio, idUsuario]);
 

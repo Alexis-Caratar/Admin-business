@@ -94,10 +94,7 @@ export const detallesMesa = async (req, res) => {
 
 export const listarEgresos = async (req, res) => {
   try {
-    const { id_negocio, id_caja } = req.params;
-    console.log("req",req.params);
-    
-
+    const { id_negocio, id_caja } = req.params;    
     const egresos = await CajeroService.listarEgresos(
       id_negocio,
       id_caja
@@ -111,9 +108,7 @@ export const listarEgresos = async (req, res) => {
 };
 
 export const crearEgreso = async (req, res) => {
-  try {
-    console.log(req.body);
-    
+  try {    
     const {idUsuario,id_negocio,id_caja,descripcion,metodo_pago,monto,observacion} = req.body;
 
     // 🔐 Validación obligatoria
@@ -209,7 +204,6 @@ export const actualizaventa = async (req, res) => {
 export const liberar_mesa = async (req, res) => {
   try {
     const { id_mesa,id_negocio } = req.params;
-    console.log("req.params",req.params);
     
     const respuesta = await CajeroService.liberar_mesa(id_mesa,id_negocio);
     res.json(respuesta);

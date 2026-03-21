@@ -19,6 +19,8 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  Chip,
+  Stack,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
@@ -27,6 +29,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import InputAdornment from "@mui/material/InputAdornment";
+import LunchDiningIcon from '@mui/icons-material/LunchDining';
+import QrCodeIcon from '@mui/icons-material/QrCode';
 toastr.options = {
   positionClass: "toast-top-right",
   timeOut: 2000,
@@ -267,97 +271,136 @@ animarAlCarrito(
   />
 
   {/* PRODUCTOS EN FLEXBOX */}
-  <Box
-    sx={{
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 2, // espacio entre cards
-    }}
-  >
-    {filtered.map((prod) => (
-      <Box
-        key={prod.id}
+<Box
+  sx={{
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 2,
+  }}
+>
+  {filtered.map((prod) => (
+    <Box
+      key={prod.id}
+      sx={{
+        flex: "1 1 150px",
+        maxWidth: 220,
+      }}
+    >
+      <Card
+        onClick={(e) => handleAgregar(prod, e)}
         sx={{
-          flex: "1 1 150px", // mínimo 150px, crece según el contenedor
-          maxWidth: 220, // opcional, evita que se estire demasiado
+          cursor: "pointer",
+          height: { xs: 220, sm: 240, md: 260 }, // altura fija para todas
+          display: "flex",
+          flexDirection: "column",
+          borderRadius: 3,
+          overflow: "hidden",
+          transition: "0.2s",
+          boxShadow: 2,
+          "&:hover": {
+            transform: "translateY(-4px)",
+            boxShadow: 5,
+          },
         }}
       >
-        <Card
-          onClick={(e) => handleAgregar(prod, e)}
+        {/* ICONO */}
+        <Box
           sx={{
-            cursor: "pointer",
-            height: "100%",
-            borderRadius: 3,
-            overflow: "hidden",
-            transition: "0.2s",
-            boxShadow: 2,
-            "&:hover": {
-              transform: "translateY(-4px)",
-              boxShadow: 5,
-            },
+            height: { xs: 80, sm: 90, md: 120 },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "#f6f6f6",
+            borderRadius: 2,
           }}
         >
-          {prod.imagen_plato ? (
-            <CardMedia
-              component="img"
-              height={isMobile ? 90 : 140}
-              image={prod.imagen_plato}
-              alt={prod.nombre}
+          <Avatar
+            sx={{
+              width: { xs: 36, sm: 40, md: 60 },
+              height: { xs: 36, sm: 40, md: 60 },
+              bgcolor: "#e0e0e0",
+            }}
+          >
+            <LunchDiningIcon
+              sx={{
+                fontSize: { xs: 20, sm: 24, md: 32 },
+                color: "#f76917",
+              }}
             />
-          ) : (
-            <Box
-              height={isMobile ? 90 : 140}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              bgcolor="#f6f6f6"
-            >
-              <Avatar sx={{ width: 44, height: 44 }}>
-                {prod.nombre?.[0]}
-              </Avatar>
-            </Box>
-          )}
+          </Avatar>
+        </Box>
 
-          <CardContent sx={{ p: isMobile ? 1 : 1.5 }}>
+        {/* CONTENIDO */}
+        <CardContent
+          sx={{
+            flex: 1,          // ocupa el espacio restante
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between", // botón siempre abajo
+            p: { xs: 1, sm: 1.5 },
+          }}
+        >
+          <Box>
+              
+                <Stack direction="row" spacing={1} alignItems="center">
+                   <QrCodeIcon sx={{ fontSize: 20, color: "#d3830b" }} />
+                    <Chip
+                      label={prod.codigo_barra}
+                      size="small"
+                      sx={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        height: 20,
+                        bgcolor: "#111827",
+                        color: "#fff"
+                      }}
+                    />
+
+                   
+                  </Stack>
+
             <Typography
               fontWeight={700}
-              fontSize={isMobile ? 12 : 14}
+              fontSize={{ xs: 12, sm: 14 }}
               noWrap
+              sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
             >
               {prod.nombre}
             </Typography>
 
             <Typography
-              fontSize={isMobile ? 12 : 13}
+              fontSize={{ xs: 12, sm: 13 }}
               color="success.main"
               fontWeight={800}
             >
               ${Number(prod.precio_venta).toLocaleString()}
             </Typography>
+          </Box>
 
-            <Button
-              fullWidth
-              size="small"
-              variant="contained"
-              color="success"
-              startIcon={<AddShoppingCartIcon />}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAgregar(prod, e);
-              }}
-              sx={{
-                mt: 0.7,
-                fontSize: isMobile ? 11 : 12,
-                py: 0.4,
-              }}
-            >
-              Agregar
-            </Button>
-          </CardContent>
-        </Card>
-      </Box>
-    ))}
-  </Box>
+          <Button
+            fullWidth
+            size="small"
+            variant="contained"
+            color="success"
+            startIcon={<AddShoppingCartIcon />}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAgregar(prod, e);
+            }}
+            sx={{
+              mt: 1,
+              fontSize: { xs: 11, sm: 12 },
+              py: 0.5,
+            }}
+          >
+            Agregar
+          </Button>
+        </CardContent>
+      </Card>
+    </Box>
+  ))}
+</Box>
+
 </Box>
       </DialogContent>
 

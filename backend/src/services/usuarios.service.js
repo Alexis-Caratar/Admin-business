@@ -1,4 +1,4 @@
-import { db } from "../config/db.js";
+import { db, pool } from "../config/db.js";
 import bcrypt from "bcryptjs";
 
 const TABLE = "usuarios";
@@ -17,7 +17,7 @@ export const listar = async (id_negocio) => {
     FROM usuarios u
     INNER JOIN negocios n ON u.id_negocio = n.id
     INNER JOIN personas p on u.id_persona=p.id
-    WHERE u.id_negocio = ?
+    WHERE u.id_negocio = $1
     order by u.id desc
     `,
     [id_negocio]
@@ -49,70 +49,110 @@ export const obtener = async (id) => {
 
 export const crear = async (payload) => {
   const { persona, usuario } = payload;
+  const client = await pool.connect();
 
-  // Validar que la persona tenga identificacion, nombres y apellidos
-  if (!persona.identificacion || !persona.nombres || !persona.apellidos) {
-    const err = new Error("Los datos de la persona son obligatorios");
-    err.status = 400;
-    throw err;
+  try {
+    await client.query("BEGIN");
+
+    // ============================
+    // VALIDACIONES
+    // ============================
+    if (!persona.identificacion || !persona.nombres || !persona.apellidos) {
+      throw new Error("Los datos de la persona son obligatorios");
+    }
+
+    if (!usuario.rol) {
+      throw new Error("El rol del usuario es obligatorio");
+    }
+
+    if (!usuario.email) {
+      throw new Error("El email es obligatorio");
+    }
+
+    // ============================
+    // VALIDAR EMAIL DUPLICADO
+    // ============================
+    const { rows: exists } = await client.query(
+      `SELECT id FROM ${TABLE} WHERE email = $1`,
+      [usuario.email]
+    );
+
+    if (exists.length > 0) {
+      throw new Error("El email ya está registrado");
+    }
+
+    // ============================
+    // PASSWORD
+    // ============================
+    if (usuario.password) {
+      usuario.password = await bcrypt.hash(usuario.password, SALT_ROUNDS);
+    }
+
+    // ============================
+    // IMAGEN DEFAULT
+    // ============================
+    const DEFAULT_AVATAR =
+      "https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png";
+
+    usuario.imagen = usuario.imagen || DEFAULT_AVATAR;
+
+    // ============================
+    // INSERT PERSONA
+    // ============================
+    const { rows: personaRows } = await client.query(
+      `
+      INSERT INTO ${TABLE_PERSONAS}
+      (tipo_identificacion, identificacion, nombres, apellidos, telefono, direccion, fecha_creacion,email)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW(),$7)
+      RETURNING id
+      `,
+      [
+        persona.tipo_identificacion,
+        persona.identificacion,
+        persona.nombres,
+        persona.apellidos,
+        persona.telefono,
+        persona.direccion,
+        persona.email
+      ]
+    );
+
+    const id_persona = personaRows[0].id;
+
+    // ============================
+    // INSERT USUARIO
+    // ============================
+    const { rows: usuarioRows } = await client.query(
+      `
+      INSERT INTO ${TABLE}
+      (email, password, rol, id_negocio, imagen, id_persona, fecha_creacion)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      RETURNING id
+      `,
+      [
+        usuario.email,
+        usuario.password,
+        usuario.rol,
+        usuario.id_negocio,
+        usuario.imagen,
+        id_persona,
+      ]
+    );
+
+    await client.query("COMMIT");
+
+    return {
+      persona: { id: id_persona, ...persona },
+      usuario: { id: usuarioRows[0].id, ...usuario },
+    };
+
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Error creando usuario:", error);
+    throw error;
+  } finally {
+    client.release();
   }
-
-  // Validar que el usuario tenga rol
-  if (!usuario.rol) {
-    const err = new Error("El rol del usuario es obligatorio");
-    err.status = 400;
-    throw err;
-  }
-
-  // Validar email duplicado
-  const [exists] = await db.query(
-    `SELECT id FROM ${TABLE} WHERE email = ?`,
-    [usuario.email]
-  );
-
-  if (exists.length > 0) {
-    const err = new Error("El email ya está registrado");
-    err.status = 400;
-    throw err;
-  }
-
-  // Encriptar contraseña
-  if (usuario.password) {
-    usuario.password = await bcrypt.hash(usuario.password, SALT_ROUNDS);
-  }
-
-  // -----------------------------
-  // 1️⃣ Insertar Persona
-  // -----------------------------
-  const personaKeys = Object.keys(persona).join(", ");
-  const personaPlaceholders = Object.keys(persona).map(() => "?").join(", ");
-  const personaValues = Object.values(persona);
-
-  const sqlPersona = `INSERT INTO ${TABLE_PERSONAS} (${personaKeys}, fecha_creacion) VALUES (${personaPlaceholders}, NOW())`;
-
-  const [personaResult] = await db.query(sqlPersona, personaValues);
-  const id_persona = personaResult.insertId;
-
-  // -----------------------------
-  // 2️⃣ Insertar Usuario
-  // -----------------------------
-  const usuarioData = {
-    ...usuario,
-    id_persona,
-  };
-
-  const usuarioKeys = Object.keys(usuarioData).join(", ");
-  const usuarioPlaceholders = Object.keys(usuarioData).map(() => "?").join(", ");
-  const usuarioValues = Object.values(usuarioData);
-
-  const sqlUsuario = `INSERT INTO ${TABLE} (${usuarioKeys}, fecha_creacion) VALUES (${usuarioPlaceholders}, NOW())`;
-
-  const [usuarioResult] = await db.query(sqlUsuario, usuarioValues);
-
-  return {
-    persona: { id: id_persona, ...persona },
-    usuario: { id: usuarioResult.insertId, ...usuarioData },
-  };
 };
 
 
@@ -150,114 +190,218 @@ export const crearPersonaService = async (data) => {
 // ACTUALIZAR
 // -----------------------------
 export const actualizar = async (payload) => {
-  console.log("payload", payload);
-
   const { persona, usuario } = payload;
+  const client = await pool.connect();
 
-  // ================================
-  // 1️⃣ Validar existencia del usuario
-  // ================================
-  const [exist] = await db.query(
-    `SELECT id, id_persona FROM ${TABLE} WHERE id = ?`,
-    [usuario.id]
-  );
+  try {
+    await client.query("BEGIN");
 
-  if (exist.length === 0) {
-    const err = new Error("El usuario no existe");
-    err.status = 404;
-    throw err;
-  }
-
-  const id_usuario = usuario.id;
-  const id_persona = exist[0].id_persona;
-
-  // ================================
-  // 2️⃣ Validar email duplicado
-  // ================================
-  if (usuario.email) {
-    const [checkEmail] = await db.query(
-      `SELECT id FROM ${TABLE} WHERE email = ? AND id <> ?`,
-      [usuario.email, id_usuario]
+    // ================================
+    // 1️⃣ Validar existencia
+    // ================================
+    const { rows: exist } = await client.query(
+      `SELECT id, id_persona FROM ${TABLE} WHERE id = $1`,
+      [usuario.id]
     );
 
-    if (checkEmail.length > 0) {
-      const err = new Error("El correo ya está registrado por otro usuario");
-      err.status = 400;
-      throw err;
+    if (exist.length === 0) {
+      throw new Error("El usuario no existe");
     }
-  }
 
-  // ================================
-  // 3️⃣ Actualizar Persona
-  // ================================
-  if (persona && Object.keys(persona).length > 0) {
-    // eliminar ID para no actualizarlo
-    const { id, ...personaClean } = persona;
+    const id_usuario = usuario.id;
+    const id_persona = exist[0].id_persona;
 
-    const personaFields = Object.keys(personaClean)
-      .map((key) => `${key} = ?`)
-      .join(", ");
+    // ================================
+    // 2️⃣ Validar email duplicado
+    // ================================
+    if (usuario.email) {
+      const { rows: checkEmail } = await client.query(
+        `SELECT id FROM ${TABLE} WHERE email = $1 AND id <> $2`,
+        [usuario.email, id_usuario]
+      );
 
-    const personaValues = Object.values(personaClean);
+      if (checkEmail.length > 0) {
+        throw new Error("El correo ya está registrado por otro usuario");
+      }
+    }
 
-    const sqlPersona = `
-      UPDATE ${TABLE_PERSONAS}
-      SET ${personaFields}
-      WHERE id = ?
-    `;
+    // ================================
+    // 3️⃣ Actualizar PERSONA (dinámico PG)
+    // ================================
+    if (persona && Object.keys(persona).length > 0) {
+      const { id, ...personaClean } = persona;
 
-    console.log("SQL PERSONA:", sqlPersona, [...personaValues, id_persona]);
+      const keys = Object.keys(personaClean);
+      const values = Object.values(personaClean);
 
-    await db.query(sqlPersona, [...personaValues, id_persona]);
-  }
+      const setClause = keys
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(", ");
 
-  // ================================
-  // 4️⃣ Actualizar Usuario
-  // ================================
-  if (usuario && Object.keys(usuario).length > 0) {
-    // eliminar campos que no deben actualizarse
-    let { id, id_persona: ignore, ...usuarioClean } = usuario;
-
-    // Si llega una contraseña, encriptar
-    if (usuarioClean.password) {
-      usuarioClean.password = await bcrypt.hash(
-        usuarioClean.password,
-        SALT_ROUNDS
+      await client.query(
+        `
+        UPDATE ${TABLE_PERSONAS}
+        SET ${setClause}
+        WHERE id = $${keys.length + 1}
+        `,
+        [...values, id_persona]
       );
     }
 
-    const usuarioFields = Object.keys(usuarioClean)
-      .map((key) => `${key} = ?`)
-      .join(", ");
+    // ================================
+    // 4️⃣ Actualizar USUARIO
+    // ================================
+    if (usuario && Object.keys(usuario).length > 0) {
+      const { id, ...usuarioClean } = usuario;
 
-    const usuarioValues = Object.values(usuarioClean);
+      // encriptar password si viene
+      if (usuarioClean.password) {
+        usuarioClean.password = await bcrypt.hash(
+          usuarioClean.password,
+          SALT_ROUNDS
+        );
+      }
 
-    const sqlUsuario = `
-      UPDATE ${TABLE}
-      SET ${usuarioFields}
-      WHERE id = ?
-    `;
+      const keys = Object.keys(usuarioClean);
+      const values = Object.values(usuarioClean);
 
-    console.log("SQL USUARIO:", sqlUsuario, [...usuarioValues, id_usuario]);
+      const setClause = keys
+        .map((key, index) => `${key} = $${index + 1}`)
+        .join(", ");
 
-    await db.query(sqlUsuario, [...usuarioValues, id_usuario]);
+      await client.query(
+        `
+        UPDATE ${TABLE}
+        SET ${setClause}
+        WHERE id = $${keys.length + 1}
+        `,
+        [...values, id_usuario]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    return {
+      message: "Usuario actualizado correctamente",
+    };
+
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Error actualizando usuario:", error);
+    throw error;
+  } finally {
+    client.release();
   }
+};
 
-  return {
-    mensaje: "Usuario actualizado correctamente",
-    id_usuario,
-    id_persona,
-  };
+export const eliminar = async (id) => {
+  await db.query(
+    `DELETE FROM ${TABLE} WHERE id = $1`,
+    [id]
+  );
 };
 
 
-
-// -----------------------------
-// ELIMINAR
-// -----------------------------
-export const eliminar = async (id) => {
-  await db.query(
-    `DELETE FROM ${TABLE} WHERE id = ?`,
+export const menus_negocio = async (id) => {
+const [rows]= await db.query(
+      `
+SELECT m.*
+FROM app_modulos m
+JOIN app_modulos_negocio mn ON m.id = mn.id_modulo
+WHERE mn.id_negocio = $1
+  AND mn.activo=true
+  AND m.activo = true
+ORDER BY m.orden;`,
     [id]
   );
+  console.log("rows negocio",rows);
+  
+return rows;
+};
+
+
+export const modulos_usuario = async (id,id_negocio) => {
+
+const [rows]= await db.query(
+      `
+        SELECT DISTINCT m.*
+        FROM app_modulos m
+        INNER JOIN app_modulos_negocio mn ON m.id = mn.id_modulo
+        INNER JOIN app_modulos_negocio_rol mr 
+              ON mn.id = mr.id_app_modulos_negocio
+        INNER JOIN app_usuario_modulos um
+              ON um.id_modulo_negocio_rol = m.id AND um.id_usuario = $1
+        WHERE mn.id_negocio = $2
+          AND mn.activo=true
+          AND m.activo = true
+         AND  um.activo = true 
+        ORDER BY m.orden;`,
+    [id,id_negocio]
+  );
+  console.log("rows usuarios",rows);
+  
+return rows;
+};
+
+export const modulos_usuariocrear = async (id, id_menu) => {
+  console.log("ingreso 2");
+  const client = await pool.connect();
+  
+console.log("ingreso");
+
+  try {
+    await client.query("BEGIN");
+
+    // 🔥 Caso: si no mandan nada → desactiva todo
+ if (!id_menu || id_menu.length === 0) {
+  console.log("ENTRADO AQUI");
+  
+  await client.query(
+    `
+    UPDATE app_usuario_modulos
+    SET activo = false
+    WHERE id_usuario = $1
+    `,
+    [id]
+  );
+  await client.query("COMMIT");
+  return { ok: true };
+}
+    // 1. Desactivar los que no vienen
+    await client.query(
+      `
+      UPDATE app_usuario_modulos
+      SET activo = false
+      WHERE id_usuario = $1
+      AND id_modulo_negocio_rol NOT IN (${id_menu.map((_, i) => `$${i + 2}`).join(",")})
+      `,
+      [id, ...id_menu]
+    );
+
+    // 2. Insertar o reactivar
+    for (const menuId of id_menu) {
+      await client.query(
+        `
+        INSERT INTO app_usuario_modulos (id_usuario, id_modulo_negocio_rol, activo)
+        VALUES ($1, $2, true)
+        ON CONFLICT (id_usuario, id_modulo_negocio_rol)
+        DO UPDATE SET activo = true
+        `,
+        [id, menuId]
+      );
+    }
+
+
+console.log("salidad");
+
+    await client.query("COMMIT");
+    return { ok: true };
+  } catch (error) {
+    console.log("error",error);
+
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 };

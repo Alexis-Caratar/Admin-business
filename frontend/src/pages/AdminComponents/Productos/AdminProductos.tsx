@@ -24,6 +24,7 @@ import {
   Autocomplete,
   Pagination,
   MenuItem,
+  InputAdornment,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -36,6 +37,18 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ProductosImg from './../../../assets/img/Productos.png';
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import QrCodeIcon from "@mui/icons-material/QrCode";
+import LabelIcon from "@mui/icons-material/Label";
+import DescriptionIcon from "@mui/icons-material/Description";
+import StraightenIcon from "@mui/icons-material/Straighten";
+import CategoryIcon from "@mui/icons-material/Category";
+import StorageIcon from "@mui/icons-material/Storage";
+import ToggleOnIcon from "@mui/icons-material/ToggleOn";
+import PublicIcon from "@mui/icons-material/Public";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import ImageIcon from "@mui/icons-material/Image";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 
 
 interface Props {
@@ -116,8 +129,8 @@ const handleOpenModal = (producto?: Producto) => {
       stock_actual: 0,
       stock_minimo: 0,
       stock_maximo: 0,
-      estado:1, // por defecto
-      publicacion_web: "no", // por defecto
+      estado:true, // por defecto
+      publicacion_web: false, // por defecto
       precios: { id_producto: 0, precio_venta: 0, precio_costo: 0 },
       imagenes: [],
     });
@@ -287,34 +300,35 @@ const handleSubmit = async () => {
           }}
         >
           {/* ESTADO */}
-          {p.estado !== undefined && (
-            <Box
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                px: 1.5,
-                py: 0.5,
-                zIndex: 1,
-                borderRadius: 1,
-                bgcolor:
-                  p.estado === 1
-                    ? "success.main"
-                    : p.estado === 2
-                      ? "error.main"
-                      : "grey.500",
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: 12,
-              }}
-            >
-              {p.estado === 1
-                ? "Activo"
-                : p.estado === 2
-                  ? "Descontinuado"
-                  : "Inactivo"}
-            </Box>
-          )}
+         {p.estado !== undefined && (
+  <Box
+    sx={{
+      position: "absolute",
+      top: 10,
+      right: 10,
+      px: 1.5,
+      py: 0.4,
+      zIndex: 1,
+      borderRadius: 2,
+      fontSize: 12,
+      fontWeight: 600,
+      color: "#fff",
+      bgcolor: (() => {
+        if (p.estado === true) return "success.main";
+        if (p.estado === false) return "warning.main";
+        if (p.estado === 2) return "error.main";
+        return "grey.500";
+      })(),
+    }}
+  >
+    {(() => {
+      if (p.estado === true) return "Activo";
+      if (p.estado === false) return "Inactivo";
+      if (p.estado === 2) return "Descontinuado";
+      return "Sin estado";
+    })()}
+  </Box>
+)}
 
           {/* CARRUSEL DE IMÁGENES */}
           <Box
@@ -488,179 +502,293 @@ const handleSubmit = async () => {
         />
       </Box>
       {/* Modal */}
-      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
-  <DialogTitle>{editingId ? "Editar Producto" : "Crear Producto"}</DialogTitle>
+     <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="md">
+  
+  {/* HEADER */}
+  <DialogTitle sx={{ p: 0 }}>
+    <Box px={3} py={2} sx={{ bgcolor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
+      <Typography fontWeight={600} fontSize={18}>
+        {editingId ? "Editar Producto" : "Crear Producto"}
+      </Typography>
+      <Typography fontSize={13} color="text.secondary">
+        Configura la información del producto
+      </Typography>
+    </Box>
+  </DialogTitle>
 
-  <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+  {/* CONTENIDO */}
+  <DialogContent sx={{ py: 3 }}>
+    <Box display="flex" flexDirection="column" gap={3}>
 
-    {/* Información principal */}
-    <TextField
-      label="Código"
-      value={form.codigo_barra}
-      onChange={(e) => setForm({ ...form, codigo_barra: e.target.value })}
-      fullWidth
-      required
-    />
+      {/* ========================= */}
+      {/* INFORMACIÓN GENERAL */}
+      {/* ========================= */}
+      <Box>
+        <Typography fontWeight={600} mb={1} display="flex" gap={1} alignItems="center">
+          <Inventory2Icon color="primary" fontSize="small" />
+          Información general
+        </Typography>
+
+        <Box display="grid" gridTemplateColumns="repeat(2,1fr)" gap={2}>
+          <TextField
+            label="Código"
+            value={form.codigo_barra}
+            onChange={(e) => setForm({ ...form, codigo_barra: e.target.value })}
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <QrCodeIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <TextField
+            label="Nombre"
+            value={form.nombre}
+            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LabelIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <TextField
+            label="Descripción"
+            value={form.descripcion}
+            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+            size="small"
+            multiline
+            rows={2}
+            fullWidth
+            sx={{ gridColumn: "span 2" }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <DescriptionIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Autocomplete
+            freeSolo
+            options={unidades}
+            value={form.unidad_medida || ""}
+            onChange={(_, v) => setForm({ ...form, unidad_medida: v || "" })}
+            onInputChange={(_, v) => setForm({ ...form, unidad_medida: v })}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Unidad de medida"
+                size="small"
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <StraightenIcon color="primary" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            )}
+          />
+
+          <TextField
+            select
+            label="Tipo"
+            value={form.tipo_producto || "producto_terminado"}
+            onChange={(e) => setForm({ ...form, tipo_producto: e.target.value })}
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <CategoryIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+          >
+            <MenuItem value="Producto">Producto</MenuItem>
+            <MenuItem value="Producto_con_insumo">Producto con insumo</MenuItem>
+            <MenuItem value="insumo">Insumo</MenuItem>
+            <MenuItem value="servicio">Servicio</MenuItem>
+            <MenuItem value="otro">Otro</MenuItem>
+          </TextField>
+        </Box>
+      </Box>
+
+      {/* ========================= */}
+      {/* STOCK */}
+      {/* ========================= */}
+      <Box>
+        <Typography fontWeight={600} mb={1} display="flex" gap={1}>
+          <StorageIcon color="primary" fontSize="small" />
+          Inventario
+        </Typography>
+
+        <Box display="grid" gridTemplateColumns="repeat(3,1fr)" gap={2}>
+          <TextField
+            label="Stock Actual"
+            type="number"
+            size="small"
+            value={form.stock_actual || 0}
+            onChange={(e) => setForm({ ...form, stock_actual: Number(e.target.value) })}
+          />
+          <TextField
+            label="Stock Mínimo"
+            type="number"
+            size="small"
+            value={form.stock_minimo || 0}
+            onChange={(e) => setForm({ ...form, stock_minimo: Number(e.target.value) })}
+          />
+          <TextField
+            label="Stock Máximo"
+            type="number"
+            size="small"
+            value={form.stock_maximo || 0}
+            onChange={(e) => setForm({ ...form, stock_maximo: Number(e.target.value) })}
+          />
+        </Box>
+      </Box>
+
+      {/* ========================= */}
+      {/* ESTADO */}
+      {/* ========================= */}
+      <Box display="grid" gridTemplateColumns="repeat(2,1fr)" gap={2}>
+        <TextField
+          select
+          label="Estado"
+          size="small"
+          value={form.estado ? "true" : "false"}
+          onChange={(e) =>
+            setForm({ ...form, estado: e.target.value === "true" })
+          }
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <ToggleOnIcon color="primary" />
+              </InputAdornment>
+            ),
+          }}
+        >
+          <MenuItem value="true">Activo</MenuItem>
+          <MenuItem value="false">Inactivo</MenuItem>
+        </TextField>
 
         <TextField
-      label="Nombre"
-      value={form.nombre}
-      onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-      fullWidth      
-      required
-    />
+          select
+          label="Publicación Web"
+          size="small"
+          value={form.publicacion_web ? "true" : "false"}
+          onChange={(e) =>
+            setForm({ ...form, publicacion_web: e.target.value === "true" })
+          }
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <PublicIcon color="primary" />
+              </InputAdornment>
+            ),
+          }}
+        >
+          <MenuItem value="true">Sí</MenuItem>
+          <MenuItem value="false">No</MenuItem>
+        </TextField>
+      </Box>
 
-    <TextField
-      label="Descripción"
-      value={form.descripcion}
-      onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-      fullWidth
-      multiline
-      rows={2}
-    />
+      {/* ========================= */}
+      {/* PRECIOS */}
+      {/* ========================= */}
+      <Box>
+        <Typography fontWeight={600} mb={1} display="flex" gap={1}>
+          <AttachMoneyIcon color="primary" fontSize="small" />
+          Precios
+        </Typography>
 
-<Autocomplete<string, false, false, true>
-  freeSolo
-  options={unidades}
-  value={form.unidad_medida || ""}
-  onChange={(_, newValue: string | null) =>
-    setForm({ ...form, unidad_medida: newValue || "" })
-  }
-  onInputChange={(_, newInputValue: string) =>
-    setForm({ ...form, unidad_medida: newInputValue })
-  }
-  renderInput={(params) => <TextField {...params} label="Unidad de medida" fullWidth />}
-/>
+        <Box display="grid" gridTemplateColumns="repeat(2,1fr)" gap={2}>
+          <TextField
+            label="Costo"
+            type="number"
+            size="small"
+            value={form.precios?.precio_costo || ""}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                precios: { ...form.precios!, precio_costo: Number(e.target.value) },
+              })
+            }
+          />
 
-    {/* Tipo de Producto */}
-    <TextField
-      select
-      label="Tipo de Producto"
-      value={form.tipo_producto || "producto_terminado"}
-      onChange={(e) => setForm({ ...form, tipo_producto: e.target.value })}
-      fullWidth
-    >
-      <MenuItem value="Producto">Producto</MenuItem>
-      <MenuItem value="Producto_con_insumo">Producto con insumo</MenuItem>
-      <MenuItem value="insumo">Insumo</MenuItem>
-      <MenuItem value="servicio">Servicio</MenuItem>
-      <MenuItem value="otro">Otro</MenuItem>
-    </TextField>
+          <TextField
+            label="Venta"
+            type="number"
+            size="small"
+            value={form.precios?.precio_venta || ""}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                precios: { ...form.precios!, precio_venta: Number(e.target.value) },
+              })
+            }
+          />
+        </Box>
+      </Box>
 
-    {/* Stock */}
-    <Box display="flex" gap={1}>
-      <TextField
-        label="Stock Actual"
-        type="number"
-        value={form.stock_actual || 0}
-        onChange={(e) => setForm({ ...form, stock_actual: Number(e.target.value) })}
-        fullWidth
-      />
+      {/* ========================= */}
+      {/* IMÁGENES */}
+      {/* ========================= */}
+     
+      <Box>
+        <Typography fontWeight={600} mb={1} display="flex" gap={1}>
+          <ImageIcon color="primary" fontSize="small" />
+          Imágenes
+        </Typography>
 
-      <TextField
-        label="Stock Mínimo"
-        type="number"
-        value={form.stock_minimo || 0}
-        onChange={(e) => setForm({ ...form, stock_minimo: Number(e.target.value) })}
-        fullWidth
-      />
+              {(form.imagenes ?? []).map((img, index) => (
+          <TextField
+            key={index}
+            label={`Imagen ${index + 1}`}
+            size="small"
+            value={img.url}
+            onChange={(e) => {
+              const imgs = [...(form.imagenes ?? [])];
+              imgs[index].url = e.target.value;
+              setForm({ ...form, imagenes: imgs });
+            }}
+            fullWidth
+            sx={{ mb: 1 }}
+          />
+        ))}
 
-      <TextField
-        label="Stock Máximo"
-        type="number"
-        value={form.stock_maximo || 0}
-        onChange={(e) => setForm({ ...form, stock_maximo: Number(e.target.value) })}
-        fullWidth
-      />
+        <Button
+          startIcon={<AddPhotoAlternateIcon />}
+          variant="outlined"
+          onClick={() =>
+            setForm({
+              ...form,
+              imagenes: [
+                ...(form.imagenes || []),
+                { id_producto: form.id!, url: "", orden: form.imagenes?.length || 0, activo: 1 },
+              ],
+            })
+          }
+        >
+          Agregar imagen
+        </Button>
+      </Box>
+
     </Box>
-
-    {/* Estado */}
-    <TextField
-      select
-      label="Estado"
-      value={form.estado ?? 1}
-      onChange={(e) => setForm({ ...form, estado: Number(e.target.value) })}
-      fullWidth
-    >
-      <MenuItem value={1}>Activo</MenuItem>
-      <MenuItem value={0}>Inactivo</MenuItem>
-    </TextField>
-
-    {/* Publicación Web */}
-    <TextField
-      select
-      label="Publicación Web"
-      value={form.publicacion_web ?? 0}
-      onChange={(e) => setForm({ ...form, publicacion_web: String(e.target.value) })}
-      fullWidth
-    >
-      <MenuItem value={0}>No</MenuItem>
-      <MenuItem value={1}>Sí</MenuItem>
-    </TextField>
-
-    {/* Precios */}
-    <Box display="flex" gap={1}>
-      <TextField
-        label="Precio Costo"
-        type="number"
-        value={form.precios?.precio_costo || ""}
-        onChange={(e) =>
-          setForm({
-            ...form,
-            precios: { ...form.precios!, precio_costo: Number(e.target.value) },
-          })
-        }
-        fullWidth
-      />
-
-      <TextField
-        label="Precio Venta"
-        type="number"
-        value={form.precios?.precio_venta || ""}
-        onChange={(e) =>
-          setForm({
-            ...form,
-            precios: { ...form.precios!, precio_venta: Number(e.target.value) },
-          })
-        }
-        fullWidth
-      />
-    </Box>
-
-    {/* Imágenes */}
-    {form.imagenes?.map((img, index) => (
-      <TextField
-        key={index}
-        label={`Imagen ${index + 1}`}
-        value={img.url}
-        onChange={(e) => {
-          const imgs = [...(form.imagenes || [])];
-          imgs[index].url = e.target.value;
-          setForm({ ...form, imagenes: imgs });
-        }}
-        fullWidth
-      />
-    ))}
-
-    <Button
-      variant="outlined"
-      onClick={() =>
-        setForm({
-          ...form,
-          imagenes: [
-            ...(form.imagenes || []),
-            { id_producto: form.id!, url: "", orden: form.imagenes?.length || 0, activo: 1 },
-          ],
-        })
-      }
-    >
-      Agregar Imagen
-    </Button>
   </DialogContent>
 
-  <DialogActions>
+  {/* FOOTER */}
+  <DialogActions sx={{ px: 3, py: 2 }}>
     <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
-    <Button variant="contained" color="primary" onClick={handleSubmit}>
+    <Button variant="contained" onClick={handleSubmit}>
       {editingId ? "Actualizar" : "Crear"}
     </Button>
   </DialogActions>

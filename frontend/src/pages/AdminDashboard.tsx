@@ -60,8 +60,9 @@ const AdminDashboard: React.FC = () => {
 
   const [, setIdNegocio] = useState<string>("");
   const [nombre_negocio, setNombreNegocio] = useState<string>("Mi Negocio");
-  const [nombre, setNombre] = useState<string>("Administrador");
-  const [rol, setRol] = useState<string>("admin");
+  const [nombre, setNombre] = useState<string>("");
+  const [rol, setRol] = useState<string>("");
+  const [sinModulos, setSinModulos] = useState(false);
   const [imagen, setImagen] = useState<string>(DEFAULT_AVATAR);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -80,9 +81,10 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const storedIdNegocio = localStorage.getItem("id_negocio") || "";
     const storedNegocio = localStorage.getItem("nombre_negocio") || "Mi Negocio";
-    const storedNombre = localStorage.getItem("nombre") || "Administrador";
-    const storedRol = localStorage.getItem("rol") || "admin";
+    const storedNombre = localStorage.getItem("nombre") || "";
+    const storedRol = localStorage.getItem("rol") || "";
     const rawImagen = localStorage.getItem("imagen");
+    const id_usuarioperfil = localStorage.getItem("id_usuario");
 
     const storedImagen =
       !rawImagen || rawImagen === "null" || rawImagen === "undefined"
@@ -94,13 +96,17 @@ const AdminDashboard: React.FC = () => {
     setNombre(storedNombre);
     setRol(storedRol);
     setImagen(storedImagen);
+    
 
     const loadMenus = async () => {
-      const data = await getModulos(storedIdNegocio, storedRol);
+      const data = await getModulos(storedIdNegocio, Number(id_usuarioperfil));
       setMenus(data);
 
       if (!modulo && data.length > 0) {
         navigate(`/admin/${data[0].url}`);
+      }
+      if (data.length === 0) {
+        setSinModulos(true);
       }
     };
 
@@ -188,57 +194,56 @@ const AdminDashboard: React.FC = () => {
 
       {/* MENÚ */}
     <List sx={{ flex: 1, p: 0 }}>
-  {menus.map((menu) => {
-    const selected = modulo === menu.url;
+ {(Array.isArray(menus) ? menus : []).map((menu) => {
+  const selected = modulo === menu.url;
 
-    return (
-      <Tooltip 
-  title={collapsed ? menu.nombre : ""} 
-  placement="right" 
-  arrow 
->
-  <ListItemButton
-    key={menu.id}
-    selected={selected}
-    onClick={() => {
-      navigate(`/admin/${menu.url}`);
-      if (isSmallScreen) setDrawerOpen(false);
-    }}
-    sx={{
-      mb: 1,
-      borderRadius: 1,
-      px: 2,
-      color: selected ? "#FFFFFF" : "#9AA7B6",
-      "& .MuiListItemIcon-root": {
-        color: selected ? "#FFFFFF" : "#9AA7B6",
-        minWidth: 40,
-      },
-      "&.Mui-selected": { bgcolor: "rgba(255,255,255,0.08)" },
-      "&:hover": {
-        bgcolor: "rgba(255,255,255,0.12)",
-        color: "#FFFFFF",
-        "& .MuiListItemIcon-root": { color: "#FFFFFF" },
-      },
-    }}
-  >
-    <ListItemIcon sx={{ justifyContent: "center" }}>
-      {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
-    </ListItemIcon>
-
-    {!collapsed && (
-      <ListItemText
-        primary={menu.nombre}
-        sx={{
-          ml: 2,
-          ".MuiTypography-root": { fontFamily: FONT, fontSize: 14 },
+  return (
+    <Tooltip
+      key={menu.id}   // <-- mover key aquí
+      title={collapsed ? menu.nombre : ""}
+      placement="right"
+      arrow
+    >
+      <ListItemButton
+        selected={selected}
+        onClick={() => {
+          navigate(`/admin/${menu.url}`);
+          if (isSmallScreen) setDrawerOpen(false);
         }}
-      />
-    )}
-  </ListItemButton>
-</Tooltip>
+        sx={{
+          mb: 1,
+          borderRadius: 1,
+          px: 2,
+          color: selected ? "#FFFFFF" : "#9AA7B6",
+          "& .MuiListItemIcon-root": {
+            color: selected ? "#FFFFFF" : "#9AA7B6",
+            minWidth: 40,
+          },
+          "&.Mui-selected": { bgcolor: "rgba(255,255,255,0.08)" },
+          "&:hover": {
+            bgcolor: "rgba(255,255,255,0.12)",
+            color: "#FFFFFF",
+            "& .MuiListItemIcon-root": { color: "#FFFFFF" },
+          },
+        }}
+      >
+        <ListItemIcon sx={{ justifyContent: "center" }}>
+          {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
+        </ListItemIcon>
 
-    );
-  })}
+        {!collapsed && (
+          <ListItemText
+            primary={menu.nombre}
+            sx={{
+              ml: 2,
+              ".MuiTypography-root": { fontFamily: FONT, fontSize: 14 },
+            }}
+          />
+        )}
+      </ListItemButton>
+    </Tooltip>
+  );
+})}
 </List>
 
     </Paper>
@@ -339,7 +344,32 @@ const AdminDashboard: React.FC = () => {
         {/* RENDER DEL COMPONENTE */}
         <Box flex={1} sx={{ width: "auto", overflow: "auto", p: 3 }}>
           <Paper elevation={3} sx={{ p: 3 }}>
-            {ActiveComponent ? <ActiveComponent /> : <h2>Módulo no encontrado</h2>}
+          {sinModulos ? (
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  justifyContent="center"
+                  height="60vh"
+                  color="#6b7280"
+                >
+                   <img
+          src="https://franklinbelen.com/wp-content/uploads/cual-es-el-error-404-not-fund.jpg"
+          alt="Not found"
+         
+        />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Sin acceso
+                  </Typography>
+                  <Typography variant="body2">
+                    Ningún módulo asignado a su perfil
+                  </Typography>
+                </Box>
+              ) : ActiveComponent ? (
+                <ActiveComponent />
+              ) : (
+                <Typography>Módulo no encontrado</Typography>
+              )}
           </Paper>
         </Box>
       </Box>

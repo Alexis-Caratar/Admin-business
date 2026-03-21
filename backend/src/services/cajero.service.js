@@ -70,6 +70,7 @@ LIMIT 1;
     const [productos] = await db.query(`
     SELECT 
       p.id as id_producto,
+      p.codigo_barra,
       p.nombre as nombre_producto,
       p.id_categoria,
       pp.precio_venta,
@@ -90,33 +91,30 @@ LIMIT 1;
         imagen: cat.imagen,
         platos: platos.map(pl => ({
           id: pl.id_producto,
+          codigo_barra: pl.codigo_barra,
           nombre: pl.nombre_producto,
           precio_venta: pl.precio_venta,
           imagen_plato: pl.imagen
         }))
       };
     });
-
-    console.log("resultado",resultado);
     
     return resultado;
   },
 
-  abrirCaja: async ({ id_usuario, monto_inicial }) => {
-    const query = `
-  INSERT INTO caja (id_usuario, monto_inicial, estado, fecha_apertura)
-  VALUES ($1, $2, 'ABIERTA', NOW());
-`;
+abrirCaja: async ({ id_usuario, monto_inicial }) => {
 
-    const [insert] = await db.query(query, [id_usuario, monto_inicial]);
+  const query = `
+    INSERT INTO caja (id_usuario, monto_inicial, estado, fecha_apertura)
+    VALUES ($1, $2, 'ABIERTA', NOW())
+    RETURNING *;
+  `;
 
-    const [rows] = await db.query("SELECT * FROM caja WHERE id = $1", [
-      insert.insertId,
-    ]);
+  const [rows] = await db.query(query, [id_usuario, monto_inicial]);
 
-    return rows[0];
+  return rows[0];
 
-  },
+},
 
  cerrarCaja: async ({id_caja,monto_final,dinero_esperado,base_caja,venta_libre,diferencia,nota
 }) => {
@@ -294,7 +292,7 @@ arqueo: async ({ id_caja }) => {
     AND ve.id_caja = $1
     AND (
       p.estado_pago = false
-      OR m.estado != 'DISPONIBLE'
+      OR m.estado != 'Disponible'
     )
   `;
 
@@ -346,8 +344,6 @@ finalizarVenta: async (payload) => {
 
   try {
     await conn.query('BEGIN');
-
-    console.log("payload", payload);
 
     const {
       idUsuario, id_negocio, id_cliente, id_caja,
@@ -568,7 +564,6 @@ LIMIT 1;
       `SELECT nextval('egresos_numero_seq');`
     );
 
-    console.log(row);
     
     const numeroConsecutivo = row.nextval;
     const numeroEgreso = `EGR-${String(numeroConsecutivo).padStart(6, "0")}`;
@@ -610,7 +605,6 @@ LIMIT 1;
 
 
   actualizarEgreso: async (id, data) => {
-console.log("data",data);
 
     const sql = `
     UPDATE egresos
@@ -682,11 +676,6 @@ actualizaventa: async (payload) => {
     await conn.query('COMMIT');
     await notificarCaja(idUsuario);
     await notificarMesas(id_negocio);
-
-   
-
-    console.log("Venta actualizada:", result.rows[0]);
-
     return result.rows[0];
 
   } catch (err) {
