@@ -722,7 +722,7 @@ useEffect(() => {
       <CrearClienteModal
         open={openCrearModal}
         onClose={() => setOpenCrearModal(false)}
-        onCreated={(nuevo) => {
+        onCreated={(nuevo:any) => {
           setClienteSeleccionado({ ...nuevo, id: Date.now() });
           setOpenCrearModal(false);
         }}

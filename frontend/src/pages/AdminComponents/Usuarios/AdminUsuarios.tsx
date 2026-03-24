@@ -51,7 +51,6 @@ import {
 } from "../../../api/usuarios";
 
 import type { User } from "../../../types";
-import { iconMap } from "../../../utils/mapIcons";
 
 const AdminUsuarios: React.FC = () => {
   const idNegocioLS = localStorage.getItem("id_negocio") || "";
@@ -146,8 +145,6 @@ const AdminUsuarios: React.FC = () => {
           Swal.fire("Error", "Todos los campos son obligatorios", "error");
           return;
         }
-
-        console.log("form email",form.email);
         let email;
         
         if(form.email==''){
@@ -783,7 +780,6 @@ const AdminUsuarios: React.FC = () => {
             <Box display="flex" flexDirection="column" gap={1.2}>
               {menusNegocio.map((menu) => {
                 const checked = menusUsuario.includes(menu.id);
-                const Icon = iconMap[menu.icono ?? "default"] || StorefrontIcon;
 
                 return (
                   <Box

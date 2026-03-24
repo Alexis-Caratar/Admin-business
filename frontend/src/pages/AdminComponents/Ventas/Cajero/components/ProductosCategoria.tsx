@@ -7,7 +7,6 @@ import {
   Button,
   IconButton,
   Card,
-  CardMedia,
   CardContent,
   Avatar,
   Typography,
