@@ -8,8 +8,6 @@ export const initWebSockets = (server) => {
   wss = new WebSocketServer({ server });
 
   wss.on("connection", (ws) => {
-    console.log("Cliente WS conectado");
-
     ws.on("message", async (msg) => {
       try {
         const data = JSON.parse(msg.toString());
@@ -49,7 +47,6 @@ export const initWebSockets = (server) => {
     });
 
     ws.on("close", () => {
-      console.log("Cliente WS desconectado");
     });
   });
 };
@@ -67,7 +64,7 @@ export const notificarMesas = async (id_negocio) => {
     mesas: resultado,
   });
 
-  console.log("notificar mesas",data);
+//  console.log("notificar mesas",data);
   wss.clients.forEach((client) => {
     if (client.readyState === 1 && client.idNegocio == id_negocio) {
       client.send(data);
@@ -87,7 +84,7 @@ export const notificarCaja = async (id_usuario) => {
     tipo: "actualizar_caja",
     caja: rows.length ? rows[0] : null,
   });
-console.log("notificar caja",data);
+  //console.log("notificar caja",data);
 
   wss.clients.forEach((client) => {
     if (client.readyState === 1 && client.idUsuario == id_usuario) {

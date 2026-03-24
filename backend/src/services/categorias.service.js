@@ -2,7 +2,7 @@ import { db } from "../config/db.js";
 
 export const obtenerCategorias = async (id_negocio) => {
   const [rows] = await db.query(
-    "SELECT * FROM categorias WHERE id_negocio = $1 ORDER BY nombre DESC",
+    "SELECT * FROM categorias WHERE id_negocio = $1 ORDER BY nombre Asc",
     [id_negocio]
   );
   return rows;

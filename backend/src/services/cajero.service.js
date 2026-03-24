@@ -57,13 +57,13 @@ LIMIT 1;
   },
 
 
-  listarProductos: async () => {
+  listarProductos: async (id) => {
     // 1. OBTENER CATEGORÍAS
     const [categorias] = await db.query(`
     SELECT id, nombre, imagen
     FROM categorias
-    WHERE id_negocio = 1 
-  `);
+    WHERE id_negocio = $1
+  `,[id]);
   //revisar que eel id de negocio esta estatico
 
     // 2. OBTENER PRODUCTOS
@@ -450,6 +450,80 @@ finalizarVenta: async (payload) => {
 
   return rows;
 },
+
+crearcliente: async (payload) => {
+  try {
+    // 🔍 1. VALIDAR SI YA EXISTE
+    const existeQuery = `
+      SELECT id 
+      FROM personas 
+      WHERE TRIM(identificacion) = TRIM($1)
+      LIMIT 1;
+    `;
+
+    const existe = await pool.query(existeQuery, [
+      payload.numeroIdentificacion,
+    ]);
+
+    const {result}=existe
+       
+
+    
+    if (existe.rowCount> 0) {      
+      return {
+        ok: false,
+        message: "El cliente ya está registrado",
+      };
+    }
+
+    // ✅ 2. INSERTAR
+    const insertQuery = `
+      INSERT INTO personas (
+        tipo_identificacion,
+        identificacion,
+        nombres,
+        apellidos,
+        tipo,
+        email,
+        telefono,
+        direccion,
+        nota
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      RETURNING *;
+    `;
+
+    const values = [
+      payload.tipoIdentificacion,
+      payload.numeroIdentificacion,
+      payload.nombres,
+      payload.apellidos,
+      payload.tipoCliente,
+      payload.email,
+      payload.telefono,
+      payload.direccion,
+      payload.nota,
+    ];
+
+    const { rows } = await pool.query(insertQuery, values);
+
+    return {
+      ok: true,
+      result: rows[0],
+    };
+
+  } catch (error) {
+    // 🛡️ 3. VALIDACIÓN DEFINITIVA (UNIQUE INDEX)
+    if (error.code === "23505") {
+      return {
+        ok: false,
+        message: "El cliente ya está registrado",
+      };
+    }
+
+    throw error;
+  }
+},
   mesas: async (id_negocio) => {
 
     const query = `
@@ -715,22 +789,18 @@ SELECT
     p.id AS id_pago,
     v.numero_factura,
      TO_CHAR(p.fecha, 'HH24:MI') AS fecha,
-
     per.identificacion AS identificacion_cliente,
     CONCAT(per.nombres,' ',per.apellidos) AS nombre_completo,
-
     v.subtotal AS venta_total,
     p.estado_pago,
-    p.metodo_pago
+    p.metodo_pago,
+    m.id as id_mesa,
+    m.nombre as mesa
 
 FROM ventas v
-
-INNER JOIN pagos p 
-    ON p.id_venta = v.id
-
-INNER JOIN personas per 
-    ON per.id = v.id_cliente
-
+INNER JOIN pagos p ON p.id_venta = v.id
+INNER JOIN personas per ON per.id = v.id_cliente
+LEFT JOIN mesas m on  v.id_mesa=m.id
 WHERE v.id_caja = $1
 
 ORDER BY p.id DESC
@@ -748,17 +818,13 @@ SELECT
     vi.id_producto,
     pro.nombre,
     vi.cantidad,
+    pp.precio_venta as precio_unitario,
     vi.subtotal,
     COALESCE(pi.url, '') AS url_imagen
-
-
 FROM ventas_items vi
-
-INNER JOIN productos pro 
-    ON pro.id = vi.id_producto
-
-LEFT JOIN productos_imagenes pi 
-    ON pi.id_producto = pro.id
+INNER JOIN productos pro  ON pro.id = vi.id_producto
+INNER JOIN productos_precios pp on pro.id=pp.id_producto
+LEFT JOIN productos_imagenes pi ON pi.id_producto = pro.id
 
 WHERE vi.id_venta = $1
 `;

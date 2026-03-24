@@ -52,41 +52,27 @@ type Cliente = {
 type Props = {
   open: boolean;
   onClose: () => void;
-   carrito: any[];
+  carrito: any[];
   onRemove: (id: number) => void;
   onClear: () => void;
   onAdd: (id: number) => void;
   onSub: (id: number) => void;
-
   onFinalizar: (
     idCliente: number | null,
-    pago: {
-      metodo_pago: string;
-      monto_recibido: number;
-      cambio: number;
-    }
-  ) => void;
-
+    pago: {metodo_pago: string;monto_recibido: number;cambio: number;}) => void;
   mesaSeleccionada: Mesa | null;
   onClearMesa: () => void;
   categorias: any[];
   onOpenCategoria: (categoria: any) => void;
   loadingCategorias: boolean;
+  clienteSeleccionado: Cliente | null;
+  setClienteSeleccionado: (c: Cliente | null) => void;
 };
 
 const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 160 : -160,
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction > 0 ? -160 : 160,
-    opacity: 0,
-  }),
+  enter: (direction: number) => ({x: direction > 0 ? 160 : -160,opacity: 0,}),
+  center: {x: 0,opacity: 1,},
+  exit: (direction: number) => ({x: direction > 0 ? -160 : 160,opacity: 0,}),
 };
 
 export const CarritoMobile: React.FC<Props> = ({
@@ -102,19 +88,17 @@ export const CarritoMobile: React.FC<Props> = ({
   onClearMesa,
   categorias,
   onOpenCategoria,
-  loadingCategorias
+  loadingCategorias,
+  clienteSeleccionado,
+  setClienteSeleccionado
 }) => {
 
   const [tab, setTab] = useState<number>(0);
   const [direction, setDirection] = useState<number>(1);
-
-  // CLIENTE
   const [clienteBuscado, setClienteBuscado] = useState("");
   const [resultados, setResultados] = useState<Cliente[]>([]);
-  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
   const [openCrearModal, setOpenCrearModal] = useState(false);
-const [resetCliente, setResetCliente] = useState(0);
-  // PAGO
+  const [resetCliente, setResetCliente] = useState(0);
   const total = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
   const [metodoPago, setMetodoPago] = useState<string>("PENDIENTE");
   const [montoRecibido, setMontoRecibido] = useState<number>(0);

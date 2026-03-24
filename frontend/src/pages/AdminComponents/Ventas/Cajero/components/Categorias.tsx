@@ -57,10 +57,10 @@ export const Categorias: React.FC<Props> = ({
                   ? "column"
                   : { xs: "column", md: "row" },
 
-                alignItems: "center",
-                justifyContent: "center",
+                alignItems: "left",
+                justifyContent: "left",
 
-                p: esCarrito ? 1 : 1.3,
+                p: esCarrito ? 0.8 : 1,
                 borderRadius: 3,
                 cursor: "pointer",
                 transition: "0.25s",
@@ -98,8 +98,8 @@ export const Categorias: React.FC<Props> = ({
               <Typography
                 fontSize={
                   esCarrito
-                    ? 11
-                    : { xs: 12, md: 14 }
+                    ? 10
+                    : { xs: 8, md: 12 }
                 }
                 fontWeight={600}
                 textAlign="center"

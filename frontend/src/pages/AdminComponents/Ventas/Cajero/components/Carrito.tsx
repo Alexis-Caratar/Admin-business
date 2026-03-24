@@ -54,18 +54,15 @@ type Props = {
   onAdd: (id: number) => void;
   onSub: (id: number) => void;
   onFinalizar: (
-    idCliente: number | null,
-    pago: {
-      metodo_pago: string;
-      monto_recibido: number | "";
-      cambio: number;
-    }
-  ) => void;
+  idCliente: number | null,
+  pago: {metodo_pago: string;monto_recibido: number | "";cambio: number;}) => void;
   mesaSeleccionada: Mesa | null;
   onClearMesa: () => void;
   categorias: any[];
   onOpenCategoria: (categoria: any) => void;
   loadingCategorias: boolean;
+  clienteSeleccionado: Cliente | null;
+  setClienteSeleccionado: (c: Cliente | null) => void;
 };
 
 
@@ -80,13 +77,12 @@ export const Carrito: React.FC<Props> = ({
   onClearMesa,
   categorias,
   onOpenCategoria,
-  loadingCategorias
-}) => {
-
+  loadingCategorias,
+  clienteSeleccionado,
+  setClienteSeleccionado
+}) => {  
   const [clienteBuscado, setClienteBuscado] = useState("");
   const [resultados, setResultados] = useState<Cliente[]>([]);
-  const [clienteSeleccionado, setClienteSeleccionado] =
-  useState<Cliente | null>(null);
   const [openCrearModal, setOpenCrearModal] = useState(false);
   const [metodoPago, setMetodoPago] = useState("PENDIENTE");
   const [montoRecibido, setMontoRecibido] = useState<number | "">("");
@@ -264,10 +260,9 @@ export const Carrito: React.FC<Props> = ({
         <CrearClienteModal
           open={openCrearModal}
           onClose={() => setOpenCrearModal(false)}
-          onCreated={(nuevo) => {
+          onCreated={(nuevo:any) => {
             const clienteFinal: Cliente = {
-              ...nuevo,
-              id: Date.now(),
+              ...nuevo
             };
 
             setClienteSeleccionado(clienteFinal);

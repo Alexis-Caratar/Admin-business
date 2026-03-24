@@ -1,9 +1,7 @@
 import axios from "./axios";
 
 export const getModulos = async (id_negocio: string, id_usuario: Number) => {
-  try {
-    console.log("id_negocio",id_negocio);
-    
+  try {    
     const { data } = await axios.get("/menus_sistema", {
       params: { id_negocio, id_usuario },
     });

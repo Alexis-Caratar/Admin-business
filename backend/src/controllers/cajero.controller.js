@@ -1,4 +1,6 @@
 import CajeroService from "../services/cajero.service.js";
+import { imprimirComanda } from "../services/impresionService.js";
+
 
 
 export const estadoCaja = async (req, res) => {
@@ -13,7 +15,7 @@ export const estadoCaja = async (req, res) => {
 
 export const listarProductos = async (req, res) => {
   try {
-    const productos = await CajeroService.listarProductos();
+    const productos = await CajeroService.listarProductos(req.params.id);
     return res.json({ ok: true, productos });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
@@ -52,7 +54,15 @@ export const finalizarVenta = async (req, res) => {
   try {
    const payload = req.body;
       const resultado = await CajeroService.finalizarVenta(payload);
-    return res.json({ ok: true, result: resultado });
+   
+     /*   try {
+      await imprimirComanda(payload);
+    } catch (err) {
+      console.error("Error imprimiendo comanda:", err);
+    }
+      */
+
+      return res.json({ ok: true, result: resultado });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
   }
@@ -68,6 +78,23 @@ export const buscarCliente = async (req, res) => {
     return res.status(500).json({ ok: false, error: e.message });
   }
   
+};
+
+
+export const crearcliente = async (req, res) => {
+  try {
+    const resultado = await CajeroService.crearcliente(req.body);
+  
+  
+    return res.json(resultado);
+
+  } catch (e) {
+    return res.status(500).json({
+      ok: false,
+      message: "Error interno del servidor",
+      error: e.message,
+    });
+  }
 };
 
 export const mesas = async (req, res) => {

@@ -69,7 +69,7 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
   const [openModal, setOpenModal] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
   const [imgIndices, setImgIndices] = useState<{ [key: number]: number }>({});
 
   const unidades = ["kg", "litro", "pieza", "unidad"];
@@ -404,7 +404,7 @@ const handleSubmit = async () => {
                 fontSize: 13,
               }}
             >
-              <Typography variant="body1" fontWeight={700} noWrap>
+              <Typography variant="body2" fontWeight={700} noWrap>
                 {p.nombre}
               </Typography>
             </Box>

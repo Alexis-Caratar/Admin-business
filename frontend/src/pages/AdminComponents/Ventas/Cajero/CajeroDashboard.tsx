@@ -28,7 +28,6 @@ interface AnimItem {
 export const CajeroDashboard: React.FC = () => {
   const [categorias, setCategorias] = useState<CategoriaCajero[]>([]);
   const [caja, setCaja] = useState<Caja | null>(null);
-
   const [loadingCategorias, setLoadingCategorias] = useState(true);
   const [cajaAbierta, setCajaAbierta] = useState(false);
   const [montoApertura, setMontoApertura] = useState("");
@@ -54,7 +53,7 @@ export const CajeroDashboard: React.FC = () => {
   const id_negocio = localStorage.getItem("id_negocio");
   const [openVentasDetalles, setOpenVentasDetalles] = useState(false);
   const [animItem, setAnimItem] = useState<AnimItem | null>(null);
-  
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
 
   const abrirCarrito = () => {
     setOpenCarrito(true);
@@ -64,7 +63,6 @@ export const CajeroDashboard: React.FC = () => {
   useEffect(() => {
   const ws = new WebSocket(import.meta.env.VITE_WS_URL);
   ws.onopen = () => {
-    console.log("WS conectado");
     ws.send(JSON.stringify({
       tipo: "suscribirse_mesas",
       id_negocio
@@ -79,12 +77,12 @@ export const CajeroDashboard: React.FC = () => {
     const msg = JSON.parse(event.data);
     // MESAS
     if (msg.tipo === "mesas") {
-      console.log("Mesas actualizadas", msg.mesas);
+//      console.log("Mesas actualizadas", msg.mesas);
       setMesas(msg.mesas);
     }
     // CAJA
     if (msg.tipo === "actualizar_caja") {
-   console.log("caja actualizadas", msg.caja);
+  // console.log("caja actualizadas", msg.caja);
       const c = msg.caja;
       if (!c) return;
       setCaja(c);
@@ -140,7 +138,7 @@ export const CajeroDashboard: React.FC = () => {
     async function load() {
       try {
         setLoadingCategorias(true);
-        const res = await apiListarProductos();
+        const res = await apiListarProductos(id_negocio);
         let data: any[] = [];
         if (res && res.data) {
           if (Array.isArray(res.data)) data = res.data;
@@ -219,7 +217,7 @@ const clearMesa = () => {
     const payload = {
       idUsuario:idUsuario,
       id_negocio: id_negocio,
-      id_cliente: cliente ? cliente : 1,
+      id_cliente: cliente ? cliente : 25,
       id_caja: idCaja,
       id_mesa: mesaSeleccionada?.id,
       fecha: new Date().toISOString(),
@@ -236,6 +234,7 @@ const clearMesa = () => {
       cambio: datos_adicionales.cambio,
       productos: carrito.map((p) => ({
         id_producto: p.id,
+        nombre: p.nombre,
         cantidad: p.cantidad,
         precio_unitario: p.precio_venta,
         descuento: 0,
@@ -518,7 +517,8 @@ const cerrarCajaReal = async (cierreData: any) => {
               zIndex: 1400,
             }}
           >
-            <Badge badgeContent={carrito.length} color="error">
+            <Badge badgeContent={carrito.reduce((total, item) => total + item.cantidad, 0)}
+               color="error">
               <Fab color="primary" onClick={abrirCarrito}>
                 <ShoppingCartIcon />
               </Fab>
@@ -535,51 +535,43 @@ const cerrarCajaReal = async (cierreData: any) => {
     "& .MuiDrawer-paper": { width: 400, p: 2, boxSizing: "border-box" },
   }}
 >
-  <Carrito
-    carrito={carrito}
-    onRemove={removeItem}
-    onClear={clearCarrito}
-    onAdd={sumarCantidad}
-    onSub={restarCantidad}
-    onFinalizar={(c, p) => {
-      finalizarVenta(c, p);
-      setOpenCarrito(false);
-    }}
-    mesaSeleccionada={mesaSeleccionada}
-    onClearMesa={clearMesa} // <-- aquí
-    categorias={categorias}
-    onOpenCategoria={(categoria) => {
-      setOpenCarrito(false);
-      openCategoria(categoria);
-    }}
-    loadingCategorias={loadingCategorias}
-  />
+        <Carrito
+          carrito={carrito}
+          onRemove={removeItem}
+          onClear={clearCarrito}
+          onAdd={sumarCantidad}
+          onSub={restarCantidad}
+          onFinalizar={(c, p) => {finalizarVenta(c, p);setOpenCarrito(false);}}
+          mesaSeleccionada={mesaSeleccionada}
+          onClearMesa={clearMesa} 
+          categorias={categorias}
+          onOpenCategoria={(categoria) => {setOpenCarrito(false);openCategoria(categoria);}}
+          loadingCategorias={loadingCategorias}
+          clienteSeleccionado={clienteSeleccionado}
+          setClienteSeleccionado={setClienteSeleccionado}
+        />
 </Drawer>
 
         {/* === CARRITO MÓVIL === */}
         <Box sx={{ display: { xs: "block", md: "none" } }}>
           {isMobile && (
         <CarritoMobile
-  open={openCarrito}
-  onClose={cerrarCarrito}
-  carrito={carrito}
-  onRemove={removeItem}
-  onClear={clearCarrito}
-  onAdd={sumarCantidad}
-  onSub={restarCantidad}
-  onFinalizar={(c, p) => {
-    finalizarVenta(c, p);
-    setOpenCarrito(false);
-  }}
-  mesaSeleccionada={mesaSeleccionada}
-  onClearMesa={clearMesa} // <-- aquí
-  categorias={categorias}
-  onOpenCategoria={(categoria) => {
-    setOpenCarrito(false);
-    openCategoria(categoria);
-  }}
-  loadingCategorias={loadingCategorias}
-/>
+          open={openCarrito}
+          onClose={cerrarCarrito}
+          carrito={carrito}
+          onRemove={removeItem}
+          onClear={clearCarrito}
+          onAdd={sumarCantidad}
+          onSub={restarCantidad}
+          onFinalizar={(c, p) => {finalizarVenta(c, p);setOpenCarrito(false);}}
+          mesaSeleccionada={mesaSeleccionada}
+          onClearMesa={clearMesa} 
+          categorias={categorias}
+          onOpenCategoria={(categoria) => {setOpenCarrito(false);openCategoria(categoria);}}
+          loadingCategorias={loadingCategorias}
+          clienteSeleccionado={clienteSeleccionado}
+          setClienteSeleccionado={setClienteSeleccionado}
+           />
           )}
         </Box>
       </Box>

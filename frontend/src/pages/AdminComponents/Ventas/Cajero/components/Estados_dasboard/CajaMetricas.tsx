@@ -59,8 +59,8 @@ export default function CajaMetricas({
       key={i}
       flex="1 1 calc(100% - 16px)"        // xs: full width
       sx={{
-        '@media (min-width:600px)': { flex: '1 1 calc(50% - 16px)' },   // sm: 2 por fila
-        '@media (min-width:900px)': { flex: '1 1 calc(25% - 16px)' },   // md: 4 por fila
+        '@media (min-width:600px)': { flex: '1 1 calc(40% - 10px)' },   // sm: 2 por fila
+        '@media (min-width:900px)': { flex: '1 1 calc(15% - 8px)' },   // md: 4 por fila
       }}
     >
       <Card

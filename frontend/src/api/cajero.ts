@@ -3,8 +3,8 @@ import axios from "./axios";
 export const estado_caja = (data: any) =>
   axios.post("/cajero/estado-caja", data);
 
-export const apiListarProductos = () =>
-  axios.get("/cajero/productos");
+export const apiListarProductos = (id:any) =>
+  axios.get(`/cajero/productos/${id}`);
 
 export const apiAbrirCaja = (data: any) =>
   axios.post("/cajero/abrir-caja", data);
@@ -20,6 +20,9 @@ export const finalizar_venta = (payload: any) =>
 
 export const apibuscar_cliente = (payload: any) => 
   axios.post("/cajero/buscar-cliente", payload);
+
+export const apicrear_cliente = (payload: any) => 
+  axios.post("/cajero/crear_cliente", payload);
 
 export const apimesas = (payload: any) => 
   axios.post("/cajero/mesas", payload);

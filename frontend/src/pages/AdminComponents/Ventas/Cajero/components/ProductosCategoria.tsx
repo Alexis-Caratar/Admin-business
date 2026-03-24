@@ -135,8 +135,7 @@ animarAlCarrito(
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          px: 3,
-          py: 2,//
+          px: 1,
           borderBottom: "1px solid #eee",
         }}
       >
@@ -169,7 +168,7 @@ animarAlCarrito(
           }}
         >
           <Typography
-            fontWeight={700}
+            fontWeight={600}
             display="flex"
             alignItems="center"
             gap={1}
@@ -178,12 +177,12 @@ animarAlCarrito(
             <CategoryIcon fontSize="small" />
             Categorías
           </Typography>
-
+          
           <List
             dense
             sx={{
               display: isMobile ? "flex" : "block",
-              gap: 1,
+              gap: 0,
             }}
           >
             {categorias.map((cat) => {
@@ -200,12 +199,13 @@ animarAlCarrito(
                   selected={active}
                   sx={{
                     borderRadius: 2,
-                    minWidth: isMobile ? 160 : "auto",
+                    minWidth: isMobile ? 150 : "auto",
                     mb: isMobile ? 0 : 0.5,
                     "&.Mui-selected": {
                       backgroundColor: "primary.main",
-                      color: "white",
+                      color: "black",
                     },
+                    bgcolor: active? "primary.main" : "primary.secodary",
                   }}
                 >
                   <Avatar
@@ -215,8 +215,8 @@ animarAlCarrito(
                       width: 32,
                       height: 32,
                       mr: 1,
-                      bgcolor: active ? "white" : "primary.main",
-                      color: active ? "primary.main" : "white",
+                      bgcolor: active ? "black" : "primary.main",
+                      color: active ? "primary.main" : "black",
                       fontWeight: 700,
                     }}
                   >
@@ -230,7 +230,7 @@ animarAlCarrito(
                     secondary={`${cat.platos.length} platos`}
                     secondaryTypographyProps={{
                       fontSize: 11,
-                      color: active ? "white" : "text.secondary",
+                      color: active ? "black" : "text.secondary",
                     }}
                   />
                 </ListItemButton>
@@ -241,7 +241,7 @@ animarAlCarrito(
 
  {/* ================= PRODUCTOS ================= */}
 <Box sx={{ flex: 1, p: 2, overflowY: "auto" }}>
-  <Typography fontWeight={800} fontSize={18}>
+  <Typography fontWeight={600} fontSize={18}>
     {categoriaActiva?.categoria}
   </Typography>
 
@@ -282,15 +282,15 @@ animarAlCarrito(
     <Box
       key={prod.id}
       sx={{
-        flex: "1 1 150px",
-        maxWidth: 220,
+        flex: "1 1 120px",
+        maxWidth:  { xs: 100, sm: 200, md: 200 }
       }}
     >
       <Card
         onClick={(e) => handleAgregar(prod, e)}
         sx={{
           cursor: "pointer",
-          height: { xs: 220, sm: 240, md: 260 }, // altura fija para todas
+          height: { xs: 160, sm: 220, md: 260 }, // altura fija para todas
           display: "flex",
           flexDirection: "column",
           borderRadius: 3,

@@ -18,12 +18,12 @@ export default function CajaPanel({
     <Box display="flex" flexWrap="wrap" gap={2}>
       
       {/* Estado caja */}
-      <Box flex="1 1 300px">
+      <Box flex="1 1 10px">
         <CajaEstado cajaAbierta={cajaAbierta} />
       </Box>
 
       {/* Métricas */}
-      <Box flex="1 1 600px">
+      <Box flex="1 1 900px">
         <CajaMetricas
           caja={caja}
           formatCOP={formatCOP}
