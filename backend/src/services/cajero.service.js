@@ -57,50 +57,42 @@ LIMIT 1;
   },
 
 
-  listarProductos: async (id) => {
-    // 1. OBTENER CATEGORÍAS
-    const [categorias] = await db.query(`
-    SELECT id, nombre, imagen
-    FROM categorias
-    WHERE id_negocio = $1
-  `,[id]);
-  //revisar que eel id de negocio esta estatico
-
-    // 2. OBTENER PRODUCTOS
-    const [productos] = await db.query(`
+listarProductos: async (id) => {
+  const { rows } = await pool.query(`
     SELECT 
-      p.id as id_producto,
-      p.codigo_barra,
-      p.nombre as nombre_producto,
-      p.id_categoria,
-      pp.precio_venta,
-      img.url as imagen
-    FROM productos p
-    LEFT JOIN productos_precios pp ON pp.id_producto = p.id
-    LEFT JOIN productos_imagenes img ON img.id_producto = p.id
-    WHERE p.estado = true
-  `);
+      c.id,
+      c.nombre AS categoria,
+      c.imagen,
+      COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', p.id,
+            'codigo_barra', p.codigo_barra,
+            'stock_actual', p.stock_actual,
+            'nombre', p.nombre,
+            'precio_venta', pp.precio_venta,
+            'imagenes', (
+              SELECT COALESCE(json_agg(img.url), '[]')
+              FROM productos_imagenes img
+              WHERE img.id_producto = p.id
+            )
+          )
+        ) FILTER (WHERE p.id IS NOT NULL),
+        '[]'
+      ) AS platos
+    FROM categorias c
+    LEFT JOIN productos p 
+      ON p.id_categoria = c.id 
+      AND p.estado = true
+    LEFT JOIN productos_precios pp 
+      ON pp.id_producto = p.id
+    WHERE c.id_negocio = $1
+    GROUP BY c.id, c.nombre, c.imagen
+    ORDER BY c.nombre;
+  `, [id]);
 
-    // 3. ARMAR EL JSON AGRUPADO POR CATEGORÍA
-    const resultado = categorias.map(cat => {
-      const platos = productos.filter(p => p.id_categoria === cat.id);
-
-      return {
-        id: cat.id,
-        categoria: cat.nombre,
-        imagen: cat.imagen,
-        platos: platos.map(pl => ({
-          id: pl.id_producto,
-          codigo_barra: pl.codigo_barra,
-          nombre: pl.nombre_producto,
-          precio_venta: pl.precio_venta,
-          imagen_plato: pl.imagen
-        }))
-      };
-    });
-    
-    return resultado;
-  },
+  return rows;
+},
 
 abrirCaja: async ({ id_usuario, monto_inicial }) => {
 

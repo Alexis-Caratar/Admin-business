@@ -406,7 +406,7 @@ export const Carrito: React.FC<Props> = ({
                     >
                       <ListItemAvatar>
                         <Avatar
-                          src={item.imagen_plato}
+                          src={item.imagenes}
                           alt={item.nombre}
                           variant="rounded"
                           sx={{ width: 50, height: 50, mr: 1 }}

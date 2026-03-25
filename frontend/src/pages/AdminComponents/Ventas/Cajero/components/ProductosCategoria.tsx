@@ -28,7 +28,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import InputAdornment from "@mui/material/InputAdornment";
-import LunchDiningIcon from '@mui/icons-material/LunchDining';
+import RestaurantIcon from "@mui/icons-material/Restaurant"; 
 import QrCodeIcon from '@mui/icons-material/QrCode';
 toastr.options = {
   positionClass: "toast-top-right",
@@ -303,31 +303,51 @@ animarAlCarrito(
         }}
       >
         {/* ICONO */}
-        <Box
-          sx={{
-            height: { xs: 80, sm: 90, md: 120 },
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "#f6f6f6",
-            borderRadius: 2,
-          }}
-        >
-          <Avatar
-            sx={{
-              width: { xs: 36, sm: 40, md: 60 },
-              height: { xs: 36, sm: 40, md: 60 },
-              bgcolor: "#e0e0e0",
-            }}
-          >
-            <LunchDiningIcon
-              sx={{
-                fontSize: { xs: 20, sm: 24, md: 32 },
-                color: "#f76917",
-              }}
-            />
-          </Avatar>
-        </Box>
+       
+<Box
+  sx={{
+    position: "relative",
+    height: { xs: 80, sm: 90, md: 120 },
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    bgcolor: "#f6f6f6",
+    borderRadius: 2,
+  }}
+>
+  {/* STOCK EN ESQUINA */}
+  <Chip
+    label={prod.stock_actual}
+    size="small"
+    sx={{
+      position: "absolute",
+      top: 6,
+      right: 6,
+      fontSize: 11,
+      fontWeight: 700,
+      height: 20,
+      bgcolor: "#012b4f",
+      color: "#fff",
+      borderRadius: "6px",
+    }}
+  />
+
+  {/* ICONO */}
+  <Avatar
+    sx={{
+      width: { xs: 36, sm: 40, md: 60 },
+      height: { xs: 36, sm: 40, md: 60 },
+      bgcolor: "#e0e0e0",
+    }}
+  >
+    <RestaurantIcon
+      sx={{
+        fontSize: { xs: 20, sm: 24, md: 32 },
+        color: "#1196b7",
+      }}
+    />
+  </Avatar>
+</Box>
 
         {/* CONTENIDO */}
         <CardContent
@@ -343,17 +363,17 @@ animarAlCarrito(
               
                 <Stack direction="row" spacing={1} alignItems="center">
                    <QrCodeIcon sx={{ fontSize: 20, color: "#d3830b" }} />
-                    <Chip
-                      label={prod.codigo_barra}
-                      size="small"
-                      sx={{
-                        fontSize: 11,
-                        fontWeight: 700,
-                        height: 20,
-                        bgcolor: "#111827",
-                        color: "#fff"
-                      }}
-                    />
+                     <Typography
+              fontWeight={700}
+              fontSize={{ xs: 12, sm: 14 }}
+              noWrap
+              sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
+            >
+              {prod.codigo_barra}
+            </Typography>
+
+
+                  
 
                    
                   </Stack>
@@ -376,24 +396,44 @@ animarAlCarrito(
             </Typography>
           </Box>
 
-          <Button
-            fullWidth
-            size="small"
-            variant="contained"
-            color="success"
-            startIcon={<AddShoppingCartIcon />}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAgregar(prod, e);
-            }}
-            sx={{
-              mt: 1,
-              fontSize: { xs: 11, sm: 12 },
-              py: 0.5,
-            }}
-          >
-            Agregar
-          </Button>
+        <Button
+              fullWidth
+              size="small"
+              variant="contained"
+              startIcon={<AddShoppingCartIcon />}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAgregar(prod, e);
+              }}
+              sx={{
+                mt: 1,
+                py: 0.8,
+                borderRadius: 2.5,
+
+                background: "linear-gradient(135deg,#f76917,#ff9800)",
+                color: "#fff",
+
+                fontSize: { xs: 11, sm: 12 },
+                fontWeight: 700,
+                letterSpacing: 0.3,
+
+                boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+                transition: "all 0.25s ease",
+
+                "&:hover": {
+                  background: "linear-gradient(135deg,#e65c0f,#fb8c00)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 10px 22px rgba(0,0,0,0.3)",
+                },
+
+                "&:active": {
+                  transform: "scale(0.97)",
+                  boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
+                },
+              }}
+            >
+              Agregar
+            </Button>
         </CardContent>
       </Card>
     </Box>
