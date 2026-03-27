@@ -42,7 +42,7 @@ export const Categorias: React.FC<Props> = ({
 
             // 👇 AQUÍ ESTA LA MAGIA
             gridTemplateColumns: esCarrito
-              ? { xs: "repeat(3, 1fr)", md: "2" } // 📱 3 por fila en carrito
+              ? { xs: "repeat(4, 1fr)", md: "4" } // 📱 3 por fila en carrito
               : "1fr", // Dashboard normal
           }}
         >

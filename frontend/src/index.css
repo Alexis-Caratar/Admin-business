@@ -72,7 +72,7 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 textarea:-webkit-autofill,
 select:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0px 1000px #fff0f0 inset !important; /* color fondo */
+  -webkit-box-shadow: 0 0 0px 1000px #efefef inset !important; /* color fondo */
   -webkit-text-fill-color: #000000 !important; /* color texto */
   transition: background-color 5000s ease-in-out 0s;
 }

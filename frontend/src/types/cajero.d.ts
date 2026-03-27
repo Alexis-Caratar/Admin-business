@@ -54,5 +54,6 @@ export interface Mesa {
   nombre: string;
   capacidad: number;
   estado: "Disponible" | "Ocupada" | "Reservada"; // Ajusta según tus valores posibles
+  estado_pago: string;
   fecha_creacion: string; // ISO string
 }

@@ -37,14 +37,14 @@ app.use("/api/usuarios", usuariosRoutes);
 // ---------------------------
 //  RUTAS PROTEGIDAS
 // ---------------------------
-app.use("/api/menus_sistema", /* authenticate,*/ menus_sistema);
-app.use("/api/negocios", /* authenticate,*/ negociosRoutes);
-app.use("/api/categorias", /* authenticate,*/ categoriasRouter);
-app.use("/api/productos", /* authenticate,*/ productosRoutes);
-app.use("/api/reservas", /* authenticate,*/ reservasRoutes);
-app.use("/api/empleados", /* authenticate,*/ empleadosRoutes);
-app.use("/api/inventario", /* authenticate,*/ inventariosRoutes);
-app.use("/api/ventas", /* authenticate,*/ ventasRoutes);
-app.use("/api/cajero", /* authenticate,*/ cajero);
+app.use("/api/menus_sistema",  authenticate, menus_sistema);
+app.use("/api/negocios",  authenticate, negociosRoutes);
+app.use("/api/categorias",  authenticate, categoriasRouter);
+app.use("/api/productos",  authenticate, productosRoutes);
+app.use("/api/reservas",  authenticate, reservasRoutes);
+app.use("/api/empleados",  authenticate, empleadosRoutes);
+app.use("/api/inventario",  authenticate, inventariosRoutes);
+app.use("/api/ventas",  authenticate, ventasRoutes);
+app.use("/api/cajero",  authenticate, cajero);
 
 export default app;

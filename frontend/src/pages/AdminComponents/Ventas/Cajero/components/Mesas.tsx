@@ -13,7 +13,6 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
 import CloseIcon from "@mui/icons-material/Close";
@@ -21,6 +20,7 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import type { Mesa } from "./../../../../../types/cajero";
 import { apidetallesMesa, actualiza_venta, liberar_mesa } from "../../../../../api/cajero";
 import Swal from "sweetalert2";
+import ChairIcon from "@mui/icons-material/Chair";
 
 type Props = {
   idUsuario: number|null;
@@ -44,9 +44,9 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
   const getEstadoConfig = (estado: Mesa["estado"]) => {
     switch (estado) {
       case "Disponible":
-        return { chipColor: "linear-gradient(135deg, #09a58e, #2e7d32)" as const, iconBg: "#1eab35", icon: <CheckCircleIcon /> };
+        return { chipColor: "linear-gradient(135deg, #079150, #006837)" as const, iconBg: "#1196b7", icon: <ChairIcon /> };
       case "Ocupada":
-        return { chipColor: "linear-gradient(135deg, #ff416c, #ff4b2b)" as const, iconBg: "#221d1d", icon: <RestaurantIcon /> };
+        return { chipColor: "linear-gradient(135deg, #fe3e00, #cd3706)" as const, iconBg: "#221d1d", icon: <RestaurantIcon /> };
       case "Reservada":
         return { chipColor: "linear-gradient(135deg, #f7971e, #ffd200)" as const, iconBg: "#ef6c00", icon: <EventSeatIcon /> };
       default:
@@ -292,9 +292,72 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
 
       {/* Modal Orden */}
       <Dialog open={openOrden} onClose={() => setOpenOrden(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-          🧾 Orden - {mesaOrden?.nombre}
-          <IconButton onClick={() => setOpenOrden(false)} sx={{ position: "absolute", right: 8, top: 8 }}>
+     <DialogTitle
+          sx={{
+            fontWeight: 700,
+            pb: 1.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            pr: 6, // espacio para el botón cerrar
+          }}
+        >
+          {/* IZQUIERDA */}
+          <Box>
+            <Typography fontWeight={700} fontSize={18}>
+              🧾 Orden - {mesaOrden?.nombre}
+            </Typography>
+
+            <Typography fontSize={12} color="text.secondary">
+              Estado de la factura
+            </Typography>
+          </Box>
+
+          {/* ESTADO PRO */}
+          <Box
+            sx={{
+              px: 2,
+              py: 0.7,
+              borderRadius: 2,
+              fontWeight: 700,
+              fontSize: 12,
+              letterSpacing: 0.5,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+
+              background:
+                detalleVenta?.estado_pago_bool === true
+                  ? "linear-gradient(135deg,#16a34a,#22c55e)"
+                  : detalleVenta?.estado_pago_bool === false
+                  ? "linear-gradient(135deg,#dc2626,#ef4444)"
+                  : "#e5e7eb",
+
+              color:
+                detalleVenta?.estado_pago_bool == null
+                  ? "#374151"
+                  : "#fff",
+
+              boxShadow:
+                detalleVenta?.estado_pago_bool != null
+                  ? "0 4px 12px rgba(0,0,0,0.25)"
+                  : "none",
+            }}
+          >
+            {detalleVenta?.estado_pago_bool === true && "✔ FACTURA PAGADA"}
+            {detalleVenta?.estado_pago_bool === false && " FACTURA PENDIENTE PAGO"}
+            {detalleVenta?.estado_pago_bool == null && "SIN VENTA"}
+          </Box>
+
+          {/* BOTÓN CERRAR */}
+          <IconButton
+            onClick={() => setOpenOrden(false)}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+            }}
+          >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -361,10 +424,35 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
                 ))}
               </Box>
 
+              {detalleVenta.nota && (
+                    <Box
+                      sx={{
+                        p: 2,                        // padding interno
+                        mt: 2,                       // margen superior
+                        borderRadius: 2,              // bordes redondeados
+                        bgcolor: "#f5f5f5",           // fondo gris claro
+                        border: "1px solid #e0e0e0", // borde sutil
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.08)", // sombra suave
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <Typography fontWeight={700} fontSize={14} color="text.primary">
+                        📝 Nota:
+                      </Typography>
+                      <Typography fontSize={14} color="text.secondary" sx={{ wordBreak: "break-word" }}>
+                        {detalleVenta.nota}
+                      </Typography>
+                    </Box>
+                  )}
+
               <Box sx={{ mt: 2, p: 1, borderRadius: 3, background: "linear-gradient(135deg, #111827, #1f2937)", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Typography fontWeight={600}>Total</Typography>
                 <Typography variant="h6" fontWeight={700}>${Number(detalleVenta.venta_total).toLocaleString()}</Typography>
               </Box>
+
+         
               {detalleVenta.estado_pago != "PENDIENTE" && (
                 <Box
                   onClick={handleLiberarMesa}
@@ -433,10 +521,12 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
                     value={metodoPago}
                     onChange={(e) => setMetodoPago(e.target.value)}
                   >
-                    <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
-                    <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
-                    <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-                    <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
+                  <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
+                  <MenuItem value="TRANSFERENCIA">🔁 Transferencia</MenuItem>
+                  <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
+                  <MenuItem value="NEQUI">📲 Nequi</MenuItem>
+                  <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
+                  <MenuItem value="TIQUERERA">🎟️ Tiquetera</MenuItem>
                   </TextField>
 
                   {metodoPago === "EFECTIVO" && (

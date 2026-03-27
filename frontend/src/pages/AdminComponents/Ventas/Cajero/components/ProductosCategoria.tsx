@@ -14,7 +14,6 @@ import {
   TextField,
   List,
   ListItemButton,
-  ListItemText,
   Divider,
   useTheme,
   useMediaQuery,
@@ -129,33 +128,43 @@ animarAlCarrito(
       }}
     >
       {/* ================= HEADER ================= */}
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          px: 1,
-          borderBottom: "1px solid #eee",
-        }}
-      >
-        <Box display="flex" alignItems="center" gap={1}>
-          <AddShoppingCartIcon color="primary" />
-          <Typography fontWeight={800}>Seleccionar Productos</Typography>
-        </Box>
+  <DialogTitle
+  sx={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    px: { xs: 1, md: 2 },
+    py: { xs: 0.5, md: 1.5 }, // 👈 menos alto en móvil
+    borderBottom: "1px solid #eee",
+  }}
+>
+  <Box display="flex" alignItems="center" gap={{ xs: 0.5, md: 1 }}>
+    <AddShoppingCartIcon sx={{ fontSize: { xs: 18, md: 24 } }} />
 
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+    <Typography
+      fontWeight={800}
+      sx={{ fontSize: { xs: 14, md: 18 } }} // 👈 texto más pequeño en móvil
+    >
+      Seleccionar Productos
+    </Typography>
+  </Box>
+
+  <IconButton
+    onClick={onClose}
+    sx={{ p: { xs: 0.5, md: 1 } }} // 👈 botón más compacto
+  >
+    <CloseIcon sx={{ fontSize: { xs: 25, md: 24 } }} />
+  </IconButton>
+</DialogTitle>
 
       {/* ================= BODY ================= */}
-      <DialogContent
-        sx={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          p: 0,
-        }}
-      >
+   <DialogContent
+  sx={{
+    display: "flex",
+    flexDirection: { xs: "column", md: "row" },
+    p: { xs: 0.5, md: 0 }, // 👈 menos espacio en móvil
+  }}
+>
         {/* ================= CATEGORÍAS ================= */}
         <Box
           sx={{
@@ -188,51 +197,65 @@ animarAlCarrito(
               const active = categoriaActiva?.id === cat.id;
 
               return (
-                <ListItemButton
-                  key={cat.id}
-                  onClick={() => {
-                    setCategoriaActiva(cat);
-                    setProductos(cat.platos);
-                    setSearch("");
-                  }}
-                  selected={active}
-                  sx={{
-                    borderRadius: 2,
-                    minWidth: isMobile ? 150 : "auto",
-                    mb: isMobile ? 0 : 0.5,
-                    "&.Mui-selected": {
-                      backgroundColor: "primary.main",
-                      color: "black",
-                    },
-                    bgcolor: active? "primary.main" : "primary.secodary",
-                  }}
-                >
+            <ListItemButton
+              key={cat.id}
+              onClick={() => {
+                setCategoriaActiva(cat);
+                setProductos(cat.platos);
+                setSearch("");
+              }}
+              selected={active}
+              sx={{
+                borderRadius: 2,
+                minWidth: isMobile ? 150 : "auto",
+                mb: isMobile ? 0 : 0.5,
+                "&.Mui-selected": {
+                  backgroundColor: "primary.main",
+                  color: "black",
+                },
+                bgcolor: active ? "primary.main" : "primary.secondary",
+              }}
+            >
+              <Box sx={{ width: "100%" }}>
+                
+                {/* 🔹 FILA SUPERIOR: imagen + nombre */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Avatar
                     src={cat.imagen || undefined}
                     alt={cat.categoria}
                     sx={{
-                      width: 32,
-                      height: 32,
-                      mr: 1,
+                      width: 28,
+                      height: 28,
                       bgcolor: active ? "black" : "primary.main",
                       color: active ? "primary.main" : "black",
-                      fontWeight: 700,
+                      fontWeight: 600,
                     }}
                   >
-                    {/* Fallback si no hay imagen */}
                     {!cat.imagen && cat.categoria?.[0]}
                   </Avatar>
 
+                 <Typography
+                  fontWeight={700}
+                  noWrap
+                  sx={{
+                    fontSize: { xs: 10, sm: 11, md: 12, lg: 13 },
+                  }}
+                >
+                  {cat.categoria}
+                </Typography>
+                </Box>
 
-                  <ListItemText
-                    primary={cat.categoria}
-                    secondary={`${cat.platos.length} platos`}
-                    secondaryTypographyProps={{
-                      fontSize: 11,
-                      color: active ? "black" : "text.secondary",
-                    }}
-                  />
-                </ListItemButton>
+                {/* 🔹 ABAJO: cantidad */}
+                <Typography
+                  fontSize={10}
+                  mt={0.5}
+                  color={active ? "black" : "text.secondary"}
+                >
+                  {cat.platos.length} platos
+                </Typography>
+
+              </Box>
+            </ListItemButton>
               );
             })}
           </List>
@@ -372,15 +395,10 @@ animarAlCarrito(
               {prod.codigo_barra}
             </Typography>
 
-
-                  
-
-                   
-                  </Stack>
-
+          </Stack>
             <Typography
               fontWeight={700}
-              fontSize={{ xs: 12, sm: 14 }}
+              fontSize={{ xs: 9, sm: 12 }}
               noWrap
               sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
             >
@@ -446,8 +464,23 @@ animarAlCarrito(
       <Divider />
 
       {/* ================= FOOTER ================= */}
-     <DialogActions sx={{ px: 3, py: 2 }}>
-  <Button onClick={onClose}>Cerrar</Button>
+  <DialogActions
+  sx={{
+    py: { xs: 0.5, md: 1 },
+    px: 2,
+    justifyContent: "center",
+    borderTop: "1px solid #eee",
+  }}
+>
+  <Typography
+    sx={{
+      fontWeight: 700,
+      fontSize: { xs: 13, md: 16 },
+      textAlign: "center",
+    }}
+  >
+    Selecciona los productos
+  </Typography>
 </DialogActions>
 
 {/* ANIMACIÓN */}

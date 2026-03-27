@@ -26,12 +26,12 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       const { token, user } = await login({ email, password });
-
       localStorage.setItem("token", token);
       localStorage.setItem("id_usuario", String(user.id));
       localStorage.setItem("id_persona", String(user.id_persona));
       localStorage.setItem("id_negocio", String(user.id_negocio));
       localStorage.setItem("nombre_negocio", String(user.nombre_negocio));
+      localStorage.setItem("imagen_negocio", String(user.imagen_negocio));
       localStorage.setItem("nombre", user.nombre);
       localStorage.setItem("email", user.email);
       localStorage.setItem("rol", user.rol);
@@ -42,7 +42,7 @@ const Login: React.FC = () => {
       Swal.fire({
         icon: "error",
         title: "Acceso denegado",
-        text: error.response?.data?.error || "Contraseña incorrecta”",
+        text: error.response?.data?.error || "Contraseña incorrecta",
         confirmButtonColor: "#1d4ed8",
       });
     }
@@ -51,117 +51,166 @@ const Login: React.FC = () => {
   return (
     <Box
       sx={{
-        height: "100vh",
-        width: "100vw",
+        width: "97.5vw",
+        minHeight: "96vh",
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        position: "relative",
-        background: "linear-gradient(135deg, #eef2ff, #e0e7ff, #c7d2fe)",
         fontFamily: `"Inter", sans-serif`,
+        background: "#f3f4f6",
+        p: 2,
       }}
     >
-      {/* Overlay oscuro suave */}
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(0,0,0,0.15)",
-          backdropFilter: "blur(3px)",
-        }}
-      />
-
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 40 }}
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <Paper
-          elevation={8}
+          elevation={10}
           sx={{
-            position: "relative",
-            width: 400,
-            p: 5,
-            borderRadius: 3,
-            background: "rgba(255,255,255,0.85)",
-            backdropFilter: "blur(12px)",
             display: "flex",
-            flexDirection: "column",
-            gap: 3,
-            boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+            flexDirection: { xs: "column", sm: "row" },
+            width: { xs: "90%", sm: 800 },
+            minHeight: { xs: "auto", sm: 500 },
+            borderRadius: 4,
+            overflow: "hidden",
           }}
         >
-          <Typography
-            variant="h5"
-            sx={{ textAlign: "center", fontWeight: 700, color: "#0f172a" }}
+          {/* Lado izquierdo azul */}
+          <Box
+            sx={{
+              flex: 1,
+              background: "linear-gradient(135deg, #5acf8d, #0d45a0)",
+              color: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              p: 4,
+              textAlign: "center",
+              position: "relative"
+            }}
           >
-            Sistema Empresarial
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ textAlign: "center", color: "#475569", mb: 2 }}
-          >
-            Accede al panel administrativo
-          </Typography>
-
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-          >
-            <TextField
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Correo electrónico"
-              required
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <MailOutlineIcon color="primary" />
-                  </InputAdornment>
-                ),
-              }}
+            {/* Logo */}
+            <Box
+              component="img"
+              src="https://cdn-icons-png.flaticon.com/512/8214/8214962.png"
+              alt="Logo"
+              sx={{ width: 80, mb: 2, background: "#ffffff", borderRadius:10}}
             />
+            <Typography variant="h5" fontWeight={700}>
+              Bienvenido
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              AdminBusiness: el sistema empresarial 
+            </Typography>
+             <Typography variant="body2" sx={{ mt: 2 }}>
+              versátil para todo tipo de negocios y establecimientos.
+            </Typography>
 
-            <TextField
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Contraseña"
-              type="password"
-              required
-              fullWidth
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockOutlinedIcon color="primary" />
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              startIcon={<LoginIcon />}
+            {/* Curva decorativa */}
+            <Box
               sx={{
-                py: 1.5,
-                fontWeight: 600,
-                fontSize: 16,
-                textTransform: "none",
-                boxShadow: "0 5px 15px rgba(37,78,216,0.35)",
-                "&:hover": {
-                  boxShadow: "0 6px 18px rgba(37,78,216,0.45)",
-                },
+                position: "absolute",
+                right: -50,
+                bottom: 0,
+                width: 100,
+                height: "100%",
+                background: "#fff",
+                borderTopLeftRadius: "50% 50%",
+                borderBottomLeftRadius: "50% 50%",
+                display: { xs: "none", sm: "block" },
               }}
+            />
+          </Box>
+
+          {/* Lado derecho blanco */}
+          <Box
+            sx={{
+              flex: 1,
+              background: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              p: { xs: 4, sm: 8 },
+            }}
+          >
+            <Typography variant="h6" fontWeight={600} mb={4}>
+              Inicio de sesión
+            </Typography>
+
+            <form
+              onSubmit={handleSubmit}
+              style={{ display: "flex", flexDirection: "column", gap: 18 }}
             >
-              Ingresar
-            </Button>
-          </form>
+              <TextField
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="E-mail Address"
+                required
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <MailOutlineIcon color="primary" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                type="password"
+                required
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockOutlinedIcon color="primary" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                startIcon={<LoginIcon />}
+                sx={{
+                  py: 1.5,
+                  fontWeight: 600,
+                  fontSize: 16,
+                  textTransform: "none",
+                  borderRadius: 3,
+                  "&:hover": {
+                    background: "#1d4ed8",
+                  },
+                }}
+              >
+                Sign Up
+              </Button>
+            </form>
+          </Box>
         </Paper>
       </motion.div>
+
+      {/* Footer */}
+      <Box
+        sx={{
+          mt: 4,
+          textAlign: "center",
+          color: "#6b7280",
+          fontSize: 14,
+        }}
+      >
+        Derechos reservados por AdminBusiness | By Ing. Alexis Caratar | Pasto - Nariño 2026
+      </Box>
     </Box>
   );
 };

@@ -55,7 +55,7 @@ type Props = {
   onSub: (id: number) => void;
   onFinalizar: (
   idCliente: number | null,
-  pago: {metodo_pago: string;monto_recibido: number | "";cambio: number;}) => void;
+  pago: {metodo_pago: string;monto_recibido: number | "";cambio: number;nota: string;}) => void;
   mesaSeleccionada: Mesa | null;
   onClearMesa: () => void;
   categorias: any[];
@@ -85,6 +85,7 @@ export const Carrito: React.FC<Props> = ({
   const [resultados, setResultados] = useState<Cliente[]>([]);
   const [openCrearModal, setOpenCrearModal] = useState(false);
   const [metodoPago, setMetodoPago] = useState("PENDIENTE");
+  const [nota, setNota] = useState("");
   const [montoRecibido, setMontoRecibido] = useState<number | "">("");
   const total = carrito.reduce(
     (acc, v) => acc + v.precio_venta * v.cantidad,
@@ -379,8 +380,6 @@ export const Carrito: React.FC<Props> = ({
           ) : (
             <>
 
-
-
               <Typography
                 color="text.secondary"
                 align="left"
@@ -397,7 +396,7 @@ export const Carrito: React.FC<Props> = ({
                   >
                     <ListItem
                       sx={{
-                        py: 1,
+                        py: 0.2,
                         "&:hover": {
                           backgroundColor: "#f5f5f5",
                           borderRadius: 1,
@@ -412,7 +411,6 @@ export const Carrito: React.FC<Props> = ({
                           sx={{ width: 50, height: 50, mr: 1 }}
                         />
                       </ListItemAvatar>
-
                       <ListItemText
                         primary={
                           <Typography fontSize={14} fontWeight={600}>
@@ -421,11 +419,7 @@ export const Carrito: React.FC<Props> = ({
                         }
                         secondary={
                           <Stack spacing={0.5}>
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              spacing={1}
-                            >
+                            <Stack direction="row" alignItems="center" spacing={1}>
                               <Button
                                 variant="outlined"
                                 size="small"
@@ -435,7 +429,7 @@ export const Carrito: React.FC<Props> = ({
                                 -
                               </Button>
 
-                              <Typography fontSize={14} fontWeight={600}>
+                              <Typography component="span" fontSize={14} fontWeight={600}>
                                 {item.cantidad}
                               </Typography>
 
@@ -448,27 +442,38 @@ export const Carrito: React.FC<Props> = ({
                                 +
                               </Button>
 
-                              <Typography fontSize={13} color="text.secondary">
+                              <Typography component="span" fontSize={13} color="text.secondary">
                                 💲 {item.precio_venta.toLocaleString()}
                               </Typography>
-
                             </Stack>
 
-                            <Typography
-                              fontSize={13}
-                              fontWeight="bold"
-                              color="primary"
-                            >
-                              Subtotal: $
-                              {(item.cantidad * item.precio_venta).toLocaleString()}
+                            <Typography component="span" fontSize={13} fontWeight="bold" color="primary">
+                              Subtotal: ${(item.cantidad * item.precio_venta).toLocaleString()}
                             </Typography>
                           </Stack>
                         }
+                        secondaryTypographyProps={{
+                          component: "div", // 🔥 ESTA ES LA CLAVE
+                        }}
                       />
                     </ListItem>
                   </SwipeableListItem>
                 ))}
               </SwipeableList>
+              
+                <TextField
+                fullWidth
+                size="small"
+                placeholder="Ej: sin cebolla, término medio..."
+                onChange={(e) => setNota(e.target.value)}
+                sx={{
+                  mt: 1,
+                  "& .MuiInputBase-root": {
+                    fontSize: 12,
+                    borderRadius: 2,
+                  },
+                }}
+              />
 
               <Divider sx={{ my: 1 }} />
 
@@ -493,11 +498,12 @@ export const Carrito: React.FC<Props> = ({
                 onChange={(e) => setMetodoPago(e.target.value)}
               >
                 <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
-                <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
-                <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
+               <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
+                <MenuItem value="TRANSFERENCIA">🔁 Transferencia</MenuItem>
                 <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-                <MenuItem value="NEQUI">📱 Nequi</MenuItem>
-                <MenuItem value="DAVIPLATA">🏦 DaviPlata</MenuItem>
+                <MenuItem value="NEQUI">📲 Nequi</MenuItem>
+                <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
+                <MenuItem value="TIQUERERA">🎟️ Tiquetera</MenuItem>
               </TextField>
 
               {/* MONTO RECIBIDO */}
@@ -553,6 +559,7 @@ export const Carrito: React.FC<Props> = ({
             metodo_pago: metodoPago,
             monto_recibido: montoRecibido,
             cambio: Math.max(cambio, 0),
+            nota:nota,
           });
 
           setClienteSeleccionado(null);

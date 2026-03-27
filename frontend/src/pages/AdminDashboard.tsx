@@ -29,7 +29,7 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-
+import PersonIcon from '@mui/icons-material/Person';
 import { getModulos } from "../api/menusistema";
 import { iconMap } from "../utils/mapIcons";
 import { componentMap } from "../utils/mapComponents";
@@ -50,21 +50,18 @@ type Modulo = {
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { modulo } = useParams();
-
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
-
   const [menus, setMenus] = useState<Modulo[]>([]);
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
-
   const [, setIdNegocio] = useState<string>("");
   const [nombre_negocio, setNombreNegocio] = useState<string>("Mi Negocio");
+  const [imagen_negocio, setImagenNegocio] = useState<string>("");
   const [nombre, setNombre] = useState<string>("");
   const [rol, setRol] = useState<string>("");
   const [sinModulos, setSinModulos] = useState(false);
   const [imagen, setImagen] = useState<string>(DEFAULT_AVATAR);
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
 
@@ -81,6 +78,7 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const storedIdNegocio = localStorage.getItem("id_negocio") || "";
     const storedNegocio = localStorage.getItem("nombre_negocio") || "Mi Negocio";
+    const imagenNegocio = localStorage.getItem("imagen_negocio")||"";
     const storedNombre = localStorage.getItem("nombre") || "";
     const storedRol = localStorage.getItem("rol") || "";
     const rawImagen = localStorage.getItem("imagen");
@@ -93,15 +91,15 @@ const AdminDashboard: React.FC = () => {
 
     setIdNegocio(storedIdNegocio);
     setNombreNegocio(storedNegocio);
+     setImagenNegocio(imagenNegocio);
     setNombre(storedNombre);
     setRol(storedRol);
     setImagen(storedImagen);
     
 
     const loadMenus = async () => {
-      const data = await getModulos(storedIdNegocio, Number(id_usuarioperfil));
+      const data = await getModulos(storedIdNegocio, Number(id_usuarioperfil));    
       setMenus(data);
-
       if (!modulo && data.length > 0) {
         navigate(`/admin/${data[0].url}`);
       }
@@ -147,7 +145,28 @@ const AdminDashboard: React.FC = () => {
         p={2}
       >
         <Box display="flex" alignItems="center" gap={1}>
-          <StorefrontIcon sx={{ color: "#FFFFFF", fontSize: 20 }} />
+         <Box
+              sx={{
+                width: 60,
+                height: 50,
+                borderRadius: "50%",
+                overflow: "hidden",
+                bgcolor: "#f5f5f5", // color de fondo si no hay imagen
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {imagen_negocio ? (
+                <img
+                  src={imagen_negocio}
+                  alt="Negocio"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <StorefrontIcon sx={{ color: "#FFFFFF", fontSize: 20 }} />
+              )}
+            </Box>
           {!collapsed && (
             <Typography
               variant="subtitle2"
@@ -293,7 +312,7 @@ const AdminDashboard: React.FC = () => {
               </IconButton>
             )}
 
-            <Box sx={{ display: "flex", gap: 1, ml: "auto", alignItems: "center" }}>
+              <Box sx={{ display: "flex", gap: 1, ml: "auto", alignItems: "center" }}>
               <Tooltip title="Notificaciones">
                 <IconButton sx={{ color: "#9AA7B6" }}>
                   <NotificationsIcon />
@@ -306,35 +325,55 @@ const AdminDashboard: React.FC = () => {
                 </IconButton>
               </Tooltip>
 
-              {/* Avatar */}
-              <IconButton
-                onClick={(e) => setAnchorEl(e.currentTarget)}
-                sx={{ p: 0 }}
-              >
-                <Avatar src={imagen}>{nombre.charAt(0)}</Avatar>
-                <ArrowDropDownIcon sx={{ color: "#FFFFFF" }} />
+              {/* Avatar con Dropdown */}
+              <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0, display: "flex", alignItems: "center" }}>
+                <Avatar src={imagen} sx={{ width: 32, height: 32, mr: 0.5, bgcolor: "#1976d2" }}>
+                  {nombre.charAt(0)}
+                </Avatar>
+                <ArrowDropDownIcon sx={{ color: "#1976d2" }} />
               </IconButton>
 
               <Menu
                 anchorEl={anchorEl}
                 open={openMenu}
                 onClose={() => setAnchorEl(null)}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "right",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                PaperProps={{
+                  sx: {
+                    borderRadius: 2,
+                    minWidth: 180,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    px: 1,
+                    py: 0.5,
+                  },
                 }}
               >
+                {/* Menu Items */}
                 <MenuItem
-                  onClick={() => {
-                    localStorage.clear();
-                    window.location.href = "/login";
+                  sx={{
+                    borderRadius: 1,
+                    px: 2,
+                    py: 1,
+                    mb: 0.5,
+                    transition: "all 0.2s",
+                    "&:hover": { bgcolor: "#E3F2FD" },
                   }}
                 >
-                  <LogoutIcon sx={{ mr: 1 }} /> Salir
+                  <PersonIcon sx={{ mr: 1, color: "#1976d2" }} /> Perfil
+                </MenuItem>
+
+                <MenuItem
+                  onClick={() => { localStorage.clear(); window.location.href = "/login"; }}
+                  sx={{
+                    borderRadius: 1,
+                    px: 2,
+                    py: 1,
+                    transition: "all 0.2s",
+                    "&:hover": { bgcolor: "#FFEBEE" },
+                  }}
+                >
+                  <LogoutIcon sx={{ mr: 1, color: "#D32F2F" }} /> Salir
                 </MenuItem>
               </Menu>
             </Box>

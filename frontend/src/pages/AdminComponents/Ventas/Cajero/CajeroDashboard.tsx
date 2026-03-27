@@ -227,7 +227,7 @@ const clearMesa = () => {
       impuesto,
       total,
       estado: "PENDIENTE",
-      nota: "",
+      nota: datos_adicionales.nota,
       metodo_pago: datos_adicionales.metodo_pago,
       monto_pagado: total,
       monto_recibido: Number(datos_adicionales.monto_recibido || 0),
@@ -676,7 +676,7 @@ const cerrarCajaReal = async (cierreData: any) => {
       Continuar
     </Button>
   </DialogActions>
-</Dialog>
+    </Dialog>
 
  {/* 👇 AQUÍ VA LA ANIMACIÓN */}
   {animItem && (

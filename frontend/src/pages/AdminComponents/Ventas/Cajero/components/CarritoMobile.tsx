@@ -59,7 +59,7 @@ type Props = {
   onSub: (id: number) => void;
   onFinalizar: (
     idCliente: number | null,
-    pago: {metodo_pago: string;monto_recibido: number;cambio: number;}) => void;
+    pago: {metodo_pago: string;monto_recibido: number | "";cambio: number;nota: string;}) => void;
   mesaSeleccionada: Mesa | null;
   onClearMesa: () => void;
   categorias: any[];
@@ -102,6 +102,7 @@ export const CarritoMobile: React.FC<Props> = ({
   const total = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
   const [metodoPago, setMetodoPago] = useState<string>("PENDIENTE");
   const [montoRecibido, setMontoRecibido] = useState<number>(0);
+   const [nota, setNota] = useState("");
   const cambio = montoRecibido - total;
   const trailingActions = (id: number) => (
     <TrailingActions>
@@ -198,6 +199,7 @@ useEffect(() => {
       metodo_pago: metodoPago,
       monto_recibido: montoRecibido,
       cambio: Math.max(cambio, 0),
+      nota:nota
     };
 
     onFinalizar(clienteSeleccionado ? clienteSeleccionado.id : null, pago);
@@ -512,11 +514,11 @@ useEffect(() => {
                             key={item.id}
                             trailingActions={trailingActions(item.id)}
                           >
-                            <ListItem sx={{ py: 1 }}>
+                            <ListItem sx={{ py: 0 }}>
 
                               <ListItemAvatar>
                                 <Avatar
-                                  src={item.imagen_plato??undefined}
+                                  src={item.imagenes[0]??undefined}
                                   variant="rounded"
                                   sx={{ width: 48, height: 48 }}
                                 />
@@ -525,7 +527,7 @@ useEffect(() => {
                               <ListItemText
                                 primary={<Typography fontWeight={600}>{item.nombre}</Typography>}
                                 secondary={
-                                  <Stack spacing={1}>
+                                  <Stack spacing={0}>
                                     <Stack direction="row" spacing={1} alignItems="center">
 
                                       <Button
@@ -560,9 +562,26 @@ useEffect(() => {
                             </ListItem>
                           </SwipeableListItem>
                         ))}
+                        
                       </SwipeableList>
                     )}
                   </Box>
+                {carrito.length > 0 && (
+                  <>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      placeholder="Ej: sin cebolla, término medio..."
+                      onChange={(e) => setNota(e.target.value)}
+                      sx={{
+                        mt: 1,
+                        "& .MuiInputBase-root": {
+                          fontSize: 12,
+                          borderRadius: 2,
+                        },
+                      }}
+                    />
+                 
 
                   <Box
                     sx={{
@@ -616,7 +635,8 @@ useEffect(() => {
                       Ir a Pago
                     </Button>
                   </Box>
-
+                  </>
+     )}
                 </Box>
               )}
 
@@ -639,10 +659,11 @@ useEffect(() => {
                   >
                     <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
                     <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
-                    <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
+                    <MenuItem value="TRANSFERENCIA">🔁 Transferencia</MenuItem>
                     <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-                    <MenuItem value="NEQUI">📱 Nequi</MenuItem>
-                    <MenuItem value="DAVIPLATA">🏦 DaviPlata</MenuItem>
+                    <MenuItem value="NEQUI">📲 Nequi</MenuItem>
+                    <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
+                    <MenuItem value="TIQUERERA">🎟️ Tiquetera</MenuItem>
                   </TextField>
 
                   {/* MONTO RECIBIDO: mostrar vacío cuando es 0 */}

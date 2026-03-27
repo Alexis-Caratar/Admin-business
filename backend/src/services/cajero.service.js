@@ -237,6 +237,10 @@ arqueo: async ({ id_caja }) => {
         WHEN pa.metodo_pago = 'DAVIPLATA' AND pa.estado_pago = true
         THEN pa.monto_pagado ELSE 0 END) AS daviplata,
 
+        SUM(CASE 
+        WHEN pa.metodo_pago = 'TIQUERERA' AND pa.estado_pago = true
+        THEN pa.monto_pagado ELSE 0 END) AS tiquetera,
+
     SUM(CASE 
         WHEN pa.estado_pago = false
         THEN pa.monto_pagado ELSE 0 END) AS pendiente,
@@ -318,6 +322,7 @@ arqueo: async ({ id_caja }) => {
     { metodo_pago: "TRANSFERENCIA", total: pagos.transferencia || 0 },
     { metodo_pago: "NEQUI", total: pagos.nequi || 0 },
     { metodo_pago: "DAVIPLATA", total: pagos.daviplata || 0 },
+    { metodo_pago: "TIQUERERA", total: pagos.tiquetera || 0 },
     { metodo_pago: "PENDIENTE", total: pagos.pendiente || 0 }
   ];
 
@@ -519,10 +524,21 @@ crearcliente: async (payload) => {
   mesas: async (id_negocio) => {
 
     const query = `
-    SELECT *
-    FROM mesas
-    WHERE id_negocio = $1
-    order by id asc
+    SELECT 
+        m.*
+      
+    FROM mesas m
+
+    LEFT JOIN (
+        SELECT DISTINCT ON (id_mesa) *
+        FROM ventas
+        ORDER BY id_mesa, fecha DESC
+    ) v ON v.id_mesa = m.id
+
+    LEFT JOIN pagos p ON p.id_venta = v.id
+
+    WHERE m.id_negocio = $1
+    ORDER BY m.id ASC;
     `;
     const [rows] = await db.query(query, [id_negocio]);
     return rows;
@@ -539,7 +555,9 @@ crearcliente: async (payload) => {
     per.identificacion AS identificacion_cliente,
     per.nombres || ' ' || per.apellidos AS nombre_completo,
     v.subtotal AS venta_total,
+    p.estado_pago as estado_pago_bool,
     p.metodo_pago AS estado_pago,
+    v.nota,
 
     COALESCE(
         json_agg(
@@ -566,9 +584,9 @@ LEFT JOIN (
 ) prod_i ON pro.id = prod_i.id_producto
 
 LEFT JOIN (
-    SELECT id_venta, MAX(id) AS id_pago, MAX(metodo_pago) AS metodo_pago
+    SELECT id_venta, MAX(id) AS id_pago, MAX(metodo_pago) AS metodo_pago,estado_pago
     FROM pagos
-    GROUP BY id_venta
+    GROUP BY id_venta,estado_pago
 ) p ON v.id = p.id_venta
 
 INNER JOIN personas per ON v.id_cliente = per.id
@@ -586,7 +604,9 @@ GROUP BY
     per.nombres,
     per.apellidos,
     v.subtotal,
-    p.metodo_pago
+    p.metodo_pago,
+    p.estado_pago,
+    v.nota
 
 ORDER BY p.id_pago DESC
 LIMIT 1;
@@ -787,7 +807,8 @@ SELECT
     p.estado_pago,
     p.metodo_pago,
     m.id as id_mesa,
-    m.nombre as mesa
+    m.nombre as mesa,
+    v.nota
 
 FROM ventas v
 INNER JOIN pagos p ON p.id_venta = v.id

@@ -1,24 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import {
-  Box,
-  Card,
-  Typography,
-  Divider,
-  Stack,
-  Avatar,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  TextField,
-  Pagination,
-  IconButton,
-  Paper,
-  DialogActions,
-  InputAdornment,
-  Button,
-  MenuItem,
-  CircularProgress
+  Box, Card, Typography, Divider, Stack, Avatar, Chip, Dialog, DialogTitle, DialogContent, TextField, Pagination, IconButton, Paper, DialogActions, InputAdornment, Button, MenuItem, CircularProgress,
+  Tooltip
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PrintIcon from "@mui/icons-material/Print";
@@ -28,11 +11,13 @@ import PaymentsIcon from "@mui/icons-material/Payments";
 import SearchIcon from "@mui/icons-material/Search";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { FacturaPOS } from "../../../../FacturasPos/FacturaPOS";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { facturaPorCaja, productosPorVenta, actualiza_venta } from "../../../../../../api/cajero";
 
 export default function VentasDetalles({ open, onClose, id_caja }: any) {
@@ -45,30 +30,43 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
   const [ventaSeleccionada, setVentaSeleccionada] = useState<any>(null);
   const [productosDetalle, setProductosDetalle] = useState<any[]>([]);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
-  const [openPago, setOpenPago] = useState(false);
   const [metodoPago, setMetodoPago] = useState("EFECTIVO");
   const [montoRecibido, setMontoRecibido] = useState<any>("");
   const [cambio, setCambio] = useState<number>(0);
   const idUsuario = localStorage.getItem("id_usuario");
   const id_negocio = localStorage.getItem("id_negocio");
+  const [openVentaRegistrada, setOpenVentaRegistrada] = useState(false);
   const porPagina = 16;
+  const inputRef = useRef(null);
+  const cambioaux = montoRecibido - ventaSeleccionada?.venta_total || 0;
+  const cambioSeguro = Math.max(cambioaux, 0);
+  const [ventaPayload, setVentaPayload] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open && id_caja) cargarVentas();
   }, [open, id_caja]);
 
   useEffect(() => {
-    // recalcular cambio automáticamente
-    if (metodoPago === "EFECTIVO" && ventaSeleccionada) {
-      const total = Number(ventaSeleccionada.venta_total || 0);
-      setCambio(Number(montoRecibido || 0) - total);
+    if (metodoPago !== "EFECTIVO" || !ventaSeleccionada) {
+      setCambio(0);
+      return;
     }
+    const total = Number(ventaSeleccionada.venta_total || 0);
+    const recibido = Number(montoRecibido || 0);
+
+    setCambio(recibido - total);
   }, [montoRecibido, metodoPago, ventaSeleccionada]);
 
-  const cargarVentas = async () => {
+const cargarVentas = async () => {
+  try {
+    setLoading(true);
     const { data } = await facturaPorCaja({ id_caja });
     if (data?.ok) setVentas(data.result);
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   const abrirDetalle = async (venta: any) => {
     setVentaSeleccionada(venta);
@@ -140,27 +138,19 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
       metodo_pago: metodoPago,
       monto_recibido: montoRecibido,
       cambio: cambio,
-      id_mesa:ventaSeleccionada.id_mesa||0
+      id_mesa: ventaSeleccionada.id_mesa || 0,
+      total_pago: ventaSeleccionada.venta_total
     };
-
-    console.log("payload",payload);
-    
     try {
       const { data } = await actualiza_venta(payload);
       if (data?.ok) {
-        setOpenPago(false);
+        setVentaPayload(payload);
         setDetalleOpen(false);
+        setOpenVentaRegistrada(true);
         setVentaSeleccionada(null);
         setMontoRecibido("");
         setMetodoPago("EFECTIVO");
         cargarVentas();
-        Swal.fire({
-          title: "Venta registrada",
-          html: `<b style="font-size:18px;color:#16a34a">✅ Operación exitosa</b><br/><br/>La venta se guardó correctamente`,
-          icon: "success",
-          confirmButtonText: "Aceptar",
-          confirmButtonColor: "#16a34a",
-        });
       }
     } catch (err) {
       console.error(err);
@@ -174,11 +164,11 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
     }
   };
 
-const ticketRef = useRef<HTMLDivElement>(null);
-const imprimirPOS = useReactToPrint({
-  contentRef: ticketRef,
-  documentTitle: "Factura POS",
-  pageStyle: `
+  const ticketRef = useRef<HTMLDivElement>(null);
+  const imprimirPOS = useReactToPrint({
+    contentRef: ticketRef,
+    documentTitle: "Factura POS",
+    pageStyle: `
     @page {
       size: 80mm auto;
       margin: 0;
@@ -190,12 +180,18 @@ const imprimirPOS = useReactToPrint({
       }
     }
   `,
-});
+  });
 
   return (
     <>
       {/* ================= LISTADO VENTAS ================= */}
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl" PaperProps={{
+        sx: {
+          zIndex: 1200,
+        },
+      }} sx={{
+        zIndex: 1200,
+      }}>
         <DialogTitle sx={{ pb: 1 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
 
@@ -343,17 +339,45 @@ const imprimirPOS = useReactToPrint({
                 </Stack>
               </Card>
             </Box>
-
+              <Stack direction="row" spacing={1} alignItems="center">
+            <Tooltip title="Refrescar ventas" arrow>
+              <IconButton
+                onClick={cargarVentas}
+                sx={{
+                  borderRadius: 2,
+                  bgcolor: "#f5f5f5",
+                  border: "1px solid #e0e0e0",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    bgcolor: "#e3f2fd",
+                    transform: "rotate(90deg)",
+                  },
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={18} />
+                ) : (
+                  <RefreshIcon sx={{ fontSize: 20 }} />
+                )}
+              </IconButton>
+            </Tooltip>
+          </Stack>
           </Box>
 
           {/* Facturas */}
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(8, 1fr)", // 🔥 8 columnas fijas
-              gap: 1.5,
+              gridTemplateColumns: {
+                xs: "repeat(2, 1fr)",   // 📱 2 columnas
+                sm: "repeat(3, 1fr)",   // tablet pequeña
+                md: "repeat(4, 1fr)",   // laptop
+                lg: "repeat(6, 1fr)",   // desktop
+                xl: "repeat(8, 1fr)",   // pantallas grandes (tu idea original)
+              },
+              gap: { xs: 1, md: 1.5 },
             }}
-          >    {ventasPagina.map((venta) => (
+          >   {ventasPagina.map((venta) => (
             <Box key={venta.id_venta}>
               <motion.div whileHover={{ scale: 1.03 }}>
                 <Card
@@ -397,8 +421,8 @@ const imprimirPOS = useReactToPrint({
                         <Typography fontSize={11} color="text.secondary">
                           {venta.fecha}
                         </Typography>
-                          <Typography fontSize={11} color="text.secondary">
-                          {venta.mesa|| 'Sin mesa'}
+                        <Typography fontSize={11} color="text.secondary">
+                          {venta.mesa || 'Sin mesa'}
                         </Typography>
                       </Box>
 
@@ -413,15 +437,7 @@ const imprimirPOS = useReactToPrint({
                     />
                     <Divider />
 
-                    {/* TOTAL */}
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography fontSize={12} color="text.secondary">
-                        Total
-                      </Typography>
-                      <Typography fontWeight={800} color="primary">
-                        {formatCOP(venta.venta_total)}
-                      </Typography>
-                    </Stack>
+
 
                   </Stack>
                 </Card>
@@ -462,8 +478,19 @@ const imprimirPOS = useReactToPrint({
             <Avatar src={ventaSeleccionada?.cliente_imagen} sx={{ width: 46, height: 46 }}><PersonIcon /></Avatar>
             <Box>
               <Typography fontSize={12} color="text.secondary">Cliente</Typography>
-              <Typography fontWeight={700}>{ventaSeleccionada?.nombre_completo}</Typography>
+              <Typography
+                fontWeight={700}
+                noWrap
+                sx={{
+                  fontSize: { xs: 12, sm: 13, md: 15, lg: 16 },
+                }}
+              >
+                {ventaSeleccionada?.nombre_completo}
+              </Typography>
+              <Typography fontSize={12} color="text.secondary">{ventaSeleccionada?.identificacion_cliente}</Typography>
             </Box>
+
+
             <Box flex={1} />
             <Chip label={ventaSeleccionada?.estado_pago === true ? "Pagado" : "Pendiente"} color={ventaSeleccionada?.estado_pago === true ? "success" : "warning"} size="small" />
           </Stack>
@@ -489,16 +516,89 @@ const imprimirPOS = useReactToPrint({
 
           <Divider sx={{ my: 2 }} />
 
-          <Box sx={{ p: 2, borderRadius: 3, background: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Typography fontWeight={700}>TOTAL</Typography>
-            <Typography fontWeight={900} fontSize={22} color="primary">{formatCOP(ventaSeleccionada?.venta_total)}</Typography>
-          </Box>
+          {ventaSeleccionada?.nota && (
+            <Box
+              sx={{
+                p: 1,
+                mt: 1,
+                borderRadius: 2,
+                bgcolor: "#f5f5f5",
+                border: "1px solid #e0e0e0",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <Typography fontWeight={500} fontSize={11} color="text.primary">
+                📝 Nota:
+              </Typography>
+              <Typography fontSize={11} color="text.secondary" sx={{ wordBreak: "break-word" }}>
+                {ventaSeleccionada.nota}
+              </Typography>
+            </Box>
+          )}
+
         </DialogContent>
 
         <DialogActions sx={{ p: 2 }}>
           <Stack spacing={1} width="100%">
             {ventaSeleccionada?.estado_pago === false && (
-              <Button fullWidth variant="contained" color="success" size="large" startIcon={<PaymentsIcon />} sx={{ borderRadius: 3, fontWeight: 700 }} onClick={() => setOpenPago(true)}>Finalizar Venta</Button>
+              <>
+
+                <Box sx={{ mt: 2, p: 1, borderRadius: 3, background: "linear-gradient(135deg, #111827, #1f2937)", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography fontWeight={600}>Total</Typography>
+                  <Typography variant="h6" fontWeight={700}>{formatCOP(ventaSeleccionada?.venta_total)}</Typography>
+                </Box>
+
+                <TextField select fullWidth label="Método de Pago" size="small" sx={{ mt: 3 }} value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}>
+                  <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
+                  <MenuItem value="TRANSFERENCIA">🔁 Transferencia</MenuItem>
+                  <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
+                  <MenuItem value="NEQUI">📲 Nequi</MenuItem>
+                  <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
+                  <MenuItem value="TIQUERERA">🎟️ Tiquetera</MenuItem>
+                </TextField>
+
+                {metodoPago === "EFECTIVO" && (
+                  <>
+                    <TextField
+                      inputRef={inputRef}
+                      fullWidth
+                      type="tel"
+                      inputMode="numeric"
+                      label="Monto recibido"
+                      size="small"
+                      sx={{ mt: 2 }}
+                      value={montoRecibido === "" ? "" : montoRecibido}
+                      onChange={(e) =>
+                        setMontoRecibido(Number(e.target.value.replace(/\D/g, "")))
+                      }
+                    />
+                    {montoRecibido !== "" && cambio < 0 && (
+                      <Typography color="error" variant="caption">
+                        El monto recibido es menor al total
+                      </Typography>
+                    )}
+
+                    <Typography
+                      sx={{ mt: 1 }}
+                      fontWeight={800}
+                      color={cambio < 0 ? "error.main" : "success.main"}
+                    >
+                      Cambio: {formatCOP(cambioSeguro)}
+                    </Typography>
+                  </>
+                )}
+
+
+
+                <DialogActions sx={{ p: 2 }}>
+                  <Button fullWidth variant="contained" color="success" disabled={metodoPago === "EFECTIVO" && cambio < 0} startIcon={<AddShoppingCartIcon />} onClick={handleFinalizarVenta} sx={{ borderRadius: 3, fontWeight: 700 }}>
+                    PAGAR FACTURA
+                  </Button>
+                </DialogActions>
+              </>
             )}
             <Button
               fullWidth
@@ -514,57 +614,111 @@ const imprimirPOS = useReactToPrint({
         </DialogActions>
       </Dialog>
 
-      {/* ================= MODAL DE PAGO ================= */}
-      <Dialog open={openPago} onClose={() => setOpenPago(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography fontWeight={800}>Finalizar Venta</Typography>
-            <IconButton onClick={() => setOpenPago(false)}><CloseIcon /></IconButton>
-          </Stack>
-        </DialogTitle>
 
-        <DialogContent>
-          <Typography mb={1} fontWeight={700}>Total a pagar</Typography>
-          <Typography fontSize={24} fontWeight={900} color="primary">{formatCOP(ventaSeleccionada?.venta_total)}</Typography>
+      {/* === DIALOG VENTA REGISTRADA === */}
+      <Dialog
+        open={openVentaRegistrada}
+        onClose={() => setOpenVentaRegistrada(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            overflow: "hidden",
+            minWidth: 380,
+            maxWidth: 420,
+            boxShadow: "0 15px 40px rgba(0,0,0,0.12)"
+          }
+        }}
+      >
+        {/* HEADER */}
+        <Box
+          sx={{
+            background: "linear-gradient(135deg,#16a34a,#22c55e)",
+            color: "white",
+            py: 3,
+            px: 2,
+            textAlign: "center"
+          }}
+        >
+          <CheckCircleIcon sx={{ fontSize: 48 }} />
+          <Typography variant="h6" fontWeight="bold">
+            Venta registrada con éxito
+          </Typography>
+        </Box>
 
-          <TextField select fullWidth label="Método de Pago" size="small" sx={{ mt: 3 }} value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}>
-            <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
-            <MenuItem value="TRANSFERENCIA">🏦 Transferencia</MenuItem>
-            <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-            <MenuItem value="PENDIENTE">⏳ Pendiente de Pago</MenuItem>
-          </TextField>
 
-          {metodoPago === "EFECTIVO" && (
-            <>
-              <TextField fullWidth autoFocus label="Monto recibido" size="small" sx={{ mt: 2 }}
-                value={montoRecibido === "" ? "" : formatCOP(montoRecibido)}
-                onChange={(e) => setMontoRecibido(Number(e.target.value.replace(/\D/g, "")))}
-              />
-              <Typography sx={{ mt: 2, fontWeight: 800 }} color={cambio < 0 ? "error.main" : "success.main"}>
-                Cambio: {formatCOP(cambio)}
+        {/* CONTENIDO */}
+        <DialogContent sx={{ textAlign: "center", py: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "#f8fafc",
+              border: "1px solid #e2e8f0"
+            }}
+          >
+            <Stack spacing={1} alignItems="center">
+
+              <Typography fontSize={13} color="text.secondary">
+                Total de la venta
               </Typography>
-            </>
-          )}
 
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                color="success.main"
+              >
+                {formatCOP(ventaPayload?.total_pago ?? 0)}
+              </Typography>
+
+              <Chip
+                label={`Pago: ${formatCOP(ventaPayload?.total_pago ?? 0)}`}
+                color="success"
+                size="small"
+                sx={{ fontWeight: 500 }}
+              />
+
+            </Stack>
+          </Paper>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2 }}>
-          <Button fullWidth variant="contained" color="success" disabled={metodoPago === "EFECTIVO" && cambio < 0} startIcon={<AddShoppingCartIcon />} onClick={handleFinalizarVenta} sx={{ borderRadius: 3, fontWeight: 700 }}>
-            PAGAR FACTURA
+        {/* FOOTER */}
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 3
+          }}
+        >
+          <Button
+            variant="contained"
+            onClick={() => setOpenVentaRegistrada(false)}
+            sx={{
+              borderRadius: 3,
+              px: 5,
+              py: 1,
+              textTransform: "none",
+              fontWeight: "bold",
+              background: "linear-gradient(90deg,#16a34a,#22c55e)",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.15)"
+            }}
+          >
+            Continuar
           </Button>
         </DialogActions>
       </Dialog>
 
-{/* RENDER DE FACTURA POST*/}
-<div style={{ display: "none" }}>
 
-  <FacturaPOS
-    ref={ticketRef}
-    venta={ventaSeleccionada}
-    productos={productosDetalle}
-  />
 
-</div>
+      {/* RENDER DE FACTURA POST*/}
+      <div style={{ display: "none" }}>
+
+        <FacturaPOS
+          ref={ticketRef}
+          venta={ventaSeleccionada}
+          productos={productosDetalle}
+        />
+
+      </div>
 
     </>
   );

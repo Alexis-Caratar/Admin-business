@@ -30,15 +30,13 @@ export const CierreCajaModal: React.FC<Props> = ({
 const [facturasPendientes, setFacturasPendientes] = useState<any[]>([]);
 const [mesasOcupadas, setMesasOcupadas] = useState<any[]>([]);
 const [alertaAbierta, setAlertaAbierta] = useState(false); // controla la modal combinada
-
-
-
+const total_tiquteras = arqueoInfo?.ventas_metodos?.[5]?.total ?? 0;
   /* DINERO ESPERADO */
   const ventas = arqueoInfo?.total_ventas ?? 0;
   const egresos = arqueoInfo?.total_egresos ?? 0;
   const montoInicial = arqueoInfo?.monto_inicial ?? 0;
 
-  const dineroEsperado = useMemo(() => Number(montoInicial) + Number(ventas) - Number(egresos), [ventas, egresos, montoInicial]);
+  const dineroEsperado = useMemo(() => Number(montoInicial) + Number(ventas) - Number(egresos)-Number(total_tiquteras), [ventas, egresos, montoInicial]);
   const ventaLibre = useMemo(() => (dineroContado === "" || baseCaja === "" ? 0 : Number(dineroContado) - Number(baseCaja)), [dineroContado, baseCaja]);
   const diferencia = useMemo(() => (dineroContado === "" ? 0 : Number(dineroContado) - dineroEsperado), [dineroContado, dineroEsperado]);
 
@@ -146,6 +144,15 @@ const camposValidos = () => {
                 </Typography>
                 <Typography fontWeight={600} color="success.main">
                   {formatCOP(ventas)}
+                </Typography>
+              </Box>
+
+              <Box display="flex" justifyContent="space-between">
+                <Typography color="text.secondary">
+                  tiquetera
+                </Typography>
+                <Typography fontWeight={600} color="success.main">
+                  {formatCOP(total_tiquteras)}
                 </Typography>
               </Box>
 
@@ -487,6 +494,15 @@ const camposValidos = () => {
           <Typography sx={{ ml: 'auto', color: 'success.main' }}>{formatCOP(ventas)}</Typography>
         </Box>
 
+       {/* tiqueteras */}
+        <Box display="flex" alignItems="center" gap={1}>
+          <Avatar sx={{ bgcolor: 'success.main', width: 30, height: 30 }}>
+            <ReceiptIcon sx={{ fontSize: 18, color: 'white' }} />
+          </Avatar>
+          <Typography fontWeight={600}>Tiqueteras:</Typography>
+          <Typography sx={{ ml: 'auto', color: 'success.main' }}>{formatCOP(total_tiquteras)}</Typography>
+        </Box>
+
         {/* Egresos */}
         <Box display="flex" alignItems="center" gap={1}>
           <Avatar sx={{ bgcolor: 'error.main', width: 30, height: 30 }}>
@@ -495,6 +511,8 @@ const camposValidos = () => {
           <Typography fontWeight={600}>Egresos:</Typography>
           <Typography sx={{ ml: 'auto', color: 'error.main' }}>- {formatCOP(egresos)}</Typography>
         </Box>
+
+  
 
         <Divider />
 

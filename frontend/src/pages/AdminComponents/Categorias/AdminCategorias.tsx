@@ -185,7 +185,7 @@ const AdminCategorias = () => {
       flex="1 1 calc(100% - 24px)" // xs: 1 por fila
       sx={{
         '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' }, // sm: 2 por fila
-        '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 24px)' }, // md: 3 por fila
+        '@media (min-width:900px)': { flex: '1 1 calc(25% - 24px)' }, // md: 3 por fila
       }}
     >
       <Card

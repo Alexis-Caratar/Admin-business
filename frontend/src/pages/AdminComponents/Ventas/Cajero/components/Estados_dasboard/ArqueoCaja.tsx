@@ -32,6 +32,7 @@ type Props = {
 };
 
 export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo }) => {
+const total_tiquteras = arqueoInfo?.ventas_metodos?.[5]?.total ?? 0;
 
   const formatCOP = (value: number) =>
     new Intl.NumberFormat("es-CO", {
@@ -44,7 +45,8 @@ export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo }) 
     arqueoInfo
       ? Number(arqueoInfo.monto_inicial) +
       Number(arqueoInfo.total_ventas) -
-      Number(arqueoInfo.total_egresos)
+      Number(arqueoInfo.total_egresos)-
+      Number(total_tiquteras)
       : 0;
 
   /** Agrupar productos por categoría */
@@ -177,6 +179,8 @@ export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo }) 
               return "#ff4081";
             case "DAVIPLATA":
               return "#ff9800";
+              case "TIQUERERA":
+              return "#118495";
             case "PENDIENTE":
               return "#9e9e9e";
             default:
@@ -196,6 +200,8 @@ export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo }) 
               return "💜";
             case "DAVIPLATA":
               return "📱";
+               case "TIQUERERA":
+              return "🎟️";
             case "PENDIENTE":
               return "⏳";
             default:
