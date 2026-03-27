@@ -801,8 +801,13 @@ SELECT
     p.id AS id_pago,
     v.numero_factura,
      TO_CHAR(p.fecha, 'HH24:MI') AS fecha,
+     TO_CHAR(p.fecha, 'DD/MM/YYYY HH24:MI:SS') AS fecha_completa,
+     TO_CHAR(NOW(), 'DD/MM/YYYY HH24:MI') AS fecha_impresion,
+    CONCAT(p2.nombres,' ',p2.apellidos) AS nombre_vendedor,
     per.identificacion AS identificacion_cliente,
     CONCAT(per.nombres,' ',per.apellidos) AS nombre_completo,
+    per.telefono,
+    per.email,
     v.subtotal AS venta_total,
     p.estado_pago,
     p.metodo_pago,
@@ -813,9 +818,11 @@ SELECT
 FROM ventas v
 INNER JOIN pagos p ON p.id_venta = v.id
 INNER JOIN personas per ON per.id = v.id_cliente
+INNER JOIN caja c on v.id_caja=c.id
+INNER JOIN usuarios u on c.id_usuario=u.id
+INNER JOIN personas p2 on  u.id_persona=p2.id
 LEFT JOIN mesas m on  v.id_mesa=m.id
 WHERE v.id_caja = $1
-
 ORDER BY p.id DESC
 `;
 

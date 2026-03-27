@@ -411,9 +411,9 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
               <Typography fontWeight={600} mb={1}>Detalle de Productos</Typography>
               <Box sx={{ borderRadius: 3, overflow: "hidden", border: "1px solid #e5e7eb", bgcolor: "#fff" }}>
                 {detalleVenta.productos.map((prod: any) => (
-                  <Box key={prod.id_producto} sx={{ display: "flex", justifyContent: "space-between", p: 1.5, gap: 2 }}>
+                  <Box key={prod.id_producto} sx={{ display: "flex", justifyContent: "space-between", p: 0.8, gap: 2 }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
-                      <Box component="img" src={prod.url_imagen || "/no-image.png"} alt={prod.nombre} sx={{ width: 55, height: 55, objectFit: "cover", borderRadius: 2, border: "1px solid #e5e7eb" }} />
+                      <Box component="img" src={prod.url_imagen || "/no-image.png"} alt={prod.nombre} sx={{ width: 30, height: 30, objectFit: "cover", borderRadius: 2, border: "1px solid #e5e7eb" }} />
                       <Box>
                         <Typography fontWeight={500}>{prod.nombre}</Typography>
                         <Typography variant="body2" color="text.secondary">Cantidad: {prod.cantidad}</Typography>
