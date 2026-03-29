@@ -14,11 +14,8 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
-import { useRef } from "react";
-import { useReactToPrint } from "react-to-print";
-import { FacturaPOS } from "../../../../FacturasPos/FacturaPOS";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { facturaPorCaja, productosPorVenta, actualiza_venta } from "../../../../../../api/cajero";
+import { facturaPorCaja, productosPorVenta, actualiza_venta,imprimirfactura } from "../../../../../../api/cajero";
 
 export default function VentasDetalles({ open, onClose, id_caja }: any) {
 
@@ -35,9 +32,9 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
   const [cambio, setCambio] = useState<number>(0);
   const idUsuario = localStorage.getItem("id_usuario");
   const id_negocio = localStorage.getItem("id_negocio");
+  const nombreuser = localStorage.getItem("nombre");
   const [openVentaRegistrada, setOpenVentaRegistrada] = useState(false);
   const porPagina = 16;
-  const inputRef = useRef(null);
   const cambioaux = montoRecibido - ventaSeleccionada?.venta_total || 0;
   const cambioSeguro = Math.max(cambioaux, 0);
   const [ventaPayload, setVentaPayload] = useState<any>(null);
@@ -164,23 +161,54 @@ const cargarVentas = async () => {
     }
   };
 
-  const ticketRef = useRef<HTMLDivElement>(null);
-  const imprimirPOS = useReactToPrint({
-    contentRef: ticketRef,
-    documentTitle: "Factura POS",
-    pageStyle: `
-    @page {
-      size: 80mm auto;
-      margin: 0;
-    }
-    @media print {
-      body {
-        margin: 0;
-        padding: 0;
-      }
-    }
-  `,
-  });
+ const imprimirFactura = async () => {
+  try {
+    if (!ventaSeleccionada) return;
+
+    console.log("venta selec",ventaSeleccionada);
+    
+    const payload = {
+      id_negocio:id_negocio,
+      venta: {
+        numero_factura: ventaSeleccionada.numero_factura,
+        fecha_completa: ventaSeleccionada.fecha_completa,
+        fecha_impresion: ventaSeleccionada.fecha_impresion,
+        nombre_vendedor: nombreuser,
+        identificacion_cliente: ventaSeleccionada.identificacion_cliente,
+        nombre_completo: ventaSeleccionada.nombre_completo,
+        telefono: ventaSeleccionada.telefono,
+        email: ventaSeleccionada.email,
+        venta_total: ventaSeleccionada.venta_total,
+        descuento: 0,
+        metodo_pago: ventaSeleccionada.metodo_pago,
+        monto_recibido: ventaSeleccionada.monto_recibido,
+        cambio: ventaSeleccionada.cambio
+      },
+      productos: productosDetalle.map((p) => ({
+        id_producto: p.id_producto,
+        nombre: p.nombre,
+        cantidad: p.cantidad,
+        precio_unitario: p.precio_unitario,
+        subtotal: p.subtotal
+      }))
+    };
+
+
+       await imprimirfactura(payload);
+    Swal.fire({
+      icon: "success",
+      title: "Enviado a impresión",
+      text: "La factura se está imprimiendo",
+      timer: 1500,
+      showConfirmButton: false
+    });
+
+  } catch (error) {
+    console.error(error);
+    Swal.fire("Error", "No se pudo imprimir", "error");
+  }
+};
+
 
   return (
     <>
@@ -429,15 +457,22 @@ const cargarVentas = async () => {
 
 
                     </Stack>
+                     <Chip
+                      label={formatCOP(venta.venta_total)}
+                      size="small"
+                      sx={{
+                        fontWeight: 'bold',         
+                        fontSize: '0.9rem'          
+                          }}
+                    />
 
                     <Chip
                       label={venta.estado_pago ? "Pagado" : "Pendiente"}
                       size="small"
                       color={venta.estado_pago ? "success" : "warning"}
                     />
+                   
                     <Divider />
-
-
 
                   </Stack>
                 </Card>
@@ -562,32 +597,33 @@ const cargarVentas = async () => {
 
                 {metodoPago === "EFECTIVO" && (
                   <>
-                    <TextField
-                      inputRef={inputRef}
-                      fullWidth
-                      type="tel"
-                      inputMode="numeric"
-                      label="Monto recibido"
-                      size="small"
-                      sx={{ mt: 2 }}
-                      value={montoRecibido === "" ? "" : montoRecibido}
-                      onChange={(e) =>
-                        setMontoRecibido(Number(e.target.value.replace(/\D/g, "")))
-                      }
-                    />
+                   <TextField
+                                        fullWidth
+                                        autoFocus
+                                        label="Monto recibido"
+                                        size="small"
+                                        type="text"
+                                        inputProps={{
+                                          inputMode: "numeric",
+                                          pattern: "[0-9]*"
+                                        }}
+                                        sx={{ mt: 2 }}
+                                        value={montoRecibido === "" ? "" : formatCOP(montoRecibido)}
+                                        onChange={(e) => {
+                                          const raw = e.target.value.replace(/\D/g, "");
+                                          setMontoRecibido(raw === "" ? "" : Number(raw));
+                                        }}
+                                      />
+
                     {montoRecibido !== "" && cambio < 0 && (
                       <Typography color="error" variant="caption">
                         El monto recibido es menor al total
                       </Typography>
                     )}
 
-                    <Typography
-                      sx={{ mt: 1 }}
-                      fontWeight={800}
-                      color={cambio < 0 ? "error.main" : "success.main"}
-                    >
-                      Cambio: {formatCOP(cambioSeguro)}
-                    </Typography>
+                      <Typography sx={{ mt: 1, fontWeight: 800 }} color={cambio < 0 ? "error.main" : "success.main"}>
+                          Cambio: {formatCOP(cambioSeguro)}
+                     </Typography>
                   </>
                 )}
 
@@ -606,9 +642,9 @@ const cargarVentas = async () => {
               variant="contained"
               color="primary"
               sx={{ borderRadius: 3, fontWeight: 700 }}
-              onClick={imprimirPOS}
+              onClick={imprimirFactura}
             >
-              Imprimir Ticket
+              Imprimir FActura
             </Button>
           </Stack>
         </DialogActions>
@@ -706,19 +742,6 @@ const cargarVentas = async () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-
-
-      {/* RENDER DE FACTURA POST*/}
-      <div style={{ display: "none" }}>
-
-        <FacturaPOS
-          ref={ticketRef}
-          venta={ventaSeleccionada}
-          productos={productosDetalle}
-        />
-
-      </div>
 
     </>
   );

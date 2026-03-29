@@ -396,15 +396,20 @@ animarAlCarrito(
             </Typography>
 
           </Stack>
-            <Typography
-              fontWeight={700}
-              fontSize={{ xs: 9, sm: 12 }}
-              noWrap
-              sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
-            >
-              {prod.nombre}
-            </Typography>
-
+           <Typography
+  fontWeight={700}
+  fontSize={{ xs: 9, sm: 12 }}
+  sx={{
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    display: "-webkit-box",
+    WebkitLineClamp: 2, // máximo 2 líneas
+    WebkitBoxOrient: "vertical",
+    wordBreak: "break-word", // para cortar palabras largas
+  }}
+>
+  {prod.nombre}
+</Typography>
             <Typography
               fontSize={{ xs: 12, sm: 13 }}
               color="success.main"

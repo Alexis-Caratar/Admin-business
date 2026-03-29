@@ -14,15 +14,21 @@ export interface User {
   imagen: string| null
 }
 
-export interface Negocio {
-  id?: number;
-  nombre: string;
-  direccion?: string; 
-  telefono?: string;
-  descripcion?: string;
-  imagen?:string;
-}
-
+  export interface Negocio {
+    id?: number;
+    nit: string;
+    nombre: string;
+    direccion?: string;
+    telefono?: string;
+    descripcion?: string;
+    imagen?: string;
+    correo?: string;
+    ciudad?: string;
+    hora_apertura?: string;
+    hora_cierre?: string;
+    tipo?: string;
+    activo?: boolean;
+  }
 
 export interface Producto {
   id?: number;

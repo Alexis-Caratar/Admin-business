@@ -1,8 +1,7 @@
-// websockets.js
 import { WebSocketServer } from "ws";
 import CajeroService from "./services/cajero.service.js";
 
-let wss;
+export let wss; // exportarlo para usarlo en el controller de impresión
 
 export const initWebSockets = (server) => {
   wss = new WebSocketServer({ server });
@@ -11,6 +10,12 @@ export const initWebSockets = (server) => {
     ws.on("message", async (msg) => {
       try {
         const data = JSON.parse(msg.toString());
+
+        // REGISTRAR AGENTES DE IMPRESIÓN FACTURAS
+        if (data.tipo === "register_agent" && data.isPrintAgent) {
+          ws.isPrintAgent = true;
+          console.log("Agente local registrado para impresión");
+        }
 
         // SUSCRIPCIÓN A MESAS
         if (data.tipo === "suscribirse_mesas") {
@@ -47,11 +52,10 @@ export const initWebSockets = (server) => {
     });
 
     ws.on("close", () => {
+      // Opcional: limpiar datos si quieres
     });
   });
 };
-
-
 
 // 🔵 NOTIFICAR MESAS
 export const notificarMesas = async (id_negocio) => {
@@ -64,15 +68,12 @@ export const notificarMesas = async (id_negocio) => {
     mesas: resultado,
   });
 
-//  console.log("notificar mesas",data);
   wss.clients.forEach((client) => {
     if (client.readyState === 1 && client.idNegocio == id_negocio) {
       client.send(data);
     }
   });
 };
-
-
 
 // 🟢 NOTIFICAR CAJA
 export const notificarCaja = async (id_usuario) => {
@@ -84,7 +85,6 @@ export const notificarCaja = async (id_usuario) => {
     tipo: "actualizar_caja",
     caja: rows.length ? rows[0] : null,
   });
-  //console.log("notificar caja",data);
 
   wss.clients.forEach((client) => {
     if (client.readyState === 1 && client.idUsuario == id_usuario) {

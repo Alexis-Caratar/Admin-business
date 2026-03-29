@@ -47,7 +47,8 @@ export default function Egresos({ idUsuario,id_negocio, id_caja, open, onClose }
   // Estados para dialogo de confirmación
   const [openConfirm, setOpenConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  
+    const rol = localStorage.getItem("rol");
+
   useEffect(() => {
     if (!open) return;
     cargarEgresos();
@@ -316,6 +317,8 @@ const cargarEgresos = async () => {
 
                   <Divider orientation="vertical" flexItem />
 
+            {rol==='admin'&&(
+              <>
                   <IconButton
                     size="small"
                     onClick={() => {
@@ -342,6 +345,9 @@ const cargarEgresos = async () => {
                   >
                     <DeleteOutlineIcon sx={{ fontSize: 18 }} />
                   </IconButton>
+                   </>
+                   )}
+
                 </Stack>
               </Box>
             ))}

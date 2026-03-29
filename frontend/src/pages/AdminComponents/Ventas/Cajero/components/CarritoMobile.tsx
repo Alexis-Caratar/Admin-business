@@ -213,6 +213,7 @@ useEffect(() => {
     onClose();
     setTab(0);
     setDirection(1);
+    setNota("");
 
 
   };

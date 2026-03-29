@@ -44,7 +44,7 @@ export const authService = {
 
 
     const [rows] = await db.query(
-      `SELECT u.*, n.nombre AS nombre_negocio, p.id as id_persona,p.nombres as nombres_persona,
+      `SELECT u.*, n.nombre AS nombre_negocio, p.id as id_persona,concat(p.nombres,' ',p.apellidos) as nombres_persona,
       n.imagen as imagen_negocio
        FROM ${USERS_TABLE} u
        LEFT JOIN negocios n ON u.id_negocio = n.id

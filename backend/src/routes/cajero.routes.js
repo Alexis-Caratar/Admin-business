@@ -21,6 +21,7 @@ router.post("/actualizar_venta", CajeroController.actualizaventa);
 router.get("/liberar_mesa/:id_mesa/:id_negocio", CajeroController.liberar_mesa);
 router.post("/factura-por-caja",CajeroController.facturaPorCaja);
 router.post("/factura-por-detalle",CajeroController.facturaPordetalle);
+router.post("/imprimirfactura",CajeroController.imprimirfactura);
 
 
 

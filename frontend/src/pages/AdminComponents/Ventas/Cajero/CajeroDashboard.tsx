@@ -51,6 +51,7 @@ export const CajeroDashboard: React.FC = () => {
   const [showStats, setShowStats] = useState(false); // por defecto oculto
   const idUsuario = localStorage.getItem("id_usuario");
   const id_negocio = localStorage.getItem("id_negocio");
+  const nombreuser = localStorage.getItem("nombre");
   const [openVentasDetalles, setOpenVentasDetalles] = useState(false);
   const [animItem, setAnimItem] = useState<AnimItem | null>(null);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
@@ -216,17 +217,18 @@ const clearMesa = () => {
 
     const payload = {
       idUsuario:idUsuario,
+      nombre_vendedor:nombreuser,
       id_negocio: id_negocio,
       id_cliente: cliente ? cliente : 25,
       id_caja: idCaja,
       id_mesa: mesaSeleccionada?.id,
-      fecha: new Date().toISOString(),
+      mesa:mesaSeleccionada?.nombre,
       subtotal,
       descuento,
       descuento_porcentaje: 0,
       impuesto,
       total,
-      estado: "PENDIENTE",
+      estado: "PENDIENTE", //REVISAR ESTE ESTADO
       nota: datos_adicionales.nota,
       metodo_pago: datos_adicionales.metodo_pago,
       monto_pagado: total,

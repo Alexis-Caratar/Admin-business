@@ -800,9 +800,9 @@ SELECT
     v.id AS id_venta,
     p.id AS id_pago,
     v.numero_factura,
-     TO_CHAR(p.fecha, 'HH24:MI') AS fecha,
-     TO_CHAR(p.fecha, 'DD/MM/YYYY HH24:MI:SS') AS fecha_completa,
-     TO_CHAR(NOW(), 'DD/MM/YYYY HH24:MI') AS fecha_impresion,
+    TO_CHAR(p.fecha, 'HH24:MI') AS fecha,
+    TO_CHAR(p.fecha AT TIME ZONE 'America/Bogota', 'DD/MM/YYYY HH12:MI:SS AM')::TEXT AS fecha_completa,
+    TO_CHAR(NOW() AT TIME ZONE 'America/Bogota', 'DD/MM/YYYY HH12:MI:SS AM')::TEXT AS fecha_impresion, 
     CONCAT(p2.nombres,' ',p2.apellidos) AS nombre_vendedor,
     per.identificacion AS identificacion_cliente,
     CONCAT(per.nombres,' ',per.apellidos) AS nombre_completo,
@@ -811,6 +811,8 @@ SELECT
     v.subtotal AS venta_total,
     p.estado_pago,
     p.metodo_pago,
+    p.monto_recibido,
+    p.cambio,
     m.id as id_mesa,
     m.nombre as mesa,
     v.nota
@@ -847,6 +849,7 @@ INNER JOIN productos_precios pp on pro.id=pp.id_producto
 LEFT JOIN productos_imagenes pi ON pi.id_producto = pro.id
 
 WHERE vi.id_venta = $1
+order by vi.id asc
 `;
 
 const [rows] = await db.query(sql,[id_venta]);

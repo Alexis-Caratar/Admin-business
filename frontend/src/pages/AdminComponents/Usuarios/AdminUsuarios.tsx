@@ -139,14 +139,7 @@ const AdminUsuarios: React.FC = () => {
    ============================ */
   const handleSubmit = async () => {
     try {
-      /** === SI ES CREAR === */
-      if (form.id_usuario === 0) {
-        if (!form.identificacion || !form.nombres || !form.apellidos) {
-          Swal.fire("Error", "Todos los campos son obligatorios", "error");
-          return;
-        }
-        let email;
-        
+       let email;
         if(form.email==''){
              const ultimos4 = form.identificacion.slice(-4);
         const nombresUsuario = `${form.nombres.split(" ")[0]}${ultimos4}`
@@ -159,6 +152,12 @@ const AdminUsuarios: React.FC = () => {
         }
          const password = `${form.identificacion}*`;
 
+      /** === SI ES CREAR === */
+      if (form.id_usuario === 0) {
+        if (!form.identificacion || !form.nombres || !form.apellidos) {
+          Swal.fire("Error", "Todos los campos son obligatorios", "error");
+          return;
+        }
 
         const payload = {
           persona: {
@@ -180,7 +179,17 @@ const AdminUsuarios: React.FC = () => {
         };
 
         await createUsuarioCompleto(payload);
-        Swal.fire("Éxito", "Usuario creado correctamente", "success");
+    Swal.fire({
+      icon: "success",
+      title: "Éxito",
+      html: `
+          Usuario creado correctamente.<br>
+            Ten en cuenta que  al crear el usuario, para el ingreso de la plataforma el usuario es el correo <br>
+            en caso de no tener el sistema le genera uno automatico<br>
+            la contraseña se genera con la identificación- Termina en '*' <br>
+            (ejemplo: 112345678*)
+      `,
+    });
       } else {
         /** === SI ES EDITAR === */
 
@@ -193,19 +202,28 @@ const AdminUsuarios: React.FC = () => {
             apellidos: form.apellidos,
             telefono: form.telefono,
             direccion: form.direccion,
-            email: form.email
+            email: email
           },
           usuario: {
             id: form.id_usuario,
-            email: form.email,
+            email: email,
             rol: form.rol,
             imagen: form.imagen,
-            password: '12345'
+            password: password
           },
         };
 
         await updateUsuarioCompleto(payload);
-        Swal.fire("Éxito", "Usuario actualizado correctamente ", "success");
+        Swal.fire({
+          icon: "success",
+          title: "Éxito",
+          html: `
+            Usuario actualizado correctamente.<br>
+            Ten en cuenta que  al actualizar el usuario, <br>
+            la contraseña se actualiza:Se genera con la identificación- Termina en '*' <br>
+            (ejemplo: 112345678*)
+          `,
+        });
       }
 
       setOpenModal(false);

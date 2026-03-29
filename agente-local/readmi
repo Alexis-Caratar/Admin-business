@@ -1,0 +1,18 @@
+para configurar la impresora localmente de forma correcta 
+1 instalar este sistema en el equipo funciona solo para windows con nom i y version de node 24
+2 instalar controlador de impresora zadig 2.9 y configurar internamente la impresora 
+3.configurar los id que estan en el .env estos despues de configurar zadig se pueden verificar los id en node pruebaimpresora.js y ahi le sale el id VENDOR_ID y PRODUCT_ID
+3 ajustar en el .evn y hacer pruebas 
+
+
+-- 🔹 Truncar tablas y reiniciar los IDs
+TRUNCATE TABLE
+    pagos,
+    ventas_items,
+    ventas,
+    egresos,
+    caja
+RESTART IDENTITY
+CASCADE;
+
+ALTER SEQUENCE egresos_numero_seq RESTART WITH 1;

@@ -1,6 +1,8 @@
 import CajeroService from "../services/cajero.service.js";
-import { imprimirComanda } from "../services/impresionService.js";
+import * as serviceNegocios from "../services/negocios.service.js";
+import dotenv from "dotenv";
 
+import { wss } from "../websockets.js"; 
 
 
 export const estadoCaja = async (req, res) => {
@@ -54,13 +56,39 @@ export const finalizarVenta = async (req, res) => {
   try {
    const payload = req.body;
       const resultado = await CajeroService.finalizarVenta(payload);
-   
-     /*   try {
-      await imprimirComanda(payload);
-    } catch (err) {
-      console.error("Error imprimiendo comanda:", err);
+      const datos_negocio = await serviceNegocios.obtener(payload.id_negocio);
+
+const payloadComanda = {
+  printerName: process.env.IMPRESORAPRINCIPAL_CAJA,          // nombre de la impresora de comandas
+  negocio: {
+    nombre: datos_negocio.nombre,
+    direccion: datos_negocio.direccion,
+    ciudad: datos_negocio.ciudad,
+    telefono: datos_negocio.telefono
+  },
+  mesa: {
+    id_mesa: payload.id_mesa||'N/A',
+    nombre: payload.mesa||'N/A'
+  },
+  usuario: {
+    id: payload.idUsuario,
+    nombre: payload.nombre_vendedor
+  },
+  fecha: datos_negocio.fecha_impresion,
+  nota: payload.nota,                        
+  productos: payload.productos
+};
+    
+    if (wss) {
+      wss.clients.forEach(client => {
+        if (client.readyState === 1 && client.isPrintAgent) { // marcamos los agentes locales con isPrintAgent
+          client.send(JSON.stringify({
+            tipo: "imprimir_comanda",
+            payload: payloadComanda
+          }));
+        }
+      });
     }
-      */
 
       return res.json({ ok: true, result: resultado });
   } catch (e) {
@@ -267,7 +295,50 @@ export const facturaPordetalle = async (req, res) => {
       msg: "Error obteniendo factura"
     });
   }
+}
 
+export const imprimirfactura = async (req, res) => {
+  try {
+    const data = req.body; 
+    const datos_negocio = await serviceNegocios.obtener(data.id_negocio);
+
+    const payloadfactura=
+    {  printerName: process.env.IMPRESORAPRINCIPAL_CAJA,          // nombre de la impresora de comandas
+          negocio: {
+            nit: datos_negocio.nit,
+            nombre: datos_negocio.nombre,
+            direccion: datos_negocio.direccion,
+            ciudad: datos_negocio.ciudad,
+            telefono: datos_negocio.telefono
+          },
+            venta: data.venta,
+            productos: data.productos
+    }
+    
+    if (wss) {
+      wss.clients.forEach(client => {
+        if (client.readyState === 1 && client.isPrintAgent) { // marcamos los agentes locales con isPrintAgent
+          client.send(JSON.stringify({
+            tipo: "imprimir_venta",
+            payload: payloadfactura
+          }));
+        }
+      });
+    }
+
+    res.json({
+      ok: true,
+      msg: "Enviado a impresión"
+    });
+
+  } catch (error) {
+    console.error("Error al enviar a impresión:", error);
+    res.status(500).json({
+      ok: false,
+      msg: "Error al enviar a impresión"
+    });
+  }
 };
+
 
 

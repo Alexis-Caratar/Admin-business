@@ -23,6 +23,8 @@ import {
   DialogActions,
   TextField,
   Pagination,
+  Switch,
+  MenuItem,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -30,20 +32,46 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import SearchIcon from "@mui/icons-material/Search";
 import StoreIcon from "@mui/icons-material/Store";
-
+import EmailIcon from "@mui/icons-material/Email";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import PhoneIcon from "@mui/icons-material/Phone";
+import BusinessIcon from "@mui/icons-material/Business";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ImageIcon from "@mui/icons-material/Image";
+import ApartmentIcon from "@mui/icons-material/Apartment";
+import CategoryIcon from "@mui/icons-material/Category";
 
 
 const AdminNegocios: React.FC = () => {
   const [negocios, setNegocios] = useState<Negocio[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [form, setForm] = useState<Negocio>({
-    nombre: "",
-    direccion: "",
-    telefono: "",
-    descripcion: "",
-    imagen: "",
-  });
+  const tiposNegocio = [
+  "Restaurante",
+  "Cafetería",
+  "Bar",
+  "Tienda",
+  "Supermercado",
+  "Panadería",
+  "Comida rápida",
+  "Servicios",
+  "Otros",
+];
+
+const [form, setForm] = useState<Negocio>({
+  nit: "",
+  nombre: "",
+  direccion: "",
+  telefono: "",
+  descripcion: "",
+  imagen: "",
+  correo: "",
+  ciudad: "",
+  hora_apertura:"",
+  hora_cierre:"",
+  tipo: "",
+  activo: true,
+});
 
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -82,12 +110,20 @@ const AdminNegocios: React.FC = () => {
 
   const openCreateModal = () => {
     setForm({
-      nombre: "",
-      direccion: "",
-      telefono: "",
-      descripcion: "",
-      imagen: "",
-    });
+   nit: "",
+  nombre: "",
+  direccion: "",
+  telefono: "",
+  descripcion: "",
+  imagen: "",
+  correo: "",
+  ciudad: "",
+  hora_apertura:"",
+  hora_cierre:"",
+  tipo: "",
+  activo: true,
+  
+});
     setEditingId(null);
     setIsModalOpen(true);
   };
@@ -216,10 +252,6 @@ const AdminNegocios: React.FC = () => {
 
 </Box>
 
-
-
-
-
    {/* GRID DE TARJETAS */}
 <Box display="flex" flexWrap="wrap" gap={3}>
   {negociosPaginated.map((n) => (
@@ -307,50 +339,146 @@ const AdminNegocios: React.FC = () => {
       </Box>
 
       {/* MODAL */}
-      <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="sm">
-        <DialogTitle>{editingId ? "Editar Negocio" : "Crear Negocio"}</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField
-            label="Nombre"
-            value={form.nombre}
-            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            fullWidth
-          />
-          <TextField
-            label="Dirección"
-            value={form.direccion}
-            onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-            fullWidth
-          />
-          <TextField
-            label="Teléfono"
-            value={form.telefono}
-            onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-            fullWidth
-          />
-          <TextField
-            label="Descripción"
-            multiline
-            rows={3}
-            value={form.descripcion}
-            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-            fullWidth
-          />
-          <TextField
-            label="URL Imagen"
-            value={form.imagen}
-            onChange={(e) => setForm({ ...form, imagen: e.target.value })}
-            fullWidth
-          />
-        </DialogContent>
+     
+<Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="md">
+  <DialogTitle sx={{ fontWeight: 500, display: "flex", alignItems: "center", gap: 1 }}>
+    <BusinessIcon />
+    {editingId ? "Editar Negocio" : "Crear Negocio"}
+  </DialogTitle>
 
-        <DialogActions>
-          <Button onClick={closeModal}>Cancelar</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            {editingId ? "Actualizar" : "Crear"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+ <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 3 }}>
+  <Box display="flex" flexWrap="wrap" gap={2}>
+    {/* Primera columna */}
+    <Box flex="1 1 45%" minWidth={250}>
+      <TextField
+        label="NIT"
+        value={form.nit}
+        onChange={(e) => setForm({ ...form, nit: e.target.value })}
+        fullWidth
+        InputProps={{ startAdornment: <BusinessIcon sx={{ mr: 1 }} /> }}
+        sx={{ mt: 2 }} // <--- aumenta un poquito el margen superior
+      />
+        <TextField
+          label="Nombre"
+          value={form.nombre}
+          onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+          fullWidth
+          InputProps={{ startAdornment: <ApartmentIcon sx={{ mr: 1 }} /> }}
+          sx={{ mt: 1 }}
+        />
+        <TextField
+          label="Dirección"
+          value={form.direccion}
+          onChange={(e) => setForm({ ...form, direccion: e.target.value })}
+          fullWidth
+          sx={{ mt: 1 }}
+          InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
+        />
+        <TextField
+          label="Ciudad"
+          value={form.ciudad}
+          onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
+          fullWidth
+          sx={{ mt: 1 }}
+          InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
+        />
+        <TextField
+          label="Teléfono"
+          value={form.telefono}
+          onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+          fullWidth
+          sx={{ mt: 1 }}
+          InputProps={{ startAdornment: <PhoneIcon sx={{ mr: 1 }} /> }}
+        />
+      </Box>
+
+      {/* Segunda columna */}
+      <Box flex="1 1 45%" minWidth={250}>
+        <TextField
+          label="Correo Electrónico"
+          value={form.correo}
+          onChange={(e) => setForm({ ...form, correo: e.target.value })}
+          fullWidth
+           sx={{ mt: 2 }}
+          InputProps={{ startAdornment: <EmailIcon sx={{ mr: 1 }} /> }}
+        />
+       <Box display="flex" gap={2}>
+        <TextField
+          label="Hora Apertura"
+          type="time"
+          value={form.hora_apertura || ""}
+          onChange={(e) => setForm({ ...form, hora_apertura: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          fullWidth
+        />
+        <TextField
+          label="Hora Cierre"
+          type="time"
+          value={form.hora_cierre || ""}
+          onChange={(e) => setForm({ ...form, hora_cierre: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          fullWidth
+        />
+      </Box>
+       
+      <TextField
+        select
+        label="Tipo de negocio"
+        value={form.tipo}
+        onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+        fullWidth
+        sx={{ mt: 1 }}
+        InputProps={{ startAdornment: <CategoryIcon sx={{ mr: 1 }} /> }}
+      >
+        {tiposNegocio.map((tipo) => (
+          <MenuItem key={tipo} value={tipo}>
+            {tipo}
+          </MenuItem>
+        ))}
+      </TextField>
+        <TextField
+          label="URL Imagen"
+          value={form.imagen}
+          onChange={(e) => setForm({ ...form, imagen: e.target.value })}
+          fullWidth
+          sx={{ mt: 1 }}
+          InputProps={{ startAdornment: <ImageIcon sx={{ mr: 1 }} /> }}
+        />
+      </Box>
+
+      {/* Descripción */}
+      <Box flex="1 1 100%">
+        <TextField
+          label="Descripción"
+          multiline
+          rows={3}
+          value={form.descripcion}
+          onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+          fullWidth
+          sx={{ mt: 1 }}
+          InputProps={{ startAdornment: <DescriptionIcon sx={{ mr: 1 }} /> }}
+        />
+      </Box>
+
+      {/* Switch Activo */}
+      <Box display="flex" alignItems="center" gap={1}>
+        <Typography>Activo:</Typography>
+        <Switch
+          checked={form.activo}
+          onChange={(e) => setForm({ ...form, activo: e.target.checked })}
+          color="primary"
+        />
+      </Box>
+    </Box>
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={closeModal}>Cancelar</Button>
+    <Button onClick={handleSubmit} variant="contained" color="primary">
+      {editingId ? "Actualizar" : "Crear"}
+    </Button>
+  </DialogActions>
+</Dialog>
     </Box>
   );
 };
