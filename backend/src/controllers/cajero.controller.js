@@ -112,9 +112,9 @@ const payloadComanda = {
       });
     }
 
-      return res.json({ ok: true });
+      return ({ ok: true });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return ({ ok: false, error: e.message });
   }
   
 };
