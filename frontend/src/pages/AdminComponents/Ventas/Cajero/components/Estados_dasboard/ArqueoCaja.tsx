@@ -32,22 +32,41 @@ type Props = {
 };
 
 export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo }) => {
-const total_tiquteras = arqueoInfo?.ventas_metodos?.[5]?.total ?? 0;
+const toNumber = (val: any) => Number(val) || 0;
 
-  const formatCOP = (value: number) =>
-    new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-    }).format(value || 0);
+const getTotalByMetodo = (metodo: string) => {
+  return toNumber(
+    arqueoInfo?.ventas_metodos?.find((m: any) => m.metodo_pago === metodo)?.total
+  );
+};
 
-  const totalEnCaja =
-    arqueoInfo
-      ? Number(arqueoInfo.monto_inicial) +
-      Number(arqueoInfo.total_ventas) -
-      Number(arqueoInfo.total_egresos)-
-      Number(total_tiquteras)
-      : 0;
+const formatCOP = (value: number) =>
+  new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+  }).format(toNumber(value));
+  
+//const total_efectivo = getTotalByMetodo("EFECTIVO");
+const total_targeta = getTotalByMetodo("TARJETA");
+const total_trasferencia = getTotalByMetodo("TRANSFERENCIA");
+const total_nequi = getTotalByMetodo("NEQUI");
+const total_daviplata = getTotalByMetodo("DAVIPLATA");
+const total_tiquteras = getTotalByMetodo("TIQUERERA");
+
+const totalDigital =
+  total_targeta +
+  total_trasferencia +
+  total_nequi +
+  total_daviplata +
+  total_tiquteras;
+
+  const totalEnCaja = arqueoInfo
+  ? toNumber(arqueoInfo.monto_inicial) +
+    toNumber(arqueoInfo.total_ventas) -
+    toNumber(arqueoInfo.total_egresos) -
+    totalDigital
+  : 0;
 
   /** Agrupar productos por categoría */
   const productosPorCategoria = arqueoInfo?.productos?.reduce((acc: any, item: any) => {

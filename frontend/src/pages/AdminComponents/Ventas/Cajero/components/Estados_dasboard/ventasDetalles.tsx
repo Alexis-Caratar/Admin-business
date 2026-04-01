@@ -20,7 +20,7 @@ import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import { facturaPorCaja, productosPorVenta, actualiza_venta,imprimirfactura } from "../../../../../../api/cajero";
+import { facturaPorCaja, productosPorVenta, actualiza_venta,imprimircomanda,imprimirfactura } from "../../../../../../api/cajero";
 
 export default function VentasDetalles({ open, onClose, id_caja }: any) {
 
@@ -192,14 +192,16 @@ const getMetodoPagoIcon = (metodo:any) => {
     }
   };
 
- const imprimirFactura = async () => {
+ const imprimirFactura = async (estado_impresion:String) => {
   try {
-    if (!ventaSeleccionada) return;
-
-    console.log("venta selec",ventaSeleccionada);
-    
+    if (!ventaSeleccionada) return;    
     const payload = {
       id_negocio:id_negocio,
+      id_mesa:ventaSeleccionada.id_mesa,
+      mesa:ventaSeleccionada.mesa,
+      idUsuario:ventaSeleccionada.id_mesa,
+      nombre_vendedor:ventaSeleccionada.nombre_vendedor,
+      nota:ventaSeleccionada.nota,
       venta: {
         numero_factura: ventaSeleccionada.numero_factura,
         fecha_completa: ventaSeleccionada.fecha_completa,
@@ -224,12 +226,16 @@ const getMetodoPagoIcon = (metodo:any) => {
       }))
     };
 
-
-       await imprimirfactura(payload);
+    if(estado_impresion=='comanda'){
+      await imprimircomanda(payload);
+    }else if(estado_impresion=='factura'){
+       await imprimirfactura(payload );
+    }
+      
     Swal.fire({
       icon: "success",
       title: "Enviado a impresión",
-      text: "La factura se está imprimiendo",
+      text: " Espere un momento se está imprimiendo...",
       timer: 1500,
       showConfirmButton: false
     });
@@ -840,17 +846,36 @@ const getMetodoPagoIcon = (metodo:any) => {
         </>
       )}
 
-      {/* IMPRIMIR */}
+      {/*  IMPRESIONES COMANDA O FACTURA */}
+
+ {ventaSeleccionada?.estado_pago === false && (
+  <Button
+          fullWidth
+          startIcon={<PrintIcon />}
+          variant="contained"
+          color="primary"
+          sx={{ borderRadius: 3, fontWeight: 700 }}
+          onClick={() => imprimirFactura("comanda")}
+        >
+          Imprimir Comanda
+        </Button>
+ )}
+    
+     {ventaSeleccionada?.estado_pago === true && (
       <Button
         fullWidth
         startIcon={<PrintIcon />}
         variant="contained"
         color="primary"
         sx={{ borderRadius: 3, fontWeight: 700 }}
-        onClick={imprimirFactura}
+        onClick={() => imprimirFactura("factura")}
       >
         Imprimir Factura
       </Button>
+
+     )}
+    
+
     </Stack>
   </DialogActions>
 </Dialog>

@@ -56,6 +56,28 @@ export const finalizarVenta = async (req, res) => {
   try {
    const payload = req.body;
       const resultado = await CajeroService.finalizarVenta(payload);
+
+      await imprimircomanda_fisica(payload);
+      return res.json({ ok: true, result: resultado });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};
+
+
+export const imprimir_comanda = async (req, res) => {
+  try {
+   const payload = req.body;
+      await imprimircomanda_fisica(payload);
+      return res.json({ ok: true, result: resultado });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};
+export const imprimircomanda_fisica = async (payload) => {
+  try {
       const datos_negocio = await serviceNegocios.obtener(payload.id_negocio);
 
 const payloadComanda = {
@@ -96,6 +118,7 @@ const payloadComanda = {
   }
   
 };
+
 
 export const buscarCliente = async (req, res) => {
   try {

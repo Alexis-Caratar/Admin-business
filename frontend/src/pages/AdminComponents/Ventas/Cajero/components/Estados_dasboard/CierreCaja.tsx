@@ -1,12 +1,16 @@
 import React, { useState, useMemo, useEffect } from "react";
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, Typography, Box, Divider, Avatar, TextField,
+  AccordionSummary,AccordionDetails,Accordion,
+  Tooltip,
 } from "@mui/material";
-
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
+
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -27,19 +31,50 @@ export const CierreCajaModal: React.FC<Props> = ({
   const [baseCaja, setBaseCaja] = useState<number | "">("");
   const [observacion, setObservacion] = useState("");
   // Para la sub-modal de facturas pendientes
-const [facturasPendientes, setFacturasPendientes] = useState<any[]>([]);
-const [mesasOcupadas, setMesasOcupadas] = useState<any[]>([]);
-const [alertaAbierta, setAlertaAbierta] = useState(false); // controla la modal combinada
-const total_tiquteras = arqueoInfo?.ventas_metodos?.[5]?.total ?? 0;
-  /* DINERO ESPERADO */
-  const ventas = arqueoInfo?.total_ventas ?? 0;
-  const egresos = arqueoInfo?.total_egresos ?? 0;
-  const montoInicial = arqueoInfo?.monto_inicial ?? 0;
+  const [facturasPendientes, setFacturasPendientes] = useState<any[]>([]);
+  const [mesasOcupadas, setMesasOcupadas] = useState<any[]>([]);
+  const [alertaAbierta, setAlertaAbierta] = useState(false); // controla la modal combinada
+  const [openVentas, setOpenVentas] = useState(false);
 
-  const dineroEsperado = useMemo(() => Number(montoInicial) + Number(ventas) - Number(egresos)-Number(total_tiquteras), [ventas, egresos, montoInicial]);
-  const ventaLibre = useMemo(() => (dineroContado === "" || baseCaja === "" ? 0 : Number(dineroContado) - Number(baseCaja)), [dineroContado, baseCaja]);
-  const diferencia = useMemo(() => (dineroContado === "" ? 0 : Number(dineroContado) - dineroEsperado), [dineroContado, dineroEsperado]);
+const toNumber = (val: any) => Number(val) || 0;
 
+const getTotalByMetodo = (metodo: string) => {
+  return toNumber(
+    arqueoInfo?.ventas_metodos?.find((m: any) => m.metodo_pago === metodo)?.total
+  );
+};
+
+const total_efectivo = getTotalByMetodo("EFECTIVO");
+const total_targeta = getTotalByMetodo("TARJETA");
+const total_trasferencia = getTotalByMetodo("TRANSFERENCIA");
+const total_nequi = getTotalByMetodo("NEQUI");
+const total_daviplata = getTotalByMetodo("DAVIPLATA");
+const total_tiqueteras = getTotalByMetodo("TIQUERERA");
+
+const ventas = toNumber(arqueoInfo?.total_ventas);
+const egresos = toNumber(arqueoInfo?.total_egresos);
+const montoInicial = toNumber(arqueoInfo?.monto_inicial);
+
+const totalDigital =
+  total_targeta +
+  total_trasferencia +
+  total_nequi +
+  total_daviplata +
+  total_tiqueteras;
+
+  const dineroEsperado = useMemo(() => {
+  return montoInicial + ventas - egresos - totalDigital;
+}, [montoInicial, ventas, egresos, totalDigital]);
+
+const ventaLibre = useMemo(() => {
+  if (dineroContado === "" || baseCaja === "") return 0;
+  return toNumber(dineroContado) - toNumber(baseCaja);
+}, [dineroContado, baseCaja]);
+
+const diferencia = useMemo(() => {
+  if (dineroContado === "") return 0;
+  return toNumber(dineroContado) - dineroEsperado;
+}, [dineroContado, dineroEsperado]);
 
   useEffect(() => {
   if (!open) return; // Solo cuando la modal de cierre de caja se abre
@@ -124,145 +159,267 @@ const camposValidos = () => {
     ✕
   </Button>
 </DialogTitle>
-        <DialogContent>
-          {/* RESUMEN CAJA */}
-          <Box
-            sx={{p: 2,borderRadius: 3,bgcolor: "#f8f9fa",mb: 3}}>
-            <Stack spacing={2}>
-              <Box display="flex" justifyContent="space-between">
-                <Typography color="text.secondary">
-                  Monto inicial
-                </Typography>
-                <Typography fontWeight={600}>
-                  {formatCOP(montoInicial)}
-                </Typography>
-              </Box>
 
-              <Box display="flex" justifyContent="space-between">
-                <Typography color="text.secondary">
-                  Ventas
-                </Typography>
-                <Typography fontWeight={600} color="success.main">
-                  {formatCOP(ventas)}
-                </Typography>
-              </Box>
+      <DialogContent sx={{ background: "#f4f6f8" }}>
 
-              <Box display="flex" justifyContent="space-between">
-                <Typography color="text.secondary">
-                  tiquetera
-                </Typography>
-                <Typography fontWeight={600} color="success.main">
-                  {formatCOP(total_tiquteras)}
-                </Typography>
-              </Box>
+  {/* 🔹 RESUMEN GENERAL */}
+  <Box
+    sx={{
+      p: 2,
+      borderRadius: 3,
+      bgcolor: "#fff",
+      mb: 2,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+    }}
+  >
+    <Typography fontWeight={700} mb={1}>
+      Resumen de Caja
+    </Typography>
 
-              <Box display="flex" justifyContent="space-between">
-                <Typography color="text.secondary">
-                  Egresos
-                </Typography>
-                <Typography fontWeight={600} color="error.main">
-                  - {formatCOP(egresos)}
-                </Typography>
-              </Box>
+    <Stack spacing={1}>
+      <Stack direction="row" justifyContent="space-between">
+        <Typography color="text.secondary">Monto inicial</Typography>
+        <Typography fontWeight={600}>{formatCOP(montoInicial)}</Typography>
+      </Stack>
 
-              <Divider />
+      <Accordion
+  expanded={openVentas}
+  onChange={() => setOpenVentas(!openVentas)}
+  sx={{
+    borderRadius: 3,
+    mb: 2,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    "&:before": { display: "none" } // quita línea fea
+  }}
+>
+  {/* HEADER (clickable) */}
+  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+    <Stack direction="row" justifyContent="space-between" width="100%">
+      <Typography color="text.secondary">
+        Ventas totales
+      </Typography>
 
-              <Box display="flex" justifyContent="space-between">
-                <Typography fontWeight={700}>
-                  Dinero esperado en caja
-                </Typography>
-                <Typography fontWeight={700} fontSize={18}>
-                  {formatCOP(dineroEsperado)}
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
+      <Typography fontWeight={700} color="success.main">
+        {formatCOP(ventas)}
+      </Typography>
+    </Stack>
+  </AccordionSummary>
 
-          {/* DINERO CONTADO */}
-          <TextField
-            fullWidth
-            type="text"
-            label="Dinero contado en caja"
-            placeholder="Ingrese el dinero contado"
-            value={dineroContado === "" ? "" : formatCOP(Number(dineroContado))}
-            onChange={(e) => {
-              const valor = e.target.value.replace(/\D/g, ""); // solo números
-              setDineroContado(valor === "" ? "" : Number(valor));
-            }}
-            sx={{ mb: 2 }}
-          />
+  {/* CONTENIDO */}
+  <AccordionDetails>
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2,1fr)",
+        gap: 1.5
+      }}
+    >
+      {[
+        { label: "Efectivo", value: total_efectivo },
+        { label: "Tarjeta", value: total_targeta },
+        { label: "Transferencia", value: total_trasferencia },
+        { label: "Nequi", value: total_nequi },
+        { label: "DaviPlata", value: total_daviplata },
+        { label: "Tiquetera", value: total_tiqueteras },
+      ].map((item, i) => (
+        <Box
+          key={i}
+          sx={{
+            p: 1.5,
+            borderRadius: 2,
+            bgcolor: "#f9fafb",
+            border: "1px solid #eee",
+            transition: "all .2s",
+            "&:hover": {
+              bgcolor: "#f1f5f9"
+            }
+          }}
+        >
+          <Typography fontSize={11} color="text.secondary">
+            {item.label}
+          </Typography>
+          <Typography fontWeight={700} fontSize={14}>
+            {formatCOP(item.value)}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  </AccordionDetails>
+</Accordion>
+      <Stack direction="row" justifyContent="space-between">
+        <Typography color="text.secondary">Egresos</Typography>
+        <Typography fontWeight={700} color="error.main">
+          - {formatCOP(egresos)}
+        </Typography>
+      </Stack>
+    </Stack>
+  </Box>
 
-          {/* DIFERENCIA */}
-          {dineroContado !== "" && (
 
-            <Box
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                bgcolor:
-                  diferencia === 0
-                    ? "#e8f5e9"
-                    : diferencia > 0
-                      ? "#e3f2fd"
-                      : "#ffebee",
-                mb: 2
-              }}
-            >
-              <Typography fontWeight={600}>
-                Diferencia: {formatCOP(diferencia)}
-              </Typography>
-              <Typography fontSize={13} color="text.secondary">
-                {diferencia === 0 && "Caja exacta"}
-                {diferencia > 0 && "Sobrante de caja"}
-                {diferencia < 0 && "Faltante de caja"}
-              </Typography>
 
-            </Box>
+  {/* 🔥 TOTAL ESPERADO (DESTACADO) */}
+  <Box
+    sx={{
+      p: 2,
+      borderRadius: 3,
+      mb: 2,
+      background: "linear-gradient(135deg,#111827,#1f2937)",
+      color: "#fff",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }}
+  >
+    
+<Tooltip
+  arrow
 
-          )}
+  placement="top"
+  componentsProps={{
+    tooltip: {
+      sx: {
+        bgcolor: "#111827",
+        color: "#fff",
+        fontSize: 12,
+        borderRadius: 2,
+        p: 1.5,
+        boxShadow: "0 6px 20px rgba(0,0,0,0.3)"
+      }
+    }
+  }}
+  title={
+    <Box>
+      <Typography fontSize={12} fontWeight={700} mb={0.5}>
+        Cálculo del dinero esperado
+      </Typography>
 
-          {/* BASE QUE QUEDA */}
-          <TextField
-            fullWidth
-            type="text"
-            label="Base que queda en caja"
-            placeholder="Ej: $ 50.000"
-            value={baseCaja === "" ? "" : formatCOP(Number(baseCaja))}
-            onChange={(e) => {
-              const valor = e.target.value.replace(/\D/g, "");
-              setBaseCaja(valor === "" ? "" : Number(valor));
-            }}
-            sx={{ mb: 2 }}
-          />
+      <Typography fontSize={11}>
+        💰 Monto inicial {formatCOP(montoInicial)}
+      </Typography>
+      <Typography fontSize={11}>
+        + 💵 Ventas en efectivo {formatCOP(total_efectivo)}
+      </Typography>
+      <Typography fontSize={11}> 
+        - 💸 Egresos {formatCOP(egresos)}
+      </Typography>
+    </Box>
+  }
+>
+  <Box
+    sx={{
+      p: 2,
+      borderRadius: 3,
+      background: "linear-gradient(135deg,#111827,#1f2937)",
+      color: "#fff",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      cursor: "pointer",
+      transition: "all .25s ease",
+      boxShadow: "0 6px 18px rgba(0,0,0,0.2)",
 
-          <Box
-            sx={{
-              p: 2,
-              borderRadius: 2,
-              bgcolor: "#f5f5f5",
-              mt: 1
-            }}
-          >
-            <Typography fontSize={13} color="text.secondary">
-              Venta libre / Retiro de caja
-            </Typography>
-            <Typography fontWeight={700} fontSize={18} color="success.main">
-              {formatCOP(ventaLibre)}
-            </Typography>
-          </Box>
+      "&:hover": {
+        transform: "translateY(-3px)",
+        boxShadow: "0 10px 25px rgba(0,0,0,0.3)"
+      }
+    }}
+  >
+    {/* LEFT */}
+    <Box display="flex" alignItems="center" gap={1}>
+      <Typography fontWeight={600}>
+        Dinero esperado
+      </Typography>
+      <InfoOutlinedIcon sx={{ fontSize: 16, opacity: 0.7 }} />
+    </Box>
 
-          {/* OBSERVACIONES */}
-          <TextField
-            fullWidth
-            multiline
-            rows={3}
-            label="Observaciones"
-            placeholder="Notas del cierre de caja..."
-            value={observacion}
-            onChange={(e) => setObservacion(e.target.value)}
-          />
+    {/* RIGHT */}
+    <Typography fontSize={20} fontWeight={800}>
+      {formatCOP(dineroEsperado)}
+    </Typography>
+  </Box>
+</Tooltip>
+  </Box>
 
-        </DialogContent>
+  {/* 🔹 DINERO CONTADO */}
+  <TextField
+    fullWidth
+    label="Dinero contado en caja"
+    value={dineroContado === "" ? "" : formatCOP(Number(dineroContado))}
+    onChange={(e) => {
+      const valor = e.target.value.replace(/\D/g, "");
+      setDineroContado(valor === "" ? "" : Number(valor));
+    }}
+    sx={{ mb: 2 }}
+  />
+
+  {/* 🔥 DIFERENCIA VISUAL */}
+  {dineroContado !== "" && (
+    <Box
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        mb: 2,
+        bgcolor:
+          diferencia === 0
+            ? "#e8f5e9"
+            : diferencia > 0
+              ? "#e3f2fd"
+              : "#ffebee"
+      }}
+    >
+      <Typography fontWeight={700}>
+        Diferencia: {formatCOP(diferencia)}
+      </Typography>
+
+      <Typography fontSize={12} color="text.secondary">
+        {diferencia === 0 && "Caja exacta"}
+        {diferencia > 0 && "Sobrante"}
+        {diferencia < 0 && "Faltante"}
+      </Typography>
+    </Box>
+  )}
+
+  {/* 🔹 BASE CAJA */}
+  <TextField
+    fullWidth
+    label="Base que queda en caja"
+    value={baseCaja === "" ? "" : formatCOP(Number(baseCaja))}
+    onChange={(e) => {
+      const valor = e.target.value.replace(/\D/g, "");
+      setBaseCaja(valor === "" ? "" : Number(valor));
+    }}
+    sx={{ mb: 2 }}
+  />
+
+  {/* 🔹 VENTA LIBRE */}
+  <Box
+    sx={{
+      p: 2,
+      borderRadius: 2,
+      bgcolor: "#fff",
+      mb: 2,
+      border: "1px dashed #ccc"
+    }}
+  >
+    <Typography fontSize={12} color="text.secondary">
+      Venta libre / Retiro
+    </Typography>
+    <Typography fontWeight={800} fontSize={18} color="success.main">
+      {formatCOP(ventaLibre)}
+    </Typography>
+  </Box>
+
+  {/* 🔹 OBSERVACIONES */}
+  <TextField
+    fullWidth
+    multiline
+    rows={3}
+    label="Observaciones"
+    value={observacion}
+    onChange={(e) => setObservacion(e.target.value)}
+  />
+
+</DialogContent>
 
         {/* BOTONES */}
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -500,7 +657,7 @@ const camposValidos = () => {
             <ReceiptIcon sx={{ fontSize: 18, color: 'white' }} />
           </Avatar>
           <Typography fontWeight={600}>Tiqueteras:</Typography>
-          <Typography sx={{ ml: 'auto', color: 'success.main' }}>{formatCOP(total_tiquteras)}</Typography>
+          <Typography sx={{ ml: 'auto', color: 'success.main' }}>{formatCOP(total_tiqueteras)}</Typography>
         </Box>
 
         {/* Egresos */}
@@ -521,7 +678,7 @@ const camposValidos = () => {
           <Avatar sx={{ bgcolor: 'warning.main', width: 30, height: 30 }}>
             <WarningAmberIcon sx={{ fontSize: 18, color: 'white' }} />
           </Avatar>
-          <Typography fontWeight={700}>Dinero esperado:</Typography>
+          <Typography fontWeight={700}>Saldo caja:</Typography>
           <Typography sx={{ ml: 'auto', fontWeight: 700 }}>{formatCOP(dineroEsperado)}</Typography>
         </Box>
 

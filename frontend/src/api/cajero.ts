@@ -72,3 +72,7 @@ export const productosPorVenta = (data:any) => {
 export const imprimirfactura = (data:any) => {
   return axios.post(`cajero/imprimirfactura`, data);
 };
+
+export const imprimircomanda = (data:any) => {
+  return axios.post(`cajero/imprimirComanda`, data);
+};
