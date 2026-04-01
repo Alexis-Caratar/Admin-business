@@ -49,35 +49,40 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        width: "97.5vw",
-        minHeight: "96vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        fontFamily: `"Inter", sans-serif`,
-        background: "#f3f4f6",
-        p: 2,
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 30 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+      <Box
+        sx={{
+          width: "100%",              
+          minHeight: "100vh",
+          overflowX: "hidden",        
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#f3f4f6",
+          boxSizing: "border-box",    
+          px: 2,                      
+          py: 2,
+        }}
       >
-        <Paper
-          elevation={10}
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            width: { xs: "90%", sm: 800 },
-            minHeight: { xs: "auto", sm: 500 },
-            borderRadius: 4,
-            overflow: "hidden",
-          }}
+     <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{ width: "100%", display: "flex", justifyContent: "center" }} // 🔥 clave
         >
+     <Paper
+            elevation={10}
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              width: "100%",
+              maxWidth: { xs: "100%", sm: 700, md: 900, lg: 900 },
+              mx: "auto",
+              borderRadius: 4,
+              overflow: "hidden",
+            }}
+          >
           {/* Lado izquierdo azul */}
           <Box
             sx={{
@@ -88,7 +93,7 @@ const Login: React.FC = () => {
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              p: 4,
+              p: { xs: 3, sm: 4 },
               textAlign: "center",
               position: "relative"
             }}
@@ -111,19 +116,20 @@ const Login: React.FC = () => {
             </Typography>
 
             {/* Curva decorativa */}
-            <Box
-              sx={{
-                position: "absolute",
-                right: -50,
-                bottom: 0,
-                width: 100,
-                height: "100%",
-                background: "#fff",
-                borderTopLeftRadius: "50% 50%",
-                borderBottomLeftRadius: "50% 50%",
-                display: { xs: "none", sm: "block" },
-              }}
-            />
+           <Box
+            sx={{
+              position: "absolute",
+              right: 0,
+              transform: "translateX(50%)",   // 🔥 efecto sin romper layout
+              bottom: 0,
+              width: 100,
+              height: "100%",
+              background: "#fff",
+              borderTopLeftRadius: "50% 50%",
+              borderBottomLeftRadius: "50% 50%",
+              display: { xs: "none", md: "block" }, // 🔥 oculta en móvil
+            }}
+          />
           </Box>
 
           {/* Lado derecho blanco */}
@@ -134,7 +140,7 @@ const Login: React.FC = () => {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              p: { xs: 4, sm: 8 },
+              p: { xs: 3, sm: 6 },
             }}
           >
             <Typography variant="h6" fontWeight={600} mb={4}>
@@ -199,6 +205,7 @@ const Login: React.FC = () => {
           </Box>
         </Paper>
       </motion.div>
+     </Box> 
 
       {/* Footer */}
       <Box
@@ -209,7 +216,7 @@ const Login: React.FC = () => {
           fontSize: 14,
         }}
       >
-        Derechos reservados por AdminBusiness | By Ing. Alexis Caratar | Pasto - Nariño 2026
+        Derechos reservados por AdminBusiness v 0.1 | By Ing. Alexis Caratar | Pasto - Nariño 2026
       </Box>
     </Box>
   );

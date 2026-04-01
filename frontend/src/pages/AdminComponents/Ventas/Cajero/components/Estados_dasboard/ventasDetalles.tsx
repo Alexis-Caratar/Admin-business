@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import {
-  Box, Card, Typography, Divider, Stack, Avatar, Chip, Dialog, DialogTitle, DialogContent, TextField, Pagination, IconButton, Paper, DialogActions, InputAdornment, Button, MenuItem, CircularProgress,
+  Box, Card, Typography,Stack, Avatar, Chip, Dialog, DialogTitle, DialogContent, TextField, Pagination, IconButton, Paper, DialogActions, InputAdornment, Button, MenuItem, CircularProgress,
   Tooltip
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -15,6 +15,11 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import HourglassTopIcon from "@mui/icons-material/HourglassTop";
+import SyncAltIcon from "@mui/icons-material/SyncAlt";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
+import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import { facturaPorCaja, productosPorVenta, actualiza_venta,imprimirfactura } from "../../../../../../api/cajero";
 
 export default function VentasDetalles({ open, onClose, id_caja }: any) {
@@ -62,6 +67,32 @@ const cargarVentas = async () => {
     if (data?.ok) setVentas(data.result);
   } finally {
     setLoading(false);
+  }
+};
+
+const getMetodoPagoIcon = (metodo:any) => {
+  switch (metodo) {
+    case "PENDIENTE":
+      return <HourglassTopIcon sx={{ fontSize: 14, color: "#d32f2f" }} />;
+
+    case "EFECTIVO":
+      return <PaymentsIcon sx={{ fontSize: 14, color: "#2e7d32" }} />;
+
+    case "TRANSFERENCIA":
+      return <SyncAltIcon sx={{ fontSize: 14, color: "#1565c0" }} />;
+
+    case "TARJETA":
+      return <CreditCardIcon sx={{ fontSize: 14, color: "#6a1b9a" }} />;
+
+    case "NEQUI":
+    case "DAVIPLATA":
+      return <PhoneIphoneIcon sx={{ fontSize: 14, color: "#00838f" }} />;
+
+    case "TIQUERERA":
+      return <ConfirmationNumberIcon sx={{ fontSize: 14, color: "#ef6c00" }} />;
+
+    default:
+      return <CreditCardIcon sx={{ fontSize: 14 }} />;
   }
 };
 
@@ -209,7 +240,6 @@ const cargarVentas = async () => {
   }
 };
 
-
   return (
     <>
       {/* ================= LISTADO VENTAS ================= */}
@@ -355,12 +385,12 @@ const cargarVentas = async () => {
                 }}
               >
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <PaymentsIcon color="error" />
+                  <PaymentsIcon color="warning" />
                   <Box>
                     <Typography fontSize={12} color="text.secondary">
                       Pendientes
                     </Typography>
-                    <Typography fontWeight={800} fontSize={18} color="error.main">
+                    <Typography fontWeight={800} fontSize={18} color="#ed6c02">
                       {metrics.totalPendientes}
                     </Typography>
                   </Box>
@@ -393,93 +423,162 @@ const cargarVentas = async () => {
           </Box>
 
           {/* Facturas */}
-          <Box
+         <Box
+  sx={{
+    display: "grid",
+    gridTemplateColumns: {
+      xs: "repeat(2, 1fr)",
+      sm: "repeat(3, 1fr)",
+      md: "repeat(4, 1fr)",
+      lg: "repeat(6, 1fr)",
+      xl: "repeat(8, 1fr)",
+    },
+    gap: { xs: 1.2, md: 1.8 },
+  }}
+>
+  {ventasPagina.map((venta) => {
+    const isPagado = venta.estado_pago;
+
+    return (
+      <Box key={venta.id_venta}>
+        <motion.div whileHover={{ scale: 1.04 }}>
+          <Card
             sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(2, 1fr)",   // 📱 2 columnas
-                sm: "repeat(3, 1fr)",   // tablet pequeña
-                md: "repeat(4, 1fr)",   // laptop
-                lg: "repeat(6, 1fr)",   // desktop
-                xl: "repeat(8, 1fr)",   // pantallas grandes (tu idea original)
-              },
-              gap: { xs: 1, md: 1.5 },
+              borderRadius: 4,
+              p: 1.5,
+              cursor: "pointer",
+              position: "relative",
+              overflow: "hidden",
+              background: isPagado
+                ? "linear-gradient(135deg,#e8f5e9,#ffffff)"
+                : "linear-gradient(135deg,#fff3e0,#ffffff)",
+              border: "1px solid #eee",
+              transition: "all .25s ease",
+              "&:hover": {
+                transform: "translateY(-6px)",
+                boxShadow: "0 12px 30px rgba(0,0,0,0.12)"
+              }
             }}
-          >   {ventasPagina.map((venta) => (
-            <Box key={venta.id_venta}>
-              <motion.div whileHover={{ scale: 1.03 }}>
-                <Card
-                  sx={{
-                    borderRadius: 4,
-                    p: 2,
-                    cursor: "pointer",
-                    background: "linear-gradient(180deg,#ffffff,#fafafa)",
-                    border: "1px solid #eee",
-                    transition: "all .2s ease",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
-                    }
-                  }}
-                  onClick={() => abrirDetalle(venta)}
-                >
-                  <Stack spacing={1.5}>
+            onClick={() => abrirDetalle(venta)}
+          >
 
-                    {/* HEADER */}
-                    <Stack direction="row" alignItems="center">
-                      <Avatar sx={{ width: 28, height: 28 }}>
-                        <Box
-                          sx={{
-                            bgcolor: "#e3f2fd",
-                            borderRadius: 2,
-                            p: 0.7,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center"
-                          }}
-                        >
-                          <ReceiptLongIcon sx={{ color: "#1976d2", fontSize: 18 }} />
-                        </Box>
-                      </Avatar>
+            {/* BARRA SUPERIOR COLOR */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: 4,
+                bgcolor: isPagado ? "#2e7d32" : "#ed6c02"
+              }}
+            />
 
-                      <Box ml={1}>
-                        <Typography fontWeight={700} fontSize={11}>
-                          {venta.numero_factura}
-                        </Typography>
-                        <Typography fontSize={11} color="text.secondary">
-                          {venta.fecha}
-                        </Typography>
-                        <Typography fontSize={11} color="text.secondary">
-                          {venta.mesa || 'Sin mesa'}
-                        </Typography>
-                      </Box>
+            <Stack spacing={1.2}>
 
-
-
-                    </Stack>
-                     <Chip
-                      label={formatCOP(venta.venta_total)}
-                      size="small"
+              {/* HEADER */}
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Avatar
+                    sx={{
+                      width: 30,
+                      height: 30,
+                      bgcolor: isPagado ? "#c8e6c9" : "#ffe0b2"
+                    }}
+                  >
+                    <ReceiptLongIcon
                       sx={{
-                        fontWeight: 'bold',         
-                        fontSize: '0.9rem'          
-                          }}
+                        fontSize: 18,
+                        color:"#0d4993" 
+                      }}
                     />
+                  </Avatar>
 
-                    <Chip
-                      label={venta.estado_pago ? "Pagado" : "Pendiente"}
-                      size="small"
-                      color={venta.estado_pago ? "success" : "warning"}
-                    />
-                   
-                    <Divider />
+                  <Box>
+                    <Typography fontWeight={700} fontSize={10}>
+                      {venta.numero_factura}
+                    </Typography>
+                    <Typography fontSize={10} color="text.secondary">
+                      {venta.fecha}
+                    </Typography>
+                  </Box>
+                </Stack>
 
-                  </Stack>
-                </Card>
-              </motion.div>
-            </Box>
-          ))}
-          </Box>
+                <Chip
+                  label={isPagado ? "Pagado" : "Pendiente"}
+                  size="small"
+                  sx={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    bgcolor: isPagado ? "#2e7d32" : "#ed6c02",
+                    color: "#fff"
+                  }}
+                />
+              </Stack>
+
+              {/* CLIENTE */}
+              <Box>
+                <Typography fontSize={11} fontWeight={600} noWrap>
+                  {venta.nombre_completo}
+                </Typography>
+                <Typography fontSize={10} color="text.secondary" noWrap>
+                  {venta.identificacion_cliente}
+                </Typography>
+              </Box>
+
+              {/* TOTAL DESTACADO */}
+              <Box
+                sx={{
+                  borderRadius: 2,
+                  p: 1,
+                  textAlign: "center",
+                  background: isPagado
+                    ? "linear-gradient(135deg,#2e7d32,#66bb6a)"
+                    : "linear-gradient(135deg,#ed6c02,#ff9800)",
+                  color: "#fff"
+                }}
+              >
+                <Typography fontSize={10}>Total</Typography>
+                <Typography fontWeight={700} fontSize={14}>
+                  {formatCOP(venta.venta_total)}
+                </Typography>
+              </Box>
+
+              {/* INFO EXTRA */}
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                sx={{
+                  bgcolor: "#f9f9f9",
+                  borderRadius: 2,
+                  px: 1,
+                  py: 0.5
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                {getMetodoPagoIcon(venta.metodo_pago)}
+                <Typography fontSize={10} color="text.secondary">
+                  {venta.metodo_pago}
+                </Typography>
+              </Stack>
+
+                <Typography fontSize={10}>
+                  🍽 {venta.mesa || "Sin mesa"}
+                </Typography>
+              </Stack>
+
+              {/* FOOTER */}
+              <Typography fontSize={9.5} color="text.secondary" noWrap>
+                👤 {venta.nombre_vendedor}
+              </Typography>
+
+            </Stack>
+          </Card>
+        </motion.div>
+      </Box>
+    );
+  })}
+</Box>
 
           {/* Paginación */}
           <Box mt={4} display="flex" justifyContent="center">
@@ -495,161 +594,266 @@ const cargarVentas = async () => {
       </Dialog>
 
       {/* ================= DETALLE FACTURA ================= */}
-      <Dialog open={detalleOpen} onClose={() => setDetalleOpen(false)} PaperProps={{ sx: { borderRadius: 4, width: 420, maxWidth: "95%", overflow: "hidden" } }}>
-        <Box sx={{ background: "linear-gradient(135deg,#1976d2,#42a5f5)", color: "#fff", p: 2 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)" }}><ReceiptLongIcon /></Avatar>
-              <Box>
-                <Typography fontWeight={800}>Factura</Typography>
-                <Typography fontSize={12}>#{ventaSeleccionada?.numero_factura}</Typography>
-              </Box>
-            </Stack>
-            <IconButton onClick={() => setDetalleOpen(false)} sx={{ color: "#fff" }}><CloseIcon /></IconButton>
-          </Stack>
+    <Dialog
+  open={detalleOpen}
+  onClose={() => setDetalleOpen(false)}
+  PaperProps={{
+    sx: {
+      borderRadius: 4,
+      width: 420,
+      maxWidth: "95%",
+      overflow: "hidden"
+    }
+  }}
+>
+  {/* HEADER */}
+  <Box sx={{ background: "linear-gradient(135deg,#1976d2,#42a5f5)", color: "#fff", p: 2 }}>
+    <Stack direction="row" justifyContent="space-between" alignItems="center">
+      <Stack direction="row" spacing={2} alignItems="center">
+        <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)" }}>
+          <ReceiptLongIcon />
+        </Avatar>
+        <Box>
+          <Typography fontWeight={800}>Factura</Typography>
+          <Typography fontSize={12}>
+            #{ventaSeleccionada?.numero_factura}
+          </Typography>
         </Box>
-        <DialogContent sx={{ background: "#fafafa" }}>
-          <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 2, borderRadius: 3, background: "#fff", mb: 2 }}>
-            <Avatar src={ventaSeleccionada?.cliente_imagen} sx={{ width: 46, height: 46 }}><PersonIcon /></Avatar>
-            <Box>
-              <Typography fontSize={12} color="text.secondary">Cliente</Typography>
-              <Typography
-                fontWeight={700}
-                noWrap
-                sx={{
-                  fontSize: { xs: 12, sm: 13, md: 15, lg: 16 },
-                }}
-              >
-                {ventaSeleccionada?.nombre_completo}
-              </Typography>
-              <Typography fontSize={12} color="text.secondary">{ventaSeleccionada?.identificacion_cliente}</Typography>
-            </Box>
+      </Stack>
 
+      <IconButton onClick={() => setDetalleOpen(false)} sx={{ color: "#fff" }}>
+        <CloseIcon />
+      </IconButton>
+    </Stack>
+  </Box>
 
-            <Box flex={1} />
-            <Chip label={ventaSeleccionada?.estado_pago === true ? "Pagado" : "Pendiente"} color={ventaSeleccionada?.estado_pago === true ? "success" : "warning"} size="small" />
-          </Stack>
+  {/* CLIENTE */}
+  <Box sx={{ p: 2, bgcolor: "#fff", borderBottom: "1px solid #eee" }}>
+    <Stack direction="row" spacing={2} alignItems="center">
+      <Avatar src={ventaSeleccionada?.cliente_imagen} sx={{ width: 46, height: 46 }}>
+        <PersonIcon />
+      </Avatar>
 
-          <Box sx={{ maxHeight: 260, overflowY: "auto", px: 1 }}>
-            {loadingDetalle ? (
-              <Box py={4} textAlign="center"><CircularProgress size={26} /></Box>
-            ) : (
-              <Stack spacing={1}>
-                {productosDetalle.map((p: any) => (
-                  <Card key={p.id_producto} sx={{ p: 1, borderRadius: 2, display: "flex", alignItems: "center", gap: 1 }}>
-                    <Avatar src={p.url_imagen} variant="rounded" sx={{ width: 40, height: 40 }} />
-                    <Box flex={1}>
-                      <Typography fontSize={13} fontWeight={600}>{p.nombre}</Typography>
-                      <Typography fontSize={12} color="text.secondary">Cantidad: {p.cantidad}</Typography>
-                    </Box>
-                    <Typography fontWeight={700} fontSize={13}>{formatCOP(p.subtotal)}</Typography>
-                  </Card>
-                ))}
-              </Stack>
-            )}
-          </Box>
+      <Box>
+        <Typography fontSize={11} color="text.secondary">
+          Cliente
+        </Typography>
 
-          <Divider sx={{ my: 2 }} />
+        <Typography fontWeight={700} fontSize={14} noWrap>
+          {ventaSeleccionada?.nombre_completo}
+        </Typography>
 
-          {ventaSeleccionada?.nota && (
-            <Box
+        <Typography fontSize={11} color="text.secondary">
+          {ventaSeleccionada?.identificacion_cliente}
+        </Typography>
+      </Box>
+
+      <Box flex={1} />
+
+      <Chip
+        label={ventaSeleccionada?.estado_pago ? "Pagado" : "Pendiente"}
+        size="small"
+        sx={{
+          bgcolor: ventaSeleccionada?.estado_pago ? "#2e7d32" : "#d32f2f",
+          color: "#fff",
+          fontWeight: 600
+        }}
+      />
+    </Stack>
+  </Box>
+
+  {/* CONTENIDO CON SCROLL */}
+ <DialogContent
+  sx={{
+    p: 0,
+    display: "flex",
+    flexDirection: "column",
+    minHeight: 150, 
+    maxHeight: "60vh",
+    background: "#fafafa"
+  }}
+>
+    <Box
+      sx={{
+        flex: 1,
+        overflowY: "auto",
+        px: 2,
+        py: 1,
+
+        "&::-webkit-scrollbar": {
+          width: 6
+        },
+        "&::-webkit-scrollbar-thumb": {
+          background: "#ccc",
+          borderRadius: 10
+        }
+      }}
+    >
+      {loadingDetalle ? (
+        <Box py={4} textAlign="center">
+          <CircularProgress size={26} />
+        </Box>
+      ) : (
+        <Stack spacing={1.2}>
+          {productosDetalle.map((p) => (
+            <Card
+              key={p.id_producto}
               sx={{
-                p: 1,
-                mt: 1,
-                borderRadius: 2,
-                bgcolor: "#f5f5f5",
-                border: "1px solid #e0e0e0",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                p: 1.2,
+                borderRadius: 3,
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "space-between",
                 gap: 1,
+                border: "1px solid #eee",
+                boxShadow: "none"
               }}
             >
-              <Typography fontWeight={500} fontSize={11} color="text.primary">
-                📝 Nota:
+              <Stack direction="row" spacing={1} alignItems="center" flex={1}>
+                <Avatar
+                  src={p.url_imagen}
+                  variant="rounded"
+                  sx={{ width: 42, height: 42 }}
+                />
+
+                <Box>
+                  <Typography fontSize={12.5} fontWeight={600} noWrap>
+                    {p.nombre}
+                  </Typography>
+
+                  <Typography fontSize={11} color="text.secondary">
+                    x{p.cantidad}
+                  </Typography>
+                </Box>
+              </Stack>
+
+              <Typography fontWeight={700} fontSize={12.5}>
+                {formatCOP(p.subtotal)}
               </Typography>
-              <Typography fontSize={11} color="text.secondary" sx={{ wordBreak: "break-word" }}>
-                {ventaSeleccionada.nota}
+            </Card>
+          ))}
+        </Stack>
+      )}
+
+      {/* NOTA */}
+      {ventaSeleccionada?.nota && (
+        <Box
+          sx={{
+            p: 1,
+            mt: 2,
+            borderRadius: 2,
+            bgcolor: "#f9fafb",
+            border: "1px dashed #d1d5db"
+          }}
+        >
+          <Typography fontSize={11} color="text.secondary">
+            📝 {ventaSeleccionada.nota}
+          </Typography>
+        </Box>
+      )}
+    </Box>
+  </DialogContent>
+
+  {/* FOOTER */}
+  <DialogActions sx={{ p: 2 }}>
+    <Stack spacing={1} width="100%">
+
+      {/* TOTAL */}
+      <Box
+        sx={{
+          p: 1.2,
+          borderRadius: 3,
+          background: "linear-gradient(135deg,#111827,#1f2937)",
+          color: "#fff",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}
+      >
+        <Typography fontWeight={600}>Total</Typography>
+        <Typography fontWeight={800}>
+          {formatCOP(ventaSeleccionada?.venta_total)}
+        </Typography>
+      </Box>
+
+      {/* FORM PAGO */}
+      {ventaSeleccionada?.estado_pago === false && (
+        <>
+          <TextField
+            select
+            fullWidth
+            label="Método de Pago"
+            size="small"
+            value={metodoPago}
+            onChange={(e) => setMetodoPago(e.target.value)}
+          >
+            <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
+            <MenuItem value="TRANSFERENCIA">🔁 Transferencia</MenuItem>
+            <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
+            <MenuItem value="NEQUI">📲 Nequi</MenuItem>
+            <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
+            <MenuItem value="TIQUERERA">🎟️ Tiquetera</MenuItem>
+          </TextField>
+
+          {metodoPago === "EFECTIVO" && (
+            <>
+              <TextField
+                fullWidth
+                label="Monto recibido"
+                size="small"
+                type="text"
+                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                sx={{ mt: 1 }}
+                value={montoRecibido === "" ? "" : formatCOP(montoRecibido)}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, "");
+                  setMontoRecibido(raw === "" ? "" : Number(raw));
+                }}
+              />
+
+              {montoRecibido !== "" && cambio < 0 && (
+                <Typography color="error" variant="caption">
+                  El monto recibido es menor al total
+                </Typography>
+              )}
+
+              <Typography
+                sx={{ mt: 1, fontWeight: 800 }}
+                color={cambio < 0 ? "error.main" : "success.main"}
+              >
+                Cambio: {formatCOP(cambioSeguro)}
               </Typography>
-            </Box>
+            </>
           )}
 
-        </DialogContent>
+          <Button
+            fullWidth
+            variant="contained"
+            color="success"
+            disabled={metodoPago === "EFECTIVO" && cambio < 0}
+            startIcon={<AddShoppingCartIcon />}
+            onClick={handleFinalizarVenta}
+            sx={{ borderRadius: 3, fontWeight: 700 }}
+          >
+            PAGAR FACTURA
+          </Button>
+        </>
+      )}
 
-        <DialogActions sx={{ p: 2 }}>
-          <Stack spacing={1} width="100%">
-            {ventaSeleccionada?.estado_pago === false && (
-              <>
-
-                <Box sx={{ mt: 2, p: 1, borderRadius: 3, background: "linear-gradient(135deg, #111827, #1f2937)", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography fontWeight={600}>Total</Typography>
-                  <Typography variant="h6" fontWeight={700}>{formatCOP(ventaSeleccionada?.venta_total)}</Typography>
-                </Box>
-
-                <TextField select fullWidth label="Método de Pago" size="small" sx={{ mt: 3 }} value={metodoPago} onChange={(e) => setMetodoPago(e.target.value)}>
-                  <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
-                  <MenuItem value="TRANSFERENCIA">🔁 Transferencia</MenuItem>
-                  <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-                  <MenuItem value="NEQUI">📲 Nequi</MenuItem>
-                  <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
-                  <MenuItem value="TIQUERERA">🎟️ Tiquetera</MenuItem>
-                </TextField>
-
-                {metodoPago === "EFECTIVO" && (
-                  <>
-                   <TextField
-                                        fullWidth
-                                        autoFocus
-                                        label="Monto recibido"
-                                        size="small"
-                                        type="text"
-                                        inputProps={{
-                                          inputMode: "numeric",
-                                          pattern: "[0-9]*"
-                                        }}
-                                        sx={{ mt: 2 }}
-                                        value={montoRecibido === "" ? "" : formatCOP(montoRecibido)}
-                                        onChange={(e) => {
-                                          const raw = e.target.value.replace(/\D/g, "");
-                                          setMontoRecibido(raw === "" ? "" : Number(raw));
-                                        }}
-                                      />
-
-                    {montoRecibido !== "" && cambio < 0 && (
-                      <Typography color="error" variant="caption">
-                        El monto recibido es menor al total
-                      </Typography>
-                    )}
-
-                      <Typography sx={{ mt: 1, fontWeight: 800 }} color={cambio < 0 ? "error.main" : "success.main"}>
-                          Cambio: {formatCOP(cambioSeguro)}
-                     </Typography>
-                  </>
-                )}
-
-
-
-                <DialogActions sx={{ p: 2 }}>
-                  <Button fullWidth variant="contained" color="success" disabled={metodoPago === "EFECTIVO" && cambio < 0} startIcon={<AddShoppingCartIcon />} onClick={handleFinalizarVenta} sx={{ borderRadius: 3, fontWeight: 700 }}>
-                    PAGAR FACTURA
-                  </Button>
-                </DialogActions>
-              </>
-            )}
-            <Button
-              fullWidth
-              startIcon={<PrintIcon />}
-              variant="contained"
-              color="primary"
-              sx={{ borderRadius: 3, fontWeight: 700 }}
-              onClick={imprimirFactura}
-            >
-              Imprimir FActura
-            </Button>
-          </Stack>
-        </DialogActions>
-      </Dialog>
-
+      {/* IMPRIMIR */}
+      <Button
+        fullWidth
+        startIcon={<PrintIcon />}
+        variant="contained"
+        color="primary"
+        sx={{ borderRadius: 3, fontWeight: 700 }}
+        onClick={imprimirFactura}
+      >
+        Imprimir Factura
+      </Button>
+    </Stack>
+  </DialogActions>
+</Dialog>
 
       {/* === DIALOG VENTA REGISTRADA === */}
       <Dialog

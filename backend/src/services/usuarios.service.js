@@ -36,7 +36,7 @@ export const obtener = async (id) => {
     SELECT u.*, n.nombre AS nombre_negocio
     FROM usuarios u
     INNER JOIN negocios n ON u.id_negocio = n.id
-    WHERE u.id = ?
+    WHERE u.id = $1
   `,
     [id]
   );

@@ -1,25 +1,10 @@
 import React, { useState, useEffect } from "react";
 import {
-  Box,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Paper,
-  Typography,
-  Divider,
-  IconButton,
-  Avatar,
-  Tooltip,
-  AppBar,
-  Toolbar,
-  Menu,
-  MenuItem,
-  useMediaQuery,
-  useTheme,
-  Drawer,
+  Box, List, ListItemButton, ListItemIcon, ListItemText, Paper,
+  Typography, Divider, IconButton, Avatar, Tooltip,
+  AppBar, Toolbar, Menu, MenuItem,
+  useMediaQuery, useTheme, Drawer
 } from "@mui/material";
-
 import { useNavigate, useParams } from "react-router-dom";
 
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
@@ -29,80 +14,67 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import PersonIcon from '@mui/icons-material/Person';
+import PersonIcon from "@mui/icons-material/Person";
 import { getModulos } from "../api/menusistema";
 import { iconMap } from "../utils/mapIcons";
 import { componentMap } from "../utils/mapComponents";
-
-const FONT = `"Inter", "Roboto", sans-serif`;
 const DEFAULT_AVATAR =
   "https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png";
 
-type Modulo = {
-  id: number;
-  url: string;
-  nombre: string;
-  icono: string | null;
-  orden: number;
-  activo: number;
-};
+const SIDEBAR_WIDTH = 240;
+const SIDEBAR_COLLAPSED = 90;
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { modulo } = useParams();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
-  const [menus, setMenus] = useState<Modulo[]>([]);
-  const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
-  const [, setIdNegocio] = useState<string>("");
-  const [nombre_negocio, setNombreNegocio] = useState<string>("Mi Negocio");
-  const [imagen_negocio, setImagenNegocio] = useState<string>("");
-  const [nombre, setNombre] = useState<string>("");
-  const [rol, setRol] = useState<string>("");
+  const [menus, setMenus] = useState<any[]>([]);
+  const [collapsed, setCollapsed] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [nombre_negocio, setNombreNegocio] = useState("Mi Negocio");
+  const [imagen_negocio, setImagenNegocio] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [rol, setRol] = useState("");
   const [sinModulos, setSinModulos] = useState(false);
-  const [imagen, setImagen] = useState<string>(DEFAULT_AVATAR);
+  const [imagen, setImagen] = useState(DEFAULT_AVATAR);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
 
+  // 🔥 CONTROL RESPONSIVE
   useEffect(() => {
-    // Ajusta colapso automáticamente según tamaño de pantalla
     if (isSmallScreen) {
-      setCollapsed(true);
+      setCollapsed(false); // móvil SIEMPRE abierto dentro del drawer
     } else {
       setCollapsed(false);
       setDrawerOpen(false);
     }
   }, [isSmallScreen]);
 
+  // 🔥 CARGA DE DATOS
   useEffect(() => {
     const storedIdNegocio = localStorage.getItem("id_negocio") || "";
     const storedNegocio = localStorage.getItem("nombre_negocio") || "Mi Negocio";
-    const imagenNegocio = localStorage.getItem("imagen_negocio")||"";
+    const imagenNegocio = localStorage.getItem("imagen_negocio") || "";
     const storedNombre = localStorage.getItem("nombre") || "";
     const storedRol = localStorage.getItem("rol") || "";
     const rawImagen = localStorage.getItem("imagen");
-    const id_usuarioperfil = localStorage.getItem("id_usuario");
+    const id_usuario = localStorage.getItem("id_usuario");
 
-    const storedImagen =
-      !rawImagen || rawImagen === "null" || rawImagen === "undefined"
-        ? DEFAULT_AVATAR
-        : rawImagen;
-
-    setIdNegocio(storedIdNegocio);
     setNombreNegocio(storedNegocio);
-     setImagenNegocio(imagenNegocio);
+    setImagenNegocio(imagenNegocio);
     setNombre(storedNombre);
     setRol(storedRol);
-    setImagen(storedImagen);
-    
+    setImagen(rawImagen || DEFAULT_AVATAR);
 
     const loadMenus = async () => {
-      const data = await getModulos(storedIdNegocio, Number(id_usuarioperfil));    
+      const data = await getModulos(storedIdNegocio, Number(id_usuario));
       setMenus(data);
+
       if (!modulo && data.length > 0) {
         navigate(`/admin/${data[0].url}`);
       }
+
       if (data.length === 0) {
         setSinModulos(true);
       }
@@ -111,229 +83,194 @@ const AdminDashboard: React.FC = () => {
     loadMenus();
   }, []);
 
-  const safeImage = (img: any) => {
-    if (!img || img === "null" || img === "undefined") {
-      return DEFAULT_AVATAR;
-    }
-    return img;
-  };
-
   const ActiveComponent = modulo ? componentMap[modulo] : null;
 
-  // Contenido del sidebar
-  const sidebarContent = (
-   <Paper
-  elevation={0}
+  // 🔥 SIDEBAR
+  const sidebar = (
+   <Box
   sx={{
-    width: collapsed ? 60 : 220,
-    transition: "width 0.3s",
+    width: collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH,
+    ...(isSmallScreen
+      ? { height: "100%",}
+      : {
+          position: "fixed",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          height: "100vh",
+        }),
     bgcolor: "#25313F",
-    color: "#9AA7B6",
-    height: "100%",
-    overflow: "hidden",
     display: "flex",
     flexDirection: "column",
-    fontFamily: FONT,
+    overflowY: "auto",
+    transition: "all 0.3s ease",
+    zIndex:20
   }}
 >
-
       {/* HEADER */}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        p={2}
-      >
-        <Box display="flex" alignItems="center" gap={1}>
-         <Box
-              sx={{
-                width: 60,
-                height: 50,
-                borderRadius: "50%",
-                overflow: "hidden",
-                bgcolor: "#f5f5f5", // color de fondo si no hay imagen
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+      <Box display="flex" alignItems="center" justifyContent="space-between" p={1}>
+       <Box display="flex" alignItems="center" gap={1.5}>
+  
+        {/* Logo */}
+        <Box
+          sx={{
+            width: 40,
+            height: 40,
+            borderRadius: "12px",
+            overflow: "hidden",
+            background: "rgba(255,255,255,0.1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          {imagen_negocio ? (
+            <img
+              src={imagen_negocio}
+              alt="Negocio"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
               }}
-            >
-              {imagen_negocio ? (
-                <img
-                  src={imagen_negocio}
-                  alt="Negocio"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <StorefrontIcon sx={{ color: "#FFFFFF", fontSize: 20 }} />
-              )}
-            </Box>
-          {!collapsed && (
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: 600, color: "#FFFFFF", fontFamily: FONT }}
-            >
-              {nombre_negocio}
-            </Typography>
+            />
+          ) : (
+            <StorefrontIcon sx={{ color: "#fff", fontSize: 20 }} />
           )}
         </Box>
 
+        {/* Nombre */}
+        {!collapsed && (
+          <Box sx={{ maxWidth: 150 }}>
+            <Typography
+              sx={{
+                color: "#fff",
+                fontWeight: 600,
+                fontSize: 14,
+                lineHeight: 1.2,
+                wordBreak: "break-word", // 🔥 clave
+              }}
+            >
+              {nombre_negocio}
+            </Typography>
+
+            <Typography
+              variant="caption"
+              sx={{
+                color: "#9AA7B6",
+                fontSize: 11,
+              }}
+            >
+              Mi negocio
+            </Typography>
+          </Box>
+        )}
+      </Box>
+
         {!isSmallScreen && (
           <IconButton
-            size="small"
-            sx={{ color: "#9AA7B6" }}
             onClick={() => setCollapsed(!collapsed)}
+            sx={{ color: "#9AA7B6", zIndex: 10 }}
           >
             {collapsed ? <MenuIcon /> : <MenuOpenIcon />}
           </IconButton>
         )}
       </Box>
 
-      {/* AVATAR */}
+      {/* USER */}
       <Box display="flex" flexDirection="column" alignItems="center" p={2}>
-        <Avatar
-          src={safeImage(imagen)}
-          sx={{ width: 50, height: 50, mb: collapsed ? 0 : 1 }}
-        >
-          {nombre?.charAt(0).toUpperCase()}
-        </Avatar>
-
+        <Avatar src={imagen} sx={{ width: 50, height: 50 }} />
         {!collapsed && (
           <>
-            <Typography variant="body2" sx={{ color: "#FFFFFF" }}>
-              {nombre}
-            </Typography>
-            <Typography variant="caption" sx={{ color: "#9AA7B6" }}>
-              {rol}
-            </Typography>
+            <Typography sx={{ color: "#fff" }}>{nombre}</Typography>
+            <Typography sx={{ color: "#fff" }} variant="caption">{rol}</Typography>
           </>
         )}
       </Box>
 
       <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
 
-      {/* MENÚ */}
-    <List sx={{ flex: 1, p: 0 }}>
- {(Array.isArray(menus) ? menus : []).map((menu) => {
-  const selected = modulo === menu.url;
+      {/* MENU */}
+      <List sx={{ flex: 1 }}>
+        {menus.map((menu) => {
+          const selected = modulo === menu.url;
 
-  return (
-    <Tooltip
-      key={menu.id}   // <-- mover key aquí
-      title={collapsed ? menu.nombre : ""}
-      placement="right"
-      arrow
-    >
-      <ListItemButton
-        selected={selected}
-        onClick={() => {
-          navigate(`/admin/${menu.url}`);
-          if (isSmallScreen) setDrawerOpen(false);
-        }}
-        sx={{
-          mb: 1,
-          borderRadius: 1,
-          px: 2,
-          color: selected ? "#FFFFFF" : "#9AA7B6",
-          "& .MuiListItemIcon-root": {
-            color: selected ? "#FFFFFF" : "#9AA7B6",
-            minWidth: 40,
-          },
-          "&.Mui-selected": { bgcolor: "rgba(255,255,255,0.08)" },
-          "&:hover": {
-            bgcolor: "rgba(255,255,255,0.12)",
-            color: "#FFFFFF",
-            "& .MuiListItemIcon-root": { color: "#FFFFFF" },
-          },
-        }}
-      >
-        <ListItemIcon sx={{ justifyContent: "center" }}>
-          {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
-        </ListItemIcon>
+          return (
+            <Tooltip
+              key={menu.id}
+              title={!isSmallScreen && collapsed ? menu.nombre : ""}
+              placement="right"
+            >
+              <ListItemButton
+                selected={selected}
+                onClick={() => {
+                  navigate(`/admin/${menu.url}`);
+                  if (isSmallScreen) setDrawerOpen(false);
+                }}
+                sx={{
+                  color: selected ? "#fff" : "#9AA7B6",
+                  "&.Mui-selected": { bgcolor: "rgba(255,255,255,0.1)" },
+                }}
+              >
+                <ListItemIcon sx={{ color: "inherit" }}>
+                  {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
+                </ListItemIcon>
 
-        {!collapsed && (
-          <ListItemText
-            primary={menu.nombre}
-            sx={{
-              ml: 2,
-              ".MuiTypography-root": { fontFamily: FONT, fontSize: 14 },
-            }}
-          />
-        )}
-      </ListItemButton>
-    </Tooltip>
-  );
-})}
-</List>
-
-    </Paper>
+                {!collapsed && <ListItemText primary={menu.nombre} />}
+              </ListItemButton>
+            </Tooltip>
+          );
+        })}
+      </List>
+    </Box>
   );
 
   return (
-    <Box display="flex" height="100vh" width="100vw">
-      {/* SIDEBAR escritorio */}
-      {!isSmallScreen && (
-        <Box
-          sx={{
-            width: collapsed ? 60 : 220,
-            transition: "width 0.3s",
-          }}
-        >
-          {sidebarContent}
-        </Box>
-      )}
+    <Box display="flex" height="100vh" width="100%">
+      
+      {/* DESKTOP */}
+      {!isSmallScreen && sidebar}
 
-      {/* SIDEBAR móvil */}
+      {/* MO BILE */}
       {isSmallScreen && (
         <Drawer
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
-          variant="temporary"
-          ModalProps={{ keepMounted: true }}
+          PaperProps={{
+            sx: { width: 245 }, 
+          }}
         >
-          {sidebarContent}
+          {sidebar}
         </Drawer>
       )}
 
       {/* CONTENIDO */}
       <Box flex={1} display="flex" flexDirection="column" bgcolor="#f3f4f6">
-        <AppBar
-          position="static"
-          sx={{ bgcolor: "#25313F", boxShadow: "none", fontFamily: FONT }}
-        >
-          <Toolbar sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
-            {/* Botón menú móvil */}
+        
+        <AppBar position="static" sx={{ bgcolor: "#25313F" }}>
+          <Toolbar>
             {isSmallScreen && (
-              <IconButton
-                size="small"
-                sx={{ color: "#9AA7B6" }}
-                onClick={() => setDrawerOpen(true)}
-              >
+              <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#fff" }}>
                 <MenuIcon />
               </IconButton>
             )}
 
-              <Box sx={{ display: "flex", gap: 1, ml: "auto", alignItems: "center" }}>
-              <Tooltip title="Notificaciones">
-                <IconButton sx={{ color: "#9AA7B6" }}>
-                  <NotificationsIcon />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Restaurar contraseña">
-                <IconButton sx={{ color: "#9AA7B6" }}>
-                  <RestoreIcon />
-                </IconButton>
-              </Tooltip>
-
-              {/* Avatar con Dropdown */}
-              <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ p: 0, display: "flex", alignItems: "center" }}>
-                <Avatar src={imagen} sx={{ width: 32, height: 32, mr: 0.5, bgcolor: "#1976d2" }}>
-                  {nombre.charAt(0)}
-                </Avatar>
-                <ArrowDropDownIcon sx={{ color: "#1976d2" }} />
+            <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
+              <IconButton sx={{ color: "#fff" }}>
+                <NotificationsIcon />
               </IconButton>
 
-              <Menu
+              <IconButton sx={{ color: "#fff" }}>
+                <RestoreIcon />
+              </IconButton>
+
+              <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+                <Avatar src={imagen} />
+                <ArrowDropDownIcon />
+              </IconButton>
+
+            <Menu
                 anchorEl={anchorEl}
                 open={openMenu}
                 onClose={() => setAnchorEl(null)}
@@ -380,35 +317,26 @@ const AdminDashboard: React.FC = () => {
           </Toolbar>
         </AppBar>
 
-        {/* RENDER DEL COMPONENTE */}
-        <Box flex={1} sx={{ width: "auto", overflow: "auto", p: 3 }}>
-          <Paper elevation={3} sx={{ p: 3 }}>
-          {sinModulos ? (
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  height="60vh"
-                  color="#6b7280"
-                >
-                   <img
-          src="https://franklinbelen.com/wp-content/uploads/cual-es-el-error-404-not-fund.jpg"
-          alt="Not found"
-         
-        />
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    Sin acceso
-                  </Typography>
-                  <Typography variant="body2">
-                    Ningún módulo asignado a su perfil
-                  </Typography>
-                </Box>
-              ) : ActiveComponent ? (
-                <ActiveComponent />
-              ) : (
-                <Typography>Módulo no encontrado</Typography>
-              )}
+        <Box flex={1} p={0.5}
+         sx={{
+    ...(isSmallScreen
+      ? {}
+      : {
+          ml: `${collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH}px`,
+        }),
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+  }}
+  >
+          <Paper sx={{ p: 1 }}>
+            {sinModulos ? (
+              <Typography>Sin acceso</Typography>
+            ) : ActiveComponent ? (
+              <ActiveComponent /> //aqui van los modulos principales
+            ) : (
+              <Typography>Módulo no encontrado</Typography>
+            )}
           </Paper>
         </Box>
       </Box>

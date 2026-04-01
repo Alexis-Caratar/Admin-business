@@ -1,18 +1,6 @@
 import React, { useState } from "react";
-import {
-  Card,
-  Typography,
-  Box,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  TextField,
-  MenuItem,
-  useTheme,
-  useMediaQuery,
-} from "@mui/material";
+import {Card,Typography,Box,Chip,Dialog,DialogTitle,DialogContent,IconButton,TextField,
+  MenuItem,useTheme,useMediaQuery,} from "@mui/material";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
 import CloseIcon from "@mui/icons-material/Close";
@@ -191,7 +179,7 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
     sx={{
       display: "flex",
       flexWrap: "wrap",
-      gap: 2, // espacio entre cards
+      gap: 1,
     }}
   >
     {mesas.map((mesa) => {
@@ -235,12 +223,13 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
               label={mesa.estado}
               size="small"
               sx={{
+                textAlign:"center",
                 position: "absolute",
                 top: 11,
                 right: 20,
                 fontWeight: 700,
                 height: 24,
-                px: 3,
+                px: {xs:2,sm:5},
                 borderRadius: 2,
                 background: config.chipColor,
                 color: "#fff",

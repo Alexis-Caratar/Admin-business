@@ -297,7 +297,7 @@ animarAlCarrito(
   sx={{
     display: "flex",
     flexWrap: "wrap",
-    gap: 2,
+    gap:  { xs: 1, sm: 2, md: 4 }
   }}
 >
   {filtered.map((prod) => (

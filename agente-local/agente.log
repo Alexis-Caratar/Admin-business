@@ -1,0 +1,2232 @@
+🚀 Iniciando watchdog del agente...
+📦 Mon Mar 30 15:21:40 HPS 2026 - Ejecutando agente...
+
+> agente-local@1.0.0 dev
+> nodemon server.js
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Error al imprimir factura: Error: Can not find printer
+    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
+    at new Promise (<anonymous>)
+    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
+    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+    at WebSocket.emit (node:events:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-loError al imprimir factura: Error: Can not find printer
+    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
+    at new Promise (<anonymous>)
+    at iError al imprimir factura: Error: Can not find printer
+    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
+    at new Promise (<anonymous>)
+    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
+    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+    at WebSocket.emit (node:events:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-loError al imprimir factura: Error: Can not find printer
+    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
+    at new Promise (<anonymous>)
+    at iError al imprimir factura: Error: Can not find printer
+    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
+    at new Promise (<anonymous>)
+    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
+    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+    at WebSocket.emit (node:events:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-loError al imprimir factura: Error: Can not find printer
+    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
+    at new Promise (<anonymous>)
+    at iFactura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Error al imprimir factura: Error: LIBUSB_ERROR_ACCESS
+    at Device.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\usb\dist\usb\device.js:67:14)
+    at USBAdapter.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:87:18)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:21:12
+    at new Promise (<anonymous>)
+    at imprimirFactura (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:18:10)
+    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:25:32)
+    at WebSocError al imprimir factura: Error: LIBUSB_ERROR_ACCESS
+    at Device.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\usb\dist\usb\device.js:67:14)
+    at USBAdapter.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:87:18)
+    at C:\Users\johan\Desktop\AdmFactura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Error al imprimir factura: Error: LIBUSB_ERROR_ACCESS
+    at Device.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\usb\dist\usb\device.js:67:14)
+    at USBAdapter.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:87:18)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:158:12
+    at new Promise (<anonymous>)
+    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
+    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+    at WebSocket.emit (node:events:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
+    at Receiver.emit (node:events:508:28)
+    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14) {
+  errno: -3
+}
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+ce.js:155:10)
+    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+    at WebSocket.emit (node:events:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
+    at Receiver.emit (node:events:508:28)
+    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14) {
+  errno: -3
+}
+Error al imprimir factura: Error: LIBUSB_ERROR_ACCESS
+    at Device.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\usb\dist\usb\device.js:67:14)
+    at USBAdapter.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:87:18)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:158:12
+    at new Promise (<anonymous>)
+    atFactura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Error al imprimir factura: Error: LIBUSB_ERROR_ACCESS
+    at Device.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\usb\dist\usb\device.js:67:14)
+    at USBAdapter.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:87:18)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:158:12
+    at new Promise (<anonymous>)
+    at imprimirComanda (C:\Users\joFactura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+    at WebSocket.emit (node:events:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
+    at Receiver.emit (node:events:508:28)
+    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14) {
+  errno: -3
+}
+ules\ws\lib\receiver.js:596:14) {
+  errno: -3
+}
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+rno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+EFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+D',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+🚀 Iniciando watchdog del agente...
+📦 Tue Mar 31 09:33:21 HPS 2026 - Ejecutando agente...
+
+> agente-local@1.0.0 dev
+> nodemon server.js
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+🚀 Iniciando watchdog del agente...
+📦 Tue Mar 31 09:34:16 HPS 2026 - Ejecutando agente...
+
+> agente-local@1.0.0 dev
+> nodemon server.js
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNREFUSED 192.168.11.211:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4078,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '192.168.11.211',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+🚀 Iniciando watchdog del agente...
+📦 Tue Mar 31 11:01:58 HPS 2026 - Ejecutando agente...
+
+> agente-local@1.0.0 dev
+> nodemon server.js
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🛡️ auth for agents: https://vestauth.com
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Error al imprimir factura: Error: LIBUSB_ERROR_ACCESS
+    at Device.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\usb\dist\usb\device.js:67:14)
+    at USBAdapter.open (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:87:18)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:158:12
+    at new Promise (<anonymous>)
+    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
+    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+    at WebSocket.emit (node:events:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
+    at Receiver.emit (node:events:508:28)
+    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14) {
+  errno: -3
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+ at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+    at WebSocket.emit (node:events:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
+    at Receiver.emit (node:events:508:28)
+    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14) {
+  errno: -3
+}
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (4) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+🤖 Servidor listo
+🌐 http://localhost:4100
+  
+Conectado al backend WebSocket
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Error al imprimir factura: Error: Can't close device with a pending request
+    at Device.close (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\usb\dist\usb\device.js:84:14)
+    at USBAdapter.close (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:139:20)
+    at C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\core\dist\index.cjs:1192:20
+    at new Promise (<anonymous>)
+    at Printer.close (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\core\dist\index.cjs:1191:12)
+    at async C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:216:9
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Factura impresa correctamente: { status: 'OK IMPRESION CON EXITO', printer: 'Caja Principal' }
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
