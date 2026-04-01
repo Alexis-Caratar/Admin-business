@@ -70,7 +70,7 @@ export const imprimir_comanda = async (req, res) => {
   try {
    const payload = req.body;
       await imprimircomanda_fisica(payload);
-      return res.json({ ok: true, result: resultado });
+      return res.json({ ok: true });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
   }
@@ -112,7 +112,7 @@ const payloadComanda = {
       });
     }
 
-      return res.json({ ok: true, result: resultado });
+      return res.json({ ok: true });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
   }
