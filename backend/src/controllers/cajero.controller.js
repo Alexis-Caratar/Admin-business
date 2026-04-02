@@ -76,6 +76,7 @@ export const imprimir_comanda = async (req, res) => {
   }
   
 };
+
 export const imprimircomanda_fisica = async (payload) => {
   try {
       const datos_negocio = await serviceNegocios.obtener(payload.id_negocio);
@@ -364,4 +365,16 @@ export const imprimirfactura = async (req, res) => {
 };
 
 
+export const cancelarFactura = async (req, res) => {
+  try {
+   const payload = req.body;
+   console.log("payload",payload);
+   
+     const result= await CajeroService.cancelar_factura(payload)
+      res.json({ok: true, result});
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};
 

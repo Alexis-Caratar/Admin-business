@@ -76,3 +76,7 @@ export const imprimirfactura = (data:any) => {
 export const imprimircomanda = (data:any) => {
   return axios.post(`cajero/imprimirComanda`, data);
 };
+
+export const cancelarFactura = (data:any) => {
+  return axios.post(`cajero/cancelarFactura`, data);
+};

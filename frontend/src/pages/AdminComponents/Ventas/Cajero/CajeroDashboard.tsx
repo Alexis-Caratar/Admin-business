@@ -228,7 +228,7 @@ const clearMesa = () => {
       descuento_porcentaje: 0,
       impuesto,
       total,
-      estado: "PENDIENTE", //REVISAR ESTE ESTADO
+      estado: "activa", 
       nota: datos_adicionales.nota,
       metodo_pago: datos_adicionales.metodo_pago,
       monto_pagado: total,

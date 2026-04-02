@@ -2101,11 +2101,20 @@ Error al imprimir factura: Error: Can not find printer
     at Receiver.emit (node:events:508:28)
     at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
     at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-ceiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Error al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+cpos\usb-adapter\dist\index.cjs:34:13)
     at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
     at new Promise (<anonymous>)
     at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
@@ -2125,19 +2134,36 @@ Error al imprimir factura: Error: Can not find printer
     at Receiver.emit (node:events:508:28)
     at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
     at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-w Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
 Receiver.emit (node:events:508:28)
     at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
     at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Error al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+escpos\usb-adapter\dist\index.cjs:34:13)
     at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
     at new Promise (<anonymous>)
     at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
@@ -2147,57 +2173,117 @@ Error al imprimir factura: Error: Can not find printer
     at Receiver.emit (node:events:508:28)
     at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
     at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+bSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
     at WebSocket.emit (node:events:508:28)
     at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
     at Receiver.emit (node:events:508:28)
     at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
     at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-ura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+ket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
     at WebSocket.emit (node:events:508:28)
     at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
     at Receiver.emit (node:events:508:28)
     at Receiver.dataMeError al imprimir factura: Error: Can not find printer
     at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
+    at C:\Users\johan\DesConexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
     at Receiver.emit (node:events:508:28)
     at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\Error al imprimir factura: Error: Can not find printer
+    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+vents:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
+    at Receiver.emit (node:events:508:28)
+    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
+    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+vents:508:28)
+    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
+    at Receiver.emit (node:events:508:28)
+    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
+    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+s:508:28)
+    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
+    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
+Error al imprimir factura: Error: Can not find printer
     at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
     at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
     at new Promise (<anonymous>)
     at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-   at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
     at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
     at WebSocket.emit (node:events:508:28)
     at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
@@ -2237,14 +2323,16 @@ Error al imprimir factura: Error: Can not find printer
     at Receiver.emit (node:events:508:28)
     at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
     at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Error al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket

@@ -169,6 +169,7 @@ arqueo: async ({ id_caja }) => {
         INNER JOIN pagos pe 
             ON pe.id_venta = ve.id
         WHERE pe.estado_pago = true
+        and ve.estado!='cancelado'
         GROUP BY ve.id_caja
     ) v ON v.id_caja = c.id
 
@@ -205,6 +206,7 @@ arqueo: async ({ id_caja }) => {
         ON c.id = p.id_categoria
     WHERE v.id_caja = $1
     AND pa.estado_pago = true
+    AND v.estado!='cancelado'
     GROUP BY 
         c.id, c.nombre, p.id, p.nombre
     ORDER BY 
@@ -252,7 +254,7 @@ arqueo: async ({ id_caja }) => {
     FROM ventas v
     INNER JOIN pagos pa
         ON pa.id_venta = v.id
-    WHERE v.id_caja = $1
+    WHERE v.id_caja = $1 and v.estado!='cancelado'
   `;
 
   /* ===============================
@@ -300,7 +302,9 @@ arqueo: async ({ id_caja }) => {
     FROM ventas ve 
     INNER JOIN pagos p ON ve.id = p.id_venta
     LEFT JOIN mesas m ON ve.id_mesa = m.id
-    WHERE p.estado_pago = false
+    WHERE 
+     ve.estado!='cancelado'  
+    and p.estado_pago = false 
     AND ve.id_caja = $1
   `;
 
@@ -815,7 +819,8 @@ SELECT
     p.cambio,
     m.id as id_mesa,
     m.nombre as mesa,
-    v.nota
+    v.nota,
+    v.estado as estado_venta
 
 FROM ventas v
 INNER JOIN pagos p ON p.id_venta = v.id
@@ -857,10 +862,25 @@ const [rows] = await db.query(sql,[id_venta]);
 return rows;
 
 },
+cancelar_factura: async (payload) => {
+  const conn = await pool.connect();
+
+  try {
+    const result = await conn.query(
+      `UPDATE ventas SET estado = 'cancelado',nota=$2 WHERE id = $1 RETURNING *`,
+      [payload.id_venta,payload.nota]
+    );
+        
+    return result.rows[0]; 
+
+  } catch (err) {
+    console.error("Error cancelar factura:", err.message);
+    throw err;
+  } finally {
+    conn.release();
+  }
+},
 }
-
-
-
 
 
 export default CajeroService;

@@ -20,7 +20,8 @@ import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import { facturaPorCaja, productosPorVenta, actualiza_venta,imprimircomanda,imprimirfactura } from "../../../../../../api/cajero";
+import { facturaPorCaja, productosPorVenta,cancelarFactura, actualiza_venta,imprimircomanda,imprimirfactura } from "../../../../../../api/cajero";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 
 export default function VentasDetalles({ open, onClose, id_caja }: any) {
 
@@ -44,6 +45,8 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
   const cambioSeguro = Math.max(cambioaux, 0);
   const [ventaPayload, setVentaPayload] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [openCancel, setOpenCancel] = useState(false);
+  const [motivo, setMotivo] = useState("");
 
   useEffect(() => {
     if (open && id_caja) cargarVentas();
@@ -69,6 +72,36 @@ const cargarVentas = async () => {
     setLoading(false);
   }
 };
+
+const getEstadoChip = (venta: any) => {
+   if (!venta || typeof venta !== "object") {
+    return { label: "", color: "#ccc", icon: "" };
+  }
+  
+  if (venta.estado_venta === "cancelado") {
+    return {
+      label: "Cancelada",
+      color: "#d32f2f",
+      icon: "❌"
+    };
+  }
+
+  if (venta.estado_pago) {
+    return {
+      label: "Pagado",
+      color: "#2e7d32",
+      icon: "✔️"
+    };
+  }
+
+  return {
+    label: "Pendiente",
+    color: "#ed6c02",
+    icon: "⏳"
+  };
+};
+
+const estado = ventaSeleccionada? getEstadoChip(ventaSeleccionada): null;
 
 const getMetodoPagoIcon = (metodo:any) => {
   switch (metodo) {
@@ -109,17 +142,22 @@ const getMetodoPagoIcon = (metodo:any) => {
   /* ================= METRICAS ================= */
   const metrics = useMemo(() => {
     const totalPagadas = ventas.filter(v => v.estado_pago === true).length;
-    const totalPendientes = ventas.filter(v => v.estado_pago === false).length;
+    const totalPendientes = ventas.filter(v => v.estado_pago === false&& v.estado_venta!='cancelado').length;
+    const totalCancelado = ventas.filter(v =>  v.estado_venta==='cancelado').length;
 
     const totalVentas = ventas
       .filter(v => v.estado_pago === true)
       .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
 
     const pendiente_pago = ventas
-      .filter(v => v.estado_pago === false)
+      .filter(v => v.estado_pago === false&&v.estado_venta==='activa')
       .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
 
-    return { totalPagadas, totalPendientes, totalVentas, pendiente_pago };
+         const facturas_canceladas = ventas
+      .filter(v => v.estado_venta==='cancelado')
+      .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
+
+    return { totalPagadas, totalPendientes, totalVentas, pendiente_pago,facturas_canceladas,totalCancelado};
   }, [ventas]);
 
   /* ================= FILTROS ================= */
@@ -131,7 +169,10 @@ const getMetodoPagoIcon = (metodo:any) => {
     }
 
     if (filtro === "pendientes") {
-      data = data.filter(v => v.estado_pago === false);
+      data = data.filter(v => v.estado_pago === false&& v.estado_venta!='cancelado');
+    }
+      if (filtro === "cancelado") {
+      data = data.filter(v => v.estado_venta==='cancelado');
     }
 
     if (busqueda) {
@@ -140,7 +181,7 @@ const getMetodoPagoIcon = (metodo:any) => {
       );
     }
 
-    return data;
+      return data;
   }, [ventas, filtro, busqueda]);
 
   const totalPaginas = Math.ceil(ventasFiltradas.length / porPagina);
@@ -403,6 +444,40 @@ const getMetodoPagoIcon = (metodo:any) => {
                 </Stack>
               </Card>
             </Box>
+
+             {/* FACTURAS CANCELADAS */}
+            <Box flex="1 1 200px">
+              <Card
+                onClick={() => setFiltro("cancelado")}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  cursor: "pointer",
+                  transition: "all .2s ease",
+                  border: filtro === "cancelado" ? "2px solid #d32f2f" : "1px solid #eee",
+                  background:
+                    filtro === "cancelado"
+                      ? "linear-gradient(135deg,#ffebee,#fff5f5)"
+                      : "#fff",
+                  transform: filtro === "cancelado" ? "scale(1.03)" : "scale(1)",
+                  boxShadow: filtro === "cancelado" ? 4 : 1,
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <PaymentsIcon color="error" />
+                  <Box>
+                    <Typography fontSize={12} color="text.secondary">
+                      canceladas
+                    </Typography>
+                    <Typography fontWeight={800} fontSize={18} color="#ed0202">
+                      {metrics.totalCancelado}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Card>
+            </Box>
+
+
               <Stack direction="row" spacing={1} alignItems="center">
             <Tooltip title="Refrescar ventas" arrow>
               <IconButton
@@ -444,7 +519,7 @@ const getMetodoPagoIcon = (metodo:any) => {
 >
   {ventasPagina.map((venta) => {
     const isPagado = venta.estado_pago;
-
+    const estado = getEstadoChip(venta); 
     return (
       <Box key={venta.id_venta}>
         <motion.div whileHover={{ scale: 1.04 }}>
@@ -455,9 +530,12 @@ const getMetodoPagoIcon = (metodo:any) => {
               cursor: "pointer",
               position: "relative",
               overflow: "hidden",
-              background: isPagado
-                ? "linear-gradient(135deg,#e8f5e9,#ffffff)"
-                : "linear-gradient(135deg,#fff3e0,#ffffff)",
+              background:
+                venta.estado_venta === "cancelado"
+                  ? "linear-gradient(135deg,#ffebee,#ffffff)"
+                  : isPagado
+                  ? "linear-gradient(135deg,#e8f5e9,#ffffff)"
+                  : "linear-gradient(135deg,#fff3e0,#ffffff)",
               border: "1px solid #eee",
               transition: "all .25s ease",
               "&:hover": {
@@ -476,8 +554,13 @@ const getMetodoPagoIcon = (metodo:any) => {
                 left: 0,
                 width: "100%",
                 height: 4,
-                bgcolor: isPagado ? "#2e7d32" : "#ed6c02"
-              }}
+                bgcolor:
+                venta.estado_venta === "cancelado"
+                  ? "#d32f2f"
+                  : isPagado
+                  ? "#2e7d32"
+                  : "#ed6c02"
+                            }}
             />
 
             <Stack spacing={1.2}>
@@ -509,17 +592,21 @@ const getMetodoPagoIcon = (metodo:any) => {
                     </Typography>
                   </Box>
                 </Stack>
-
-                <Chip
-                  label={isPagado ? "Pagado" : "Pendiente"}
-                  size="small"
-                  sx={{
-                    fontSize: 10,
-                    fontWeight: 600,
-                    bgcolor: isPagado ? "#2e7d32" : "#ed6c02",
-                    color: "#fff"
-                  }}
-                />
+                  <Chip
+            label={`${estado.icon} ${estado.label}`}
+            size="small"
+            sx={{
+              fontSize: 10,
+              fontWeight: 700,
+              bgcolor: estado.color,
+              color: "#fff",
+              borderRadius: 2,
+              px: 0.5,
+              letterSpacing: 0.3,
+              boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+            }}
+          />
+            
               </Stack>
 
               {/* CLIENTE */}
@@ -538,8 +625,11 @@ const getMetodoPagoIcon = (metodo:any) => {
                   borderRadius: 2,
                   p: 1,
                   textAlign: "center",
-                  background: isPagado
-                    ? "linear-gradient(135deg,#2e7d32,#66bb6a)"
+                       background:
+                venta.estado_venta === "cancelado"
+                  ? "linear-gradient(135deg,#ed0202,#f85b5b)"
+                  : isPagado
+                   ? "linear-gradient(135deg,#2e7d32,#66bb6a)"
                     : "linear-gradient(135deg,#ed6c02,#ff9800)",
                   color: "#fff"
                 }}
@@ -591,12 +681,31 @@ const getMetodoPagoIcon = (metodo:any) => {
             <Pagination count={totalPaginas} page={pagina} onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPagina(value)} />
           </Box>
         </DialogContent>
-        <DialogActions sx={{ borderTop: "1px solid #eee" }}>
-          <Stack direction="row" spacing={2} ml="auto">
-            <Paper sx={{ px: 3, py: 1, bgcolor: "#ffebee" }}><Typography color="error.main" fontWeight={700}>Por cobrar: {formatCOP(metrics.pendiente_pago)}</Typography></Paper>
-            <Paper sx={{ px: 3, py: 1, bgcolor: "#e8f5e9" }}><Typography color="success.main" fontWeight={700}>Vendido: {formatCOP(metrics.totalVentas)}</Typography></Paper>
-          </Stack>
-        </DialogActions>
+        <DialogActions
+  sx={{
+    borderTop: "1px solid #eee",
+    justifyContent: "center"
+  }}
+>
+  <Stack direction="row" spacing={2}>
+    <Paper sx={{ px: 3, py: 1, bgcolor: "#ffebee" }}>
+      <Typography color="error.main" fontWeight={700}>
+        Facturas canceladas: {formatCOP(metrics.facturas_canceladas)}
+      </Typography>
+    </Paper>
+    <Paper sx={{ px: 3, py: 1, bgcolor: "#ffffeb" }}>
+      <Typography color="warning" fontWeight={700}>
+        Por cobrar: {formatCOP(metrics.pendiente_pago)}
+      </Typography>
+    </Paper>
+
+    <Paper sx={{ px: 3, py: 1, bgcolor: "#e8f5e9" }}>
+      <Typography color="success.main" fontWeight={700}>
+        Vendido: {formatCOP(metrics.totalVentas)}
+      </Typography>
+    </Paper>
+  </Stack>
+</DialogActions>
       </Dialog>
 
       {/* ================= DETALLE FACTURA ================= */}
@@ -613,25 +722,93 @@ const getMetodoPagoIcon = (metodo:any) => {
   }}
 >
   {/* HEADER */}
-  <Box sx={{ background: "linear-gradient(135deg,#1976d2,#42a5f5)", color: "#fff", p: 2 }}>
-    <Stack direction="row" justifyContent="space-between" alignItems="center">
-      <Stack direction="row" spacing={2} alignItems="center">
-        <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)" }}>
-          <ReceiptLongIcon />
-        </Avatar>
-        <Box>
-          <Typography fontWeight={800}>Factura</Typography>
-          <Typography fontSize={12}>
-            #{ventaSeleccionada?.numero_factura}
-          </Typography>
-        </Box>
-      </Stack>
+ <Box
+  sx={{
+    background: "linear-gradient(135deg,#1976d2,#42a5f5)",
+    color: "#fff",
+    px: 2.5,
+    py: 2,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16
+  }}
+>
+  <Stack
+    direction="row"
+    justifyContent="space-between"
+    alignItems="center"
+  >
+    {/* IZQUIERDA */}
+    <Stack direction="row" spacing={1.5} alignItems="center">
+      <Avatar
+        sx={{
+          width: 42,
+          height: 42,
+          bgcolor: "rgba(255,255,255,0.2)",
+          backdropFilter: "blur(6px)"
+        }}
+      >
+        <ReceiptLongIcon />
+      </Avatar>
 
-      <IconButton onClick={() => setDetalleOpen(false)} sx={{ color: "#fff" }}>
-        <CloseIcon />
-      </IconButton>
+      <Box>
+        <Typography fontWeight={800} fontSize={16}>
+          Factura
+        </Typography>
+
+        <Typography fontSize={12} sx={{ opacity: 0.9 }}>
+          #{ventaSeleccionada?.numero_factura}
+        </Typography>
+      </Box>
     </Stack>
-  </Box>
+
+    {/* DERECHA (ACCIONES) */}
+    <Stack direction="row" spacing={1}>
+      
+      {/* CANCELAR */}
+     
+     {ventaSeleccionada?.estado_venta!='cancelado'&& ventaSeleccionada?.estado_pago===false&& (
+  <Tooltip title="Cancelar factura" arrow>
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenCancel(true);
+          }}
+          sx={{
+            color: "#fff",
+            bgcolor: "rgba(255,82,82,0.2)",
+            transition: "all .2s ease",
+            "&:hover": {
+              bgcolor: "#d32f2f",
+              transform: "scale(1.1)"
+            }
+          }}
+        >
+          <CancelOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+     )}
+    
+
+      {/* CERRAR */}
+      <Tooltip title="Cerrar" arrow>
+        <IconButton
+          onClick={() => setDetalleOpen(false)}
+          sx={{
+            color: "#fff",
+            bgcolor: "rgba(255,255,255,0.15)",
+            "&:hover": {
+              bgcolor: "rgba(255,255,255,0.3)"
+            }
+          }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+    </Stack>
+  </Stack>
+</Box>
 
   {/* CLIENTE */}
   <Box sx={{ p: 2, bgcolor: "#fff", borderBottom: "1px solid #eee" }}>
@@ -656,13 +833,16 @@ const getMetodoPagoIcon = (metodo:any) => {
 
       <Box flex={1} />
 
-      <Chip
-        label={ventaSeleccionada?.estado_pago ? "Pagado" : "Pendiente"}
+     <Chip
+        label={estado?.label}
         size="small"
         sx={{
-          bgcolor: ventaSeleccionada?.estado_pago ? "#2e7d32" : "#d32f2f",
+          bgcolor: estado?.color,
           color: "#fff",
-          fontWeight: 600
+          fontWeight: 700,
+          borderRadius: 2,
+          px: 1,
+          boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
         }}
       />
     </Stack>
@@ -783,7 +963,7 @@ const getMetodoPagoIcon = (metodo:any) => {
       </Box>
 
       {/* FORM PAGO */}
-      {ventaSeleccionada?.estado_pago === false && (
+      { ventaSeleccionada?.estado_venta!='cancelado'&&ventaSeleccionada?.estado_pago === false && (
         <>
           <TextField
             select
@@ -972,6 +1152,156 @@ const getMetodoPagoIcon = (metodo:any) => {
         </DialogActions>
       </Dialog>
 
+
+      {/*Modal elegante */}
+
+      <Dialog
+        open={openCancel}
+        onClose={() => setOpenCancel(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            overflow: "hidden"
+          }
+        }}
+      >
+        {/* HEADER */}
+        <Box
+          sx={{
+            background: "linear-gradient(135deg,#d32f2f,#ef5350)",
+            color: "#fff",
+            p: 2.5
+          }}
+        >
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)" }}>
+              ⚠️
+            </Avatar>
+
+            <Box>
+              <Typography fontWeight={800} fontSize={18}>
+                Cancelar factura
+              </Typography>
+              <Typography fontSize={12} sx={{ opacity: 0.9 }}>
+                Esta acción no se puede deshacer
+              </Typography>
+            </Box>
+          </Stack>
+        </Box>
+
+        {/* CONTENIDO */}
+        <DialogContent sx={{ p: 3 }}>
+          <Stack spacing={2}>
+
+            {/* INFO FACTURA */}
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                bgcolor: "#f9fafb",
+                border: "1px solid #eee"
+              }}
+            >
+              <Typography fontSize={12} color="text.secondary">
+                Factura
+              </Typography>
+
+              <Typography fontWeight={700}>
+                #{ventaSeleccionada?.numero_factura}
+              </Typography>
+
+              <Typography fontSize={13} color="text.secondary">
+                Cliente: {ventaSeleccionada?.nombre_completo}
+              </Typography>
+            </Box>
+
+            {/* INPUT */}
+            <TextField
+              fullWidth
+              multiline
+              minRows={3}
+              maxRows={5}
+              label="Motivo de cancelación"
+              placeholder="Ej: Error en pedido, cliente desistió, etc..."
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+            />
+
+            {/* ALERTA */}
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: "#fff3e0",
+                border: "1px dashed #ff9800"
+              }}
+            >
+              <Typography fontSize={12} color="#e65100">
+                ⚠️ La factura será marcada como cancelada y no afectará los reportes de venta.
+              </Typography>
+            </Box>
+
+          </Stack>
+        </DialogContent>
+
+        {/* FOOTER */}
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+            pt: 1
+          }}
+        >
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1.5}
+            width="100%"
+          >
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => setOpenCancel(false)}
+              sx={{
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 600
+              }}
+            >
+              Volver
+            </Button>
+
+            <Button
+              fullWidth
+              color="error"
+              variant="contained"
+              disabled={!motivo}
+              onClick={async () => {
+                await cancelarFactura({
+                  id_venta: ventaSeleccionada.id_venta,
+                  nota: motivo
+                });
+
+                setOpenCancel(false);
+                setDetalleOpen(false);
+                cargarVentas();
+              }}
+              sx={{
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 700,
+                boxShadow: "0 4px 12px rgba(211,47,47,0.4)",
+                "&:hover": {
+                  boxShadow: "0 6px 16px rgba(211,47,47,0.6)"
+                }
+              }}
+            >
+              Confirmar cancelación
+            </Button>
+          </Stack>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
