@@ -90,5 +90,53 @@ export const authService = {
     );
 
     return { token, user: payload };
+  },
+
+ 
+  newpassword: async ({ id_usuario, currentPassword, newPassword }) => {
+  // 🔎 Buscar usuario
+  const [rows] = await db.query(
+    `SELECT * FROM ${USERS_TABLE} WHERE id = $1`,
+    [id_usuario]
+  );
+
+  const user = rows[0];
+
+  if (!user) {
+    const error = new Error("Usuario no encontrado");
+    error.status = 404;
+    throw error;
   }
+
+  // 🔐 Validar contraseña actual
+  const match = await bcrypt.compare(currentPassword, user.password);
+
+  if (!match) {
+    const error = new Error("La contraseña actual es incorrecta");
+    error.status = 400;
+    throw error;
+  }
+
+  // 🚫 Evitar misma contraseña
+  const samePassword = await bcrypt.compare(newPassword, user.password);
+
+  if (samePassword) {
+    const error = new Error("La nueva contraseña no puede ser igual a la actual");
+    error.status = 400;
+    throw error;
+  }
+
+  // 🔒 Encriptar nueva contraseña
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  // 💾 Actualizar en DB
+  await db.query(
+    `UPDATE ${USERS_TABLE} SET password = $1 WHERE id = $2`,
+    [hashedPassword, id_usuario]
+  );
+
+  return {
+    message: "Contraseña actualizada correctamente",
+  };
+}
 };

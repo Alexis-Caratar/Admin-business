@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import {Card,Typography,Box,Chip,Dialog,DialogTitle,DialogContent,IconButton,TextField,
-  MenuItem,useTheme,useMediaQuery,} from "@mui/material";
+  MenuItem,useTheme,useMediaQuery,
+  Button,
+  Stack,} from "@mui/material";
+  import PrintIcon from "@mui/icons-material/Print";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
 import CloseIcon from "@mui/icons-material/Close";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import type { Mesa } from "./../../../../../types/cajero";
-import { apidetallesMesa, actualiza_venta, liberar_mesa } from "../../../../../api/cajero";
+import { apidetallesMesa, actualiza_venta, liberar_mesa, imprimircomanda } from "../../../../../api/cajero";
 import Swal from "sweetalert2";
 import ChairIcon from "@mui/icons-material/Chair";
 
@@ -168,6 +171,62 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
     }
   };
 
+
+
+   const imprimirFactura = async (estado_impresion:String) => {
+    try {
+     
+      const payload = {
+        id_negocio:id_negocio,
+        id_mesa:mesaSeleccionada?.id,
+        mesa:mesaSeleccionada?.nombre,
+        idUsuario:idUsuario,
+        nombre_vendedor:detalleVenta.nombre_vendedor,
+        nota:detalleVenta.nota,
+        venta: {
+          numero_factura: detalleVenta.numero_factura,
+          fecha_completa: detalleVenta.fecha_completa,
+          fecha_impresion: detalleVenta.fecha_impresion,
+          nombre_vendedor: idUsuario,
+          identificacion_cliente: detalleVenta.identificacion_cliente,
+          nombre_completo: detalleVenta.nombre_completo,
+          telefono: detalleVenta.telefono,
+          email: detalleVenta.email,
+          venta_total: detalleVenta.venta_total,
+          descuento: 0,
+          metodo_pago: detalleVenta.estado_pago,
+          monto_recibido: detalleVenta.monto_recibido,
+          cambio: detalleVenta.cambio
+        },
+        productos: detalleVenta.productos.map((p:any) => ({
+          id_producto: p.id_producto,
+          nombre: p.nombre,
+          cantidad: p.cantidad,
+          precio_unitario: p.precio_unitario,
+          subtotal: p.subtotal
+        }))
+      };
+  
+      if(estado_impresion=='comanda'){
+        await imprimircomanda(payload);
+      }else if(estado_impresion=='factura'){
+  //       await imprimirfactura(payload );
+      }
+        
+      Swal.fire({
+        icon: "success",
+        title: "Enviado a impresión",
+        text: " Espere un momento se está imprimiendo...",
+        timer: 1500,
+        showConfirmButton: false
+      });
+  
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "No se pudo imprimir", "error");
+    }
+  };
+
   return (
   <Box width="100%">
   <Typography fontWeight={700} mb={1} sx={{ fontSize: { xs: 16, md: 22 } }}>
@@ -282,74 +341,98 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
       {/* Modal Orden */}
       <Dialog open={openOrden} onClose={() => setOpenOrden(false)} maxWidth="sm" fullWidth>
      <DialogTitle
-          sx={{
-            fontWeight: 700,
-            pb: 1.5,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            pr: 6, // espacio para el botón cerrar
-          }}
-        >
-          {/* IZQUIERDA */}
-          <Box>
-            <Typography fontWeight={700} fontSize={18}>
-              🧾 Orden - {mesaOrden?.nombre}
-            </Typography>
+  sx={{
+    fontWeight: 700,
+    pb: 1.5,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    pr: 6,
+  }}
+>
+  {/* IZQUIERDA */}
+  <Box>
+    <Typography fontWeight={700} fontSize={18}>
+      🧾 Orden - {mesaOrden?.nombre}
+    </Typography>
 
-            <Typography fontSize={12} color="text.secondary">
-              Estado de la factura
-            </Typography>
-          </Box>
+    <Typography fontSize={12} color="text.secondary">
+      Estado de la factura
+    </Typography>
+  </Box>
 
-          {/* ESTADO PRO */}
-          <Box
-            sx={{
-              px: 2,
-              py: 0.7,
-              borderRadius: 2,
-              fontWeight: 700,
-              fontSize: 12,
-              letterSpacing: 0.5,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
+  {/* DERECHA (ESTADO + BOTÓN) */}
+  <Stack direction="row" spacing={1.5} alignItems="center">
 
-              background:
-                detalleVenta?.estado_pago_bool === true
-                  ? "linear-gradient(135deg,#16a34a,#22c55e)"
-                  : detalleVenta?.estado_pago_bool === false
-                  ? "linear-gradient(135deg,#dc2626,#ef4444)"
-                  : "#e5e7eb",
+    {/* BOTÓN IMPRIMIR 🔥 */}
+    <Button
+      size="small"
+      startIcon={<PrintIcon />}
+      variant="contained"
+      sx={{
+        borderRadius: 2,
+        fontWeight: 700,
+        textTransform: "none",
+        background: "linear-gradient(135deg,#0d47a1,#1976d2)",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
+        "&:hover": {
+          background: "linear-gradient(135deg,#0b3c91,#1565c0)",
+        }
+      }}
+      onClick={() => imprimirFactura("comanda")}
+    >
+      Comanda
+    </Button>
 
-              color:
-                detalleVenta?.estado_pago_bool == null
-                  ? "#374151"
-                  : "#fff",
+    {/* ESTADO */}
+    <Box
+      sx={{
+        px: 2,
+        py: 0.7,
+        borderRadius: 2,
+        fontWeight: 700,
+        fontSize: 12,
+        letterSpacing: 0.5,
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
 
-              boxShadow:
-                detalleVenta?.estado_pago_bool != null
-                  ? "0 4px 12px rgba(0,0,0,0.25)"
-                  : "none",
-            }}
-          >
-            {detalleVenta?.estado_pago_bool === true && "✔ FACTURA PAGADA"}
-            {detalleVenta?.estado_pago_bool === false && " FACTURA PENDIENTE PAGO"}
-            {detalleVenta?.estado_pago_bool == null && "SIN VENTA"}
-          </Box>
+        background:
+          detalleVenta?.estado_pago_bool === true
+            ? "linear-gradient(135deg,#16a34a,#22c55e)"
+            : detalleVenta?.estado_pago_bool === false
+            ? "linear-gradient(135deg,#dc2626,#ef4444)"
+            : "#e5e7eb",
 
-          {/* BOTÓN CERRAR */}
-          <IconButton
-            onClick={() => setOpenOrden(false)}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+        color:
+          detalleVenta?.estado_pago_bool == null
+            ? "#374151"
+            : "#fff",
+
+        boxShadow:
+          detalleVenta?.estado_pago_bool != null
+            ? "0 4px 12px rgba(0,0,0,0.25)"
+            : "none",
+      }}
+    >
+      {detalleVenta?.estado_pago_bool === true && "✔ FACTURA PAGADA"}
+      {detalleVenta?.estado_pago_bool === false && "FACTURA PENDIENTE"}
+      {detalleVenta?.estado_pago_bool == null && "SIN VENTA"}
+    </Box>
+  </Stack>
+
+  {/* BOTÓN CERRAR */}
+  <IconButton
+    onClick={() => setOpenOrden(false)}
+    sx={{
+      position: "absolute",
+      right: 8,
+      top: 8,
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</DialogTitle>
 
         <DialogContent dividers sx={{ bgcolor: "#f8fafc" }}>
           {!loadingDetalle && detalleVenta && (

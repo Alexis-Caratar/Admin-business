@@ -2114,28 +2114,1819 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
 }
 Conexión cerrada, reintentando en 5s...
 Conectado al backend WebSocket
-cpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websockeError al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at neError al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -2146,12 +3937,59 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
-Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNABORTED 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4079,
+  code: 'ECONNABORTED',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -2162,19 +4000,14 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -2185,15 +4018,14 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
-bSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -2204,15 +4036,14 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
-ket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMeError al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\DesConexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -2223,12 +4054,14 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
-\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\Error al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -2239,14 +4072,14 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
-vents:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -2257,14 +4090,257 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
-vents:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ECONNABORTED 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4079,
+  code: 'ECONNABORTED',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -2275,61 +4351,1834 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
-s:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Error al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Error al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Error al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Error al imprimir factura: Error: Can not find printer
-    at new USBAdapter (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\@node-escpos\usb-adapter\dist\index.cjs:34:13)
-    at C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:156:20
-    at new Promise (<anonymous>)
-    at imprimirComanda (C:\Users\johan\Desktop\Admin-business\agente-local\services\imprimir.service.js:155:10)
-    at WebSocket.<anonymous> (C:\Users\johan\Desktop\Admin-business\agente-local\socket.client.js:34:32)
-    at WebSocket.emit (node:events:508:28)
-    at Receiver.receiverOnMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\websocket.js:1225:20)
-    at Receiver.emit (node:events:508:28)
-    at Receiver.dataMessage (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:596:14)
-    at Receiver.getData (C:\Users\johan\Desktop\Admin-business\agente-local\node_modules\ws\lib\receiver.js:496:10)
-Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
   errno: -4073,
   code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+�n cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+UT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+T',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+nnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+ Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+IMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4039,
+  code: 'ETIMEDOUT',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
   syscall: 'connect',
   address: '3.227.242.168',
   port: 4000

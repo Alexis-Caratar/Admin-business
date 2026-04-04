@@ -3,9 +3,8 @@ import { VentasController } from "../controllers/ventas.controller.js";
 
 const router = Router();
 
-router.post("/", VentasController.crearVenta);
-router.get("/", VentasController.listarVentas);
-router.get("/:id", VentasController.obtenerVenta);
-router.delete("/:id", VentasController.eliminarVenta);
+router.get("/resumen", VentasController.resumeventa);
+router.get("/listar", VentasController.listarVentas);
+
 
 export default router;

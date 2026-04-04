@@ -10,7 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import RestoreIcon from "@mui/icons-material/Restore";
+import LockResetIcon from "@mui/icons-material/LockReset";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -18,6 +18,9 @@ import PersonIcon from "@mui/icons-material/Person";
 import { getModulos } from "../api/menusistema";
 import { iconMap } from "../utils/mapIcons";
 import { componentMap } from "../utils/mapComponents";
+import { useIdleLogout } from "../hooks/useIdleLogout";
+import CambiarPasswordModal from "../components/CambiarPasswordModal";
+import {cambiopassword} from "./../api/auth"
 const DEFAULT_AVATAR =
   "https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png";
 
@@ -34,12 +37,40 @@ const AdminDashboard: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [nombre_negocio, setNombreNegocio] = useState("Mi Negocio");
   const [imagen_negocio, setImagenNegocio] = useState("");
+  const [id_usuario, setid_usuario] = useState("");
   const [nombre, setNombre] = useState("");
   const [rol, setRol] = useState("");
   const [sinModulos, setSinModulos] = useState(false);
   const [imagen, setImagen] = useState(DEFAULT_AVATAR);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
+  const [openPasswordModal, setOpenPasswordModal] = useState(false);
+
+  useEffect(() => {
+  const handleStorage = (e: StorageEvent) => {
+    if (e.key === "logout") {
+      navigate("/");
+    }
+  };
+
+  window.addEventListener("storage", handleStorage);
+
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+  };
+}, [navigate]);
+
+const cerrarSesion = () => {
+  localStorage.clear();
+  localStorage.setItem("logout", Date.now().toString());
+  navigate("/login");
+};
+
+  useIdleLogout({
+    timeout: 4 * 60 * 1000, // 20 minutos de inactividad
+    warningTime: 60 * 1000, // aviso 1 min antes
+    onLogout: cerrarSesion,
+  });
 
   // 🔥 CONTROL RESPONSIVE
   useEffect(() => {
@@ -59,13 +90,14 @@ const AdminDashboard: React.FC = () => {
     const storedNombre = localStorage.getItem("nombre") || "";
     const storedRol = localStorage.getItem("rol") || "";
     const rawImagen = localStorage.getItem("imagen");
-    const id_usuario = localStorage.getItem("id_usuario");
+    const id_usuario = localStorage.getItem("id_usuario")||"";
 
     setNombreNegocio(storedNegocio);
     setImagenNegocio(imagenNegocio);
     setNombre(storedNombre);
     setRol(storedRol);
     setImagen(rawImagen || DEFAULT_AVATAR);
+    setid_usuario(id_usuario);
 
     const loadMenus = async () => {
       const data = await getModulos(storedIdNegocio, Number(id_usuario));
@@ -262,7 +294,10 @@ const AdminDashboard: React.FC = () => {
               </IconButton>
 
               <IconButton sx={{ color: "#fff" }}>
-                <RestoreIcon />
+              <MenuItem onClick={() => setOpenPasswordModal(true)}>
+               <LockResetIcon sx={{ mr: 1, color: "#f59e0b" }} />
+                Cambiar contraseña
+              </MenuItem>
               </IconButton>
 
               <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
@@ -301,7 +336,7 @@ const AdminDashboard: React.FC = () => {
                 </MenuItem>
 
                 <MenuItem
-                  onClick={() => { localStorage.clear(); window.location.href = "/login"; }}
+                  onClick={() => cerrarSesion()}
                   sx={{
                     borderRadius: 1,
                     px: 2,
@@ -340,7 +375,22 @@ const AdminDashboard: React.FC = () => {
           </Paper>
         </Box>
       </Box>
+      {/*Modal cambio de contraseña */}
+            <CambiarPasswordModal
+        open={openPasswordModal}
+        onClose={() => setOpenPasswordModal(false)}
+       onSubmit={async ({ currentPassword, newPassword }) => {
+        const payload = {currentPassword,newPassword,id_usuario,};
+        await cambiopassword(payload);
+
+        localStorage.clear();
+        localStorage.setItem("logout", Date.now().toString()); // multi-tab
+        navigate("/login");
+      }}
+      />
+
     </Box>
+    
   );
 };
 

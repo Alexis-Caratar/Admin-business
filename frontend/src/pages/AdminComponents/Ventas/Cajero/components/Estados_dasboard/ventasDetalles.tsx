@@ -240,14 +240,14 @@ const getMetodoPagoIcon = (metodo:any) => {
       id_negocio:id_negocio,
       id_mesa:ventaSeleccionada.id_mesa,
       mesa:ventaSeleccionada.mesa,
-      idUsuario:ventaSeleccionada.id_mesa,
+      idUsuario:idUsuario,
       nombre_vendedor:ventaSeleccionada.nombre_vendedor,
       nota:ventaSeleccionada.nota,
       venta: {
         numero_factura: ventaSeleccionada.numero_factura,
         fecha_completa: ventaSeleccionada.fecha_completa,
         fecha_impresion: ventaSeleccionada.fecha_impresion,
-        nombre_vendedor: nombreuser,
+        nombre_vendedor: nombreuser, //revisar este estado esta duplicado en el payload
         identificacion_cliente: ventaSeleccionada.identificacion_cliente,
         nombre_completo: ventaSeleccionada.nombre_completo,
         telefono: ventaSeleccionada.telefono,
@@ -674,7 +674,7 @@ const getMetodoPagoIcon = (metodo:any) => {
       </Box>
     );
   })}
-</Box>
+        </Box>
 
           {/* Paginación */}
           <Box mt={4} display="flex" justifyContent="center">
@@ -766,7 +766,7 @@ const getMetodoPagoIcon = (metodo:any) => {
       
       {/* CANCELAR */}
      
-     {ventaSeleccionada?.estado_venta!='cancelado'&& ventaSeleccionada?.estado_pago===false&& (
+     {ventaSeleccionada?.estado_venta!='cancelado'&& ventaSeleccionada?.estado_pago==false&& (
   <Tooltip title="Cancelar factura" arrow>
         <IconButton
           onClick={(e) => {
@@ -1028,8 +1028,8 @@ const getMetodoPagoIcon = (metodo:any) => {
 
       {/*  IMPRESIONES COMANDA O FACTURA */}
 
- {ventaSeleccionada?.estado_pago === false && (
-  <Button
+    {/*{ventaSeleccionada?.estado_pago === false && ( */}
+      <Button
           fullWidth
           startIcon={<PrintIcon />}
           variant="contained"
@@ -1039,8 +1039,11 @@ const getMetodoPagoIcon = (metodo:any) => {
         >
           Imprimir Comanda
         </Button>
- )}
     
+    {/*
+    )}
+    
+   
      {ventaSeleccionada?.estado_pago === true && (
       <Button
         fullWidth
@@ -1054,6 +1057,7 @@ const getMetodoPagoIcon = (metodo:any) => {
       </Button>
 
      )}
+     */}
     
 
     </Stack>

@@ -1,49 +1,23 @@
 export interface Venta {
   id: number;
   id_negocio: number;
+  numero_factura:string;
   id_cliente: number | null;
+  identificacion_cliente:string;
+  nombre_completo:string;
   fecha: string;
   subtotal: number;
   descuento: number;
   descuento_porcentaje: number;
   impuesto: number;
-  total: number;
-  estado: string;
+  venta_total: number;
+  mesa:string;
+  estado_pago: boolean;
+  estado_venta:string;
   metodo_pago: string;
   nota: string | null;
-  items: VentaItem[];
-}
-
-export interface VentaItem {
-  id?: number;
-  id_producto: number;
-  cantidad: number;
-  precio_unitario: number;
-  descuento?: number;
-  descuento_porcentaje?: number;
-  impuesto?: number;
-  subtotal: number;
-}
-
-export interface VentaPayload {
-  id_cliente: number | null;
-  fecha: string;
-  subtotal: number;
-  descuento: number;
-  descuento_porcentaje: number;
-  impuesto: number;
+  nombre_vendedor: string;
   total: number;
-  estado: string;
-  metodo_pago: string;
-  nota?: string | null;
-  items: VentaItem[];
+  cantidad:number;
 }
 
-export interface Venta {
-  id: number;
-  id_cliente: number|null;
-  fecha: string;
-  total: number;
-  estado: string;
-  metodo_pago: string;
-}

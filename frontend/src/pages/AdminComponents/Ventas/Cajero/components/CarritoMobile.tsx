@@ -569,21 +569,7 @@ useEffect(() => {
                   </Box>
                 {carrito.length > 0 && (
                   <>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      placeholder="Ej: sin cebolla, término medio..."
-                      onChange={(e) => setNota(e.target.value)}
-                      sx={{
-                        mt: 1,
-                        "& .MuiInputBase-root": {
-                          fontSize: 12,
-                          borderRadius: 2,
-                        },
-                      }}
-                    />
-                 
-
+                  
                   <Box
                     sx={{
 
@@ -593,8 +579,22 @@ useEffect(() => {
                       borderTop: "1px solid #eee",
                       pt: 1,
                       pb: 1,
+                      mt:1,
                     }}
                   >
+                    <TextField
+                      fullWidth
+                      size="small"
+                      placeholder="Ej: sin cebolla, término medio..."
+                      onChange={(e) => setNota(e.target.value)}
+                      sx={{
+                        
+                        "& .MuiInputBase-root": {
+                          fontSize: 12,
+                          borderRadius: 2,
+                        },
+                      }}
+                    />
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                       <Typography fontWeight="bold">Total</Typography>
                       <Typography fontWeight="bold" color="success.main">

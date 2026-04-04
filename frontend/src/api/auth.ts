@@ -14,3 +14,10 @@ export const register = async (payload: any) => {
   const { data } = await axios.post("/auth/register", payload);
   return data;
 };
+
+
+
+export const cambiopassword = async (payload: any) => {
+  const { data } = await axios.post("/auth/newpassword", payload);
+  return data;
+};

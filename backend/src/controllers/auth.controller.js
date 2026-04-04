@@ -31,3 +31,14 @@ export const login = async (req, res) => {
     return res.status(err.status || 500).json({ error: err.message });
   }
 };
+
+export const newpassword = async (req, res) => {
+  try {
+    
+    const data = await authService.newpassword(req.body);
+    return res.json({ ok: true, ...data });
+
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message });
+  }
+};

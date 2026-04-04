@@ -558,10 +558,15 @@ crearcliente: async (payload) => {
     v.numero_factura,
     per.identificacion AS identificacion_cliente,
     per.nombres || ' ' || per.apellidos AS nombre_completo,
+    per.telefono,
+    per.email,
     v.subtotal AS venta_total,
     p.estado_pago as estado_pago_bool,
     p.metodo_pago AS estado_pago,
+    p.monto_recibido,
+    p.cambio,
     v.nota,
+    per2.nombres || ' ' || per2.apellidos AS nombre_vendedor,
 
     COALESCE(
         json_agg(
@@ -588,12 +593,16 @@ LEFT JOIN (
 ) prod_i ON pro.id = prod_i.id_producto
 
 LEFT JOIN (
-    SELECT id_venta, MAX(id) AS id_pago, MAX(metodo_pago) AS metodo_pago,estado_pago
+    SELECT id_venta, MAX(id) AS id_pago, MAX(metodo_pago) AS metodo_pago,estado_pago,
+    monto_recibido,cambio
     FROM pagos
-    GROUP BY id_venta,estado_pago
+    GROUP BY id_venta,estado_pago,monto_recibido,cambio
 ) p ON v.id = p.id_venta
 
 INNER JOIN personas per ON v.id_cliente = per.id
+INNER JOIN caja c ON v.id_caja=c.id
+INNER JOIN usuarios u ON c.id_usuario=u.id
+INNER JOIN personas per2 ON u.id_persona=per2.id
 
 WHERE m.estado = 'Ocupada'
 AND m.id_negocio = $1
@@ -610,7 +619,13 @@ GROUP BY
     v.subtotal,
     p.metodo_pago,
     p.estado_pago,
-    v.nota
+    v.nota,
+    per2.nombres,
+    per2.apellidos,
+    p.monto_recibido,
+    p.cambio,
+    per.telefono,
+    per.email
 
 ORDER BY p.id_pago DESC
 LIMIT 1;

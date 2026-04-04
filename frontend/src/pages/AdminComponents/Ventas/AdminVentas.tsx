@@ -1,84 +1,95 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
+import { Box, Dialog, DialogContent } from "@mui/material";
 
 import StatsCards from "./StatsCards";
 import CalendarView from "./CalendarView";
 import VentasDelDia from "./VentasDelDia";
 
 import type { Venta } from "../../../types/ventas";
-import { getVentas } from "../../../api/ventas";
+import { getResumenVentas, getVentasPorDia } from "../../../api/ventas";
 
 const AdminVentas: React.FC = () => {
-  const [ventas, setVentas] = useState<Venta[]>([]);
+  // --- Estados ---
+  const [resumen, setResumen] = useState<Venta[]>([]); // resumen por día
+  const [ventasDelDia, setVentasDelDia] = useState<Venta[]>([]); // detalle por fecha
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // -------------------------------------------------------------------
-  // Cargar ventas desde la API
+  // Cargar resumen de ventas al montar
   // -------------------------------------------------------------------
-  const loadVentas = useCallback(async () => {
+  const loadResumen = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getVentas();
-
-      // Normalización por si la API devuelve estructura { ok, ventas }
-      setVentas(Array.isArray(data?.ventas) ? data.ventas : data ?? []);
+      const data = await getResumenVentas(); // API que devuelve resumen por fecha
+      setResumen(data.ventas || []);
     } catch (error) {
-      console.error("Error cargando ventas:", error);
-      setVentas([]);
+      console.error("Error cargando resumen de ventas:", error);
+      setResumen([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadVentas();
-  }, [loadVentas]);
+    loadResumen();
+  }, [loadResumen]);
 
   // -------------------------------------------------------------------
-  // Estadísticas calculadas
+  // Click en fecha: traer ventas completas
+  // -------------------------------------------------------------------
+  const handleDateClick = async (fecha: string) => {
+    try {
+      setLoading(true);
+      setSelectedDate(fecha);
+
+      const data = await getVentasPorDia(fecha); // API que devuelve ventas completas
+      console.log("data",data);
+      
+      setVentasDelDia(data.ventas || []);
+    } catch (error) {
+      console.error("Error cargando ventas del día:", error);
+      setVentasDelDia([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // -------------------------------------------------------------------
+  // Estadísticas generales del resumen
   // -------------------------------------------------------------------
   const stats = useMemo(() => {
-    if (!ventas.length) {
-      return {
-        totalVentas: 0,
-        totalDinero: 0,
-        ventaMayor: 0,
-      };
-    }
+    if (!resumen.length) return { totalVentas: 0, totalDinero: 0, ventaMayor: 0 };
 
-    const totalVentas = ventas.length;
-    const totalDinero = ventas.reduce((sum, v) => sum + Number(v.total || 0), 0);
-    const ventaMayor = Math.max(...ventas.map((v) => Number(v.total || 0)));
+    const totalVentas = resumen.reduce((sum, r) => sum + Number(r.cantidad || 0), 0);
+    const totalDinero = resumen.reduce((sum, r) => sum + Number(r.total || 0), 0);
+    const ventaMayor = Math.max(...resumen.map((r) => Number(r.total || 0)));
 
     return { totalVentas, totalDinero, ventaMayor };
-  }, [ventas]);
+  }, [resumen]);
 
-  // -------------------------------------------------------------------
-  // Render UI
-  // -------------------------------------------------------------------
   return (
     <Box p={3}>
       {/* TARJETAS DE ESTADÍSTICAS */}
       <StatsCards stats={stats} loading={loading} />
 
       {/* CALENDARIO */}
-      <CalendarView ventas={ventas} onSelectDate={setSelectedDate} />
+      <CalendarView ventas={resumen} onSelectDate={handleDateClick} />
 
       {/* MODAL: VENTAS POR DÍA */}
       <Dialog
         open={Boolean(selectedDate)}
         onClose={() => setSelectedDate(null)}
         fullWidth
-        maxWidth="md"
+        maxWidth="xl"
       >
-        <DialogTitle sx={{ fontWeight: "bold" }}>
-          Ventas del {selectedDate}
-        </DialogTitle>
 
         <DialogContent dividers>
           {selectedDate && (
-            <VentasDelDia ventas={ventas} fecha={selectedDate} />
+            <VentasDelDia
+              ventas={ventasDelDia}
+              fecha={selectedDate}
+            />
           )}
         </DialogContent>
       </Dialog>
