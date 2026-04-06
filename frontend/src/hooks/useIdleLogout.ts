@@ -8,8 +8,8 @@ interface Props {
 }
 
 export const useIdleLogout = ({
-  timeout = 4 * 60 * 1000, // 5 min
-  warningTime = 60 * 1000, // 1 min antes
+  timeout = 20 * 60 * 1000, // 20 min
+  warningTime = 120 * 1000, // 2 min antes
   onLogout,
 }: Props) => {
 

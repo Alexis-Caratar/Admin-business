@@ -67,8 +67,8 @@ const cerrarSesion = () => {
 };
 
   useIdleLogout({
-    timeout: 4 * 60 * 1000, // 20 minutos de inactividad
-    warningTime: 60 * 1000, // aviso 1 min antes
+    timeout: 20 * 60 * 1000, // 20 minutos de inactividad
+    warningTime: 120 * 1000, // aviso 2 min antes
     onLogout: cerrarSesion,
   });
 
@@ -215,7 +215,7 @@ const cerrarSesion = () => {
         <Avatar src={imagen} sx={{ width: 50, height: 50 }} />
         {!collapsed && (
           <>
-            <Typography sx={{ color: "#fff" }}>{nombre}</Typography>
+            <Typography sx={{ color: "#fff",fontSize: 13}}>{nombre}</Typography>
             <Typography sx={{ color: "#fff" }} variant="caption">{rol}</Typography>
           </>
         )}

@@ -5747,17 +5747,18 @@ Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
 }
 Conexión cerrada, reintentando en 5s...
 Conectado al backend WebSocket
-�n cerrada, reintentando en 5s...
-Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4039,
-  code: 'ETIMEDOUT',
+  errno: -4073,
+  code: 'EHOSTUNREACH',
   syscall: 'connect',
   address: '3.227.242.168',
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
+Conectado al backend WebSocket
+.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
   errno: -4039,
   code: 'ETIMEDOUT',
@@ -5812,11 +5813,6 @@ Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
 }
 Conexión cerrada, reintentando en 5s...
 Conectado al backend WebSocket
-UT',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -5827,6 +5823,8 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+nexión cerrada, reintentando en 5s...
 Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
   errno: -4062,
@@ -5837,10 +5835,18 @@ Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
 }
 Conexión cerrada, reintentando en 5s...
 Conectado al backend WebSocket
-: -4039,
-  code: 'ETIMEDOUT',
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
   syscall: 'connect',
   address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+,
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
@@ -5853,15 +5859,6 @@ Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4039,
-  code: 'ETIMEDOUT',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
-Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
   errno: -4073,
@@ -5890,14 +5887,98 @@ Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
 }
 Conexión cerrada, reintentando en 5s...
 Conectado al backend WebSocket
-T',
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
   syscall: 'connect',
   address: '3.227.242.168',
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+exión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+�n cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4062,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+NREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+Conexión cerrada, reintentando en 5s...
+Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -4073,
+  code: 'EHOSTUNREACH',
+  syscall: 'connect',
+  address: '3.227.242.168',
+  port: 4000
+}
+Conexión cerrada, reintentando en 5s...
+Conectado al backend WebSocket
+nect [as oncomplete] (node:net:1637:16) {
   errno: -4073,
   code: 'EHOSTUNREACH',
   syscall: 'connect',
@@ -5924,10 +6005,6 @@ Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
 }
 Conexión cerrada, reintentando en 5s...
 Conectado al backend WebSocket
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -5938,8 +6015,8 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+Conectado al backend WebSocket
+nect [as oncomplete] (node:net:1637:16) {
   errno: -4073,
   code: 'EHOSTUNREACH',
   syscall: 'connect',
@@ -5957,32 +6034,6 @@ Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
 }
 Conexión cerrada, reintentando en 5s...
 Conectado al backend WebSocket
-nnect [as oncomplete] (node:net:1637:16) {
-  errno: -4073,
-  code: 'EHOSTUNREACH',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
-Conexión cerrada, reintentando en 5s...
-Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4062,
-  code: 'ENETUNREACH',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
-Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
- Error: connect ETIMEDOUT 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4039,
-  code: 'ETIMEDOUT',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
 Conexión cerrada, reintentando en 5s...
 Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
@@ -5993,64 +6044,8 @@ Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
   port: 4000
 }
 Conexión cerrada, reintentando en 5s...
-Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4073,
-  code: 'EHOSTUNREACH',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
-Conexión cerrada, reintentando en 5s...
-Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4062,
-  code: 'ENETUNREACH',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
-Conexión cerrada, reintentando en 5s...
 Conectado al backend WebSocket
-: connect EHOSTUNREACH 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4073,
-  code: 'EHOSTUNREACH',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
-Conexión cerrada, reintentando en 5s...
-Error WS: Error: connect EHOSTUNREACH 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4073,
-  code: 'EHOSTUNREACH',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
-Conexión cerrada, reintentando en 5s...
-Error WS: Error: connect ENETUNREACH 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4062,
-  code: 'ENETUNREACH',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
-Conexión cerrada, reintentando en 5s...
-Conectado al backend WebSocket
-IMEDOUT 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
-  errno: -4039,
-  code: 'ETIMEDOUT',
-  syscall: 'connect',
-  address: '3.227.242.168',
-  port: 4000
-}
-Conexión cerrada, reintentando en 5s...
-Error WS: Error: connect ETIMEDOUT 3.227.242.168:4000
-    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+(node:net:1637:16) {
   errno: -4039,
   code: 'ETIMEDOUT',
   syscall: 'connect',
