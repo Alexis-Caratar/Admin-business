@@ -15,6 +15,8 @@ interface Props {
   stats: {
     totalVentas: number;
     totalDinero: number;
+    totalEgresos:number;
+    totaltotal:number;
     ventaMayor: number;
   };
   loading: boolean;
@@ -111,37 +113,60 @@ const CardStat = ({
 const StatsCards: React.FC<Props> = ({ stats, loading }) => {
   return (
     <Box
+  sx={{
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 1,
+    mb: 3,
+  }}
+>
+  {[ 
+    {
+      title: "Total Ventas",
+      value: stats.totalVentas,
+      icon: <PointOfSaleIcon />,
+      gradient: "linear-gradient(135deg,#1976d2,#42a5f5)",
+    },
+    {
+      title: "Ingresos Totales",
+      value: formatCOP(stats.totalDinero),
+      icon: <PaymentsIcon />,
+      gradient: "linear-gradient(135deg,#2e7d32,#66bb6a)",
+    },
+    {
+      title: "Egresos Totales",
+      value: formatCOP(-stats.totalEgresos),
+      icon: <PaymentsIcon />,
+      gradient: "linear-gradient(135deg,#f19a9a,#ef0909)",
+    },
+    {
+      title: "Total Neto",
+      value: formatCOP(-stats.totaltotal),
+      icon: <PaymentsIcon />,
+      gradient: "linear-gradient(135deg,#1976d2,#42a5f5)",
+    },
+    {
+      title: "Venta Más Alta",
+      value: formatCOP(stats.ventaMayor),
+      icon: <TrendingUpIcon />,
+      gradient: "linear-gradient(135deg,#6a1b9a,#ab47bc)",
+    },
+  ].map((card, i) => (
+    <Box
+      key={i}
       sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 2,
-        mb: 3,
+        flex: {
+          xs: "1 1 100%",   // 📱 1 por fila
+          sm: "1 1 48%",    // 📱 2 por fila
+          md: "1 1 23%",    // 💻 4 por fila
+          lg: "1 1 15%",    // 🖥 5 por fila 👈
+        },
       }}
     >
-      <CardStat
-        title="Total Ventas"
-        value={stats.totalVentas}
-        loading={loading}
-        icon={<PointOfSaleIcon />}
-        gradient="linear-gradient(135deg,#1976d2,#42a5f5)"
-      />
-
-      <CardStat
-        title="Ingresos Totales"
-        value={formatCOP(stats.totalDinero)}
-        loading={loading}
-        icon={<PaymentsIcon />}
-        gradient="linear-gradient(135deg,#2e7d32,#66bb6a)"
-      />
-
-      <CardStat
-        title="Venta Más Alta"
-        value={formatCOP(stats.ventaMayor)}
-        loading={loading}
-        icon={<TrendingUpIcon />}
-        gradient="linear-gradient(135deg,#6a1b9a,#ab47bc)"
-      />
+      <CardStat {...card} loading={loading} />
     </Box>
+  ))}
+</Box>
   );
 };
 

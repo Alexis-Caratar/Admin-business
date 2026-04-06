@@ -59,13 +59,16 @@ const AdminVentas: React.FC = () => {
   // Estadísticas generales del resumen
   // -------------------------------------------------------------------
   const stats = useMemo(() => {
-    if (!resumen.length) return { totalVentas: 0, totalDinero: 0, ventaMayor: 0 };
+    if (!resumen.length) return { totalVentas: 0, totalDinero: 0,totalEgresos:0,totaltotal:0, ventaMayor: 0 };
 
     const totalVentas = resumen.reduce((sum, r) => sum + Number(r.cantidad || 0), 0);
     const totalDinero = resumen.reduce((sum, r) => sum + Number(r.total || 0), 0);
+    const totalEgresos = resumen.reduce((sum, r) => sum + Number(r.egresos || 0), 0);
+    const totaltotal = totalDinero-totalEgresos;
     const ventaMayor = Math.max(...resumen.map((r) => Number(r.total || 0)));
 
-    return { totalVentas, totalDinero, ventaMayor };
+
+    return { totalVentas, totalDinero,totalEgresos,totaltotal, ventaMayor };
   }, [resumen]);
 
   return (

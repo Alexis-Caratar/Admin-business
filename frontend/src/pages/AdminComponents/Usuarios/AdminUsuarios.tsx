@@ -39,6 +39,7 @@ import WorkIcon from "@mui/icons-material/Work";
 import ImageIcon from "@mui/icons-material/Image";
 import InputAdornment from "@mui/material/InputAdornment";
 import Swal from "sweetalert2";
+import { useTheme, useMediaQuery } from "@mui/material";
 
 import {
   getUsuarios,
@@ -68,7 +69,8 @@ const AdminUsuarios: React.FC = () => {
   const [selectedUsuario, setSelectedUsuario] = useState<User | null>(null);
   const [loadingPermisos, setLoadingPermisos] = useState(false);
   const [savingPermisos, setSavingPermisos] = useState(false);
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   /** FORMULARIO con tipado real */
   const [form, setForm] = useState({
     id_usuario: 0,
@@ -473,9 +475,25 @@ const AdminUsuarios: React.FC = () => {
         </Box>
 
         {/* PAGINACIÓN */}
-        <Box display="flex" justifyContent="center" mt={3}>
-          <Pagination count={totalPages} page={page} onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPage(value)} />
-        </Box>
+
+          {totalPages > 1 && (
+                <Stack alignItems="center" mt={3}>
+                  <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPage(value)} 
+                    color="primary"
+                    shape="rounded"
+                    size={isMobile ? "small" : "medium"}   
+                    siblingCount={isMobile ? 0 : 1}       
+                    boundaryCount={isMobile ? 1 : 2}
+                    showFirstButton={!isMobile}            
+                    showLastButton={!isMobile}
+        
+                  />
+                </Stack>
+              )}
+
 
       <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="md">
   {/* HEADER */}

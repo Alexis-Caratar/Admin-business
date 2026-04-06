@@ -13,6 +13,7 @@ import {
   TextField,
   IconButton,
   Pagination,
+  Stack,
 } from "@mui/material";
 
 import CategoryIcon from "@mui/icons-material/Category";
@@ -20,6 +21,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useTheme, useMediaQuery } from "@mui/material";
 
 import {
   getCategorias,
@@ -37,6 +39,8 @@ const AdminCategorias = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [showProductos, setShowProductos] = useState(false);
   const [selectedCategoriaId, setSelectedCategoriaId] = useState<number | null>(null);
@@ -121,6 +125,9 @@ const AdminCategorias = () => {
     setShowProductos(false);
     setSelectedCategoriaId(null);
   };
+
+      const totalPaginas = Math.ceil(categorias.length / itemsPerPage);
+
 
   return (
     <Box p={3}>
@@ -247,15 +254,23 @@ const AdminCategorias = () => {
 </Box>
 
           {/* PAGINACIÓN */}
-          <Box mt={4} display="flex" justifyContent="center">
-            <Pagination
-              count={Math.ceil(filtered.length / itemsPerPage)}
-              page={page}
-              onChange={(_, v) => setPage(v)}
-              color="primary"
-            />
-          </Box>
+      {totalPaginas > 1 && (
+              <Stack alignItems="center" mt={3}>
+                <Pagination
+                  count={totalPaginas}
+                  page={page}
+                  onChange={(_, v) => setPage(v)}
+                  color="primary"
+                  shape="rounded"
+                  size={isMobile ? "small" : "medium"}  
+                  siblingCount={isMobile ? 0 : 1}        
+                  boundaryCount={isMobile ? 1 : 2}
+                  showFirstButton={!isMobile}           
+                  showLastButton={!isMobile}
 
+                />
+              </Stack>
+            )}
           {/* MODAL */}
           <Dialog
             open={openModal}

@@ -19,5 +19,7 @@ export interface Venta {
   nombre_vendedor: string;
   total: number;
   cantidad:number;
+  egresos: number;
+  id_caja:number;
 }
 

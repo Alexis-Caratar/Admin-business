@@ -13,7 +13,6 @@ export const VentasController = {
 
     listarVentas: async (req, res) => {    
     try {
-      console.log("req query",req.query);
       
       const ventas = await VentasService.listarVentas(req.query.id_negocio,req.query.fecha);
       return res.json({ ok: true, ventas });

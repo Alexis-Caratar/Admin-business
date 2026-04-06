@@ -25,6 +25,7 @@ import {
   Pagination,
   Switch,
   MenuItem,
+  Stack,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -40,11 +41,14 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import ImageIcon from "@mui/icons-material/Image";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import CategoryIcon from "@mui/icons-material/Category";
+import { useTheme, useMediaQuery } from "@mui/material";
 
 
 const AdminNegocios: React.FC = () => {
   const [negocios, setNegocios] = useState<Negocio[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const tiposNegocio = [
   "Restaurante",
@@ -80,7 +84,7 @@ const [form, setForm] = useState<Negocio>({
 
   // 📄 Paginación
   const [page, setPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   const fetchNegocios = async () => {
     const data = await getNegocios();
@@ -328,15 +332,27 @@ const [form, setForm] = useState<Negocio>({
 </Box>
 
       {/* PAGINACIÓN */}
-      <Box display="flex" justifyContent="center" mt={4}>
-        <Pagination
-          count={totalPages}
-          page={page}
-          onChange={(_, value) => setPage(value)}
-          color="primary"
-          size="medium"
-        />
-      </Box>
+ 
+    {totalPages > 1 && (
+            <Stack alignItems="center" mt={3}>
+              <Pagination
+                count={totalPages}
+                page={page}
+              onChange={(_, value) => setPage(value)}
+                color="primary"
+                shape="rounded"
+                
+                size={isMobile ? "small" : "medium"}   // 👈 más compacto en móvil
+                
+                siblingCount={isMobile ? 0 : 1}        // 👈 menos botones en móvil
+                boundaryCount={isMobile ? 1 : 2}
+
+                showFirstButton={!isMobile}            // 👈 ocultar en móvil
+                showLastButton={!isMobile}
+
+              />
+            </Stack>
+          )}
 
       {/* MODAL */}
      

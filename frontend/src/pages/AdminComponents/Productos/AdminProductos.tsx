@@ -25,6 +25,7 @@ import {
   Pagination,
   MenuItem,
   InputAdornment,
+  Stack,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -49,6 +50,8 @@ import PublicIcon from "@mui/icons-material/Public";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ImageIcon from "@mui/icons-material/Image";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import { useTheme, useMediaQuery } from "@mui/material";
+
 
 
 interface Props {
@@ -69,8 +72,10 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
   const [openModal, setOpenModal] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
   const [imgIndices, setImgIndices] = useState<{ [key: number]: number }>({});
+    const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const unidades = ["kg", "litro", "pieza", "unidad"];
   const defaultImage =ProductosImg
@@ -492,15 +497,23 @@ const handleSubmit = async () => {
 </Box>
 
       {/* Paginación */}
-        <Box display="flex" justifyContent="center" mt={4}>
-        <Pagination
-          count={totalPages}
-          page={page}
-          onChange={(_e: React.ChangeEvent<unknown>, value: number) => setPage(value)}
-          color="primary"
-          shape="rounded"
-        />
-      </Box>
+        {totalPages > 1 && (
+              <Stack alignItems="center" mt={3}>
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={(_e: React.ChangeEvent<unknown>, value: number) => setPage(value)}
+                  color="primary"
+                  shape="rounded"
+                  size={isMobile ? "small" : "medium"}  
+                  siblingCount={isMobile ? 0 : 1}        
+                  boundaryCount={isMobile ? 1 : 2}
+                  showFirstButton={!isMobile}           
+                  showLastButton={!isMobile}
+                />
+              </Stack>
+            )}
+
       {/* Modal */}
      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="md">
   

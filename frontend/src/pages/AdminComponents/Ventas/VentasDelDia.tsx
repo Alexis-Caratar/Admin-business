@@ -33,8 +33,11 @@ import PaymentsIcon from "@mui/icons-material/Payments";
 import SearchIcon from "@mui/icons-material/Search";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import type { Venta } from "../../../types/ventas";
-import { productosPorVenta, imprimircomanda, imprimirfactura } from "../../../api/cajero";
+import { productosPorVenta, imprimircomanda, imprimirfactura,apiArqueoCaja} from "../../../api/cajero";
 import Swal from "sweetalert2";
+import { Pagination } from "@mui/material";
+import { useTheme, useMediaQuery } from "@mui/material";
+import { ArqueoCajaModal } from "./Cajero/components/Estados_dasboard/ArqueoCaja";
 
 interface Props {
   ventas: Venta[];
@@ -49,6 +52,8 @@ const formatCOP = (value: number) =>
   }).format(value);
 
 const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
+  console.log("ventas",ventas);
+  
 
   const [ventaSeleccionada, setVentaSeleccionada] = useState<any>(null);
   const [detalleOpen, setDetalleOpen] = useState(false);
@@ -60,6 +65,14 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
   const porPagina = 16;
   const id_negocio = localStorage.getItem("id_negocio");
   const nombreuser = localStorage.getItem("nombre");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [openArqueo, setOpenArqueo] = useState(false);
+  const [loadingArqueo, setLoadingArqueo] = useState(false);
+ const [arqueoInfo, setArqueoInfo] = useState<any | null>(null);
+   const [arqueos,] = useState<any[]>([]);
+  
+
   //const [metodoPago, setMetodoPago] = useState("EFECTIVO");
   //const [montoRecibido, setMontoRecibido] = useState<any>("");
   //const [cambio, setCambio] = useState<number>(0);
@@ -78,7 +91,7 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
       const normal = v.fecha.includes("T") ? v.fecha.split("T")[0] : v.fecha;
       return normal === fecha;
     });
-  }, [ventas, fecha]);
+  }, [ventas, fecha]);  
 
   const stats = useMemo(() => {
     if (!ventasDelDia.length) {
@@ -187,7 +200,7 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
 
     return data;
   }, [ventas, filtro, busqueda]);
-  //const totalPaginas = Math.ceil(ventasFiltradas.length / porPagina);
+  const totalPaginas = Math.ceil(ventasFiltradas.length / porPagina);
   const ventasPagina = ventasFiltradas.slice((pagina - 1) * porPagina, pagina * porPagina);
 
 
@@ -303,6 +316,19 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
     }
   };
 
+const abrirArqueo = async (caja:any) => {
+  try {
+    setOpenArqueo(true);
+    setLoadingArqueo(true);
+     const { data } = await apiArqueoCaja({ id_caja: caja.id_caja });
+   if (data?.ok) setArqueoInfo(data.result);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoadingArqueo(false);
+  }
+};
+
   /* ================= FINALIZAR VENTA ================= 
   const handleFinalizarVenta = async () => {
     if (!ventaSeleccionada) return;
@@ -340,13 +366,15 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
   };
 */
 
-const vendedoresData = ventas
+const cajasData = ventas
   .filter(v => v.estado_venta !== "cancelado" && v.estado_pago === true)
   .reduce((acc, v) => {
-    const key = v.nombre_vendedor || "Sin nombre";
+    const key = `${v.nombre_vendedor}-${v.id_caja}`;
 
     if (!acc[key]) {
       acc[key] = {
+        nombre: v.nombre_vendedor || "Sin nombre",
+        id_caja: v.id_caja,
         total: 0,
         cantidad: 0,
       };
@@ -356,16 +384,9 @@ const vendedoresData = ventas
     acc[key].cantidad += 1;
 
     return acc;
-  }, {} as Record<string, { total: number; cantidad: number }>);
-  
-  const vendedoresArray = Object.entries(vendedoresData).map(
-  ([nombre, data]) => ({
-    nombre,
-    total: data.total,
-    cantidad: data.cantidad
-  })
-);
+  }, {} as Record<string, any>);
 
+const cajasArray = Object.values(cajasData);
 
 
   return (
@@ -428,73 +449,66 @@ const vendedoresData = ventas
           ))}
         </Box>
 
-             {/* Meseros */}
-<Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-  <Box flex="1 1 250px">
+             {/* cajeros */}
+<Box
+  sx={{
+    display: "grid",
+    gridTemplateColumns: {
+      xs: "repeat(2, 1fr)",
+      sm: "repeat(3, 1fr)",
+      md: "repeat(4, 1fr)",
+      lg: "repeat(6, 1fr)",
+    },
+    gap: 1.5,
+    mb: 3,
+  }}
+>
+  {cajasArray.map((caja, index) => (
     <Card
-      onClick={() => setFiltro("meseros")}
+      key={index}
+      onClick={() => abrirArqueo(caja)}
       sx={{
-        p: 2,
+        p: 1.2,
         borderRadius: 3,
         cursor: "pointer",
-        transition: "all .25s ease",
-        border: filtro === "meseros" ? "2px solid #7b1fa2" : "1px solid #eee",
-        background:
-          filtro === "meseros"
-            ? "linear-gradient(135deg,#f3e5f5,#faf5ff)"
-            : "#fff",
-        transform: filtro === "meseros" ? "scale(1.03)" : "scale(1)",
-        boxShadow: filtro === "meseros" ? 4 : 1,
+        border: "1px solid #eee",
+        transition: "all .2s ease",
+        "&:hover": {
+          transform: "translateY(-3px)",
+          boxShadow: 3,
+        },
       }}
     >
-      <Stack spacing={1.5}>
-        <Stack direction="row" spacing={2} alignItems="center">
-          <ReceiptLongIcon sx={{ color: "#7b1fa2" }} />
+      <Stack spacing={0.5}>
+        
+        {/* Nombre + caja */}
+        <Typography fontSize={11} fontWeight={700} noWrap>
+          {caja.nombre}
+        </Typography>
 
-          <Box>
-            <Typography fontSize={12} color="text.secondary">
-              Responsables
-            </Typography>
+        <Typography fontSize={10} color="text.secondary">
+          Caja #{caja.id_caja}
+        </Typography>
 
-            <Typography fontWeight={800} fontSize={20}>
-              {vendedoresArray.length}
-            </Typography>
-          </Box>
+        {/* Métricas */}
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          mt={0.5}
+        >
+          <Typography fontSize={10}>
+            {caja.cantidad} ventas
+          </Typography>
+
+          <Typography fontSize={11} fontWeight={800} color="success.main">
+            {formatCOP(caja.total)}
+          </Typography>
         </Stack>
 
-        {/* 🔥 TOP VENDEDOR */}
-        {vendedoresArray.length > 0 && (
-          <Box
-            sx={{
-              mt: 1,
-              p: 1,
-              borderRadius: 2,
-              bgcolor: "#fafafa",
-              border: "1px dashed #ddd"
-            }}
-          >
-            <Typography fontSize={11} color="text.secondary">
-              Top vendedor
-            </Typography>
-
-            <Typography fontSize={12} fontWeight={700} noWrap>
-              {
-                vendedoresArray.sort((a, b) => b.total - a.total)[0]
-                  ?.nombre
-              }
-            </Typography>
-
-            <Typography fontSize={11} color="success.main" fontWeight={700}>
-              $
-              {vendedoresArray
-                .sort((a, b) => b.total - a.total)[0]
-                ?.total.toLocaleString()}
-            </Typography>
-          </Box>
-        )}
       </Stack>
     </Card>
-  </Box>
+  ))}
 </Box>
 
 
@@ -835,6 +849,24 @@ const vendedoresData = ventas
             );
           })}
         </Box>
+        
+     {totalPaginas > 1 && (
+        <Stack alignItems="center" mt={3}>
+          <Pagination
+            count={totalPaginas}
+            page={pagina}
+            onChange={(_e: React.ChangeEvent<unknown>, value) => setPagina(value)}
+            color="primary"
+            shape="rounded"
+            size={isMobile ? "small" : "medium"}  
+            siblingCount={isMobile ? 0 : 1}        
+            boundaryCount={isMobile ? 1 : 2}
+            showFirstButton={!isMobile}           
+            showLastButton={!isMobile}
+
+          />
+        </Stack>
+      )}
       </Box>
 
       {/* ================= DETALLE FACTURA ================= */}
@@ -1189,6 +1221,75 @@ const vendedoresData = ventas
 
           </Stack>
         </DialogActions>
+      </Dialog>
+
+ {/* ================= MODAL DE FACTURA ================= */}
+      <Dialog
+  open={openArqueo}
+  onClose={() => setOpenArqueo(false)}
+  fullWidth
+  maxWidth="sm"
+>
+  <Box
+    sx={{
+      p: 2,
+      background: "linear-gradient(135deg,#7b1fa2,#ab47bc)",
+      color: "#fff",
+    }}
+  >
+    <Typography fontWeight={800}>
+      Arqueo de Caja - Responsables
+    </Typography>
+  </Box>
+
+  <DialogContent>
+    {loadingArqueo ? (
+      <Box textAlign="center" py={3}>
+        <CircularProgress />
+      </Box>
+    ) : (
+      <Stack spacing={1.5}>
+        {arqueos.map((a, i) => (
+          <Card
+            key={i}
+            sx={{
+              p: 1.5,
+              borderRadius: 3,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box>
+              <Typography fontWeight={700} fontSize={13}>
+                {a.nombre}
+              </Typography>
+              <Typography fontSize={11} color="text.secondary">
+                {a.cantidad} ventas
+              </Typography>
+            </Box>
+
+            <Typography fontWeight={800} color="success.main">
+              {formatCOP(a.total)}
+            </Typography>
+          </Card>
+        ))}
+      </Stack>
+    )}
+
+<ArqueoCajaModal
+  open={openArqueo}
+  onClose={() => setOpenArqueo(false)}
+  arqueoInfo={arqueoInfo}
+/>
+
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenArqueo(false)}>
+      Cerrar
+    </Button>
+  </DialogActions>
       </Dialog>
     </>
 

@@ -22,6 +22,7 @@ import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import { facturaPorCaja, productosPorVenta,cancelarFactura, actualiza_venta,imprimircomanda,imprimirfactura } from "../../../../../../api/cajero";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import { useTheme, useMediaQuery } from "@mui/material";
 
 export default function VentasDetalles({ open, onClose, id_caja }: any) {
 
@@ -47,6 +48,9 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
   const [loading, setLoading] = useState(false);
   const [openCancel, setOpenCancel] = useState(false);
   const [motivo, setMotivo] = useState("");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
 
   useEffect(() => {
     if (open && id_caja) cargarVentas();
@@ -678,8 +682,29 @@ const getMetodoPagoIcon = (metodo:any) => {
 
           {/* Paginación */}
           <Box mt={4} display="flex" justifyContent="center">
-            <Pagination count={totalPaginas} page={pagina} onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPagina(value)} />
+          
+            {totalPaginas > 1 && (
+                  <Stack alignItems="center" mt={3}>
+                    <Pagination
+                      count={totalPaginas}
+                      page={pagina}
+                      onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPagina(value)}
+                      color="primary"
+                      shape="rounded"
+                      size={isMobile ? "small" : "medium"}   // 👈 más compacto en móvil
+                      siblingCount={isMobile ? 0 : 1}        // 👈 menos botones en móvil
+                      boundaryCount={isMobile ? 1 : 2}
+                      showFirstButton={!isMobile}            // 👈 ocultar en móvil
+                      showLastButton={!isMobile}
+          
+                    />
+                  </Stack>
+                )}
+                
           </Box>
+
+        
+
         </DialogContent>
         <DialogActions
   sx={{
