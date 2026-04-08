@@ -38,6 +38,7 @@ import Swal from "sweetalert2";
 import { Pagination } from "@mui/material";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { ArqueoCajaModal } from "./Cajero/components/Estados_dasboard/ArqueoCaja";
+
 interface Props {
   ventas: Venta[];
   fecha: string;
