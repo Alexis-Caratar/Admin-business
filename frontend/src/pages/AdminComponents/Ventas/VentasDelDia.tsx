@@ -38,13 +38,6 @@ import Swal from "sweetalert2";
 import { Pagination } from "@mui/material";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { ArqueoCajaModal } from "./Cajero/components/Estados_dasboard/ArqueoCaja";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import StorefrontIcon from "@mui/icons-material/Storefront";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
 interface Props {
   ventas: Venta[];
   fecha: string;
