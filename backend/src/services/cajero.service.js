@@ -148,7 +148,17 @@ arqueo: async ({ id_caja }) => {
   =============================== */
   const resumenQuery = `
     SELECT 
+        c.id AS id_caja,
         c.monto_inicial,
+          c.dinero_esperado,
+          c.estado as estado_caja,
+          TO_CHAR(c.fecha_apertura AT TIME ZONE 'America/Bogota', 'DD/MM/YYYY HH12:MI:SS AM')::TEXT AS fecha_apertura, 
+          TO_CHAR(c.fecha_cierre AT TIME ZONE 'America/Bogota', 'DD/MM/YYYY HH12:MI:SS AM')::TEXT AS fecha_cierre, 
+          c.monto_final,
+          c.base_caja,
+          c.venta_libre,
+          c.diferencia,
+          c.nota as nota_caja,
 
         COALESCE(v.total_ventas,0) AS total_ventas,
         COALESCE(e.total_egresos,0) AS total_egresos,

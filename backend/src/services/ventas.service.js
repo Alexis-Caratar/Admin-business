@@ -31,7 +31,6 @@ export const VentasService = {
     // Obtener todas las ventas por fecha
   
     listarVentas: async (id_negocio, fecha) => {
-    console.log("fecha", fecha);
 
     const [rows] = await db.query(
       `SELECT  

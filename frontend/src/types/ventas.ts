@@ -20,6 +20,17 @@ export interface Venta {
   total: number;
   cantidad:number;
   egresos: number;
+  
   id_caja:number;
+   monto_inicial :number;
+   dinero_esperado :number;
+   estado_caja: string;
+   fecha_apertura: string;
+   fecha_cierre: string | null;
+   monto_final: number;
+   base_caja: number;
+   venta_libre: number;
+   diferencia: number;
+   nota_caja: string | null;
 }
 

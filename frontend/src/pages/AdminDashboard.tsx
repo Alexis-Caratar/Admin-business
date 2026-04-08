@@ -67,7 +67,7 @@ const cerrarSesion = () => {
 };
 
   useIdleLogout({
-    timeout: 20 * 60 * 1000, // 20 minutos de inactividad
+    timeout: 120 * 60 * 1000, // 2 horas de inactividad
     warningTime: 120 * 1000, // aviso 2 min antes
     onLogout: cerrarSesion,
   });

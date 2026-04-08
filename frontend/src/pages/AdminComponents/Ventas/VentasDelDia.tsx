@@ -38,6 +38,12 @@ import Swal from "sweetalert2";
 import { Pagination } from "@mui/material";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { ArqueoCajaModal } from "./Cajero/components/Estados_dasboard/ArqueoCaja";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 interface Props {
   ventas: Venta[];
@@ -52,8 +58,6 @@ const formatCOP = (value: number) =>
   }).format(value);
 
 const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
-  console.log("ventas",ventas);
-  
 
   const [ventaSeleccionada, setVentaSeleccionada] = useState<any>(null);
   const [detalleOpen, setDetalleOpen] = useState(false);
@@ -68,22 +72,8 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [openArqueo, setOpenArqueo] = useState(false);
-  const [loadingArqueo, setLoadingArqueo] = useState(false);
- const [arqueoInfo, setArqueoInfo] = useState<any | null>(null);
-   const [arqueos,] = useState<any[]>([]);
-  
-
-  //const [metodoPago, setMetodoPago] = useState("EFECTIVO");
-  //const [montoRecibido, setMontoRecibido] = useState<any>("");
-  //const [cambio, setCambio] = useState<number>(0);
-  //const cambioaux = montoRecibido - ventaSeleccionada?.venta_total || 0;
-  //const cambioSeguro = Math.max(cambioaux, 0);
-  //const [openCancel, setOpenCancel] = useState(false);
-  //const [motivo, setMotivo] = useState("");
-  //const [ventaPayload, setVentaPayload] = useState<any>(null);
-  //const [openVentaRegistrada, setOpenVentaRegistrada] = useState(false);
-  //const [loading, setLoading] = useState(false);
-
+  const [, setLoadingArqueo] = useState(false);
+  const [arqueoInfo, setArqueoInfo] = useState<any | null>(null);
 
   const ventasDelDia = useMemo(() => {
     return ventas.filter((v) => {
@@ -329,43 +319,6 @@ const abrirArqueo = async (caja:any) => {
   }
 };
 
-  /* ================= FINALIZAR VENTA ================= 
-  const handleFinalizarVenta = async () => {
-    if (!ventaSeleccionada) return;
-    const payload = {
-      idUsuario,
-      id_negocio,
-      id_venta: ventaSeleccionada.id_pago,
-      metodo_pago: metodoPago,
-      monto_recibido: montoRecibido,
-      cambio: cambio,
-      id_mesa: ventaSeleccionada.id_mesa || 0,
-      total_pago: ventaSeleccionada.venta_total
-    };
-    try {
-      const { data } = await actualiza_venta(payload);
-      if (data?.ok) {
-        setVentaPayload(payload);
-        setDetalleOpen(false);
-        setOpenVentaRegistrada(true);
-        setVentaSeleccionada(null);
-        setMontoRecibido("");
-        setMetodoPago("EFECTIVO");
-        // cargarVentas();
-      }
-    } catch (err) {
-      console.error(err);
-      Swal.fire({
-        icon: "error",
-        title: "Error al registrar la venta",
-        text: "Ocurrió un problema al guardar la venta. Intente nuevamente.",
-        confirmButtonText: "Entendido",
-        confirmButtonColor: "#d32f2f",
-      });
-    }
-  };
-*/
-
 const cajasData = ventas
   .filter(v => v.estado_venta !== "cancelado" && v.estado_pago === true)
   .reduce((acc, v) => {
@@ -377,17 +330,33 @@ const cajasData = ventas
         id_caja: v.id_caja,
         total: 0,
         cantidad: 0,
+        monto_inicial: v.monto_inicial || 0,
+        dinero_esperado: 0,
+        monto_final: 0,
+        base_caja: v.base_caja || 0,
+        venta_libre: 0,
+        diferencia: 0,
+        estado: v.estado_caja ,
+        fecha_apertura: v.fecha_apertura,
+        fecha_cierre: v.fecha_cierre,
+        nota: "",
       };
     }
 
     acc[key].total += Number(v.venta_total || 0);
     acc[key].cantidad += 1;
+    acc[key].venta_libre += Number(v.venta_total || 0);
 
     return acc;
   }, {} as Record<string, any>);
 
-const cajasArray = Object.values(cajasData);
+  const cajasArray = Object.values(cajasData).map((caja: any) => {
+  caja.dinero_esperado = caja.base_caja + caja.venta_libre-arqueoInfo;
+  caja.monto_final = caja.total; // o el valor real si lo tienes
+  caja.diferencia = caja.monto_final - caja.dinero_esperado;
 
+  return caja;
+});
 
   return (
     <>
@@ -505,7 +474,6 @@ const cajasArray = Object.values(cajasData);
             {formatCOP(caja.total)}
           </Typography>
         </Stack>
-
       </Stack>
     </Card>
   ))}
@@ -1223,75 +1191,16 @@ const cajasArray = Object.values(cajasData);
         </DialogActions>
       </Dialog>
 
- {/* ================= MODAL DE FACTURA ================= */}
-      <Dialog
-  open={openArqueo}
-  onClose={() => setOpenArqueo(false)}
-  fullWidth
-  maxWidth="sm"
->
-  <Box
-    sx={{
-      p: 2,
-      background: "linear-gradient(135deg,#7b1fa2,#ab47bc)",
-      color: "#fff",
-    }}
-  >
-    <Typography fontWeight={800}>
-      Arqueo de Caja - Responsables
-    </Typography>
-  </Box>
 
-  <DialogContent>
-    {loadingArqueo ? (
-      <Box textAlign="center" py={3}>
-        <CircularProgress />
-      </Box>
-    ) : (
-      <Stack spacing={1.5}>
-        {arqueos.map((a, i) => (
-          <Card
-            key={i}
-            sx={{
-              p: 1.5,
-              borderRadius: 3,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Box>
-              <Typography fontWeight={700} fontSize={13}>
-                {a.nombre}
-              </Typography>
-              <Typography fontSize={11} color="text.secondary">
-                {a.cantidad} ventas
-              </Typography>
-            </Box>
+                <ArqueoCajaModal
+                  open={openArqueo}
+                  onClose={() => setOpenArqueo(false)}
+                  arqueoInfo={arqueoInfo}
+                  esAdmin={true}
+                />
 
-            <Typography fontWeight={800} color="success.main">
-              {formatCOP(a.total)}
-            </Typography>
-          </Card>
-        ))}
-      </Stack>
-    )}
+</>
 
-<ArqueoCajaModal
-  open={openArqueo}
-  onClose={() => setOpenArqueo(false)}
-  arqueoInfo={arqueoInfo}
-/>
-
-  </DialogContent>
-
-  <DialogActions>
-    <Button onClick={() => setOpenArqueo(false)}>
-      Cerrar
-    </Button>
-  </DialogActions>
-      </Dialog>
-    </>
 
   );
 };

@@ -29,9 +29,10 @@ type Props = {
   open: boolean;
   onClose: () => void;
   arqueoInfo: any | null;
+  esAdmin?: boolean;
 };
 
-export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo }) => {
+export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo,esAdmin }) => {
 const toNumber = (val: any) => Number(val) || 0;
 
 const getTotalByMetodo = (metodo: string) => {
@@ -101,9 +102,239 @@ const totalDigital =
             </Typography>
           </Box>
         ) : (
+          
           <Stack spacing={1.5}>
 
             {/* MONTO INICIAL */}
+
+              {esAdmin && (
+ <Card
+        sx={{
+          borderRadius: 4,
+          p: 2,
+          background:
+            arqueoInfo.estado === "CERRADA"
+              ? "linear-gradient(135deg,#e8f5e9,#f1fff5)"
+              : "linear-gradient(135deg,#fff3e0,#fff8f2)",
+          border: "1px solid",
+          borderColor:
+            arqueoInfo.estado === "CERRADA"
+              ? "success.light"
+              : "warning.light",
+        }}
+      >
+        {/* HEADER */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <Avatar
+              sx={{
+                bgcolor:
+                  arqueoInfo.estado === "CERRADA"
+                    ? "success.main"
+                    : "warning.main",
+                width: 44,
+                height: 44,
+              }}
+            >
+              {arqueoInfo.estado === "CERRADA" ? "✔️" : "⏳"}
+            </Avatar>
+
+            <Box>
+              <Typography fontSize={11} color="text.secondary">
+                Estado de caja  Numero{arqueoInfo.id_caja}
+              </Typography>
+
+              <Typography fontWeight={800} fontSize={16}>
+                {arqueoInfo.estado}
+              </Typography>
+
+              <Typography fontSize={11} color="text.secondary">
+                {arqueoInfo.nombre}
+              </Typography>
+            </Box>
+          </Stack>
+
+          <Chip
+            label={
+              arqueoInfo.estado === "CERRADA"
+                ? "Finalizada"
+                : "En operación"
+            }
+            size="small"
+            sx={{
+              fontWeight: 700,
+              px: 1,
+              bgcolor:
+                arqueoInfo.estado === "CERRADA"
+                  ? "success.main"
+                  : "warning.main",
+              color: "#fff",
+            }}
+          />
+        </Stack>
+
+        {/* FECHAS */}
+        <Stack
+          direction="row"
+          spacing={2}
+          mt={2}
+          sx={{
+            p: 1.5,
+            borderRadius: 2,
+            bgcolor: "#fff",
+            border: "1px solid #eee",
+            justifyContent: "space-between",
+          }}
+        >
+          <Stack direction="row" spacing={1} alignItems="center">
+            📅
+            <Box>
+              <Typography fontSize={10} color="text.secondary">
+                Apertura
+              </Typography>
+              <Typography fontWeight={600} fontSize={12}>
+                {arqueoInfo.fecha_apertura || "—"}
+              </Typography>
+            </Box>
+          </Stack>
+
+          <Stack direction="row" spacing={1} alignItems="center">
+            🕒
+            <Box>
+              <Typography fontSize={10} color="text.secondary">
+                Cierre
+              </Typography>
+              <Typography fontWeight={600} fontSize={12}>
+                {arqueoInfo.fecha_cierre || "—"}
+              </Typography>
+            </Box>
+          </Stack>
+        </Stack>
+
+        {/* KPIs PRINCIPALES */}
+        <Box
+          mt={2}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 1.2,
+          }}
+        >
+          {[
+            {
+              label: "En caja",
+              value: totalEnCaja,
+              icon: "💰",
+            },
+            {
+              label: "Inicial",
+              value: arqueoInfo.monto_inicial,
+              icon: "🏁",
+            },
+            {
+              label: "Final",
+              value: arqueoInfo.monto_final,
+              icon: "📦",
+            },
+          ].map((item, i) => (
+            <Box
+              key={i}
+              sx={{
+                p: 1.2,
+                borderRadius: 2,
+                bgcolor: "#fff",
+                border: "1px solid #eee",
+              }}
+            >
+              <Typography fontSize={10} color="text.secondary">
+                {item.icon} {item.label}
+              </Typography>
+
+              <Typography fontWeight={800} fontSize={13}>
+                {formatCOP(item.value)}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+
+        {/* DETALLE */}
+        <Box
+          mt={1.5}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 1.2,
+          }}
+        >
+          {[
+            {
+              label: "Base caja",
+              value: arqueoInfo.base_caja,
+              icon: "🏦",
+            },
+            {
+              label: "Ventas",
+              value: arqueoInfo.venta_libre,
+              icon: "🛒",
+            },
+            {
+              label: "Diferencia",
+              value: arqueoInfo.diferencia,
+              icon: "📊",
+              color:
+                arqueoInfo.diferencia < 0
+                  ? "error.main"
+                  : "success.main",
+            },
+          ].map((item, i) => (
+            <Box
+              key={i}
+              sx={{
+                p: 1.2,
+                borderRadius: 2,
+                bgcolor: "#fafafa",
+                border: "1px solid #eee",
+              }}
+            >
+              <Typography fontSize={10} color="text.secondary">
+                {item.icon} {item.label}
+              </Typography>
+
+              <Typography
+                fontWeight={800}
+                fontSize={13}
+                color={item.color}
+              >
+                {formatCOP(item.value)}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+
+        {/* NOTA */}
+        {arqueoInfo.nota_caja && (
+          <Box
+            mt={1.5}
+            sx={{
+              p: 1.2,
+              borderRadius: 2,
+              bgcolor: "#fff8e1",
+              border: "1px dashed #fbc02d",
+            }}
+          >
+            <Typography fontSize={10} color="text.secondary">
+              📝 Observación
+            </Typography>
+
+            <Typography fontSize={12} fontWeight={500}>
+              {arqueoInfo.nota_caja}
+            </Typography>
+          </Box>
+        )}
+            </Card>
+              )}
+             
+
             <Card elevation={10} sx={{ borderRadius: 3 }}>
               <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Avatar sx={{ bgcolor: "primary.main", width: 50, height: 50 }}>
@@ -122,347 +353,347 @@ const totalDigital =
             </Card>
 
            {/* VENTAS */}
-<Accordion
-  sx={{
-    borderRadius: 3,
-    overflow: "hidden",
-    border: "1px solid",
-    borderColor: "divider",
-    "&:before": { display: "none" }
-  }}
->
-
-  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-
-    <CardContent
-    
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
-        width: "100%"
-      }}
-    >
-
-      <Avatar
-        sx={{
-          bgcolor: "success.main",
-          width: 50,
-          height: 50
-        }}
-      >
-        <PointOfSaleIcon />
-      </Avatar>
-
-      <Box>
-
-        <Typography fontSize={13} color="text.secondary">
-          Ventas Totales
-        </Typography>
-
-        <Typography
-          fontSize={24}
-          fontWeight="bold"
-          color="success.main"
-        >
-          {formatCOP(arqueoInfo.total_ventas)}
-        </Typography>
-
-      </Box>
-
-    </CardContent>
-
-  </AccordionSummary>
-
-  <AccordionDetails>
-
-    <Stack spacing={0.1}>
-
-      {arqueoInfo?.ventas_metodos?.map((v: any) => {
-
-        const total = arqueoInfo.total_ventas || 0;
-
-        const porcentaje = total
-          ? ((v.total / total) * 100).toFixed(1)
-          : 0;
-
-        const getColor = (metodo: string) => {
-          switch (metodo) {
-            case "EFECTIVO":
-              return "#4caf50";
-            case "TARJETA":
-              return "#1976d2";
-            case "TRANSFERENCIA":
-              return "#6a1b9a";
-            case "NEQUI":
-              return "#ff4081";
-            case "DAVIPLATA":
-              return "#ff9800";
-              case "TIQUERERA":
-              return "#118495";
-            case "PENDIENTE":
-              return "#9e9e9e";
-            default:
-              return "#607d8b";
-          }
-        };
-
-        const getIcon = (metodo: string) => {
-          switch (metodo) {
-            case "EFECTIVO":
-              return "💵";
-            case "TARJETA":
-              return "💳";
-            case "TRANSFERENCIA":
-              return "🏦";
-            case "NEQUI":
-              return "💜";
-            case "DAVIPLATA":
-              return "📱";
-               case "TIQUERERA":
-              return "🎟️";
-            case "PENDIENTE":
-              return "⏳";
-            default:
-              return "💰";
-          }
-        };
-
-        return (
-
-          <Box
-            key={v.metodo_pago}
+          <Accordion
             sx={{
-              p: 0.5,
-              borderRadius: 2,
-              border: "1px solid #eee",
-              bgcolor: "#fafafa",
-              transition: "all .2s ease",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: 2
-              }
+              borderRadius: 3,
+              overflow: "hidden",
+              border: "1px solid",
+              borderColor: "divider",
+              "&:before": { display: "none" }
             }}
           >
 
-            {/* HEADER */}
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-             
-            >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
 
-              <Box display="flex" alignItems="center" gap={1}>
-
-                <Typography fontSize={12}>
-                  {getIcon(v.metodo_pago)}
-                </Typography>
-
-                <Typography fontWeight={600}>
-                  {v.metodo_pago}
-                </Typography>
-
-              </Box>
-
-              <Box textAlign="right">
-
-                <Typography
-                  fontWeight="bold"
-                  sx={{
-                    color: getColor(v.metodo_pago)
-                  }}
-                >
-                  {formatCOP(v.total)}
-                </Typography>
-
-                <Typography
-                  fontSize={10}
-                  color="text.secondary"
-                >
-                  {porcentaje} %
-                </Typography>
-
-              </Box>
-
-            </Box>
-
-            {/* BARRA */}
-            <Box
-              sx={{
-                height: 6,
-                borderRadius: 5,
-                bgcolor: "#eee",
-                overflow: "hidden"
-              }}
-            >
-
-              <Box
+              <CardContent
+              
                 sx={{
-                  width: `${porcentaje}%`,
-                  height: "100%",
-                  bgcolor: getColor(v.metodo_pago),
-                  transition: "width .4s ease"
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  width: "100%"
                 }}
-              />
+              >
 
-            </Box>
+                <Avatar
+                  sx={{
+                    bgcolor: "success.main",
+                    width: 50,
+                    height: 50
+                  }}
+                >
+                  <PointOfSaleIcon />
+                </Avatar>
 
-          </Box>
+                <Box>
 
-        );
+                  <Typography fontSize={13} color="text.secondary">
+                    Ventas Totales
+                  </Typography>
 
-      })}
+                  <Typography
+                    fontSize={24}
+                    fontWeight="bold"
+                    color="success.main"
+                  >
+                    {formatCOP(arqueoInfo.total_ventas)}
+                  </Typography>
 
-    </Stack>
+                </Box>
 
-  </AccordionDetails>
+              </CardContent>
 
-</Accordion>
+            </AccordionSummary>
+
+            <AccordionDetails>
+
+              <Stack spacing={0.1}>
+
+                {arqueoInfo?.ventas_metodos?.map((v: any) => {
+
+                  const total = arqueoInfo.total_ventas || 0;
+
+                  const porcentaje = total
+                    ? ((v.total / total) * 100).toFixed(1)
+                    : 0;
+
+                  const getColor = (metodo: string) => {
+                    switch (metodo) {
+                      case "EFECTIVO":
+                        return "#4caf50";
+                      case "TARJETA":
+                        return "#1976d2";
+                      case "TRANSFERENCIA":
+                        return "#6a1b9a";
+                      case "NEQUI":
+                        return "#ff4081";
+                      case "DAVIPLATA":
+                        return "#ff9800";
+                        case "TIQUERERA":
+                        return "#118495";
+                      case "PENDIENTE":
+                        return "#9e9e9e";
+                      default:
+                        return "#607d8b";
+                    }
+                  };
+
+                  const getIcon = (metodo: string) => {
+                    switch (metodo) {
+                      case "EFECTIVO":
+                        return "💵";
+                      case "TARJETA":
+                        return "💳";
+                      case "TRANSFERENCIA":
+                        return "🏦";
+                      case "NEQUI":
+                        return "💜";
+                      case "DAVIPLATA":
+                        return "📱";
+                        case "TIQUERERA":
+                        return "🎟️";
+                      case "PENDIENTE":
+                        return "⏳";
+                      default:
+                        return "💰";
+                    }
+                  };
+
+                  return (
+
+                    <Box
+                      key={v.metodo_pago}
+                      sx={{
+                        p: 0.5,
+                        borderRadius: 2,
+                        border: "1px solid #eee",
+                        bgcolor: "#fafafa",
+                        transition: "all .2s ease",
+                        "&:hover": {
+                          transform: "translateY(-2px)",
+                          boxShadow: 2
+                        }
+                      }}
+                    >
+
+                      {/* HEADER */}
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                      
+                      >
+
+                        <Box display="flex" alignItems="center" gap={1}>
+
+                          <Typography fontSize={12}>
+                            {getIcon(v.metodo_pago)}
+                          </Typography>
+
+                          <Typography fontWeight={600}>
+                            {v.metodo_pago}
+                          </Typography>
+
+                        </Box>
+
+                        <Box textAlign="right">
+
+                          <Typography
+                            fontWeight="bold"
+                            sx={{
+                              color: getColor(v.metodo_pago)
+                            }}
+                          >
+                            {formatCOP(v.total)}
+                          </Typography>
+
+                          <Typography
+                            fontSize={10}
+                            color="text.secondary"
+                          >
+                            {porcentaje} %
+                          </Typography>
+
+                        </Box>
+
+                      </Box>
+
+                      {/* BARRA */}
+                      <Box
+                        sx={{
+                          height: 6,
+                          borderRadius: 5,
+                          bgcolor: "#eee",
+                          overflow: "hidden"
+                        }}
+                      >
+
+                        <Box
+                          sx={{
+                            width: `${porcentaje}%`,
+                            height: "100%",
+                            bgcolor: getColor(v.metodo_pago),
+                            transition: "width .4s ease"
+                          }}
+                        />
+
+                      </Box>
+
+                    </Box>
+
+                  );
+
+                })}
+
+              </Stack>
+
+            </AccordionDetails>
+
+          </Accordion>
           {/* EGRESOS */}
-<Accordion
-  sx={{
-    borderRadius: 3,
-    overflow: "hidden",
-    border: "1px solid",
-    borderColor: "divider",
-    "&:before": { display: "none" }
-  }}
->
-
-  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-
-    <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-
-      <Avatar sx={{ bgcolor: "error.main", width: 50, height: 50 }}>
-        <AttachMoneyIcon />
-      </Avatar>
-
-      <Box>
-        <Typography fontSize={13} color="text.secondary">
-          Egresos Totales
-        </Typography>
-
-        <Typography fontSize={24} fontWeight="bold" color="error.main">
-          {formatCOP(arqueoInfo.total_egresos)}
-        </Typography>
-      </Box>
-
-    </CardContent>
-
-  </AccordionSummary>
-
-  <AccordionDetails>
-
-    <Stack spacing={1.5}>
-
-      {arqueoInfo?.egresos?.length === 0 && (
-        <Typography color="text.secondary">
-          No hay egresos registrados
-        </Typography>
-      )}
-
-      {arqueoInfo?.egresos?.map((e: any) => {
-
-        const getIcon = (metodo: string) => {
-          switch (metodo) {
-            case "EFECTIVO":
-              return "💵";
-            case "TARJETA":
-              return "💳";
-            case "TRANSFERENCIA":
-              return "🏦";
-            default:
-              return "💰";
-          }
-        };
-
-        const fecha = new Date(e.created_at).toLocaleString("es-CO");
-
-        return (
-
-          <Box
-            key={e.id}
+          <Accordion
             sx={{
-              p: 1.5,
-              borderRadius: 2,
-              border: "1px solid #eee",
-              bgcolor: "#fff7f7",
-              transition: "all .2s ease",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: 2
-              }
+              borderRadius: 3,
+              overflow: "hidden",
+              border: "1px solid",
+              borderColor: "divider",
+              "&:before": { display: "none" }
             }}
           >
 
-            {/* HEADER */}
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={0.5}
-            >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
 
-              <Box>
+              <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 
-                <Typography fontWeight={600} fontSize={14}>
-                  {e.descripcion}
-                </Typography>
+                <Avatar sx={{ bgcolor: "error.main", width: 50, height: 50 }}>
+                  <AttachMoneyIcon />
+                </Avatar>
 
-                <Typography fontSize={12}  color="text.secondary">
-                 Egreso # {e.numero_egreso} • {fecha}
-                </Typography>
+                <Box>
+                  <Typography fontSize={13} color="text.secondary">
+                    Egresos Totales
+                  </Typography>
 
-              </Box>
+                  <Typography fontSize={24} fontWeight="bold" color="error.main">
+                    {formatCOP(arqueoInfo.total_egresos)}
+                  </Typography>
+                </Box>
 
-              <Typography
-                fontWeight="bold"
-                color="error.main"
-                fontSize={15}
-              >
-                - {formatCOP(e.monto)}
-              </Typography>
+              </CardContent>
 
-            </Box>
+            </AccordionSummary>
 
-            {/* METODO Y OBSERVACION */}
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mt={0.5}
-            >
+            <AccordionDetails>
 
-              <Typography fontSize={13} color="text.secondary">
-                {getIcon(e.metodo_pago)} {e.metodo_pago}
-              </Typography>
+              <Stack spacing={1.5}>
 
-              {e.observacion && (
-                <Typography
-                  fontSize={12}
-                  color="text.secondary"
-                  sx={{
-                    fontStyle: "italic"
-                  }}
-                >
-                  {e.observacion}
-                </Typography>
-              )}
+                {arqueoInfo?.egresos?.length === 0 && (
+                  <Typography color="text.secondary">
+                    No hay egresos registrados
+                  </Typography>
+                )}
 
-            </Box>
+                {arqueoInfo?.egresos?.map((e: any) => {
 
-          </Box>
+                  const getIcon = (metodo: string) => {
+                    switch (metodo) {
+                      case "EFECTIVO":
+                        return "💵";
+                      case "TARJETA":
+                        return "💳";
+                      case "TRANSFERENCIA":
+                        return "🏦";
+                      default:
+                        return "💰";
+                    }
+                  };
 
-        );
+                  const fecha = new Date(e.created_at).toLocaleString("es-CO");
 
-      })}
+                  return (
 
-    </Stack>
+                    <Box
+                      key={e.id}
+                      sx={{
+                        p: 1.5,
+                        borderRadius: 2,
+                        border: "1px solid #eee",
+                        bgcolor: "#fff7f7",
+                        transition: "all .2s ease",
+                        "&:hover": {
+                          transform: "translateY(-2px)",
+                          boxShadow: 2
+                        }
+                      }}
+                    >
 
-  </AccordionDetails>
+                      {/* HEADER */}
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        mb={0.5}
+                      >
 
-</Accordion>
+                        <Box>
+
+                          <Typography fontWeight={600} fontSize={14}>
+                            {e.descripcion}
+                          </Typography>
+
+                          <Typography fontSize={10}  color="text.secondary">
+                          Egreso # {e.numero_egreso} • {fecha}
+                          </Typography>
+
+                        </Box>
+
+                        <Typography
+                          fontWeight="bold"
+                          color="error.main"
+                          fontSize={15}
+                        >
+                          - {formatCOP(e.monto)}
+                        </Typography>
+
+                      </Box>
+
+                      {/* METODO Y OBSERVACION */}
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        mt={0.5}
+                      >
+
+                        <Typography fontSize={13} color="text.secondary">
+                          {getIcon(e.metodo_pago)} {e.metodo_pago}
+                        </Typography>
+
+                        {e.observacion && (
+                          <Typography
+                            fontSize={12}
+                            color="text.secondary"
+                            sx={{
+                              fontStyle: "italic"
+                            }}
+                          >
+                            {e.observacion}
+                          </Typography>
+                        )}
+
+                      </Box>
+
+                    </Box>
+
+                  );
+
+                })}
+
+              </Stack>
+
+            </AccordionDetails>
+
+          </Accordion>
 
             {/* TOTAL EN CAJA */}
             <Card elevation={4} sx={{ borderRadius: 3, bgcolor: "#e8f5e9" }}>
