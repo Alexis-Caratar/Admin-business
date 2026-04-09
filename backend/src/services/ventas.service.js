@@ -33,7 +33,7 @@ export const VentasService = {
     listarVentas: async (id_negocio, fecha) => {
 
     const [rows] = await db.query(
-      `SELECT  
+      `SELECT  DISTINCT
           v.id,
           p.id AS id_pago,
           v.numero_factura,
@@ -54,7 +54,6 @@ export const VentasService = {
           m.nombre as mesa,
           v.nota,
           v.estado as estado_venta,
-          e.monto,
           c.id as id_caja
       FROM ventas v
       INNER JOIN pagos p ON p.id_venta = v.id
@@ -64,7 +63,6 @@ export const VentasService = {
       INNER JOIN negocios n on u.id_negocio=n.id
       INNER JOIN personas p2 on u.id_persona=p2.id
       LEFT JOIN mesas m on v.id_mesa=m.id
-      LEFT JOIN egresos e on e.id_caja=c.id
       WHERE n.id = $1
         AND DATE(v.fecha) = $2
       ORDER BY p.id DESC`,
