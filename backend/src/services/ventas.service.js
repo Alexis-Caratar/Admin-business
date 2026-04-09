@@ -16,7 +16,7 @@ export const VentasService = {
 FROM (
     -- 🔥 VENTAS
     SELECT
-        DATE(v.fecha) AS fecha,
+        (v.fecha AT TIME ZONE 'America/Bogota')::date AS fecha,
         SUM(v.total) AS total,
         COUNT(v.id) AS cantidad
     FROM ventas v
@@ -25,16 +25,16 @@ FROM (
     INNER JOIN negocios n ON u.id_negocio = n.id
     WHERE n.id = $1
       AND v.estado != 'cancelado'
-    GROUP BY DATE(v.fecha)
+    GROUP BY (v.fecha AT TIME ZONE 'America/Bogota')::date
 ) v
 
 LEFT JOIN (
-    -- 🔥 EGRESOS (SEPARADO)
+    -- 🔥 EGRESOS
     SELECT
-        DATE(e.created_at) AS fecha,
+        (e.created_at AT TIME ZONE 'America/Bogota')::date AS fecha,
         SUM(e.monto) AS egresos
     FROM egresos e
-    GROUP BY DATE(e.created_at)
+    GROUP BY (e.created_at AT TIME ZONE 'America/Bogota')::date
 ) e ON v.fecha = e.fecha
 
 ORDER BY v.fecha ASC;`
