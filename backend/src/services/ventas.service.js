@@ -8,20 +8,36 @@ export const VentasService = {
     const [rows] = await db.query(
    //   `SELECT * FROM ventas ORDER BY fecha DESC`
 
-        `SELECT  
-    TO_CHAR(v.fecha, 'YYYY-MM-DD') AS fecha,  -- solo día
-    SUM(CAST(v.total AS NUMERIC)) AS total,   -- suma total del día
-    SUM(CAST(e.monto AS NUMERIC)) AS egresos,  -- suma egresos
-    COUNT(v.id) AS cantidad                    -- cantidad de facturas
+        `SELECT 
+    v.fecha,
+    v.total,
+    COALESCE(e.egresos, 0) AS egresos,
+    v.cantidad
+FROM (
+    -- 🔥 VENTAS
+    SELECT
+        DATE(v.fecha) AS fecha,
+        SUM(v.total) AS total,
+        COUNT(v.id) AS cantidad
     FROM ventas v
     INNER JOIN caja c ON v.id_caja = c.id
     INNER JOIN usuarios u ON c.id_usuario = u.id
     INNER JOIN negocios n ON u.id_negocio = n.id
-    LEFT JOIN egresos e on c.id=e.id_caja
     WHERE n.id = $1
-    And v.estado!='cancelado'
-    GROUP BY TO_CHAR(v.fecha, 'YYYY-MM-DD')
-    ORDER BY fecha ASC;`
+      AND v.estado != 'cancelado'
+    GROUP BY DATE(v.fecha)
+) v
+
+LEFT JOIN (
+    -- 🔥 EGRESOS (SEPARADO)
+    SELECT
+        DATE(e.created_at) AS fecha,
+        SUM(e.monto) AS egresos
+    FROM egresos e
+    GROUP BY DATE(e.created_at)
+) e ON v.fecha = e.fecha
+
+ORDER BY v.fecha ASC;`
     ,[id_negocio]);
 
     
