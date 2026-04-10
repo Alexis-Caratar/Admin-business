@@ -8,20 +8,36 @@ export const VentasService = {
     const [rows] = await db.query(
    //   `SELECT * FROM ventas ORDER BY fecha DESC`
 
-        `SELECT  
-    TO_CHAR(v.fecha, 'YYYY-MM-DD') AS fecha,  -- solo día
-    SUM(CAST(v.total AS NUMERIC)) AS total,   -- suma total del día
-    SUM(CAST(e.monto AS NUMERIC)) AS egresos,  -- suma egresos
-    COUNT(v.id) AS cantidad                    -- cantidad de facturas
+        `SELECT 
+    v.fecha,
+    v.total,
+    COALESCE(e.egresos, 0) AS egresos,
+    v.cantidad
+FROM (
+    -- 🔥 VENTAS
+    SELECT
+        (v.fecha AT TIME ZONE 'America/Bogota')::date AS fecha,
+        SUM(v.total) AS total,
+        COUNT(v.id) AS cantidad
     FROM ventas v
     INNER JOIN caja c ON v.id_caja = c.id
     INNER JOIN usuarios u ON c.id_usuario = u.id
     INNER JOIN negocios n ON u.id_negocio = n.id
-    LEFT JOIN egresos e on c.id=e.id_caja
     WHERE n.id = $1
-    And v.estado!='cancelado'
-    GROUP BY TO_CHAR(v.fecha, 'YYYY-MM-DD')
-    ORDER BY fecha ASC;`
+      AND v.estado != 'cancelado'
+    GROUP BY (v.fecha AT TIME ZONE 'America/Bogota')::date
+) v
+
+LEFT JOIN (
+    -- 🔥 EGRESOS
+    SELECT
+        (e.created_at AT TIME ZONE 'America/Bogota')::date AS fecha,
+        SUM(e.monto) AS egresos
+    FROM egresos e
+    GROUP BY (e.created_at AT TIME ZONE 'America/Bogota')::date
+) e ON v.fecha = e.fecha
+
+ORDER BY v.fecha ASC;`
     ,[id_negocio]);
 
     
@@ -33,7 +49,7 @@ export const VentasService = {
     listarVentas: async (id_negocio, fecha) => {
 
     const [rows] = await db.query(
-      `SELECT  
+      `SELECT  DISTINCT
           v.id,
           p.id AS id_pago,
           v.numero_factura,
@@ -54,7 +70,6 @@ export const VentasService = {
           m.nombre as mesa,
           v.nota,
           v.estado as estado_venta,
-          e.monto,
           c.id as id_caja
       FROM ventas v
       INNER JOIN pagos p ON p.id_venta = v.id
@@ -64,7 +79,6 @@ export const VentasService = {
       INNER JOIN negocios n on u.id_negocio=n.id
       INNER JOIN personas p2 on u.id_persona=p2.id
       LEFT JOIN mesas m on v.id_mesa=m.id
-      LEFT JOIN egresos e on e.id_caja=c.id
       WHERE n.id = $1
         AND DATE(v.fecha) = $2
       ORDER BY p.id DESC`,
