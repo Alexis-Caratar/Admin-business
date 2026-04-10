@@ -68,7 +68,7 @@ listarProductos: async (id) => {
           DISTINCT jsonb_build_object(
             'id', p.id,
             'codigo_barra', p.codigo_barra,
-            'stock_actual', p.stock_actual,
+            'stock_actual', 10,
             'nombre', p.nombre,
             'precio_venta', pp.precio_venta,
             'imagenes', (

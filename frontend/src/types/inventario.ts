@@ -1,12 +1,13 @@
-export interface InventarioFisico {
+export type InventarioFisico = {
   id: number;
-  id_persona: number | null;
-  id_negocio: number | null;
-  fecha: string;
-  tipo: "PRODUCTOS" | "ACTIVOS"|"OTROS";
-  nombre: string | null;
-}
-
+  nombre: string;
+  unidad: string;
+  tipo: "INSUMO" | "PRODUCTO" | "ACTIVO";
+  stock_actual: number;
+  stock_minimo: number;
+  stock_maximo: number;
+  costo_unitario: number;
+};
 export interface InventarioFisicoDetalle {
   id:                   number;
   id_inventario_fisico: number;
@@ -22,6 +23,7 @@ export interface InventarioFisicoDetalle {
   nombre:               string;
   descripcion:          string;
   unidad_medida:        string;
+  tipo:                  "PRODUCTOS" | "ACTIVOS"|"OTROS";
 }
 
 export interface InventarioConDetalles {

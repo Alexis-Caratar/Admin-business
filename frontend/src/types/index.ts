@@ -36,6 +36,8 @@ export interface Producto {
   nombre: string;
   descripcion?: string;
   unidad_medida?: string;
+  usa_receta?: boolean;
+  inventario_id?: number | null;
 
   // Inventario
   stock_actual?: number;

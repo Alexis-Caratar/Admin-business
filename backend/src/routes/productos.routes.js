@@ -3,6 +3,7 @@ import * as controller from "../controllers/productos.controller.js";
 const router = Router();
 router.get("/categorias/:id", controller.listar);
 router.get("/:id", controller.obtener);
+router.post("/inventario", controller.obtener_inventario);
 router.post("/", controller.crear);
 router.put("/:id", controller.actualizar);
 router.delete("/:id", controller.eliminar);

@@ -42,9 +42,6 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import LabelIcon from "@mui/icons-material/Label";
 import DescriptionIcon from "@mui/icons-material/Description";
-import StraightenIcon from "@mui/icons-material/Straighten";
-import CategoryIcon from "@mui/icons-material/Category";
-import StorageIcon from "@mui/icons-material/Storage";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import PublicIcon from "@mui/icons-material/Public";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
@@ -52,7 +49,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { useTheme, useMediaQuery } from "@mui/material";
 
-
+import { inventario } from "./../../../api/productos";
 
 interface Props {
   id: number;
@@ -67,18 +64,30 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
     descripcion: "",
     unidad_medida: "",
     imagenes: [],
+    usa_receta: false,
+    inventario_id: null,
   });
+
+
   const [editingId, setEditingId] = useState<number | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const itemsPerPage = 12;
   const [imgIndices, setImgIndices] = useState<{ [key: number]: number }>({});
-    const theme = useTheme();
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const unidades = ["kg", "litro", "pieza", "unidad"];
+  const [inventarios, setInventarios] = useState([]);
   const defaultImage =ProductosImg
+   const [receta, setReceta] = useState([
+  {
+    inventario_id: 0,
+    nombre: "",
+    unidad: "",
+    cantidad: 0
+  }
+]);
+  const [openRecetaModal, setOpenRecetaModal] = useState(false);
 
   // Fetch productos
   const fetchProductos = async () => {
@@ -119,6 +128,36 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
     }));
   };
 
+
+  const fetchInventario = async (tipo: string) => {
+  try {
+  const  payload = { id, tipo };
+    const res = await inventario(payload); // asegúrate que tu API reciba ?tipo=
+    setInventarios(res.data || res);
+  } catch (error) {
+    console.error("Error cargando inventario", error);
+  }
+};
+
+useEffect(() => {
+  if (openModal) {
+    if (form.usa_receta) {
+      fetchInventario("INSUMO");
+    } else {
+      fetchInventario("PRODUCTO");
+    }
+  }
+}, [form.usa_receta, openModal]);
+
+
+const handleChangeUsaReceta = (value: boolean) => {
+  setForm({
+    ...form,
+    usa_receta: value,
+    inventario_id: null, // 🔥 limpia selección anterior
+  });
+};
+
   // CRUD
 const handleOpenModal = (producto?: Producto) => {
   if (producto) {
@@ -136,10 +175,13 @@ const handleOpenModal = (producto?: Producto) => {
       stock_maximo: 0,
       estado:true, // por defecto
       publicacion_web: false, // por defecto
+      usa_receta: false, 
+      inventario_id: null, 
       precios: { id_producto: 0, precio_venta: 0, precio_costo: 0 },
       imagenes: [],
     });
     setEditingId(null);
+     setReceta([]);
   }
   setOpenModal(true);
 };
@@ -154,14 +196,20 @@ const handleSubmit = async () => {
       descripcion: form.descripcion,
       unidad_medida: form.unidad_medida,
       tipo_producto: form.tipo_producto,
-      stock_actual: form.stock_actual,
-      stock_minimo: form.stock_minimo,
-      stock_maximo: form.stock_maximo,
       estado: form.estado,
       publicacion_web: form.publicacion_web,
+      usa_receta: form.usa_receta,
+      inventario_id: form.usa_receta ? null : form.inventario_id
     },
     productos_precios: form.precios ? [{ ...form.precios }] : [],
     productos_imagenes: form.imagenes ? [...form.imagenes] : [],
+    receta: form.usa_receta
+    ? receta.map(r => ({
+        inventario_id: r.inventario_id,
+        cantidad: r.cantidad
+      }))
+    : []
+
   }as any;
 
   try {
@@ -180,11 +228,25 @@ const handleSubmit = async () => {
   }
 };
 
-  const handleEdit = (producto: Producto) => {
-    setForm(producto);
-    setEditingId(producto.id!);
-    setOpenModal(true);
-  };
+const handleEdit = (producto: any) => {
+  setForm(producto);
+  setEditingId(producto.id!);
+
+  if (producto.usa_receta && producto.receta) {
+    setReceta(
+      producto.receta.map((r: any) => ({
+        inventario_id: r.inventario_id,
+        nombre: r.inventario_nombre,
+        unidad: r.unidad,
+        cantidad: r.cantidad
+      }))
+    );
+  } else {
+    setReceta([]);
+  }
+
+  setOpenModal(true);
+};
 
   const handleDelete = async (id?: number) => {
     if (!id) return;
@@ -589,86 +651,123 @@ const handleSubmit = async () => {
             }}
           />
 
-          <Autocomplete
-            freeSolo
-            options={unidades}
-            value={form.unidad_medida || ""}
-            onChange={(_, v) => setForm({ ...form, unidad_medida: v || "" })}
-            onInputChange={(_, v) => setForm({ ...form, unidad_medida: v })}
+  
+        {/* ================= IZQUIERDA ================= */}
+        <Box
+        >
+          <TextField
+            select
+            fullWidth
+            label="Modo de control"
+            size="small"
+            value={form.usa_receta ? "receta" : "directo"}
+            onChange={(e) => handleChangeUsaReceta(e.target.value === "receta")}
+          >
+            <MenuItem value="directo">PRODUCTO</MenuItem>
+            <MenuItem value="receta">PRODCUTO CON ISUMO</MenuItem>
+          </TextField>
+
+
+        </Box>
+
+        {/* ================= DERECHA ================= */}
+        <Box
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            bgcolor: "#ffffff",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: 1
+          }}
+        >
+          {!form.usa_receta ? (
+            <>
+              <Typography fontWeight={600} fontSize={15}>
+                Inventario asociado
+              </Typography>
+
+           <Autocomplete
+            options={inventarios}
+            value={
+              inventarios.find((i: any) => i.id === form.inventario_id) || null
+            }
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            getOptionLabel={(option: any) =>
+              `${option.nombre} • ${option.stock} ${option.unidad}`
+            }
+            onChange={(_, value) =>
+              setForm({ ...form, inventario_id: value?.id || null })
+            }
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Unidad de medida"
+                label="Seleccionar inventario"
                 size="small"
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <StraightenIcon color="primary" />
-                    </InputAdornment>
-                  ),
-                }}
+                fullWidth
               />
             )}
           />
 
-          <TextField
-            select
-            label="Tipo"
-            value={form.tipo_producto || "producto_terminado"}
-            onChange={(e) => setForm({ ...form, tipo_producto: e.target.value })}
-            size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <CategoryIcon color="primary" />
-                </InputAdornment>
-              ),
-            }}
-          >
-            <MenuItem value="Producto">Producto</MenuItem>
-            <MenuItem value="Producto_con_insumo">Producto con insumo</MenuItem>
-            <MenuItem value="insumo">Insumo</MenuItem>
-            <MenuItem value="servicio">Servicio</MenuItem>
-            <MenuItem value="otro">Otro</MenuItem>
-          </TextField>
+            </>
+          ) : (
+            <>
+              <Typography fontWeight={600} fontSize={15}>
+                Receta del producto
+              </Typography>
+
+              <Button
+                variant="contained"
+                onClick={() => setOpenRecetaModal(true)}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  py: 1
+                }}
+              >
+                Configurar receta
+              </Button>
+
+              <Box
+                sx={{
+                  borderRadius: 2,
+                  bgcolor: "#f9fafb",
+                  border: "1px dashed #d1d5db",
+                  p: 1.5,
+                  maxHeight: 140,
+                  overflow: "auto"
+                }}
+              >
+                {receta.length > 0 ? (
+                  receta.map((r, i) => (
+                    <Typography key={i} fontSize={13}>
+                      • {r.nombre} — {r.cantidad} {r.unidad}
+                    </Typography>
+                  ))
+                ) : (
+                  <Typography fontSize={12} color="text.secondary">
+                    No hay insumos configurados
+                  </Typography>
+                )}
+              </Box>
+
+              <Typography fontSize={12} color="text.secondary">
+                El stock se calculará en base a los insumos definidos en la receta.
+              </Typography>
+            </>
+          )}
+        </Box>
+        
+
+
         </Box>
       </Box>
 
-      {/* ========================= */}
-      {/* STOCK */}
-      {/* ========================= */}
-      <Box>
-        <Typography fontWeight={600} mb={1} display="flex" gap={1}>
-          <StorageIcon color="primary" fontSize="small" />
-          Inventario
-        </Typography>
-
-        <Box display="grid" gridTemplateColumns="repeat(3,1fr)" gap={2}>
-          <TextField
-            label="Stock Actual"
-            type="number"
-            size="small"
-            value={form.stock_actual || 0}
-            onChange={(e) => setForm({ ...form, stock_actual: Number(e.target.value) })}
-          />
-          <TextField
-            label="Stock Mínimo"
-            type="number"
-            size="small"
-            value={form.stock_minimo || 0}
-            onChange={(e) => setForm({ ...form, stock_minimo: Number(e.target.value) })}
-          />
-          <TextField
-            label="Stock Máximo"
-            type="number"
-            size="small"
-            value={form.stock_maximo || 0}
-            onChange={(e) => setForm({ ...form, stock_maximo: Number(e.target.value) })}
-          />
-        </Box>
-      </Box>
-
+    
       {/* ========================= */}
       {/* ESTADO */}
       {/* ========================= */}
@@ -803,6 +902,115 @@ const handleSubmit = async () => {
     <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
     <Button variant="contained" onClick={handleSubmit}>
       {editingId ? "Actualizar" : "Crear"}
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
+{/*modal de insumos  */}
+
+<Dialog
+  open={openRecetaModal}
+  onClose={() => setOpenRecetaModal(false)}
+  fullWidth
+  maxWidth="sm"
+>
+  <DialogTitle>
+    Configurar receta
+  </DialogTitle>
+
+  <DialogContent>
+    <Box display="flex" flexDirection="column" gap={2} mt={1}>
+
+      {/* SELECTOR INSUMOS */}
+      <Autocomplete
+        options={inventarios}
+        getOptionLabel={(option: any) =>
+          `${option.nombre} (${option.unidad})`
+        }
+        onChange={(_, value) => {
+          if (!value) return;
+
+          const existe = receta.find(r => r.inventario_id === value.id);
+          if (existe) return;
+
+          setReceta([
+            ...receta,
+            {
+              inventario_id: value.id,
+              nombre: value.nombre,
+              unidad: value.unidad,
+              cantidad: 0
+            }
+          ]);
+        }}
+        renderInput={(params) => (
+          <TextField {...params} label="Agregar insumo" size="small" />
+        )}
+      />
+
+      {/* LISTADO */}
+      <Box display="flex" flexDirection="column" gap={1}>
+        {receta.map((item, index) => (
+          <Box
+            key={index}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              p: 1.5,
+              borderRadius: 2,
+              border: "1px solid #eee"
+            }}
+          >
+            <Box>
+              <Typography fontWeight={600}>
+                {item.nombre}
+              </Typography>
+              <Typography fontSize={12} color="text.secondary">
+                {item.unidad}
+              </Typography>
+            </Box>
+
+            <Box display="flex" alignItems="center" gap={1}>
+              <TextField
+                type="number"
+                size="small"
+                label="Cantidad"
+                value={item.cantidad}
+                onChange={(e) => {
+                  const newReceta = [...receta];
+                  newReceta[index].cantidad = Number(e.target.value);
+                  setReceta(newReceta);
+                }}
+                sx={{ width: 100 }}
+              />
+
+              <IconButton
+                color="error"
+                onClick={() =>
+                  setReceta(receta.filter((_, i) => i !== index))
+                }
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        ))}
+      </Box>
+
+    </Box>
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenRecetaModal(false)}>
+      Cancelar
+    </Button>
+    <Button
+      variant="contained"
+      onClick={() => setOpenRecetaModal(false)}
+    >
+      Guardar receta
     </Button>
   </DialogActions>
 </Dialog>

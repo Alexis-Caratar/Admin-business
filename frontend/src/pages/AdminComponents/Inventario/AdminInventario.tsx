@@ -6,7 +6,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-//  DialogActions,
+  DialogActions,
   TextField,
   Select,
   MenuItem,
@@ -20,41 +20,56 @@ import {
 
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import EditIcon from "@mui/icons-material/Edit";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import DevicesIcon from "@mui/icons-material/Devices";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-
 
 import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 
 import {
- // crearInventario,
   getInventarios,
   deleteInventario,
-  
+  crearInventario,
+  actualizarInventario,
+  crearMovimiento,
 } from "../../../api/inventarios";
 
-import type { InventarioFisico } from "../../../types/inventario";
-import InventarioDetalles from "./DetalleInventario";
-
 const AdminInventario: React.FC = () => {
-  const idNegocio = localStorage.getItem("id_negocio") || "";
-  const idPersona = localStorage.getItem("id_persona") || "";
-  const [inventarios, setInventarios] = useState<InventarioFisico[]>([]);
+  const [inventarios, setInventarios] = useState<any[]>([]);
   const [openModal, setOpenModal] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [openMovimiento, setOpenMovimiento] = useState(false);
+const [tipoMovimiento, setTipoMovimiento] = useState("");
+const [motivo, setMotivo] = useState("");
+const [itemsMovimiento, setItemsMovimiento] = useState<any[]>([]);
 
-  const [detalleId, setDetalleId] = useState<number | null>(null);
+const abrirMovimiento = ( tipo: string) => {
+  setTipoMovimiento(tipo);
+  setItemsMovimiento([]);
+  setMotivo("");
+  setOpenMovimiento(true);
+};
 
-  const [form, setForm] = useState({
-    nombre: "",
-    tipo: "PRODUCTOS",
-    id_negocio: idNegocio,
-    id_persona: idPersona,
-  });
+type TipoInventario = "INSUMO" | "PRODUCTO" | "ACTIVO";
 
-  // Obtener inventarios
+const [form, setForm] = useState<{
+  nombre: string;
+  unidad: string;
+  tipo: TipoInventario;
+  stock_actual: number;
+  stock_minimo: number;
+  stock_maximo: number;
+  costo_unitario: number;
+}>({
+  nombre: "",
+  unidad: "",
+  tipo: "INSUMO",
+  stock_actual: 0,
+  stock_minimo: 0,
+  stock_maximo: 0,
+  costo_unitario: 0
+});
+
   const fetchData = async () => {
     const data = await getInventarios();
     setInventarios(data);
@@ -64,173 +79,409 @@ const AdminInventario: React.FC = () => {
     fetchData();
   }, []);
 
-  // Crear inventario
-/*   const handleSubmit = async () => {
-    await crearInventario(form);
-    setOpenModal(false);
-    setForm({ nombre: "", tipo: "PRODUCTOS", id_negocio: idNegocio, id_persona: idPersona });
-    fetchData();
-  }; */
+  // ✅ CREAR / EDITAR
+  const handleSubmit = async () => {
+    if (!form.nombre) {
+      Swal.fire("Error", "El nombre es obligatorio", "warning");
+      return;
+    }
 
-  // Eliminar inventario
+    try {
+      if (editingId) {
+        await actualizarInventario(editingId, form);
+      } else {
+        await crearInventario(form);
+      }
+
+      setOpenModal(false);
+      resetForm();
+      fetchData();
+    } catch (error) {
+      Swal.fire("Error", "No se pudo guardar", "error");
+    }
+  };
+
+  const resetForm = () => {
+    setForm({
+      nombre: "",
+      unidad: "",
+      tipo: "INSUMO",
+      stock_actual: 0,
+      stock_minimo: 0,
+      stock_maximo: 0,
+      costo_unitario: 0
+    });
+    setEditingId(null);
+  };
+
+  // ✅ EDITAR
+  const handleEdit = (inv: any) => {
+    setForm(inv);
+    setEditingId(inv.id);
+    setOpenModal(true);
+  };
+
+  // ✅ ELIMINAR
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: "¿Eliminar inventario?",
-      text: "Esta acción no se puede deshacer.",
+      title: "¿Eliminar?",
       icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Sí, eliminar",
+      showCancelButton: true
     });
 
     if (result.isConfirmed) {
       await deleteInventario(id);
       fetchData();
-      Swal.fire({ icon: "success", title: "Inventario eliminado", timer: 1500 });
     }
   };
-
-  // Icono según tipo
-  const iconoTipo = (tipo: string) => {
-    if (tipo === "PRODUCTOS") return <ShoppingCartIcon sx={{ fontSize: 32, color: "#19786aff" }} />;
-    if (tipo === "ACTIVOS") return <DevicesIcon sx={{ fontSize: 32, color: "#184384ff" }} />;
-    return <InventoryIcon sx={{ fontSize: 32, color: "#176291ff" }} />;
-  };
-
-  const tituloTipo = (tipo: string) => {
-    if (tipo === "PRODUCTOS") return "Productos";
-    if (tipo === "ACTIVOS") return " Activos";
-    return " Otros";
-  };
-
-  if (detalleId) {
-    return <InventarioDetalles id={detalleId} onBack={() => setDetalleId(null)} />;
-  }
 
   return (
     <Box p={2}>
       {/* HEADER */}
       <Box display="flex" justifyContent="space-between" mb={3}>
-        <Typography variant="h5" display="flex" alignItems="center" gap={1}>
-          <InventoryIcon /> Inventario Físico
+        <Typography variant="h5" fontWeight={600}>
+          Inventario
         </Typography>
 
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => setOpenModal(true)}
-          sx={{ background: "#0D47A1" }}
-        >
-          Crear Inventario
-        </Button>
-      </Box>
-
-{/* LISTA INVENTARIOS */}
-<Box display="flex" flexWrap="wrap" gap={2}>
-  {inventarios.map((inv) => (
-    <Box
-      key={inv.id}
-      flex="1 1 calc(100% - 16px)" // xs: 1 por fila
-      sx={{
-        '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 16px)' }, // md: 3 por fila
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Card
-          onClick={() => setDetalleId(inv.id)} // 👈 ABRIR DETALLES AL HACER CLICK
-          sx={{
-            borderRadius: 3,
-            boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
-            cursor: "pointer", // 👈 MOUSE POINTER
-            transition: "0.2s",
-            "&:hover": {
-              boxShadow: "0px 6px 18px rgba(0,0,0,0.18)",
-              transform: "translateY(-3px)",
-            },
-            position: "relative",
+          onClick={() => {
+            resetForm();
+            setOpenModal(true);
           }}
         >
-          <CardContent>
-            {/* Icono + Tipo */}
-            <Box display="flex" alignItems="center" gap={1}>
-              {iconoTipo(inv.tipo)}
-              <Typography variant="h6">{tituloTipo(inv.tipo)}</Typography>
-            </Box>
+          NUEVO INVENTARIO
+        </Button>
+              <Button
+        variant="contained"
+        color="success"
+        onClick={() => abrirMovimiento("ENTRADA")}
+      >
+        Registrar Compra masiva
+      </Button>
+      </Box>
 
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              {inv.nombre}
-            </Typography>
+      {/* LISTA */}
+      <Box display="flex" flexWrap="wrap" gap={2}>
+        {inventarios.map((inv) => (
+          <Box key={inv.id} flex="1 1 calc(33% - 16px)">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <Card sx={{ borderRadius: 3 }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <InventoryIcon />
+                    <Typography fontWeight={600}>
+                      {inv.nombre}
+                    </Typography>
+                  </Box>
 
-            <Typography variant="caption" color="text.secondary">
-              Fecha: {new Date(inv.fecha).toLocaleString()}
-            </Typography>
+                  <Typography fontSize={13}>
+                    Unidad: {inv.unidad}
+                  </Typography>
 
-            {/* Botones */}
-            <Stack direction="row" spacing={1} mt={2}>
-              <IconButton
-                color="error"
-                onClick={(e) => {
-                  e.stopPropagation(); // 🔒 EVITA QUE SE ABRA LA TARJETA
-                  handleDelete(inv.id);
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
+                  <Typography fontSize={13}>
+                    Stock: {inv.stock_actual}
+                  </Typography>
 
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation(); // 🔒 EVITA QUE SE ABRA LA TARJETA
-                  setDetalleId(inv.id);
-                }}
-              >
-                <ExpandMoreIcon />
-              </IconButton>
-            </Stack>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </Box>
-  ))}
-</Box>
+                  <Typography fontSize={13} color="error">
+                    Min: {inv.stock_minimo}
+                  </Typography>
+
+                  <Typography fontSize={13}>
+                    Costo: ${inv.costo_unitario}
+                  </Typography>
+
+                  <Stack direction="row" spacing={1} mt={2}>
+                    <IconButton onClick={() => handleEdit(inv)}>
+                      <EditIcon />
+                    </IconButton>
+
+                    <IconButton color="error" onClick={() => handleDelete(inv.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Stack>
+
+                  <Stack direction="row" spacing={1} mt={2}>
+  <Button
+    size="small"
+    variant="contained"
+    color="success"
+    onClick={(e) => {
+      e.stopPropagation();
+      abrirMovimiento( "ENTRADA");
+    }}
+  >
+    + Entrada
+  </Button>
+
+  <Button
+    size="small"
+    variant="contained"
+    color="warning"
+    onClick={(e) => {
+      e.stopPropagation();
+      abrirMovimiento( "SALIDA");
+    }}
+  >
+    - Salida
+  </Button>
 
 
-      {/* MODAL CREAR INVENTARIO */}
-      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Nuevo Inventario Físico</DialogTitle>
+</Stack>
 
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Box>
+        ))}
+      </Box>
+
+      {/* MODAL */}
+      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth>
+        <DialogTitle>
+          {editingId ? "Editar" : "Nuevo"} inventario
+        </DialogTitle>
+
+        <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
           <TextField
-            label="Nombre del inventario"
+            label="Nombre"
             value={form.nombre}
             onChange={(e) => setForm({ ...form, nombre: e.target.value })}
           />
 
-          <FormControl fullWidth>
+          <TextField
+            label="Unidad"
+            value={form.unidad}
+            onChange={(e) => setForm({ ...form, unidad: e.target.value })}
+          />
+
+          <FormControl>
             <InputLabel>Tipo</InputLabel>
             <Select
               value={form.tipo}
               label="Tipo"
               onChange={(e) => setForm({ ...form, tipo: e.target.value })}
             >
-              <MenuItem value="PRODUCTOS">Productos</MenuItem>
-              <MenuItem value="ACTIVOS">Activos</MenuItem>
-              <MenuItem value="OTROS">Otros</MenuItem>
+              <MenuItem value="INSUMO">Insumo</MenuItem>
+              <MenuItem value="PRODUCTO">Producto</MenuItem>
+              <MenuItem value="ACTIVO">Activo</MenuItem>
             </Select>
           </FormControl>
+
+          <TextField
+            label="Stock actual"
+            type="number"
+            value={form.stock_actual}
+            onChange={(e) =>
+              setForm({ ...form, stock_actual: Number(e.target.value) })
+            }
+          />
+
+          <TextField
+            label="Stock mínimo"
+            type="number"
+            value={form.stock_minimo}
+            onChange={(e) =>
+              setForm({ ...form, stock_minimo: Number(e.target.value) })
+            }
+          />
+
+          <TextField
+            label="Stock máximo"
+            type="number"
+            value={form.stock_maximo}
+            onChange={(e) =>
+              setForm({ ...form, stock_maximo: Number(e.target.value) })
+            }
+          />
+
+          <TextField
+            label="Costo unitario"
+            type="number"
+            value={form.costo_unitario}
+            onChange={(e) =>
+              setForm({ ...form, costo_unitario: Number(e.target.value) })
+            }
+          />
         </DialogContent>
 
-       {/*  <DialogActions>
+        <DialogActions>
           <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
-          <Button variant="contained" sx={{ background: "#0D47A1" }} onClick={handleSubmit}>
-            Crear
+          <Button variant="contained" onClick={handleSubmit}>
+            Guardar
           </Button>
-        </DialogActions> */}
+        </DialogActions>
       </Dialog>
+
+
+ {/* MODAL MOVIMIENTO */}
+<Dialog
+  open={openMovimiento}
+  onClose={() => setOpenMovimiento(false)}
+  fullWidth
+  maxWidth="md"
+>
+  {/* HEADER */}
+  <DialogTitle sx={{ pb: 1 }}>
+    <Typography variant="h6" fontWeight={600}>
+      {tipoMovimiento === "ENTRADA" ? "Registrar compra" : "Registrar salida"}
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      Agrega múltiples productos en un solo movimiento
+    </Typography>
+  </DialogTitle>
+
+  <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+
+    {/* BOTÓN AGREGAR */}
+    <Box display="flex" justifyContent="flex-end">
+      <Button
+        variant="contained"
+        size="small"
+        startIcon={<AddIcon />}
+        sx={{ borderRadius: 2 }}
+        onClick={() =>
+          setItemsMovimiento([
+            ...itemsMovimiento,
+            { inventario_id: "", cantidad: 0 }
+          ])
+        }
+      >
+        Agregar producto
+      </Button>
+    </Box>
+
+    {/* CABECERA TIPO TABLA */}
+    <Box
+      display="grid"
+      gridTemplateColumns="2fr 1fr auto"
+      px={1}
+      py={1}
+      sx={{
+        fontSize: 13,
+        fontWeight: 600,
+        color: "text.secondary",
+        borderBottom: "1px solid #eee"
+      }}
+    >
+      <span>Producto</span>
+      <span>Cantidad</span>
+      <span></span>
+    </Box>
+
+    {/* LISTA */}
+    <Box display="flex" flexDirection="column" gap={1}>
+      {itemsMovimiento.map((item, index) => (
+        <Box
+          key={index}
+          display="grid"
+          gridTemplateColumns="2fr 1fr auto"
+          gap={2}
+          alignItems="center"
+          sx={{
+            p: 1,
+            borderRadius: 2,
+            background: "#fafafa",
+            border: "1px solid #eee"
+          }}
+        >
+          {/* SELECT */}
+          <FormControl size="small" fullWidth>
+            <Select
+              value={item.inventario_id}
+              displayEmpty
+              onChange={(e) => {
+                const newItems = [...itemsMovimiento];
+                newItems[index].inventario_id = e.target.value;
+                setItemsMovimiento(newItems);
+              }}
+            >
+              <MenuItem value="">
+                <em>Seleccionar producto</em>
+              </MenuItem>
+              {inventarios.map((inv) => (
+                <MenuItem key={inv.id} value={inv.id}>
+                  {inv.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* CANTIDAD */}
+          <TextField
+            size="small"
+            type="number"
+            placeholder="0"
+            value={item.cantidad}
+            onChange={(e) => {
+              const newItems = [...itemsMovimiento];
+              newItems[index].cantidad = Number(e.target.value);
+              setItemsMovimiento(newItems);
+            }}
+          />
+
+          {/* DELETE */}
+          <IconButton
+            color="error"
+            onClick={() =>
+              setItemsMovimiento(itemsMovimiento.filter((_, i) => i !== index))
+            }
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      ))}
+    </Box>
+
+    {/* OBSERVACIÓN */}
+    <TextField
+      label="Observación"
+      size="small"
+      multiline
+      minRows={2}
+      value={motivo}
+      onChange={(e) => setMotivo(e.target.value)}
+    />
+  </DialogContent>
+
+  {/* FOOTER */}
+  <DialogActions sx={{ px: 3, pb: 2 }}>
+    <Button onClick={() => setOpenMovimiento(false)}>
+      Cancelar
+    </Button>
+
+    <Button
+      variant="contained"
+      sx={{ borderRadius: 2, px: 3 }}
+      onClick={async () => {
+        try {
+          for (const item of itemsMovimiento) {
+            if (!item.inventario_id || item.cantidad <= 0) continue;
+
+            await crearMovimiento({
+              inventario_id: item.inventario_id,
+              tipo: tipoMovimiento,
+              cantidad: item.cantidad,
+              observacion: motivo
+            });
+          }
+
+          Swal.fire("OK", "Movimientos registrados", "success");
+
+          setOpenMovimiento(false);
+          fetchData();
+
+        } catch (error) {
+          Swal.fire("Error", "No se pudo guardar", "error");
+        }
+      }}
+    >
+      Guardar todo
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </Box>
   );
 };

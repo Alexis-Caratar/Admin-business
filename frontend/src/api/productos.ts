@@ -7,6 +7,11 @@ export const getProductos = async (id:number) => {
   return data;
 };
 
+export const inventario = async (payload: Partial<Producto>) => {
+  const { data } = await axios.post("/productos/inventario/", payload);
+  return data;
+};
+
 export const crearProducto = async (payload: Partial<Producto>) => {
   const { data } = await axios.post("/productos", payload);
   return data;

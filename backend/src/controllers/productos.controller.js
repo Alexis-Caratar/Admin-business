@@ -5,6 +5,9 @@ export const listar = async (req, res) => {
 export const obtener = async (req, res) => {
   try { const data = await service.obtener(req.params.id); if(!data) return res.status(404).json({ error: "No encontrado" }); res.json(data); } catch (err) { res.status(500).json({ error: err.message }); }
 };
+export const obtener_inventario = async (req, res) => {  
+  try { const data = await service.obtener_inventario(req.body); if(!data) return res.status(404).json({ error: "No encontrado" }); res.json(data); } catch (err) { res.status(500).json({ error: err.message }); }
+};
 export const crear = async (req, res) => {
   try { const data = await service.crear(req.body); res.status(201).json(data); } catch (err) { res.status(500).json({ error: err.message }); }
 };

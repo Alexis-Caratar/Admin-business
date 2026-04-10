@@ -1,54 +1,72 @@
-import * as InventarioService from "../services/inventarios.service.js";
+import * as service from "../services/inventarios.service.js";
 
-// Crear inventario
-export const crearInventario = async (req, res) => {
+// LISTAR
+export const listar = async (req, res) => {
   try {
-    const data = await InventarioService.crearInventario(req.body);
-    res.json({ ok: true, data });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
+    const data = await service.listar();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Agregar detalle
-export const agregarDetalle = async (req, res) => {
+// CREAR
+export const crear = async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = await InventarioService.agregarDetalle(id, req.body);
-    res.json({ ok: true, data });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
+    const data = await service.crear(req.body);
+    res.status(201).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Listar inventarios
-export const listarInventarios = async (req, res) => {
+// ACTUALIZAR
+export const actualizar = async (req, res) => {
   try {
-    const data = await InventarioService.listarInventarios();
-    res.json({ ok: true, data });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
+    const data = await service.actualizar(req.params.id, req.body);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Obtener inventario con detalles
-export const obtenerInventario = async (req, res) => {
+// ELIMINAR
+export const eliminar = async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = await InventarioService.obtenerInventario(id);
-    res.json({ ok: true, data });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
+    await service.eliminar(req.params.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Eliminar inventario
-export const eliminarInventario = async (req, res) => {
+
+// Crear movimiento
+export const crearMovimiento = async (req, res) => {
   try {
-    const { id } = req.params;
-    await InventarioService.eliminarInventario(id);
-    res.json({ ok: true, msg: "Inventario eliminado" });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
+    const data = await service.crearMovimiento(req.body);
+    res.status(201).json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Listar movimientos
+export const listarMovimientos = async (req, res) => {
+  try {
+    const data = await service.listarMovimientos(req.params.inventario_id);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Eliminar movimiento
+export const eliminarMovimiento = async (req, res) => {
+  try {
+    await service.eliminarMovimiento(req.params.id);
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

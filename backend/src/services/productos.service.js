@@ -3,6 +3,7 @@ import { db, pool } from "../config/db.js";
 const TABLE = "productos";
 const TABLE_IMAGENES = "productos_imagenes";
 const TABLE_PRECIOS = "productos_precios";
+const TABLE_RECETA = "recetas";
 
 export const listar = async (id_categoria) => {
 
@@ -11,9 +12,6 @@ export const listar = async (id_categoria) => {
     `SELECT * FROM ${TABLE} WHERE id_categoria = $1 ORDER BY id DESC`,
     [id_categoria]
   );
-console.log("productos",productos);
-
-
 
   const ids = productos.map(p => p.id);
 
@@ -22,7 +20,6 @@ console.log("productos",productos);
     `SELECT * FROM ${TABLE_PRECIOS} WHERE id_producto = ANY($1)`,
     [ids]
   );
-console.log("precios",precios);
 
   // 3️⃣ IMÁGENES
   const { rows: imagenes } = await pool.query(
@@ -32,15 +29,27 @@ console.log("precios",precios);
     [ids]
   );
 
+  // 4 recetas
+  const { rows: recetas } = await pool.query(
+    `SELECT r.*, i.nombre as inventario_nombre FROM ${TABLE_RECETA} r 
+     inner join inventario i on i.id = r.inventario_id
+     WHERE producto_id = ANY($1) 
+     ORDER BY id ASC`,
+    [ids]
+  );
+
   // 4️⃣ MAPEO FINAL
   const productosFinal = productos.map(p => {
     const precio = precios.find(pr => pr.id_producto === p.id) || null;
     const imgs = imagenes.filter(img => img.id_producto === p.id);
+    const rec = recetas.filter(r => r.producto_id === p.id);
 
     return {
       ...p,
       precios: precio,
-      imagenes: imgs
+      imagenes: imgs,
+      receta: rec
+
     };
   });
 
@@ -88,6 +97,28 @@ export const obtener = async (id) => {
   };
 };
 
+export const obtener_inventario = async (datos) => {
+  const { id, tipo } = datos;
+
+  const [inventario] = await db.query(
+    `
+    SELECT 
+      id,
+      nombre,
+      stock,
+      unidad
+    FROM inventario
+    WHERE tipo = $1
+    AND estado = true
+    ORDER BY nombre;
+    `,
+    [ tipo]
+  );
+ 
+
+  return inventario;
+};
+
 
 // Crear producto completo
 export const crear = async (payload) => {
@@ -96,7 +127,7 @@ export const crear = async (payload) => {
   try {
     await client.query("BEGIN");
 
-    const { producto, productos_imagenes, productos_precios } = payload;
+    const { producto, productos_imagenes, productos_precios, receta } = payload;
 
     // ============================
     // 1️⃣ INSERTAR PRODUCTO
@@ -117,7 +148,6 @@ export const crear = async (payload) => {
 
     const productoId = productoRows[0].id;
 
-    // ============================
     // 2️⃣ INSERTAR IMÁGENES
     // ============================
     if (productos_imagenes?.length > 0) {
@@ -138,7 +168,6 @@ export const crear = async (payload) => {
       }
     }
 
-    // ============================
     // 3️⃣ INSERTAR PRECIOS
     // ============================
     if (productos_precios?.length > 0) {
@@ -172,6 +201,25 @@ export const crear = async (payload) => {
       }
     }
 
+// 4 INSERTAR receta
+    // ============================
+     if (receta?.length > 0) {
+      for (const rect of receta) {
+        await client.query(
+          `
+          INSERT INTO ${TABLE_RECETA}
+          (producto_id, inventario_id, cantidad)
+          VALUES ($1, $2, $3)
+          `,
+          [
+            productoId,
+            rect.inventario_id,
+            rect.cantidad ?? 0,
+          ]
+        );
+      }
+    }
+
     await client.query("COMMIT");
 
     return productoRows[0];
@@ -191,7 +239,7 @@ export const actualizar = async (id, payload) => {
   try {
     await client.query("BEGIN");
 
-    const { producto, productos_imagenes, productos_precios } = payload;
+    const { producto, productos_imagenes, productos_precios,receta } = payload;
 
     // ============================
     // 1️⃣ ACTUALIZAR PRODUCTO
@@ -313,6 +361,23 @@ export const actualizar = async (id, payload) => {
         }
       }
     }
+
+
+      // 4 receta
+        
+      await client.query(`DELETE FROM ${TABLE_RECETA} WHERE producto_id = $1`, [id]);
+
+      for (const rect of receta) {
+        await client.query(
+          `
+          INSERT INTO ${TABLE_RECETA}
+          (producto_id, inventario_id, cantidad)
+          VALUES ($1, $2, $3)
+          `,
+          [id, rect.inventario_id, rect.cantidad]
+        );
+      }
+
 
     await client.query("COMMIT");
 
