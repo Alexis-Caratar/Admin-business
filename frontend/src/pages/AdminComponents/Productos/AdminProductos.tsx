@@ -271,6 +271,7 @@ const handleEdit = (producto: any) => {
     }
   };
 
+   
 
   return (
     <Box p={0} ml={0}>
@@ -664,7 +665,7 @@ const handleEdit = (producto: any) => {
             onChange={(e) => handleChangeUsaReceta(e.target.value === "receta")}
           >
             <MenuItem value="directo">PRODUCTO</MenuItem>
-            <MenuItem value="receta">PRODCUTO CON ISUMO</MenuItem>
+            <MenuItem value="receta">PRODUCTO CON INSUMO</MenuItem>
           </TextField>
 
 
@@ -823,24 +824,27 @@ const handleEdit = (producto: any) => {
         </Typography>
 
         <Box display="grid" gridTemplateColumns="repeat(2,1fr)" gap={2}>
-          <TextField
-            label="Costo"
-            type="number"
-            size="small"
-            value={form.precios?.precio_costo || ""}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                precios: { ...form.precios!, precio_costo: Number(e.target.value) },
-              })
-            }
-          />
+        <TextField
+          label="Costo"
+          type="number"
+          size="small"
+          value={form.precios?.precio_costo === 0 ? "" : form.precios?.precio_costo}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              precios: {
+                ...form.precios!,
+                precio_costo: e.target.value === "" ? 0 : Number(e.target.value),
+              },
+            })
+          }
+        />
 
           <TextField
             label="Venta"
             type="number"
             size="small"
-            value={form.precios?.precio_venta || ""}
+            value={form.precios?.precio_venta === 0 ? "" : form.precios?.precio_venta}
             onChange={(e) =>
               setForm({
                 ...form,
