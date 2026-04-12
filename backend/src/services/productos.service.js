@@ -105,7 +105,7 @@ export const obtener_inventario = async (datos) => {
     SELECT 
       id,
       nombre,
-      stock,
+      stock_actual,
       unidad
     FROM inventario
     WHERE tipo = $1
