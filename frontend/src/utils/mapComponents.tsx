@@ -12,7 +12,7 @@ export const componentMap: Record<string, React.FC> = {
   usuarios: AdminUsuarios,
   negocios: AdminNegocios,
  // productos: AdminProductos,
-  inventariofisico: AdminInventario,
+  inventario: AdminInventario,
   ventas:AdminVentas,
   cajero:CajeroDashboard,
   categorias: AdminCategorias,

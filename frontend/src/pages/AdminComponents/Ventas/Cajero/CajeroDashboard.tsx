@@ -20,6 +20,8 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VentasDetalles from "./components/Estados_dasboard/ventasDetalles";
 import CajaPanel from "./components/Estados_dasboard/CajaPanel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Loader from "../../../../components/Loader";
+
 interface AnimItem {
   img: string;
   start: { left: number; top: number };
@@ -364,6 +366,9 @@ const cerrarCajaReal = async (cierreData: any) => {
   }, 700);
 };
 
+if (loadingCategorias ) {
+  return <Loader text="Cargando ..." />;
+}
   return (
     
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", p: 0, ml: 0 }}>

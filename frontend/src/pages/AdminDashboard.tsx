@@ -21,6 +21,7 @@ import { componentMap } from "../utils/mapComponents";
 import { useIdleLogout } from "../hooks/useIdleLogout";
 import CambiarPasswordModal from "../components/CambiarPasswordModal";
 import {cambiopassword} from "./../api/auth"
+import Loader from "../components/Loader";
 const DEFAULT_AVATAR =
   "https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png";
 
@@ -45,6 +46,7 @@ const AdminDashboard: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
   const handleStorage = (e: StorageEvent) => {
@@ -113,6 +115,7 @@ const cerrarSesion = () => {
     };
 
     loadMenus();
+    setLoading(false);
   }, []);
 
   const ActiveComponent = modulo ? componentMap[modulo] : null;
@@ -258,6 +261,14 @@ const cerrarSesion = () => {
     </Box>
   );
 
+  if (loading) {
+  return (
+    <Loader 
+      text="Cargando sistema..."
+      logo={imagen_negocio}
+    />
+  );
+}
   return (
     <Box display="flex" height="100vh" width="100%">
       

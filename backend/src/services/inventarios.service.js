@@ -62,7 +62,6 @@ export const actualizar = async (id, data) => {
     nombre,
     unidad,
     tipo,
-    stock,
     stock_actual,
     stock_minimo,
     stock_maximo,
@@ -77,20 +76,18 @@ export const actualizar = async (id, data) => {
       nombre = $1,
       unidad = $2,
       tipo = $3,
-      stock = $4,
-      stock_actual = $5,
-      stock_minimo = $6,
-      stock_maximo = $7,
-      costo_unitario = $8,
-      estado = $9
-    WHERE id = $10
+      stock_actual = $4,
+      stock_minimo = $5,
+      stock_maximo = $6,
+      costo_unitario = $7,
+      estado = $8
+    WHERE id = $9
     RETURNING *
     `,
     [
       nombre,
       unidad,
       tipo,
-      Number(stock || 0),
       Number(stock_actual || 0),
       Number(stock_minimo || 0),
       Number(stock_maximo || 0),

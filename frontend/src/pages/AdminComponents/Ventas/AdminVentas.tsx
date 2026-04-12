@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Box, Dialog, DialogContent } from "@mui/material";
-
+import Loader from "../../../components/Loader";
 import StatsCards from "./StatsCards";
 import CalendarView from "./CalendarView";
 import VentasDelDia from "./VentasDelDia";
@@ -71,6 +71,9 @@ const AdminVentas: React.FC = () => {
     return { totalVentas, totalDinero,totalEgresos,totaltotal, ventaMayor };
   }, [resumen]);
 
+  if (loading && !resumen.length) {
+  return <Loader text="Cargando ventas..." />;
+}
   return (
     <Box p={3}>
       {/* TARJETAS DE ESTADÍSTICAS */}
@@ -88,12 +91,16 @@ const AdminVentas: React.FC = () => {
       >
 
         <DialogContent dividers>
-          {selectedDate && (
+        {loading ? (
+          <Loader text="Cargando ventas del día..." />
+        ) : (
+          selectedDate && (
             <VentasDelDia
               ventas={ventasDelDia}
               fecha={selectedDate}
             />
-          )}
+          )
+        )}
         </DialogContent>
       </Dialog>
     </Box>
