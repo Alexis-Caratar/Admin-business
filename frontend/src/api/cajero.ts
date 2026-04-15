@@ -80,3 +80,11 @@ export const imprimircomanda = (data:any) => {
 export const cancelarFactura = (data:any) => {
   return axios.post(`cajero/cancelarFactura`, data);
 };
+
+export const apiObtenerInventario = (data:any) => {
+  return axios.post(`cajero/obtener-inventario`, data);
+};
+
+export const apiGuardarInventario = (data:any) => {
+  return axios.post(`cajero/guardar-inventario`, data);
+};

@@ -378,3 +378,30 @@ export const cancelarFactura = async (req, res) => {
   
 };
 
+export const obtenerInventario = async (req, res) => {
+  try {
+   const payload = req.user.id_negocio;
+   console.log("payload",req);
+   
+     const result= await CajeroService.obtener_inventario(payload)
+      res.json({ok: true, result});
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};
+
+
+export const guardarInventario = async (req, res) => {
+  try {
+   const payload = req.body;
+   console.log("payload",payload);
+   
+     const result= await CajeroService.guardar_inventario(payload)
+      res.json({ok: true, result});
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};
+

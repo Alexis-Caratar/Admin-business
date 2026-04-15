@@ -905,6 +905,77 @@ cancelar_factura: async (payload) => {
     conn.release();
   }
 },
+
+obtener_inventario: async (id_negocio) => {
+  const conn = await pool.connect();
+
+  try {
+    const result = await conn.query(
+      `
+      select 
+        id AS id,
+        nombre,
+        stock_actual
+      FROM inventario
+      WHERE id_negocio = $1
+      AND estado = true
+      ORDER BY nombre ASC;`,
+      [id_negocio]
+    );
+
+    return result.rows;
+
+  } catch (err) {
+    console.error("Error obteniendo inventario:", err.message);
+    throw err;
+  } finally {
+    conn.release();
+  }
+},
+
+guardar_inventario: async (payload) => {
+  const conn = await pool.connect();
+
+  try {
+    await conn.query("BEGIN");
+
+    const { id_caja, data } = payload;
+
+    for (const item of data) {
+      await conn.query(
+        `
+        INSERT INTO inventario_caja (
+          id_caja,
+          id_producto,
+          stock_apertura,
+          stock_sistema,
+          estado
+        )
+        VALUES ($1, $2, $3, $4, 'APERTURA')
+        `,
+        [
+          id_caja,
+          item.id,
+          item.stockFisico,   // 👈 lo que el cajero contó
+          item.stock_actual   // 👈 lo que decía el sistema
+        ]
+      );
+    }
+
+    await conn.query("COMMIT");
+
+    return { ok: true };
+
+  } catch (err) {
+    await conn.query("ROLLBACK");
+    console.error("Error guardando inventario:", err.message);
+    throw err;
+  } finally {
+    conn.release();
+  }
+},
+
+
 }
 
 
