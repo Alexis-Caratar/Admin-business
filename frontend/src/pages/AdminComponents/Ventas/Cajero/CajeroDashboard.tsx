@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import {  Box, Typography, Stack, Chip, Button, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog, DialogContent, Paper, DialogActions } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import type { ProductoCajero, CategoriaCajero, Caja, Mesa } from "../../../../types/cajero";
-import { apiListarProductos, apiAbrirCaja, apiArqueoCaja, apiCerrarCaja, estado_caja, finalizar_venta, apiGuardarInventario, apiObtenerInventario } from "../../../../api/cajero";
+import { apiListarProductos, apiAbrirCaja, apiArqueoCaja, apiCerrarCaja, estado_caja, finalizar_venta } from "../../../../api/cajero";
 import { Mesas } from "./components/Mesas";
 import { Carrito } from "./components/Carrito";
 import { AperturaCajaModal } from "./components/AperturaCaja";
@@ -21,7 +21,6 @@ import VentasDetalles from "./components/Estados_dasboard/ventasDetalles";
 import CajaPanel from "./components/Estados_dasboard/CajaPanel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Loader from "../../../../components/Loader";
-import { ModalInventario } from "./components/ModalInventario";
 
 interface AnimItem {
   img: string;
@@ -58,9 +57,7 @@ export const CajeroDashboard: React.FC = () => {
   const [openVentasDetalles, setOpenVentasDetalles] = useState(false);
   const [animItem, setAnimItem] = useState<AnimItem | null>(null);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
-  const [modalInventario, setModalInventario] = useState(false);
-  const [tipoInventario, setTipoInventario] = useState<"APERTURA" | "CIERRE">("APERTURA");
-  const [productosInventario, setProductosInventario] = useState([]);
+
   const abrirCarrito = () => {
     setOpenCarrito(true);
   };
@@ -267,23 +264,21 @@ const clearMesa = () => {
     }
   };
   //aperturar la caja 
-const abrirCajaReal = async () => {
+const abrirCajaReal = async (payload: any) => {
   try {
+    console.log("🚀 payload recibido:", payload);
+
     const { data } = await apiAbrirCaja({
       id_usuario: idUsuario,
-      monto_inicial: Number(montoApertura)
+      monto_inicial: payload.monto_inicial,
+      inventario: payload.inventario 
     });
 
     if (data?.ok) {
-      setCajaAbierta(true);
+      setCajaAbierta(true);      
       setCaja(data.result);
       setIdCaja(data.result.id);
-      abrirInventarioApertura();
-      setModalApertura(false);
-      setTipoInventario("APERTURA");
-      setModalInventario(true);
     }
-    
 
   } catch (err) {
     console.error("Error abrirCajaReal:", err);
@@ -291,19 +286,7 @@ const abrirCajaReal = async () => {
 };
 
 
-const abrirInventarioApertura = async () => {
-  try {
-    const { data } = await apiObtenerInventario(id_negocio);
 
-    setProductosInventario(data.result);
-
-    setTipoInventario("APERTURA");
-    setModalInventario(true);
-
-  } catch (err) {
-    console.error(err);
-  }
-};
 
   const cargarArqueo = async (id_caja_param?: number) => {
     try {
@@ -377,17 +360,6 @@ const cerrarCajaReal = async (cierreData: any) => {
   }, 700);
 };
 
-
-const handleConfirmInventario = async (data: any[]) => {
-  try {
-    console.log("Inventario confirmado:", data);
-     await apiGuardarInventario({ id_caja: idCaja, data })
-    setModalInventario(false);
-
-  } catch (err) {
-    console.error("Error guardando inventario:", err);
-  }
-};
 
 
 if (loadingCategorias ) {
@@ -608,13 +580,12 @@ if (loadingCategorias ) {
       </Box>
 
       {/* === MODALES === */}
-      <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} />
+      <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} id_negocio={Number(id_negocio)}   />
       <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
       <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} arqueoInfo={arqueoInfo} formatCOP={formatCOP} onCerrar={cerrarCajaReal}/>
       <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada} categorias={categorias} onAgregar={addCart} animarAlCarrito={animarAlCarrito}/>
       <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)}  idUsuario={idUsuario != null ? Number(idUsuario) : null} id_negocio={id_negocio != null ? Number(id_negocio) : null}  id_caja={idCaja} />
       <VentasDetalles open={openVentasDetalles} onClose={() => setOpenVentasDetalles(false)} id_caja={idCaja}/>
-     <ModalInventario open={modalInventario} onClose={() => setModalInventario(false)} onConfirm={handleConfirmInventario} productos={productosInventario} tipo={tipoInventario} id_caja={idCaja}/>
       {/* === DIALOG VENTA REGISTRADA === */}
      <Dialog
   open={openVentaRegistrada}

@@ -44,7 +44,7 @@ export const eliminar = async (req, res) => {
 // Crear movimiento
 export const crearMovimiento = async (req, res) => {
   try {
-    const data = await service.crearMovimiento(req.body);
+    const data = await service.crearMovimiento(req.body,req.user.id);
     res.status(201).json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });

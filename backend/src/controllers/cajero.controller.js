@@ -25,7 +25,7 @@ export const listarProductos = async (req, res) => {
 };
 
 export const abrirCaja = async (req, res) => {
-  try {
+  try {    
     const result = await CajeroService.abrirCaja(req.body);
     return res.json({ ok: true, result });
   } catch (e) {
@@ -380,9 +380,7 @@ export const cancelarFactura = async (req, res) => {
 
 export const obtenerInventario = async (req, res) => {
   try {
-   const payload = req.user.id_negocio;
-   console.log("payload",req);
-   
+   const payload = req.user.id_negocio;   
      const result= await CajeroService.obtener_inventario(payload)
       res.json({ok: true, result});
   } catch (e) {
@@ -393,11 +391,10 @@ export const obtenerInventario = async (req, res) => {
 
 
 export const guardarInventario = async (req, res) => {
-  try {
+  try {    
    const payload = req.body;
-   console.log("payload",payload);
    
-     const result= await CajeroService.guardar_inventario(payload)
+     const result= await CajeroService.guardar_inventario(payload,req.user.id)
       res.json({ok: true, result});
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });

@@ -6,7 +6,17 @@ const TABLE_MOV = "inventario_movimientos";
 // LISTAR
 export const listar = async () => {
   const { rows } = await pool.query(`
-    SELECT *
+    SELECT  id,
+    nombre,
+    unidad,
+    costo_unitario,
+    created_at,
+    tipo,
+    estado,
+    stock_actual::int AS stock_actual,
+    stock_minimo,
+    stock_maximo,
+    id_negocio
     FROM ${TABLE}
     ORDER BY id DESC
   `);
@@ -113,7 +123,7 @@ export const eliminar = async (id) => {
 
 
 // ✅ CREAR MOVIMIENTO (COMPRA / SALIDA)
-export const crearMovimiento = async (data) => {
+export const crearMovimiento = async (data,id_usuario) => {
   const client = await pool.connect();
 
   try {
@@ -130,11 +140,11 @@ export const crearMovimiento = async (data) => {
     const { rows } = await client.query(
       `
       INSERT INTO ${TABLE_MOV}
-      (inventario_id, tipo, cantidad, motivo)
-      VALUES ($1, $2, $3, $4)
+      (inventario_id, tipo, cantidad, motivo,id_usuario)
+      VALUES ($1, $2, $3, $4,$5)
       RETURNING *
       `,
-      [inventario_id, tipo, cantidad, observacion]
+      [inventario_id, tipo, cantidad, observacion,id_usuario]
     );
 
     // 2. Actualizar stock
@@ -166,7 +176,15 @@ export const listarMovimientos = async (inventario_id) => {
   const { rows } = await pool.query(
     `
     SELECT 
-      m.*,
+       m.id,
+      m.inventario_id,
+      m.tipo,
+      m.cantidad,
+      m.motivo,
+      m.referencia,
+      m.created_at,
+      m.id_usuario,
+      m.id_caja,
       i.nombre,
       i.unidad
     FROM ${TABLE_MOV} m

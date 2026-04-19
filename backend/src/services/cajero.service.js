@@ -94,18 +94,108 @@ listarProductos: async (id) => {
   return rows;
 },
 
-abrirCaja: async ({ id_usuario, monto_inicial }) => {
+abrirCaja: async ({ id_usuario, monto_inicial, inventario }) => {
+ 
+  const conn = await pool.connect();
 
-  const query = `
-    INSERT INTO caja (id_usuario, monto_inicial, estado, fecha_apertura)
-    VALUES ($1, $2, 'ABIERTA', NOW())
-    RETURNING *;
-  `;
+  try {
+    await conn.query("BEGIN");
 
-  const [rows] = await db.query(query, [id_usuario, monto_inicial]);
+    // 🔹 1. Crear caja
+    const resultCaja = await conn.query(
+      `
+      INSERT INTO caja (id_usuario, monto_inicial, estado, fecha_apertura)
+      VALUES ($1, $2, 'ABIERTA', NOW())
+      RETURNING *;
+      `,
+      [id_usuario, monto_inicial]
+    );
 
-  return rows[0];
+    const caja = resultCaja.rows[0];
+    const id_caja = caja.id;
 
+    // 🔹 2. Recorrer inventario
+    for (const item of inventario) {    
+      const diferencia = item.stockFisico - item.stock_actual;
+
+      // 2.1 histórico inventario
+      await conn.query(
+        `
+        INSERT INTO inventario_caja (
+          id_caja,
+          id_producto,
+          stock_apertura,
+          stock_sistema,
+          diferencia,
+          estado
+        )
+        VALUES ($1, $2, $3, $4, $5, 'APERTURA CAJA')
+        `,
+        [
+          id_caja,
+          item.id,
+          item.stockFisico,
+          item.stock_actual,
+          diferencia
+        ]
+      );
+
+      
+      // 🔥 solo si hay diferencia
+      if (diferencia !== 0) {
+
+        const tipo = diferencia > 0 ? "ENTRADA" : "SALIDA";
+        const cantidad = Math.abs(diferencia);
+
+        // movimiento
+        await conn.query(
+          `
+          INSERT INTO inventario_movimientos (
+            inventario_id,
+            tipo,
+            cantidad,
+            motivo,
+            id_usuario,
+            id_caja
+          )
+          VALUES ($1, $2, $3, $4, $5, $6)
+          `,
+          [
+            item.id,
+            tipo,
+            cantidad,
+            `${item.observacion || ""} INVENTARIO APERTURA (Caja ${id_caja})`,
+            id_usuario,
+            id_caja
+          ]
+        );
+
+        // actualizar stock
+        const operador = tipo === "ENTRADA" ? "+" : "-";
+
+        await conn.query(
+          `
+          UPDATE inventario
+          SET stock_actual = COALESCE(stock_actual, 0) ${operador} $1
+          WHERE id = $2
+          `,
+          [cantidad, item.id]
+        );
+      }
+    }
+
+    await conn.query("COMMIT");
+
+    return caja;
+    
+
+  } catch (err) {
+    await conn.query("ROLLBACK");
+    console.error("Error en apertura completa:", err.message);
+    throw err;
+  } finally {
+    conn.release();
+  }
 },
 
  cerrarCaja: async ({id_caja,monto_final,dinero_esperado,base_caja,venta_libre,diferencia,nota
@@ -756,7 +846,7 @@ actualizaventa: async (payload) => {
       idUsuario, id_negocio, id_venta,
       metodo_pago, monto_recibido, cambio, id_mesa
     } = payload;
-
+    
     // estado de pago
     const estado_pago_id = metodo_pago !== 'PENDIENTE' ? 1 : 0;
 
@@ -915,7 +1005,7 @@ obtener_inventario: async (id_negocio) => {
       select 
         id AS id,
         nombre,
-        stock_actual
+        stock_actual::int AS stock_actual
       FROM inventario
       WHERE id_negocio = $1
       AND estado = true
@@ -933,7 +1023,7 @@ obtener_inventario: async (id_negocio) => {
   }
 },
 
-guardar_inventario: async (payload) => {
+guardar_inventario: async (payload,id_usuario) => {
   const conn = await pool.connect();
 
   try {
@@ -942,6 +1032,10 @@ guardar_inventario: async (payload) => {
     const { id_caja, data } = payload;
 
     for (const item of data) {
+
+      const diferencia = item.stockFisico - item.stock_actual;
+
+      // 1. Guardar histórico (arqueo)
       await conn.query(
         `
         INSERT INTO inventario_caja (
@@ -949,17 +1043,61 @@ guardar_inventario: async (payload) => {
           id_producto,
           stock_apertura,
           stock_sistema,
+          diferencia,
           estado
         )
-        VALUES ($1, $2, $3, $4, 'APERTURA')
+        VALUES ($1, $2, $3, $4, $5, 'CERRAR CAJA')
         `,
         [
           id_caja,
           item.id,
-          item.stockFisico,   // 👈 lo que el cajero contó
-          item.stock_actual   // 👈 lo que decía el sistema
+          item.stockFisico,
+          item.stock_actual,
+          diferencia
         ]
       );
+
+      // 🔥 2. SOLO si hay diferencia, crear movimiento
+      if (diferencia !== 0) {
+
+        const tipo = diferencia > 0 ? "ENTRADA" : "SALIDA";
+        const cantidad = Math.abs(diferencia);
+
+        // 2.1 insertar movimiento
+        await conn.query(
+          `
+          INSERT INTO inventario_movimientos (
+            inventario_id,
+            tipo,
+            cantidad,
+            motivo,
+            id_usuario,
+            id_caja
+          )
+          VALUES ($1, $2, $3, $4,$5,$6)
+          `,
+          [
+            item.id,
+            tipo,
+            cantidad,
+            `${item.observacion} INVENTARIO APERTURA (Caja ${id_caja})`,
+             id_usuario,
+             id_caja
+          ]
+        );
+
+        // 2.2 actualizar stock real
+        const operador = tipo === "ENTRADA" ? "+" : "-";
+
+        await conn.query(
+          `
+          UPDATE inventario
+          SET stock_actual = COALESCE(stock_actual, 0) ${operador} $1
+          WHERE id = $2
+          `,
+          [cantidad, item.id]
+        );
+      }
     }
 
     await conn.query("COMMIT");
@@ -973,7 +1111,7 @@ guardar_inventario: async (payload) => {
   } finally {
     conn.release();
   }
-},
+}
 
 
 }

@@ -204,10 +204,11 @@ const getMetodoPagoIcon = (metodo:any) => {
   /* ================= FINALIZAR VENTA ================= */
   const handleFinalizarVenta = async () => {
     if (!ventaSeleccionada) return;
+    
     const payload = {
       idUsuario,
       id_negocio,
-      id_venta: ventaSeleccionada.id_pago,
+      id_venta: ventaSeleccionada.id_venta,
       metodo_pago: metodoPago,
       monto_recibido: montoRecibido,
       cambio: cambio,

@@ -57,6 +57,8 @@ const AdminInventario: React.FC = () => {
   const itemsPerPage = 12;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const rol = localStorage.getItem("rol") || "";
+
 
   const inventariosFiltrados = inventarios.filter((inv) => {
     const texto = search.toLowerCase();
@@ -132,13 +134,13 @@ const AdminInventario: React.FC = () => {
     try {
       const toNumber = (value: number | "") => (value === "" ? 0 : value);
 
-const cleanForm = {
-  ...form,
-  stock_actual: toNumber(form.stock_actual),
-  stock_minimo: toNumber(form.stock_minimo),
-  stock_maximo: toNumber(form.stock_maximo),
-  costo_unitario: toNumber(form.costo_unitario),
-};
+      const cleanForm = {
+        ...form,
+        stock_actual: toNumber(form.stock_actual),
+        stock_minimo: toNumber(form.stock_minimo),
+        stock_maximo: toNumber(form.stock_maximo),
+        costo_unitario: toNumber(form.costo_unitario),
+      };
 
       if (editingId) {
         await actualizarInventario(editingId, cleanForm);
@@ -188,17 +190,18 @@ const cleanForm = {
     }
   };
 
-  
+
 
   return (
     <Box p={2}>
       {/* HEADER */}
 
-
       <Box
         display="flex"
+        flexDirection={isMobile ? "column" : "row"}
         justifyContent="space-between"
-        alignItems="center"
+        alignItems={isMobile ? "flex-start" : "center"}
+        gap={2}
         mb={4}
       >
         {/* TITULO */}
@@ -212,8 +215,11 @@ const cleanForm = {
         </Box>
 
         {/* ACCIONES */}
-        <Stack direction="row" spacing={2}>
-
+        <Stack
+          direction={isMobile ? "column" : "row"}
+          spacing={2}
+          width={isMobile ? "100%" : "auto"}
+        >
           <Button
             variant="outlined"
             color="success"
@@ -224,27 +230,31 @@ const cleanForm = {
             Registrar entradas
           </Button>
 
-          <Button
-            variant="outlined"
-            color="warning"
-            startIcon={<TrendingDownIcon />}
-            onClick={() => abrirMovimiento("SALIDA", "MASIVO")}
-            sx={{ borderRadius: 2 }}
-          >
-            Registrar Salidas
-          </Button>
+          {rol == 'admin' && (
+            <>
+              <Button
+                variant="outlined"
+                color="warning"
+                startIcon={<TrendingDownIcon />}
+                onClick={() => abrirMovimiento("SALIDA", "MASIVO")}
+                sx={{ borderRadius: 2 }}
+              >
+                Registrar Salidas
+              </Button>
 
-          <Button
-            variant="contained"
-            startIcon={<AddBoxIcon />}
-            onClick={() => {
-              resetForm();
-              setOpenModal(true);
-            }}
-            sx={{ borderRadius: 2, px: 3 }}
-          >
-            Nuevo
-          </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddBoxIcon />}
+                onClick={() => {
+                  resetForm();
+                  setOpenModal(true);
+                }}
+                sx={{ borderRadius: 2, px: 3 }}
+              >
+                Nuevo
+              </Button>
+            </>
+          )}
 
         </Stack>
       </Box>
@@ -279,7 +289,7 @@ const cleanForm = {
       >
 
         {inventariosPaginados.map((inv) => {
-          const bajoStock = inv.stock_actual <= inv.stock_minimo;
+         // const bajoStock = inv.stock_actual <= inv.stock_minimo;
           return (
             <motion.div
               key={inv.id}
@@ -326,16 +336,48 @@ const cleanForm = {
 
                     {/* STOCK */}
                     <Box>
-                      <Typography fontSize={13}>
-                        Stock: <b>{inv.stock_actual}</b>
-                      </Typography>
-
-                      <Typography
-                        fontSize={12}
-                        color={bajoStock ? "error" : "text.secondary"}
+                      <Box
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 2,
+                          background:
+                            inv.stock_actual <= inv.stock_minimo
+                              ? "linear-gradient(135deg,#ffebee,#ffcdd2)"
+                              : "linear-gradient(135deg,#e8f5e9,#c8e6c9)",
+                          border: "1px solid",
+                          borderColor:
+                            inv.stock_actual <= inv.stock_minimo ? "error.main" : "success.main"
+                        }}
                       >
-                        Min: {inv.stock_minimo}
-                      </Typography>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+
+                          <Typography fontSize={13} color="text.secondary">
+                            Stock actual
+                          </Typography>
+
+                          <Typography
+                            fontSize={22}
+                            fontWeight={900}
+                            sx={{
+                              color:
+                                inv.stock_actual <= inv.stock_minimo ? "error.main" : "success.main"
+                            }}
+                          >
+                            {inv.stock_actual}
+                          </Typography>
+                        </Stack>
+
+                        <Typography fontSize={11} color="text.secondary">
+                          Mínimo: {inv.stock_minimo}
+                        </Typography>
+
+                        {inv.stock_actual <= inv.stock_minimo && (
+                          <Typography fontSize={11} color="error.main" fontWeight={600}>
+                            ⚠ Stock bajo
+                          </Typography>
+                        )}
+                      </Box>
+
                     </Box>
 
                     {/* COSTO */}
@@ -344,25 +386,30 @@ const cleanForm = {
                     </Typography>
 
                     {/* ACCIONES */}
+
+
                     <Stack
                       direction="row"
                       justifyContent="space-between"
                       alignItems="center"
                       mt={1}
                     >
-                      <Box>
-                        <IconButton size="small" onClick={() => handleEdit(inv)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
+                      {rol == 'admin' && (
+                        <Box>
+                          <IconButton size="small" onClick={() => handleEdit(inv)}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
 
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDelete(inv.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleDelete(inv.id)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+
+                      )}
 
                       {/* MOVIMIENTOS */}
                       <Stack direction="row" spacing={1}>
@@ -378,20 +425,21 @@ const cleanForm = {
                           +
                         </Button>
 
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          color="warning"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            abrirMovimiento("SALIDA", "INDIVIDUAL", inv.id);
-                          }}
-                        >
-                          -
-                        </Button>
+                        {rol == 'admin' && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="warning"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              abrirMovimiento("SALIDA", "INDIVIDUAL", inv.id);
+                            }}
+                          >
+                            -
+                          </Button>
+                        )}
                       </Stack>
                     </Stack>
-
                   </Stack>
                 </CardContent>
               </Card>
@@ -709,30 +757,30 @@ const cleanForm = {
                 </FormControl>
 
                 {/* CANTIDAD + UNIDAD */}
-              <Box display="flex" alignItems="center" gap={1}>
-               <TextField
-              size="small"
-              type="number"
-              placeholder=""
-              value={item.cantidad === 0 ? "" : item.cantidad}
-              onChange={(e) => {
-                const newItems = [...itemsMovimiento];
-                newItems[index].cantidad =
-                  e.target.value === "" ? 0 : Number(e.target.value);
-                setItemsMovimiento(newItems);
-              }}
-              fullWidth
-            />
+                <Box display="flex" alignItems="center" gap={1}>
+                  <TextField
+                    size="small"
+                    type="number"
+                    placeholder=""
+                    value={item.cantidad === 0 ? "" : item.cantidad}
+                    onChange={(e) => {
+                      const newItems = [...itemsMovimiento];
+                      newItems[index].cantidad =
+                        e.target.value === "" ? 0 : Number(e.target.value);
+                      setItemsMovimiento(newItems);
+                    }}
+                    fullWidth
+                  />
 
-                {/* 👉 UNIDAD DINÁMICA */}
-                <Typography fontSize={12} color="text.secondary" sx={{ minWidth: 50 }}>
-                  {
-                    inventarios.find((inv) => inv.id === item.inventario_id)?.unidad || ""
-                  }
-                </Typography>
-              </Box>
+                  {/* 👉 UNIDAD DINÁMICA */}
+                  <Typography fontSize={12} color="text.secondary" sx={{ minWidth: 50 }}>
+                    {
+                      inventarios.find((inv) => inv.id === item.inventario_id)?.unidad || ""
+                    }
+                  </Typography>
+                </Box>
 
-                
+
 
 
                 {/* DELETE */}

@@ -1,17 +1,18 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
   Typography,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
-  TextField
+  TextField,
+  Box,
+  TableContainer,
+  Paper,
+  TablePagination,
+  Chip,
+  Stack
 } from "@mui/material";
 
 type Producto = {
@@ -23,43 +24,75 @@ type Producto = {
 type ProductoConteo = Producto & {
   stockFisico: number | "";
   diferencia?: number;
+  observacion?: string;
 };
 
 type Props = {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: (data: ProductoConteo[]) => void | Promise<void>;
   productos: Producto[];
   tipo: "APERTURA" | "CIERRE";
-  id_caja: number | null;
+  onChangeData?: (data: ProductoConteo[]) => void;
 };
 
 export const ModalInventario: React.FC<Props> = ({
-  open,
-  onClose,
-  onConfirm,
   productos,
   tipo,
-  id_caja
+  onChangeData
 }) => {
   const [data, setData] = useState<ProductoConteo[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(8);  
+  const [errores, setErrores] = useState<Record<number, boolean>>({});
+  const [erroresObs, setErroresObs] = useState<Record<number, boolean>>({});
 
-  console.log("productos",productos);
-  
-  // 🔥 Inicializar data
+
+  const prevRef = useRef<any>(null);
+
+useEffect(() => {
+  const payload = data.map((p) => ({
+    id: p.id,
+    nombre: p.nombre,
+    stock_actual: p.stock_actual,
+    stockFisico: p.stockFisico === "" ? 0 : Number(p.stockFisico),
+    diferencia:
+      p.stockFisico === ""
+        ? 0
+        : Number(p.stockFisico) - p.stock_actual,
+    observacion: p.observacion || ""
+  }));
+
+  const json = JSON.stringify(payload);
+
+  if (prevRef.current === json) return;
+
+  prevRef.current = json;
+  onChangeData?.(payload);
+}, [data]);
+
+  // 🔄 cargar productos
   useEffect(() => {
-    if (open) {
-      setData(
-        (productos || []).map((p) => ({
-          ...p,
-          stockFisico: tipo === "APERTURA" ? p.stock_actual : ""
-        }))
-      );
-    }
-  }, [open, productos, tipo]);
+    setData(
+      (productos || []).map((p) => ({
+        ...p,
+        stockFisico: tipo === "APERTURA" ? p.stock_actual : "",
+        observacion: ""
+      }))
+    );
+  }, [productos, tipo]);
 
-  // 🔥 Manejo de cambio
+  // 🔍 filtro búsqueda
+  const filteredData = useMemo(() => {
+    return data.filter((p) =>
+      p.nombre.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [data, search]);
+
+  // 📄 paginación
+  const paginatedData = useMemo(() => {
+    const start = page * rowsPerPage;
+    return filteredData.slice(start, start + rowsPerPage);
+  }, [filteredData, page, rowsPerPage]);
+
   const handleChange = (id: number, value: string) => {
     const limpio = value.replace(/\D/g, "");
 
@@ -72,159 +105,170 @@ export const ModalInventario: React.FC<Props> = ({
     );
   };
 
-  // 🔥 Validación fuerte
-  const validar = () => {
-    return data.every(
-      (p) =>
-        p.stockFisico !== "" &&
-        Number(p.stockFisico) >= 0 &&
-        Number(p.stockFisico) < 100000
+  const handleBlurFisico = (row: ProductoConteo) => {
+  if (row.stockFisico === "") {
+    setErrores((prev) => ({ ...prev, [row.id]: true }));
+  } else {
+    setErrores((prev) => ({ ...prev, [row.id]: false }));
+  }
+};
+
+const handleBlurObs = (row: ProductoConteo) => {
+  const diferencia =
+    row.stockFisico === ""
+      ? 0
+      : Number(row.stockFisico) - row.stock_actual;
+
+  if (diferencia !== 0 && (!row.observacion || row.observacion.trim().length < 3)) {
+    setErroresObs((prev) => ({ ...prev, [row.id]: true }));
+  } else {
+    setErroresObs((prev) => ({ ...prev, [row.id]: false }));
+  }
+};
+
+  const handleObservacion = (id: number, value: string) => {
+    setData((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, observacion: value } : p
+      )
     );
   };
 
-  // 🔥 Ordenar por diferencia (los problemas arriba)
-  const dataOrdenada = useMemo(() => {
-    return [...data].sort((a, b) => {
-      const diffA =
-        a.stockFisico === "" ? 0 : Number(a.stockFisico) - a.stock_actual;
-      const diffB =
-        b.stockFisico === "" ? 0 : Number(b.stockFisico) - b.stock_actual;
-
-      return Math.abs(diffB) - Math.abs(diffA);
-    });
-  }, [data]);
-
-  // 🔥 Confirmar
-  const handleConfirm = async () => {
-    if (!validar() || !id_caja) return;
-
-    try {
-      setLoading(true);
-
-      const payload = data.map((p) => ({
-        ...p,
-        diferencia:
-          p.stockFisico === ""
-            ? 0
-            : Number(p.stockFisico) - p.stock_actual
-      }));
-
-      await onConfirm(payload);
-
-    } catch (err) {
-      console.error("Error confirmando inventario:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <Dialog
-      open={open}
-      maxWidth="md"
-      fullWidth
-      disableEscapeKeyDown
-      onClose={(_e, reason) => {
-        if (reason === "backdropClick") return;
-        onClose();
-      }}
-    >
-      <DialogTitle sx={{ fontWeight: 700 }}>
-        {tipo === "APERTURA"
-          ? "Confirmar Inventario Inicial"
-          : "Confirmar Inventario de Cierre"}
-      </DialogTitle>
+    <Box>
+      {/* HEADER */}
+      <Box
+        sx={{
+          background: "linear-gradient(135deg,#0f172a,#1e293b)",
+          color: "white",
+          px: 3,
+          py: 2,
+          borderRadius: 2,
+          mb: 2
+        }}
+      >
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography fontWeight="bold">
+            {tipo === "APERTURA"
+              ? "Inventario Inicial"
+              : "Inventario de Cierre"}
+          </Typography>
 
-      <DialogContent>
-        <Typography variant="body2" sx={{ mb: 2 }}>
-          {tipo === "APERTURA"
-            ? "Verifique el inventario físico antes de iniciar la jornada."
-            : "Ingrese el inventario físico al finalizar la jornada."}
-        </Typography>
+          <TextField
+            size="small"
+            placeholder="Buscar producto..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{
+              bgcolor: "white",
+              borderRadius: 1,
+              width: 220
+            }}
+          />
+        </Stack>
+      </Box>
 
-        <Table size="small">
+      {/* TABLA */}
+      <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+        <Table size="small" stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell><b>Producto</b></TableCell>
-              <TableCell align="center"><b>Sistema</b></TableCell>
-              <TableCell align="center"><b>Físico</b></TableCell>
-              <TableCell align="center"><b>Diferencia</b></TableCell>
+              <TableCell>Producto</TableCell>
+              <TableCell align="center">Sistema</TableCell>
+              <TableCell align="center">Físico</TableCell>
+              <TableCell align="center">Dif</TableCell>
+              <TableCell align="center">Obs</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {dataOrdenada.map((row) => {
+            {paginatedData.map((row) => {
               const diferencia =
                 row.stockFisico === ""
-                  ? "-"
+                  ? null
                   : Number(row.stockFisico) - row.stock_actual;
 
               return (
-                <TableRow key={row.id}>
-                  <TableCell>{row.nombre}</TableCell>
+                <TableRow key={row.id} hover>
+                  <TableCell>
+                    <Typography fontWeight={500}>
+                      {row.nombre}
+                    </Typography>
+                  </TableCell>
 
                   <TableCell align="center">
                     {row.stock_actual}
                   </TableCell>
 
                   <TableCell align="center">
-                    <TextField
+                   <TextField
                       value={row.stockFisico}
-                      onChange={(e) =>
-                        handleChange(row.id, e.target.value)
-                      }
+                      onChange={(e) => handleChange(row.id, e.target.value)}
+                      onBlur={() => handleBlurFisico(row)}
                       size="small"
-                      inputProps={{ style: { textAlign: "center" } }}
-                      sx={{
-                        width: 90,
-                        backgroundColor:
-                          row.stockFisico === ""
-                            ? "transparent"
-                            : Number(row.stockFisico) === row.stock_actual
-                            ? "#e8f5e9"
-                            : "#ffebee"
-                      }}
+                      error={errores[row.id]}
+                      helperText={errores[row.id] ? "Campo obligatorio" : ""}
+                      sx={{ width: 80 }}
                     />
+                                        
                   </TableCell>
 
-                  <TableCell
-                    align="center"
-                    sx={{
-                      color:
-                        diferencia === "-"
-                          ? "inherit"
-                          : diferencia === 0
-                          ? "green"
-                          : "red",
-                      fontWeight: 600
-                    }}
-                  >
-                    {diferencia}
+                  <TableCell align="center">
+                    {diferencia === null ? (
+                      "-"
+                    ) : (
+                      <Chip
+                        label={diferencia}
+                        size="small"
+                        color={
+                          diferencia === 0
+                            ? "success"
+                            : diferencia > 0
+                            ? "info"
+                            : "error"
+                        }
+                      />
+                    )}
+                  </TableCell>
+
+                  <TableCell align="center">
+                    {diferencia !== null && diferencia !== 0 ? (
+                      <TextField
+                        value={row.observacion || ""}
+                        onChange={(e) => handleObservacion(row.id, e.target.value)}
+                        onBlur={() => handleBlurObs(row)}
+                        size="small"
+                        error={erroresObs[row.id]}
+                        helperText={
+                          erroresObs[row.id]
+                            ? "Mínimo 3 caracteres"
+                            : ""
+                        }
+                      />
+                    ) : (
+                      "-"
+                    )}
                   </TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
-      </DialogContent>
+      </TableContainer>
 
-      <DialogActions sx={{ p: 2 }}>
-        <Button
-          onClick={onClose}
-          variant="outlined"
-          disabled={loading}
-        >
-          Cancelar
-        </Button>
-
-        <Button
-          variant="contained"
-          disabled={!validar() || loading}
-          onClick={handleConfirm}
-        >
-          {loading ? "Guardando..." : "Confirmar"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      {/* PAGINACIÓN */}
+      <TablePagination
+        component="div"
+        count={filteredData.length}
+        page={page}
+        onPageChange={(_, newPage) => setPage(newPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(e) => {
+          setRowsPerPage(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
+        rowsPerPageOptions={[5, 8, 10, 20]}
+      />
+    </Box>
   );
 };
