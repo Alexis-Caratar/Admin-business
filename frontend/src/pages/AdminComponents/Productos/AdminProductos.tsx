@@ -66,6 +66,8 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
     imagenes: [],
     usa_receta: false,
     inventario_id: null,
+    hora_inicio: "07:00",
+    hora_fin: "16:00"
   });
 
 
@@ -176,7 +178,9 @@ const handleOpenModal = (producto?: Producto) => {
       estado:true, // por defecto
       publicacion_web: false, // por defecto
       usa_receta: false, 
-      inventario_id: null, 
+      inventario_id: null,
+      hora_inicio: "07:00",
+      hora_fin: "16:00",
       precios: { id_producto: 0, precio_venta: 0, precio_costo: 0 },
       imagenes: [],
     });
@@ -199,7 +203,9 @@ const handleSubmit = async () => {
       estado: form.estado,
       publicacion_web: form.publicacion_web,
       usa_receta: form.usa_receta,
-      inventario_id: form.usa_receta ? null : form.inventario_id
+      inventario_id: form.usa_receta ? null : form.inventario_id,
+      hora_inicio: form.hora_inicio,
+      hora_fin: form.hora_fin
     },
     productos_precios: form.precios ? [{ ...form.precios }] : [],
     productos_imagenes: form.imagenes ? [...form.imagenes] : [],
@@ -813,6 +819,36 @@ const handleEdit = (producto: any) => {
           <MenuItem value="false">No</MenuItem>
         </TextField>
       </Box>
+
+        <Box>
+          <Typography fontWeight={600} mb={1}>
+            Horario de disponibilidad
+          </Typography>
+
+          <Box display="grid" gridTemplateColumns="repeat(2,1fr)" gap={2}>
+            <TextField
+              label="Hora inicio"
+              type="time"
+              size="small"
+              value={form.hora_inicio || ""}
+              onChange={(e) =>
+                setForm({ ...form, hora_inicio: e.target.value })
+              }
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <TextField
+              label="Hora fin"
+              type="time"
+              size="small"
+              value={form.hora_fin || ""}
+              onChange={(e) =>
+                setForm({ ...form, hora_fin: e.target.value })
+              }
+              InputLabelProps={{ shrink: true }}
+            />
+          </Box>
+        </Box>
 
       {/* ========================= */}
       {/* PRECIOS */}

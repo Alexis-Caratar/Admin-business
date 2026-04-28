@@ -38,6 +38,8 @@ export interface Producto {
   unidad_medida?: string;
   usa_receta?: boolean;
   inventario_id?: number | null;
+  hora_inicio?: string;
+  hora_fin?: string;
 
   // Inventario
   stock_actual?: number;

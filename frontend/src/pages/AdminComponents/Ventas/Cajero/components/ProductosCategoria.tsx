@@ -29,6 +29,9 @@ import "toastr/build/toastr.min.css";
 import InputAdornment from "@mui/material/InputAdornment";
 import RestaurantIcon from "@mui/icons-material/Restaurant"; 
 import QrCodeIcon from '@mui/icons-material/QrCode';
+import Tooltip from "@mui/material/Tooltip";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+
 toastr.options = {
   positionClass: "toast-top-right",
   timeOut: 2000,
@@ -339,22 +342,36 @@ animarAlCarrito(
   }}
 >
   {/* STOCK EN ESQUINA */}
+<Tooltip title="Stock disponible actualmente" arrow>
   <Chip
+    icon={<Inventory2Icon sx={{ fontSize: 14 }} />}
     label={prod.stock_actual}
     size="small"
     sx={{
       position: "absolute",
-      top: 6,
-      right: 6,
-      fontSize: 11,
+      top: 8,
+      right: 8,
+      fontSize: 12,
       fontWeight: 700,
-      height: 20,
-      bgcolor: "#012b4f",
+      height: 24,
+      px: 0.5,
+      bgcolor: "#0b3d2e",
       color: "#fff",
-      borderRadius: "6px",
+      borderRadius: "8px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+      backdropFilter: "blur(4px)",
+      border: "1px solid rgba(255,255,255,0.15)",
+      transition: "all 0.2s ease",
+      "&:hover": {
+        transform: "scale(1.05)",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.35)",
+      },
+      "& .MuiChip-icon": {
+        color: "#4ade80",
+      },
     }}
   />
-
+</Tooltip>
   {/* ICONO */}
   <Avatar
     sx={{
