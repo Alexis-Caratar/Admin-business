@@ -59,42 +59,49 @@ LIMIT 1;
 
 listarProductos: async (id) => {
   const { rows } = await pool.query(`
-   
-   SELECT 
-  c.id,
-  c.nombre AS categoria,
-  c.imagen,
-  json_agg(
-    DISTINCT jsonb_build_object(
-      'id', p.id,
-      'codigo_barra', p.codigo_barra,
-      'stock_actual', i.stock_actual,
-      'nombre', p.nombre,
-      'precio_venta', pp.precio_venta,
-      'imagenes', (
-        SELECT COALESCE(json_agg(img.url), '[]')
-        FROM productos_imagenes img
-        WHERE img.id_producto = p.id
-      )
-    )
-  ) AS platos
-FROM categorias c
-JOIN productos p 
-  ON p.id_categoria = c.id 
-  AND p.estado = true
-  AND (
-    (p.hora_inicio <= p.hora_fin AND CURRENT_TIME BETWEEN p.hora_inicio AND p.hora_fin)
-    OR
-    (p.hora_inicio > p.hora_fin AND (CURRENT_TIME >= p.hora_inicio OR CURRENT_TIME <= p.hora_fin))
-  )
-JOIN inventario i 
-  ON p.inventario_id = i.id 
-  AND i.stock_actual >= 1
-LEFT JOIN productos_precios pp 
-  ON pp.id_producto = p.id
-WHERE c.id_negocio = $1
-GROUP BY c.id, c.nombre, c.imagen
-ORDER BY c.nombre;
+          
+        SELECT 
+          c.id,
+          c.nombre AS categoria,
+          c.imagen,
+          json_agg(
+            DISTINCT jsonb_build_object(
+              'id', p.id,
+              'codigo_barra', p.codigo_barra,
+              'stock_actual', i.stock_actual,
+              'nombre', p.nombre,
+              'precio_venta', pp.precio_venta,
+              'imagenes' , (
+                SELECT COALESCE(json_agg(img.url), '[]')
+                FROM productos_imagenes img
+                WHERE img.id_producto = p.id
+              )
+            )
+          ) AS platos
+        FROM categorias c
+        JOIN productos p 
+          ON p.id_categoria = c.id 
+          AND p.estado = true
+          AND (
+            (p.hora_inicio <= p.hora_fin AND CURRENT_TIME BETWEEN p.hora_inicio AND p.hora_fin)
+            OR
+            (p.hora_inicio > p.hora_fin AND (CURRENT_TIME >= p.hora_inicio OR CURRENT_TIME <= p.hora_fin))
+          )
+
+        LEFT JOIN inventario i 
+          ON p.inventario_id = i.id 
+
+        LEFT JOIN productos_precios pp 
+          ON pp.id_producto = p.id
+
+        WHERE c.id_negocio = $1
+        AND (
+          p.controla_inventario = FALSE
+          OR (p.controla_inventario = TRUE AND i.stock_actual >= 1)
+        )
+
+        GROUP BY c.id, c.nombre, c.imagen
+        ORDER BY c.nombre;
   `, [id]);
 
   return rows;

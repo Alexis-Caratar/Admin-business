@@ -13,7 +13,9 @@ export const listar = async (req, res) => {
 // CREAR
 export const crear = async (req, res) => {
   try {
-    const data = await service.crear(req.body);
+    console.log(req.user);
+    
+    const data = await service.crear(req.body,req.user.id_negocio);
     res.status(201).json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });

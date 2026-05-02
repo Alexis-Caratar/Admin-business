@@ -25,7 +25,7 @@ export const listar = async () => {
 };
 
 // CREAR
-export const crear = async (data) => {
+export const crear = async (data,id_negocio) => {
   const {
     nombre,
     unidad,
@@ -48,9 +48,10 @@ export const crear = async (data) => {
       stock_maximo,
       costo_unitario,
       estado,
-      created_at
+      created_at,
+      id_negocio
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, true, NOW())
+    VALUES ($1, $2, $3, $4, $5, $6, $7, true, NOW(),$8 )
     RETURNING *
     `,
     [
@@ -60,7 +61,8 @@ export const crear = async (data) => {
       stock_actual,
       stock_minimo,
       stock_maximo,
-      costo_unitario
+      costo_unitario,
+      id_negocio
     ]
   );
 
