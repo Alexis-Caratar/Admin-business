@@ -444,6 +444,51 @@ arqueo: async ({ id_caja }) => {
     AND ve.id_caja = $1
   `;
 
+
+    /* ===============================
+      7 inventario
+  =============================== */
+  const inventarioQuery = `
+    SELECT 
+  i.id_caja,
+  i.estado,
+  date_trunc('second', i.fecha_registro) AS fecha_registro,
+
+  json_agg(
+    json_build_object(
+      'id_producto', i.id_producto,
+      'nombre', p.nombre,
+
+      -- 🔹 valores reales
+      'stock_sistema', i.stock_sistema,
+      'stock_apertura', i.stock_apertura,
+      'stock_cierre', i.stock_cierre,
+
+      -- 🔹 valor unificado para UI
+      'stock_fisico',
+        CASE 
+          WHEN i.estado = 'APERTURA CAJA' THEN i.stock_apertura
+          ELSE COALESCE(i.stock_cierre, 0)
+        END,
+
+      -- 🔹 diferencia correcta
+      'diferencia',
+        CASE 
+          WHEN i.estado = 'CIERRE'
+            THEN COALESCE(i.stock_cierre, 0) - i.stock_sistema
+          ELSE 0
+        END
+    )
+    ORDER BY p.nombre
+  ) AS productos
+
+FROM inventario_caja i
+JOIN inventario p ON p.id = i.id_producto
+WHERE i.id_caja = $1
+GROUP BY i.id_caja, i.estado, date_trunc('second', i.fecha_registro)
+ORDER BY fecha_registro DESC;
+  `;
+
   /* ===============================
      EJECUCIÓN
   =============================== */
@@ -453,6 +498,7 @@ arqueo: async ({ id_caja }) => {
   const [egresosRows] = await db.query(egresosQuery, [id_caja]);
   const [mesasRows] = await db.query(mesas_estadoQuery, [id_caja]);
   const [facturasRows] = await db.query(facturas_pendientesQuery, [id_caja]);
+  const [inventarioRows] = await db.query(inventarioQuery, [id_caja]);
 
   const pagos = pagosRows[0] || {};
 
@@ -472,7 +518,8 @@ arqueo: async ({ id_caja }) => {
     productos: productosRows,
     egresos: egresosRows,
     mesasOcupadas: mesasRows,
-    facturasPendientes: facturasRows
+    facturasPendientes: facturasRows,
+    inventario:inventarioRows
   };
 },
 
@@ -1147,7 +1194,7 @@ guardar_inventario: async (payload,id_usuario) => {
   } finally {
     conn.release();
   }
-}
+},
 
 
 }

@@ -24,6 +24,7 @@ import SavingsIcon from "@mui/icons-material/Savings";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
+import InventoryIcon from '@mui/icons-material/Inventory';
 
 type Props = {
   open: boolean;
@@ -113,12 +114,12 @@ const totalDigital =
           borderRadius: 4,
           p: 2,
           background:
-            arqueoInfo.estado === "CERRADA"
+            arqueoInfo.estado_caja === "CERRADA"
               ? "linear-gradient(135deg,#e8f5e9,#f1fff5)"
               : "linear-gradient(135deg,#fff3e0,#fff8f2)",
           border: "1px solid",
           borderColor:
-            arqueoInfo.estado === "CERRADA"
+            arqueoInfo.estado_caja === "CERRADA"
               ? "success.light"
               : "warning.light",
         }}
@@ -129,14 +130,14 @@ const totalDigital =
             <Avatar
               sx={{
                 bgcolor:
-                  arqueoInfo.estado === "CERRADA"
+                  arqueoInfo.estado_caja === "CERRADA"
                     ? "success.main"
                     : "warning.main",
                 width: 44,
                 height: 44,
               }}
             >
-              {arqueoInfo.estado === "CERRADA" ? "✔️" : "⏳"}
+              {arqueoInfo.estado_caja === "CERRADA" ? "✔️" : "⏳"}
             </Avatar>
 
             <Box>
@@ -145,7 +146,7 @@ const totalDigital =
               </Typography>
 
               <Typography fontWeight={800} fontSize={16}>
-                {arqueoInfo.estado}
+                {arqueoInfo.estado_caja}
               </Typography>
 
               <Typography fontSize={11} color="text.secondary">
@@ -156,7 +157,7 @@ const totalDigital =
 
           <Chip
             label={
-              arqueoInfo.estado === "CERRADA"
+              arqueoInfo.estado_caja === "CERRADA"
                 ? "Finalizada"
                 : "En operación"
             }
@@ -165,7 +166,7 @@ const totalDigital =
               fontWeight: 700,
               px: 1,
               bgcolor:
-                arqueoInfo.estado === "CERRADA"
+                arqueoInfo.estado_caja === "CERRADA"
                   ? "success.main"
                   : "warning.main",
               color: "#fff",
@@ -221,20 +222,21 @@ const totalDigital =
           }}
         >
           {[
-            {
-              label: "En caja",
-              value: totalEnCaja,
-              icon: "💰",
-            },
-            {
+              {
               label: "Inicial",
               value: arqueoInfo.monto_inicial,
               icon: "🏁",
             },
             {
-              label: "Final",
-              value: arqueoInfo.monto_final,
-              icon: "📦",
+              label: "ventas totales",
+              value: arqueoInfo.total_ventas,
+              icon: "💰",
+            },
+          
+             {
+              label: "egresos totales",
+              value: arqueoInfo.total_egresos,
+              icon: "💰",
             },
           ].map((item, i) => (
             <Box
@@ -267,13 +269,19 @@ const totalDigital =
           }}
         >
           {[
+            
             {
-              label: "Base caja",
+              label: "total en caja",
+              value: arqueoInfo.monto_final,
+              icon: "📦",
+            },
+            {
+              label: "Base en caja",
               value: arqueoInfo.base_caja,
               icon: "🏦",
             },
             {
-              label: "Ventas",
+              label: "Venta libre - Dinero libre",
               value: arqueoInfo.venta_libre,
               icon: "🛒",
             },
@@ -713,6 +721,235 @@ const totalDigital =
               </CardContent>
             </Card>
 
+
+{/* TOTAL INVENTARIO */}
+<Accordion
+  sx={{
+    borderRadius: 3,
+    overflow: "hidden",
+    border: "1px solid",
+    borderColor: "divider",
+    "&:before": { display: "none" }
+  }}
+>
+  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+    <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+      
+      <Avatar sx={{ bgcolor: "primary.main", width: 50, height: 50 }}>
+        <InventoryIcon />
+      </Avatar>
+
+      <Box>
+        <Typography fontSize={13} color="text.secondary">
+          INVENTARIO
+        </Typography>
+      </Box>
+
+    </CardContent>
+  </AccordionSummary>
+
+  <AccordionDetails>
+    <Stack spacing={1.5}>
+
+      {arqueoInfo?.inventario?.length === 0 && (
+        <Typography color="text.secondary">
+          No hay registros de inventario
+        </Typography>
+      )}
+
+      {arqueoInfo?.inventario?.map((e: any, index: number) => {
+
+        const fecha = new Date(e.fecha_registro)
+          .toLocaleString("es-CO");
+
+        const esCierre = e.estado === "CERRAR CAJA";
+
+        // 🔥 YA NO CALCULAS → usas backend
+        const totalDif = e.productos?.reduce(
+          (acc: number, p: any) => acc + (p.diferencia ?? 0),
+          0
+        );
+
+        return (
+          <Box
+            key={index}
+            sx={{
+              p: 1.5,
+              borderRadius: 2,
+              border: "1px solid #eee",
+              bgcolor: esCierre ? "#fff7f7" : "#f7fff9",
+              transition: "all .2s ease",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: 2
+              }
+            }}
+          >
+
+            {/* HEADER */}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={0.5}
+            >
+              <Box>
+                <Typography fontWeight={600} fontSize={14}>
+                  {e.estado}
+                </Typography>
+
+                <Typography fontSize={10} color="text.secondary">
+                  Caja #{e.id_caja} • {fecha}
+                </Typography>
+              </Box>
+
+              <Typography
+                fontWeight="bold"
+                color={
+                  totalDif === 0
+                    ? "success.main"
+                    : totalDif > 0
+                    ? "info.main"
+                    : "error.main"
+                }
+                fontSize={15}
+              >
+                {totalDif === 0 ? "✔ Cuadrado" : totalDif}
+              </Typography>
+            </Box>
+
+            {/* DETALLE PRODUCTOS */}
+  {/* DETALLE PRODUCTOS */}
+<Box mt={0.5}>
+
+  {/* 🔹 RESUMEN REAL */}
+  {(() => {
+
+    const faltante = e.productos?.reduce(
+      (acc: number, p: any) =>
+        acc + (p.diferencia < 0 ? Math.abs(p.diferencia) : 0),
+      0
+    );
+
+    const sobrante = e.productos?.reduce(
+      (acc: number, p: any) =>
+        acc + (p.diferencia > 0 ? p.diferencia : 0),
+      0
+    );
+
+    return (
+      <Box
+        sx={{
+          mb: 1,
+          px: 1.2,
+          py: 0.8,
+          borderRadius: 2,
+          bgcolor: "#f8fafc",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}
+      >
+        <Typography fontSize={12} fontWeight={500}>
+          Resumen
+        </Typography>
+
+        <Box display="flex" gap={1.5}>
+          <Typography fontSize={12} color="error.main" fontWeight={600}>
+            -{faltante}
+          </Typography>
+
+          <Typography fontSize={12} color="info.main" fontWeight={600}>
+            +{sobrante}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  })()}
+
+  {/* 🔹 LISTA PRODUCTOS */}
+  {e.productos?.map((p: any) => {
+
+    const color =
+      p.diferencia === 0
+        ? "success.main"
+        : p.diferencia > 0
+        ? "info.main"
+        : "error.main";
+
+    const label =
+      p.diferencia === 0
+        ? "OK"
+        : p.diferencia > 0
+        ? "Sobrante"
+        : "Faltante";
+
+    return (
+      <Box
+        key={p.id_producto}
+        sx={{
+          px: 1.2,
+          py: 0.8,
+          mb: 0.6,
+          borderRadius: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          border: "1px solid #f1f1f1",
+          transition: "all .2s ease",
+          "&:hover": {
+            bgcolor: "#f9fafb"
+          }
+        }}
+      >
+
+        {/* IZQUIERDA */}
+        <Box>
+          <Typography fontSize={12.5} fontWeight={500}>
+            {p.nombre}
+          </Typography>
+
+          <Typography fontSize={11} color="text.secondary">
+            Sis: {p.stock_sistema} • Fis: {p.stock_fisico}
+          </Typography>
+
+          {/* 🔥 auditoría */}
+          {esCierre && (
+            <Typography fontSize={10} color="text.secondary">
+              Ap: {p.stock_apertura} → Ci: {p.stock_cierre}
+            </Typography>
+          )}
+        </Box>
+
+        {/* DERECHA */}
+        <Box textAlign="right">
+          <Typography
+            fontWeight="bold"
+            fontSize={13}
+            color={color}
+          >
+            {p.diferencia > 0 ? `+${p.diferencia}` : p.diferencia}
+          </Typography>
+
+          <Typography fontSize={10} color="text.secondary">
+            {label}
+          </Typography>
+        </Box>
+
+      </Box>
+    );
+  })}
+
+</Box>
+
+          </Box>
+        );
+      })}
+
+    </Stack>
+  </AccordionDetails>
+</Accordion>
+
             <Divider />
 
             {/* PRODUCTOS VENDIDOS */}
@@ -841,6 +1078,7 @@ const totalDigital =
                   );
                 })}
             </Box>
+            
 
           </Stack>
         )}
