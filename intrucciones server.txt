@@ -9,57 +9,7 @@ sudo -u postgres pg_dump -d adminbusiness -F c -f /tmp/backup.dump
 sudo mv /tmp/backup.dump ~/Admin-business/Bd/
 y luego extraemos al local
 
-3. comando para traer un archivo scp -i bakend_prod.pem ubuntu@3.227.242.168:/home/ubuntu/Admin-business/Bd/backup.sql .
-
-
-
-ALTER TABLE productos 
-ADD COLUMN usa_receta BOOLEAN DEFAULT TRUE;
-
-
-ALTER TABLE productos 
-ADD COLUMN inventario_id INT;
-
-
-ALTER TABLE productos
-ADD CONSTRAINT fk_producto_inventario
-FOREIGN KEY (inventario_id)
-REFERENCES inventario(id)
-ON DELETE SET NULL;
-
-
-ALTER TABLE inventario
-ADD COLUMN estado BOOLEAN DEFAULT true;
-
-
-ALTER TABLE productos
-DROP COLUMN IF EXISTS stock_actual,
-DROP COLUMN IF EXISTS stock_minimo,
-DROP COLUMN IF EXISTS stock_maximo;
-
-ALTER TABLE inventario
-ADD COLUMN IF NOT EXISTS stock_actual NUMERIC DEFAULT 0,
-ADD COLUMN IF NOT EXISTS stock_minimo NUMERIC DEFAULT 0,
-ADD COLUMN IF NOT EXISTS stock_maximo NUMERIC DEFAULT 0;
-
-drop table movimientos_inventario;
-
-
-CREATE TABLE inventario_movimientos (
-  id SERIAL PRIMARY KEY,
-  inventario_id INT NOT NULL,
-  tipo VARCHAR(10) NOT NULL, -- ENTRADA | SALIDA
-  cantidad NUMERIC(10,2) NOT NULL,
-  motivo VARCHAR(100),
-  referencia VARCHAR(100), -- compra, venta, ajuste
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-  CONSTRAINT fk_inventario
-    FOREIGN KEY (inventario_id)
-    REFERENCES inventario(id)
-    ON DELETE CASCADE
-);
-
+3. comando para traer un archivo scp -i bakend_prod.pem ubuntu@3.227.242.168:/home/ubuntu/Admin-business/Bd/backup.dump .
 
 
 DROP TRIGGER IF EXISTS trg_descontar_inventario ON ventas_items;
@@ -70,28 +20,35 @@ FOR EACH ROW
 EXECUTE FUNCTION descontar_inventario();
 
 
--- DROP FUNCTION public.descontar_inventario();
 
 CREATE OR REPLACE FUNCTION public.descontar_inventario()
- RETURNS trigger
- LANGUAGE plpgsql
+RETURNS trigger
+LANGUAGE plpgsql
 AS $function$
 DECLARE
   r RECORD;
   v_usa_receta BOOLEAN;
   v_inventario_id INT;
   v_stock_actual NUMERIC;
+  v_controla_inventario BOOLEAN;
 BEGIN
 
   -- 🔍 Obtener configuración del producto
-  SELECT usa_receta, inventario_id
-  INTO v_usa_receta, v_inventario_id
+  SELECT usa_receta, inventario_id, controla_inventario
+  INTO v_usa_receta, v_inventario_id, v_controla_inventario
   FROM productos
   WHERE id = NEW.id_producto;
 
   -- 🚨 Validación
-  IF v_usa_receta IS NULL THEN
-    RAISE EXCEPTION 'Producto % no configurado', NEW.id_producto;
+  IF v_controla_inventario IS NULL THEN
+    RAISE EXCEPTION 'Producto % no configurado correctamente', NEW.id_producto;
+  END IF;
+
+  -- ================================
+  -- ⚪ PRODUCTO SIN CONTROL DE INVENTARIO
+  -- ================================
+  IF v_controla_inventario = FALSE THEN
+    RETURN NEW;
   END IF;
 
   -- ================================
@@ -99,7 +56,6 @@ BEGIN
   -- ================================
   IF v_usa_receta = TRUE THEN
 
-    -- validar que tenga receta
     IF NOT EXISTS (
       SELECT 1 FROM recetas WHERE producto_id = NEW.id_producto
     ) THEN
@@ -116,7 +72,7 @@ BEGIN
 
       IF v_stock_actual < (r.cantidad * NEW.cantidad) THEN
         RAISE EXCEPTION 
-        'stock_actual insuficiente en insumo % (disp: %, req: %)',
+        'Stock insuficiente en insumo % (disp: %, req: %)',
         r.inventario_id,
         v_stock_actual,
         (r.cantidad * NEW.cantidad);
@@ -143,7 +99,7 @@ BEGIN
 
     IF v_stock_actual < NEW.cantidad THEN
       RAISE EXCEPTION 
-      'stock_actual insuficiente (disp: %, req: %)',
+      'Stock insuficiente (disp: %, req: %)',
       v_stock_actual,
       NEW.cantidad;
     END IF;
@@ -156,5 +112,16 @@ BEGIN
 
   RETURN NEW;
 END;
-$function$
-;
+$function$;
+
+
+--para colocar productos sin stock
+update productos set controla_inventario=false,usa_receta=false where id=72;
+
+
+
+
+ALTER TABLE inventario_movimientos
+ADD COLUMN id_venta INT;
+
+

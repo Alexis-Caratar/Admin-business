@@ -136,30 +136,39 @@ export const CajeroDashboard: React.FC = () => {
   }, []);
 
 
+
   useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        setLoadingCategorias(true);
-        const res = await apiListarProductos(id_negocio);
-        let data: any[] = [];
-        if (res && res.data) {
-          if (Array.isArray(res.data)) data = res.data;
-          else if (res.data.ok && res.data.productos) data = res.data.productos;
-          else if (res.data.productos) data = res.data.productos;
-        }
-        if (mounted) setCategorias(data || []);
-      } catch (err) {
-        console.error("Error cargando categorías y productos:", err);
-      } finally {
-        if (mounted) setLoadingCategorias(false);
-      }
+  let mounted = true;
+  const load = async () => {
+    if (!mounted) return;
+    await cargarCategorias();
+  };
+  load();
+  return () => {
+    mounted = false;
+  };
+}, []);
+
+const cargarCategorias = async () => {
+  try {
+    setLoadingCategorias(true);
+    const res = await apiListarProductos(id_negocio);
+    let data: any[] = [];
+
+    if (res && res.data) {
+      if (Array.isArray(res.data)) data = res.data;
+      else if (res.data.ok && res.data.productos) data = res.data.productos;
+      else if (res.data.productos) data = res.data.productos;
     }
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    setCategorias(data || []);
+  } catch (err) {
+    console.error("Error cargando categorías y productos:", err);
+  } finally {
+    setLoadingCategorias(false);
+  }
+};
+
+
   const getPrecio = (p: Partial<ProductoCajero>) => Number(p.precio_venta ?? 0);
   const addCart = (p: ProductoCajero) => {
     const precio = getPrecio(p);
@@ -257,6 +266,7 @@ const clearMesa = () => {
         checkCaja();
         setVentaPayload(payload);
         closeCategoria();
+        cargarCategorias();
         setOpenVentaRegistrada(true);
       }
     } catch (err) {

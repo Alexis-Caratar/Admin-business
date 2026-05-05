@@ -723,6 +723,7 @@ const totalDigital =
 
 
 {/* TOTAL INVENTARIO */}
+{/* TOTAL INVENTARIO */}
 <Accordion
   sx={{
     borderRadius: 3,
@@ -734,7 +735,6 @@ const totalDigital =
 >
   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
     <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-      
       <Avatar sx={{ bgcolor: "primary.main", width: 50, height: 50 }}>
         <InventoryIcon />
       </Avatar>
@@ -744,211 +744,105 @@ const totalDigital =
           INVENTARIO
         </Typography>
       </Box>
-
     </CardContent>
   </AccordionSummary>
 
   <AccordionDetails>
-    <Stack spacing={1.5}>
 
-      {arqueoInfo?.inventario?.length === 0 && (
-        <Typography color="text.secondary">
-          No hay registros de inventario
-        </Typography>
-      )}
+    {(!arqueoInfo?.inventario || arqueoInfo.inventario.length === 0) && (
+      <Typography color="text.secondary">
+        No hay registros de inventario
+      </Typography>
+    )}
 
-      {arqueoInfo?.inventario?.map((e: any, index: number) => {
+    {/* 🔥 TABLA */}
+    <Box sx={{ overflowX: "auto" }}>
 
-        const fecha = new Date(e.fecha_registro)
-          .toLocaleString("es-CO");
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
 
-        const esCierre = e.estado === "CERRAR CAJA";
+        <thead>
+          <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
+            <th>Producto</th>
+            <th>Sistema</th>
+            <th>Físico</th>
+            <th>Ingresos</th>
+            <th>Ventas</th>
+            <th>Salidas</th>
+            <th>Cierre</th>
+            <th>Diferencia</th>
+          </tr>
+        </thead>
 
-        // 🔥 YA NO CALCULAS → usas backend
-        const totalDif = e.productos?.reduce(
-          (acc: number, p: any) => acc + (p.diferencia ?? 0),
-          0
-        );
+        <tbody>
 
-        return (
-          <Box
-            key={index}
-            sx={{
-              p: 1.5,
-              borderRadius: 2,
-              border: "1px solid #eee",
-              bgcolor: esCierre ? "#fff7f7" : "#f7fff9",
-              transition: "all .2s ease",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: 2
-              }
-            }}
-          >
+          {arqueoInfo?.inventario?.map((p: any) => {
 
-            {/* HEADER */}
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={0.5}
-            >
-              <Box>
-                <Typography fontWeight={600} fontSize={14}>
-                  {e.estado}
-                </Typography>
+            const diff = p.diferencia ?? 0;
 
-                <Typography fontSize={10} color="text.secondary">
-                  Caja #{e.id_caja} • {fecha}
-                </Typography>
-              </Box>
+            const color =
+              diff === 0
+                ? "green"
+                : diff > 0
+                ? "blue"
+                : "red";
 
-              <Typography
-                fontWeight="bold"
-                color={
-                  totalDif === 0
-                    ? "success.main"
-                    : totalDif > 0
-                    ? "info.main"
-                    : "error.main"
-                }
-                fontSize={15}
+            return (
+              <tr
+                key={p.id_producto}
+                style={{
+                  borderBottom: "1px solid #f1f1f1"
+                }}
               >
-                {totalDif === 0 ? "✔ Cuadrado" : totalDif}
-              </Typography>
-            </Box>
 
-            {/* DETALLE PRODUCTOS */}
-  {/* DETALLE PRODUCTOS */}
-<Box mt={0.5}>
+                {/* PRODUCTO */}
+                <td style={{ padding: "8px" }}>
+                  <b>{p.nombre}</b>
+                </td>
 
-  {/* 🔹 RESUMEN REAL */}
-  {(() => {
+                {/* SISTEMA */}
+                <td>{p.stock_sistema}</td>
 
-    const faltante = e.productos?.reduce(
-      (acc: number, p: any) =>
-        acc + (p.diferencia < 0 ? Math.abs(p.diferencia) : 0),
-      0
-    );
+                {/* FISICO */}
+                <td>{p.stock_apertura}</td>
 
-    const sobrante = e.productos?.reduce(
-      (acc: number, p: any) =>
-        acc + (p.diferencia > 0 ? p.diferencia : 0),
-      0
-    );
+                {/* INGRESOS */}
+                <td style={{ color: "green" }}>
+                  +{p.ingresos}
+                </td>
 
-    return (
-      <Box
-        sx={{
-          mb: 1,
-          px: 1.2,
-          py: 0.8,
-          borderRadius: 2,
-          bgcolor: "#f8fafc",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
-        }}
-      >
-        <Typography fontSize={12} fontWeight={500}>
-          Resumen
-        </Typography>
+                {/* VENTAS */}
+                <td style={{ color: "blue" }}>
+                  -{p.ventas}
+                </td>
 
-        <Box display="flex" gap={1.5}>
-          <Typography fontSize={12} color="error.main" fontWeight={600}>
-            -{faltante}
-          </Typography>
+                {/* SALIDAS */}
+                <td style={{ color: "orange" }}>
+                  -{p.salidas}
+                </td>
 
-          <Typography fontSize={12} color="info.main" fontWeight={600}>
-            +{sobrante}
-          </Typography>
-        </Box>
-      </Box>
-    );
-  })()}
+                {/* CIERRE */}
+                <td>
+                  {p.cierre_sistema}
+                </td>
 
-  {/* 🔹 LISTA PRODUCTOS */}
-  {e.productos?.map((p: any) => {
+                {/* DIFERENCIA */}
+                <td style={{ fontWeight: "bold", color }}>
+                  {diff > 0 ? `+${diff}` : diff}
+                </td>
 
-    const color =
-      p.diferencia === 0
-        ? "success.main"
-        : p.diferencia > 0
-        ? "info.main"
-        : "error.main";
+              </tr>
+            );
+          })}
 
-    const label =
-      p.diferencia === 0
-        ? "OK"
-        : p.diferencia > 0
-        ? "Sobrante"
-        : "Faltante";
+        </tbody>
+      </table>
 
-    return (
-      <Box
-        key={p.id_producto}
-        sx={{
-          px: 1.2,
-          py: 0.8,
-          mb: 0.6,
-          borderRadius: 2,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          border: "1px solid #f1f1f1",
-          transition: "all .2s ease",
-          "&:hover": {
-            bgcolor: "#f9fafb"
-          }
-        }}
-      >
+    </Box>
 
-        {/* IZQUIERDA */}
-        <Box>
-          <Typography fontSize={12.5} fontWeight={500}>
-            {p.nombre}
-          </Typography>
-
-          <Typography fontSize={11} color="text.secondary">
-            Sis: {p.stock_sistema} • Fis: {p.stock_fisico}
-          </Typography>
-
-          {/* 🔥 auditoría */}
-          {esCierre && (
-            <Typography fontSize={10} color="text.secondary">
-              Ap: {p.stock_apertura} → Ci: {p.stock_cierre}
-            </Typography>
-          )}
-        </Box>
-
-        {/* DERECHA */}
-        <Box textAlign="right">
-          <Typography
-            fontWeight="bold"
-            fontSize={13}
-            color={color}
-          >
-            {p.diferencia > 0 ? `+${p.diferencia}` : p.diferencia}
-          </Typography>
-
-          <Typography fontSize={10} color="text.secondary">
-            {label}
-          </Typography>
-        </Box>
-
-      </Box>
-    );
-  })}
-
-</Box>
-
-          </Box>
-        );
-      })}
-
-    </Stack>
   </AccordionDetails>
 </Accordion>
+
+
 
             <Divider />
 

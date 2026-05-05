@@ -449,44 +449,93 @@ arqueo: async ({ id_caja }) => {
       7 inventario
   =============================== */
   const inventarioQuery = `
-    SELECT 
-  i.id_caja,
-  i.estado,
-  date_trunc('second', i.fecha_registro) AS fecha_registro,
+ WITH apertura AS (
+  SELECT *
+  FROM inventario_caja
+  WHERE id_caja = $1
+    AND estado = 'APERTURA CAJA'
+  LIMIT 1
+),
+cierre AS (
+  SELECT *
+  FROM inventario_caja
+  WHERE id_caja = $1
+    AND estado = 'CERRAR CAJA'
+  LIMIT 1
+),
 
-  json_agg(
-    json_build_object(
-      'id_producto', i.id_producto,
-      'nombre', p.nombre,
+rango AS (
+  SELECT 
+    a.fecha_registro AS fecha_inicio,
+    COALESCE(c.fecha_registro, NOW()) AS fecha_fin
+  FROM apertura a
+  LEFT JOIN cierre c ON true
+)
 
-      -- 🔹 valores reales
-      'stock_sistema', i.stock_sistema,
-      'stock_apertura', i.stock_apertura,
-      'stock_cierre', i.stock_cierre,
+SELECT
+  i.id AS id_producto,
+  i.nombre,
 
-      -- 🔹 valor unificado para UI
-      'stock_fisico',
-        CASE 
-          WHEN i.estado = 'APERTURA CAJA' THEN i.stock_apertura
-          ELSE COALESCE(i.stock_cierre, 0)
-        END,
+  a.stock_sistema,
+  a.stock_apertura,
 
-      -- 🔹 diferencia correcta
-      'diferencia',
-        CASE 
-          WHEN i.estado = 'CIERRE'
-            THEN COALESCE(i.stock_cierre, 0) - i.stock_sistema
-          ELSE 0
-        END
-    )
-    ORDER BY p.nombre
-  ) AS productos
+  -- 🔥 ENTRADAS (globales)
+  COALESCE(SUM(
+    CASE 
+      WHEN m.tipo = 'ENTRADA' THEN m.cantidad 
+      ELSE 0 
+    END
+  ),0)::int AS ingresos,
 
-FROM inventario_caja i
-JOIN inventario p ON p.id = i.id_producto
-WHERE i.id_caja = $1
-GROUP BY i.id_caja, i.estado, date_trunc('second', i.fecha_registro)
-ORDER BY fecha_registro DESC;
+  -- 🔥 VENTAS (solo caja)
+  COALESCE(SUM(
+    CASE 
+      WHEN m.tipo = 'VENTA' 
+      AND m.id_caja = $1
+      THEN m.cantidad 
+      ELSE 0 
+    END
+  ),0)::int AS ventas,
+
+  -- 🔥 SALIDAS (globales)
+  COALESCE(SUM(
+    CASE 
+      WHEN m.tipo = 'SALIDA' THEN m.cantidad 
+      ELSE 0 
+    END
+  ),0)::int AS salidas,
+
+  -- 🔥 CÁLCULO FINAL
+  (
+    a.stock_sistema
+    + COALESCE(SUM(CASE WHEN m.tipo = 'ENTRADA' THEN m.cantidad ELSE 0 END),0)
+    - COALESCE(SUM(CASE WHEN m.tipo = 'VENTA' AND m.id_caja = $1 THEN m.cantidad ELSE 0 END),0)
+    - COALESCE(SUM(CASE WHEN m.tipo = 'SALIDA' THEN m.cantidad ELSE 0 END),0)
+  )::int AS cierre_sistema
+
+FROM inventario i
+
+LEFT JOIN inventario_caja a 
+  ON a.id_producto = i.id
+  AND a.id_caja = $1
+  AND a.estado = 'APERTURA CAJA'
+
+LEFT JOIN inventario_movimientos m
+  ON m.inventario_id = i.id
+  AND m.created_at BETWEEN (
+    SELECT fecha_inicio FROM rango
+  )
+  AND (
+    SELECT fecha_fin FROM rango
+  )
+
+GROUP BY 
+  i.id,
+  i.nombre,
+  a.stock_sistema,
+  a.stock_apertura
+
+ORDER BY i.nombre;
   `;
 
   /* ===============================
