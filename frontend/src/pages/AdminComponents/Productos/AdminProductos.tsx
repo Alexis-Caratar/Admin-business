@@ -26,6 +26,7 @@ import {
   MenuItem,
   InputAdornment,
   Stack,
+  Avatar,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -64,7 +65,8 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
     descripcion: "",
     unidad_medida: "",
     imagenes: [],
-    usa_receta: false,
+    tipo_control: "producto",
+    es_complemento: false,
     inventario_id: null,
     hora_inicio: "07:00",
     hora_fin: "16:00"
@@ -90,6 +92,7 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
   }
 ]);
   const [openRecetaModal, setOpenRecetaModal] = useState(false);
+const [productos_complementos, setproductos_complementos] = useState<any[]>([]);
 
   // Fetch productos
   const fetchProductos = async () => {
@@ -152,12 +155,16 @@ useEffect(() => {
 }, [form.usa_receta, openModal]);
 
 
-const handleChangeUsaReceta = (value: boolean) => {
+const handleChangeTipoControl = (value: string) => {
   setForm({
     ...form,
-    usa_receta: value,
-    inventario_id: null, // 🔥 limpia selección anterior
+    tipo_control: value,
+    inventario_id: null,
   });
+
+  if (value !== "receta") {
+    setReceta([]);
+  }
 };
 
   // CRUD
@@ -177,7 +184,7 @@ const handleOpenModal = (producto?: Producto) => {
       stock_maximo: 0,
       estado:true, // por defecto
       publicacion_web: false, // por defecto
-      usa_receta: false, 
+      tipo_control: "producto",
       inventario_id: null,
       hora_inicio: "07:00",
       hora_fin: "16:00",
@@ -192,31 +199,42 @@ const handleOpenModal = (producto?: Producto) => {
 
 
 const handleSubmit = async () => {
-  const payload = {
-    producto: {
-      id_categoria: id,
-      codigo_barra: form.codigo_barra,
-      nombre: form.nombre,
-      descripcion: form.descripcion,
-      unidad_medida: form.unidad_medida,
-      tipo_producto: form.tipo_producto,
-      estado: form.estado,
-      publicacion_web: form.publicacion_web,
-      usa_receta: form.usa_receta,
-      inventario_id: form.usa_receta ? null : form.inventario_id,
-      hora_inicio: form.hora_inicio,
-      hora_fin: form.hora_fin
-    },
-    productos_precios: form.precios ? [{ ...form.precios }] : [],
-    productos_imagenes: form.imagenes ? [...form.imagenes] : [],
-    receta: form.usa_receta
-    ? receta.map(r => ({
-        inventario_id: r.inventario_id,
-        cantidad: r.cantidad
-      }))
-    : []
+  console.log("control", form.tipo_control);
+  
+const payload = {
+  producto: {
+    id_categoria: id,
+    codigo_barra: form.codigo_barra,
+    nombre: form.nombre,
+    descripcion: form.descripcion,
+    unidad_medida: form.unidad_medida,
+    tipo_producto: form.tipo_producto,
+    es_complemento: form.es_complemento,
+    estado: form.estado,
+    publicacion_web: form.publicacion_web,
+    inventario_id:form.tipo_control === "producto"? form.inventario_id: null,
+    controla_inventario:form.tipo_control != "sin_inventario"? true: false,
+    usa_receta:form.tipo_control === "receta",
+    hora_inicio: form.hora_inicio,
+    hora_fin: form.hora_fin
+  },
+  productos_precios: form.precios
+    ? [{ ...form.precios }]
+    : [],
 
-  }as any;
+  productos_imagenes: form.imagenes
+    ? [...form.imagenes]
+    : [],
+  receta:
+    form.tipo_control === "receta"
+      ? receta.map((r) => ({
+          inventario_id: r.inventario_id,
+          cantidad: r.cantidad
+        }))
+      : [],
+
+      productos_complementos: productos_complementos
+} as any;
 
   try {
     if (editingId) {
@@ -238,8 +256,20 @@ const handleEdit = (producto: any) => {
   setForm(producto);
   setEditingId(producto.id!);
 
-  if (producto.usa_receta && producto.receta) {
-    setReceta(
+  if (producto.productos_complementos) {
+  setproductos_complementos(
+    producto.productos_complementos.map((p: any) => ({
+      id_producto_complemento: p.id_producto_complemento,
+      obligatorio: p.obligatorio ?? false,
+      tipo_seleccion: p.tipo_seleccion ?? "opcional"
+    }))
+  );
+} else {
+  setproductos_complementos([]);
+}
+
+if (producto.tipo_control === "receta" && producto.receta) {
+      setReceta(
       producto.receta.map((r: any) => ({
         inventario_id: r.inventario_id,
         nombre: r.inventario_nombre,
@@ -662,22 +692,49 @@ const handleEdit = (producto: any) => {
         {/* ================= IZQUIERDA ================= */}
         <Box
         >
-          <TextField
-            select
-            fullWidth
-            label="Modo de control"
-            size="small"
-            value={form.usa_receta ? "receta" : "directo"}
-            onChange={(e) => handleChangeUsaReceta(e.target.value === "receta")}
-          >
-            <MenuItem value="directo">PRODUCTO</MenuItem>
-            <MenuItem value="receta">PRODUCTO CON INSUMO</MenuItem>
-          </TextField>
+         <TextField
+          select
+          fullWidth
+          label="Modo de control"
+          size="small"
+          value={form.tipo_control || "producto"}
+          onChange={(e) => handleChangeTipoControl(e.target.value)}
+        >
+          <MenuItem value="producto">PRODUCTO FINAL</MenuItem>
+          <MenuItem value="receta">PRODUCTO CON INSUMO</MenuItem>
+          <MenuItem value="sin_inventario">SIN INVENTARIO</MenuItem>
+        </TextField>
 
 
         </Box>
 
+        <Box>
+  <TextField
+    select
+    fullWidth
+    label="Tipo de producto"
+    size="small"
+    value={form.es_complemento ? "true" : "false"}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        es_complemento: e.target.value === "true",
+      })
+    }
+  >
+    <MenuItem value="false">
+      PRODUCTO PRINCIPAL
+    </MenuItem>
+
+    <MenuItem value="true">
+      PRODUCTO COMPLEMENTARIO
+    </MenuItem>
+  </TextField>
+</Box>
+
+
         {/* ================= DERECHA ================= */}
+        {form.tipo_control != "sin_inventario"&&(
         <Box
           sx={{
             p: 3,
@@ -691,8 +748,8 @@ const handleEdit = (producto: any) => {
             gap: 1
           }}
         >
-          {!form.usa_receta ? (
-            <>
+            {form.tipo_control === "producto" ? (      
+                    <>
               <Typography fontWeight={600} fontSize={15}>
                 Inventario asociado
               </Typography>
@@ -704,7 +761,7 @@ const handleEdit = (producto: any) => {
             }
             isOptionEqualToValue={(option, value) => option.id === value.id}
             getOptionLabel={(option: any) =>
-              `${option.nombre} • ${option.stock} ${option.unidad}`
+              `${option.nombre} • ${option.stock_actual} ${option.unidad}`
             }
             onChange={(_, value) =>
               setForm({ ...form, inventario_id: value?.id || null })
@@ -768,7 +825,7 @@ const handleEdit = (producto: any) => {
             </>
           )}
         </Box>
-        
+        )}
 
 
         </Box>
@@ -933,6 +990,168 @@ const handleEdit = (producto: any) => {
           Agregar imagen
         </Button>
       </Box>
+   
+{/* PRODUCTOS COMPLEMENTARIOS*/}
+
+{form.es_complemento === false && (
+  <Box
+  sx={{
+    p: 2.5,
+    borderRadius: 3,
+    border: "1px solid #e5e7eb",
+    bgcolor: "#fff",
+  }}
+>
+  {/* HEADER */}
+  <Box mb={2}>
+    <Typography fontWeight={700} fontSize={15}>
+      Productos complementarios
+    </Typography>
+    <Typography fontSize={12} color="text.secondary">
+      Administra productos incluidos y opcionales
+    </Typography>
+  </Box>
+
+  {/* SELECTOR */}
+  <Autocomplete
+    multiple
+    options={productos.filter((p) => p.id !== form.id)}
+    getOptionLabel={(option: any) => option.nombre}
+    value={productos.filter((p) =>
+      productos_complementos.some(
+        (r) => r.id_producto_complemento === p.id
+      )
+    )}
+    onChange={(_, values) => {
+      setproductos_complementos(
+        values.map((v: any) => ({
+          id_producto_complemento: v.id,
+          obligatorio: true,
+          tipo_seleccion: "unico",
+        }))
+      );
+    }}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="Buscar productos"
+        size="small"
+      />
+    )}
+  />
+
+  {/* GRID CARDS */}
+  <Box
+    mt={2}
+    display="grid"
+    gridTemplateColumns="repeat(auto-fill, minmax(220px, 1fr))"
+    gap={1.5}
+  >
+    {productos_complementos.map((item, index) => {
+      const producto = productos.find(
+        (p) => p.id === item.id_producto_complemento
+      );
+
+      return (
+        <Box
+          key={index}
+          sx={{
+            p: 1.5,
+            borderRadius: 3,
+            border: "1px solid #e5e7eb",
+            bgcolor: "#fafafa",
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            transition: "0.2s",
+            "&:hover": {
+              transform: "translateY(-2px)",
+              boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
+              bgcolor: "#fff",
+            },
+          }}
+        >
+          {/* PRODUCT NAME */}
+          <Typography fontWeight={700} fontSize={13} noWrap>
+            {producto?.imagenes && producto.imagenes.length > 0 ? (
+              <Box display="flex" alignItems="center" gap={1}>
+                <Avatar src={producto.imagenes[0].url} alt={producto.nombre} sx={{ width: 24, height: 24 }} />
+                {producto.nombre}
+              </Box>
+            ) : (
+              <Typography fontWeight={700} fontSize={13} noWrap>
+                {producto?.nombre}
+              </Typography>
+            )}
+          </Typography>
+
+          {/* SWITCH SIMPLE */}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mt={1}
+          >
+            <Typography fontSize={12}>
+              {item.obligatorio ? "Incluido" : "Opcional"}
+            </Typography>
+
+            <Box
+              onClick={() => {
+                const copia = [...productos_complementos];
+                copia[index].obligatorio = !copia[index].obligatorio;
+                setproductos_complementos(copia);
+              }}
+              sx={{
+                width: 42,
+                height: 22,
+                borderRadius: 10,
+                bgcolor: item.obligatorio ? "#22c55e" : "#cbd5e1",
+                position: "relative",
+                cursor: "pointer",
+                transition: "0.2s",
+              }}
+            >
+              <Box
+                sx={{
+                  width: 18,
+                  height: 18,
+                  borderRadius: "50%",
+                  bgcolor: "#fff",
+                  position: "absolute",
+                  top: 2,
+                  left: item.obligatorio ? 22 : 2,
+                  transition: "0.2s",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+                }}
+              />
+            </Box>
+          </Box>
+        </Box>
+      );
+    })}
+  </Box>
+
+  {/* EMPTY STATE */}
+  {productos_complementos.length === 0 && (
+    <Box
+      mt={2}
+      sx={{
+        py: 4,
+        textAlign: "center",
+        border: "1px dashed #d1d5db",
+        borderRadius: 3,
+        bgcolor: "#fafafa",
+      }}
+    >
+      <Typography fontSize={12} color="text.secondary">
+        Aún no hay productos complementarios
+      </Typography>
+    </Box>
+  )}
+</Box>
+)}
+   
 
     </Box>
   </DialogContent>

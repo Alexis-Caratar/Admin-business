@@ -4,7 +4,9 @@ export interface ProductoCajero {
   stock_actual:string;
   nombre: string;
   precio_venta: number;
+  parent_id: number | null;
   imagen_plato: string | null;
+  productos_complementos?: ProductoCajero[];
 }
 
 export interface CategoriaCajero {
@@ -24,6 +26,7 @@ export interface CierreCaja {
 }
 
   export interface ItemCarrito extends ProductoCajero {
+  productos_complementos?: ProductoCajero[]; 
   cantidad: number;
 }
 

@@ -58,9 +58,7 @@ LIMIT 1;
 
 
 listarProductos: async (id) => {
-  const { rows } = await pool.query(`
-          
-  WITH hora_local AS (
+  const { rows } = await pool.query(`WITH hora_local AS (
   SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota')::time AS hora
 )
 
@@ -68,40 +66,92 @@ SELECT
   c.id,
   c.nombre AS categoria,
   c.imagen,
+
   json_agg(
     DISTINCT jsonb_build_object(
       'id', p.id,
       'codigo_barra', p.codigo_barra,
+
       'stock_actual', 
         CASE 
           WHEN p.controla_inventario THEN i.stock_actual
           ELSE NULL
         END,
+
       'nombre', p.nombre,
       'precio_venta', pp.precio_venta,
+
       'imagenes', (
         SELECT COALESCE(json_agg(img.url), '[]')
         FROM productos_imagenes img
         WHERE img.id_producto = p.id
+      ),
+
+      -- 🔥 COMPLEMENTOS COMO PLATOS COMPLETOS
+      'productos_complementos', (
+        SELECT COALESCE(
+          json_agg(
+            jsonb_build_object(
+              'id_producto_complemento', p2.id,
+              'codigo_barra', p2.codigo_barra,
+
+              'stock_actual',
+                CASE
+                  WHEN p2.controla_inventario THEN i2.stock_actual
+                  ELSE NULL
+                END,
+
+              'nombre', p2.nombre,
+              'precio_venta', pp2.precio_venta,
+
+              'imagenes', (
+                SELECT COALESCE(json_agg(img.url), '[]')
+                FROM productos_imagenes img
+                WHERE img.id_producto = p2.id
+              ),
+
+              'tipo_seleccion', pc.tipo_seleccion,
+              'obligatorio', pc.obligatorio,
+              'orden', pc.orden,
+              'estado', pc.estado
+            )
+            ORDER BY pc.orden
+          ),
+          '[]'
+        )
+        FROM productos_complementos pc
+
+        JOIN productos p2
+          ON p2.id = pc.id_producto_complemento
+
+        LEFT JOIN inventario i2
+          ON p2.inventario_id = i2.id
+
+        LEFT JOIN productos_precios pp2
+          ON pp2.id_producto = p2.id
+
+        WHERE pc.id_producto = p.id
+          AND pc.estado = true
       )
+
     )
   ) AS platos
 
 FROM categorias c
+
 JOIN productos p 
   ON p.id_categoria = c.id 
   AND p.estado = true
+  AND p.es_complemento = FALSE
 
 JOIN hora_local h ON TRUE
 
 AND (
-  -- 🟢 horario normal
   (
     p.hora_inicio <= p.hora_fin 
     AND h.hora BETWEEN p.hora_inicio AND p.hora_fin
   )
   OR
-  -- 🔵 horario que cruza medianoche (ej: 6pm a 2am)
   (
     p.hora_inicio > p.hora_fin 
     AND (
@@ -1140,6 +1190,7 @@ obtener_inventario: async (id_negocio) => {
         stock_actual::int AS stock_actual
       FROM inventario
       WHERE id_negocio = $1
+      and stock_actual>0
       AND estado = true
       ORDER BY nombre ASC;`,
       [id_negocio]

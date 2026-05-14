@@ -4,12 +4,18 @@ const TABLE = "productos";
 const TABLE_IMAGENES = "productos_imagenes";
 const TABLE_PRECIOS = "productos_precios";
 const TABLE_RECETA = "recetas";
+const TABLE_COMPLEMENTOS = "productos_complementos ";
+
 
 export const listar = async (id_categoria) => {
 
   // 1️⃣ PRODUCTOS
   const { rows: productos } = await pool.query(
-    `SELECT * FROM ${TABLE} WHERE id_categoria = $1 ORDER BY id DESC`,
+    `SELECT *, case when usa_receta=true then 'receta' 
+    when inventario_id is not null then 'producto' else 'sin_inventario'
+     end as tipo_control 
+    FROM ${TABLE} WHERE id_categoria = $1 
+    ORDER BY id DESC`,
     [id_categoria]
   );
 
@@ -38,17 +44,28 @@ export const listar = async (id_categoria) => {
     [ids]
   );
 
+   const { rows: productos_complementos } = await pool.query(
+    `SELECT * FROM ${TABLE_COMPLEMENTOS} 
+     WHERE id_producto_complemento = ANY($1) 
+     and estado=true
+     ORDER BY id ASC`,
+    [ids]
+  );
+
   // 4️⃣ MAPEO FINAL
   const productosFinal = productos.map(p => {
     const precio = precios.find(pr => pr.id_producto === p.id) || null;
     const imgs = imagenes.filter(img => img.id_producto === p.id);
     const rec = recetas.filter(r => r.producto_id === p.id);
+   const comple = productos_complementos.filter(r => r.id_producto === p.id);
+
 
     return {
       ...p,
       precios: precio,
       imagenes: imgs,
-      receta: rec
+      receta: rec,
+      productos_complementos:comple
 
     };
   });
@@ -127,7 +144,7 @@ export const crear = async (payload) => {
   try {
     await client.query("BEGIN");
 
-    const { producto, productos_imagenes, productos_precios, receta } = payload;
+    const { producto, productos_imagenes, productos_precios, receta,productos_complementos } = payload;
 
     // ============================
     // 1️⃣ INSERTAR PRODUCTO
@@ -220,6 +237,38 @@ export const crear = async (payload) => {
       }
     }
 
+
+
+// 5 INSERTAR PRODUCTOS COMPLEMENTOS
+// ============================
+console.log("productos_complementos",productos_complementos);
+
+if (productos_complementos?.length > 0) {
+  for (const complemento of productos_complementos) {
+    await client.query(
+      `
+      INSERT INTO productos_complementos
+      (
+        id_producto,
+        id_producto_complemento,
+        tipo_seleccion,
+        obligatorio,
+        orden,
+        estado
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      `,
+      [
+        productoId,
+        complemento.id_producto_relacionado,
+        complemento.tipo_seleccion ?? "unico",
+        complemento.obligatorio ?? false,
+        complemento.orden ?? 0,
+        complemento.estado ?? true
+      ]
+    );
+  }
+}
     await client.query("COMMIT");
 
     return productoRows[0];
@@ -239,7 +288,7 @@ export const actualizar = async (id, payload) => {
   try {
     await client.query("BEGIN");
 
-    const { producto, productos_imagenes, productos_precios,receta } = payload;
+    const { producto, productos_imagenes, productos_precios,receta,productos_complementos } = payload;
 
     // ============================
     // 1️⃣ ACTUALIZAR PRODUCTO
@@ -377,6 +426,48 @@ export const actualizar = async (id, payload) => {
           [id, rect.inventario_id, rect.cantidad]
         );
       }
+
+
+      // ============================
+// GUARDAR PRODUCTOS COMPLEMENTOS
+// ============================
+
+// elimina los anteriores
+await client.query(
+  `
+  DELETE FROM productos_complementos 
+  WHERE id_producto = $1
+  `,
+  [id]
+);
+
+// inserta los nuevos
+if (productos_complementos?.length > 0) {
+  for (const complemento of productos_complementos) {
+    await client.query(
+      `
+      INSERT INTO productos_complementos 
+      (
+        id_producto,
+        id_producto_complemento,
+        tipo_seleccion,
+        obligatorio,
+        orden,
+        estado
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      `,
+      [
+        id,
+        complemento.id_producto_complemento,
+        complemento.tipo_seleccion ?? "unico",
+        complemento.obligatorio ?? false,
+        complemento.orden ?? 0,
+        complemento.estado ?? true
+      ]
+    );
+  }
+}
 
 
     await client.query("COMMIT");

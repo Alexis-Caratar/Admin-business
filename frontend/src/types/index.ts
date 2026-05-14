@@ -36,7 +36,9 @@ export interface Producto {
   nombre: string;
   descripcion?: string;
   unidad_medida?: string;
-  usa_receta?: boolean;
+  tipo_control?: string;
+  es_complemento?: boolean;
+  usa_receta?: string;
   inventario_id?: number | null;
   hora_inicio?: string;
   hora_fin?: string;
