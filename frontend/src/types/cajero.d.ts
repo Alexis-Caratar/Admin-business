@@ -6,6 +6,7 @@ export interface ProductoCajero {
   precio_venta: number;
   parent_id: number | null;
   imagen_plato: string | null;
+  imagenes:string;
   productos_complementos?: ProductoCajero[];
 }
 

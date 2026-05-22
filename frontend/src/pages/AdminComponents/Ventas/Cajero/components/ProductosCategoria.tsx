@@ -627,6 +627,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                     const extra = {
                       id: c.id_producto_complemento,
                       nombre: c.nombre,
+                      imagenes: c.imagenes[0],
                       precio_venta: c.precio_venta,
                       cantidad: 1,
                       tipo: "extra",
@@ -637,9 +638,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                       id: productoSeleccionado.id,
                       codigo_barra: productoSeleccionado.codigo_barra,
                       nombre: productoSeleccionado.nombre,
-                      imagen: productoSeleccionado.imagen_plato
-                        ? productoSeleccionado.imagen_plato
-                        : null,
+                      imagenes: productoSeleccionado.imagenes[0],
                       precio_venta: productoSeleccionado.precio_venta,
                       cantidad: 1,
                       tipo: "plato",

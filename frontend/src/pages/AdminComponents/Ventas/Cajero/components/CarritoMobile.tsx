@@ -519,7 +519,7 @@ useEffect(() => {
 
                               <ListItemAvatar>
                                 <Avatar
-                                  src={item.imagenes[0]??undefined}
+                                  src={item.imagenes}
                                   variant="rounded"
                                   sx={{ width: 48, height: 48 }}
                                 />
