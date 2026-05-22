@@ -1,199 +1,637 @@
-import React from "react";
-import { Box, Typography, Container, Card, CardContent, CardMedia, Stack } from "@mui/material";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
+import {
+  Box,
+  Button,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  CardMedia,
+  Fab,
+} from "@mui/material";
+
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import DeliveryDiningIcon from "@mui/icons-material/DeliveryDining";
-import BookOnlineIcon from "@mui/icons-material/BookOnline";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
+export default function Home() {
+  const [filter, setFilter] = useState("todo");
 
-const Home: React.FC = () => {
+  // SEO
+  useEffect(() => {
+    document.title =
+      "Punto Urbano | Hamburguesas y Fast Food en Pasto";
+
+    const metaDescription = document.querySelector(
+      'meta[name="description"]'
+    );
+
+    if (metaDescription) {
+      metaDescription.setAttribute(
+        "content",
+        "Punto Urbano en Pasto. Hamburguesas irresistibles, comida rápida premium, ambiente moderno y experiencias únicas."
+      );
+    } else {
+      const meta = document.createElement("meta");
+      meta.name = "description";
+      meta.content =
+        "Punto Urbano en Pasto. Hamburguesas irresistibles, comida rápida premium, ambiente moderno y experiencias únicas.";
+      document.head.appendChild(meta);
+    }
+  }, []);
+
+  const frases = [
+    "🍔✨ Restaurante Fast-food en Pasto",
+    "El lugar donde el sabor y la buena energía se encuentran.",
+    "Disfruta hamburguesas irresistibles y experiencias únicas.",
+    "No es solo comida, es vivir Punto Urbano.",
+  ];
+
+  const [texto, setTexto] = useState("");
+  const [fraseIndex, setFraseIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const menu = [
+    {
+      name: "Hamburguesa Urbana",
+      category: "comidas",
+      price: 18000,
+      image:
+        "https://images.unsplash.com/photo-1550547660-d9450f859349",
+    },
+    {
+      name: "Pizza Artesanal",
+      category: "comidas",
+      price: 25000,
+      image:
+        "https://images.unsplash.com/photo-1548365328-9f547f5d0f3b",
+    },
+    {
+      name: "Limonada Natural",
+      category: "bebidas",
+      price: 6000,
+      image:
+        "https://images.unsplash.com/photo-1528825871115-3581a5387919",
+    },
+    {
+      name: "Café Especial",
+      category: "bebidas",
+      price: 5000,
+      image:
+        "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+    },
+    {
+      name: "Combo Punto Urbano",
+      category: "combos",
+      price: 32000,
+      image:
+        "https://images.unsplash.com/photo-1550317138-10000687a72b",
+    },
+  ];
+
+  const filtered =
+    filter === "todo"
+      ? menu
+      : menu.filter((m) => m.category === filter);
+
+  useEffect(() => {
+    const fraseActual = frases[fraseIndex];
+
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        setTexto(
+          fraseActual.substring(0, texto.length + 1)
+        );
+
+        if (texto === fraseActual) {
+          setTimeout(() => {
+            setIsDeleting(true);
+          }, 1800);
+        }
+      } else {
+        setTexto(
+          fraseActual.substring(0, texto.length - 1)
+        );
+
+        if (texto === "") {
+          setIsDeleting(false);
+          setFraseIndex(
+            (prev) => (prev + 1) % frases.length
+          );
+        }
+      }
+    }, isDeleting ? 35 : 65);
+
+    return () => clearTimeout(timeout);
+  }, [texto, isDeleting, fraseIndex]);
+
   return (
-    <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh",  width: "100vw",fontFamily: "Roboto" }}>
-      {/* Hero Section */}
+    <Box
+      sx={{
+        bgcolor: "#0f172a",
+        color: "white",
+        minHeight: "100vh",
+      }}
+    >
+      {/* HERO */}
       <Box
         sx={{
-          textAlign: "center",
-          py: 1,
-          bgcolor: "linear-gradient(135deg, #ff6f00, #ffb74d)",
+          height: "100vh",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          gap: 3,
-          color: "#fff",
+          justifyContent: "center",
+          textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+
+          "@keyframes blinkCursor": {
+            "0%": {
+              borderColor: "transparent",
+            },
+            "50%": {
+              borderColor: "#22c55e",
+            },
+            "100%": {
+              borderColor: "transparent",
+            },
+          },
         }}
       >
-        {/* Logo animado */}
+        {/* OVERLAY */}
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.65), rgba(0,0,0,0.78))",
+            backdropFilter: "blur(2px)",
+          }}
+        />
+
+        {/* CONTENIDO */}
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1, type: "spring", stiffness: 120 }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          style={{
+            position: "relative",
+            zIndex: 2,
+            width: "100%",
+            padding: "20px",
+          }}
         >
-          <Box
+          {/* LOGO */}
+          <CardMedia
             component="img"
-            src="https://scontent.fpso2-1.fna.fbcdn.net/v/t39.30808-6/654550237_1636080677540571_5948649793158553684_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeFo9acJvskQkbXlCu8GkHMQRNzXqs_y1spE3Neqz_LWyqGsXZUgf0WTC3vxihy9JCm1bzgOmTmF0ajPUfprbfpr&_nc_ohc=wW9Hzs9jvoQQ7kNvwFYARWw&_nc_oc=AdogaJyZhzDnr-t61O-zxm0Eisb518qxLHk-Xz-Iat1wyqe531EnuIHv7ynMSFBjR-k&_nc_zt=23&_nc_ht=scontent.fpso2-1.fna&_nc_gid=7KTKeRWKvYZQIIYw4pjsRg&_nc_ss=7a32e&oh=00_Afx9TGpFdAo5qsAmI47lXz6q1RqS-pFmNbQHeIfz_HVf9g&oe=69CC3AB9" // reemplaza con tu logo
-            alt="Punto Urbano Logo"
-            sx={{ width: { xs: 150, sm: 200 },height:{xs:120,sm:150}, mb: 2 ,borderRadius:10}}
-            
+            image="https://scontent.fpso2-1.fna.fbcdn.net/v/t39.30808-1/656542185_1537348755058274_911175189399496857_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=103&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=2hjiczlQeBQQ7kNvwH-L5Bo&_nc_oc=AdppFpGQC__PnwIXgPna_pVzSvFdERdENhZfWHY1U1f4kqe9p8BHZR17c4jcdqHojYU&_nc_zt=24&_nc_ht=scontent.fpso2-1.fna&_nc_gid=c6bSqwNcatHn268CjGPRrQ&_nc_ss=7a2a8&oh=00_Af6C_vgFSrc4VGT_JOQCyl3Eo7Z09nznQcIbIhF0yvXcog&oe=6A162494"
+            alt="Punto Urbano Pasto"
+            sx={{
+              width: 180,
+              height: 180,
+              objectFit: "cover",
+              borderRadius: "50%",
+              mx: "auto",
+              mb: 4,
+              border:
+                "5px solid rgba(255,255,255,0.15)",
+              boxShadow:
+                "0 20px 60px rgba(0,0,0,0.45)",
+            }}
           />
-        </motion.div>
- <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1, color: "green"}}>
-            Restaurante -Fast-food  Punto Urbano Pasto
+
+          {/* TITULO SEO */}
+          <Typography
+            component="h1"
+            sx={{
+              fontSize: {
+                xs: "3rem",
+                md: "5rem",
+              },
+              fontWeight: 900,
+              color: "white",
+              letterSpacing: "-2px",
+              textShadow:
+                "0 10px 30px rgba(0,0,0,0.4)",
+            }}
+          >
+            Restaurante Punto Urbano
           </Typography>
-        {/* Mensaje animado */}
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1 }}
-        >
-          <Typography variant="h4" sx={{ fontWeight: "bold", mb: 1, color: "black"}}>
-            ¡Estamos trabajando para ti!
+
+          {/* TYPEWRITER */}
+          <Typography
+            component="h2"
+            sx={{
+              mt: 3,
+              color: "#e2e8f0",
+              fontSize: {
+                xs: "1rem",
+                md: "1.5rem",
+              },
+              fontWeight: 500,
+              maxWidth: 950,
+              mx: "auto",
+              minHeight: 60,
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              borderRight:
+                "3px solid #22c55e",
+              animation:
+                "blinkCursor 0.8s infinite",
+            }}
+          >
+            {texto}
           </Typography>
-          <Typography variant="h6" sx={{ maxWidth: 500, mx: "auto", color: "black" }}>
-            Pronto podrás disfrutar de una experiencia renovada en nuestra página
-            web de Punto Urbano.
-          </Typography>
+
+          {/* BOTONES */}
+          <Stack
+            direction={{
+              xs: "column",
+              sm: "row",
+            }}
+            spacing={2}
+            justifyContent="center"
+            sx={{ mt: 5 }}
+          >
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: "#22c55e",
+                borderRadius: 4,
+                px: 5,
+                py: 1.4,
+                fontSize: 16,
+                textTransform: "none",
+                fontWeight: 700,
+                boxShadow:
+                  "0 12px 30px rgba(34,197,94,0.35)",
+
+                "&:hover": {
+                  bgcolor: "#16a34a",
+                  transform:
+                    "translateY(-2px)",
+                },
+              }}
+            >
+              Ver menú
+            </Button>
+
+            <Button
+              variant="outlined"
+              sx={{
+                borderRadius: 4,
+                px: 5,
+                py: 1.4,
+                fontSize: 16,
+                textTransform: "none",
+                fontWeight: 700,
+                color: "white",
+                borderColor:
+                  "rgba(255,255,255,0.5)",
+
+                "&:hover": {
+                  borderColor: "white",
+                  bgcolor:
+                    "rgba(255,255,255,0.08)",
+                },
+              }}
+            >
+              Reservar mesa
+            </Button>
+          </Stack>
         </motion.div>
       </Box>
 
-      {/* Sección de menús (preview) */}
+      {/* ABOUT */}
       <Container sx={{ py: 10 }}>
         <Typography
           variant="h4"
-          sx={{ fontWeight: "bold", textAlign: "center", mb: 6, color: "black" }}
+          fontWeight={700}
+          textAlign="center"
         >
-          Pronto conocerás nuestros menús
+          Restaurante moderno en Pasto
         </Typography>
 
-        <Box
+        <Typography
           sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 4,
+            mt: 2,
+            color: "#94a3b8",
+            textAlign: "center",
+            maxWidth: 700,
+            mx: "auto",
           }}
         >
-          {[1, 2, 3].map((item) => (
-            <Box key={item} sx={{ width: 300 }}>
-              <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
-                <Card sx={{ height: "100%", display: "flex", flexDirection: "column", boxShadow: 3, borderRadius: 3 }}>
+          En Punto Urbano combinamos
+          hamburguesas artesanales,
+          comida rápida premium y una
+          experiencia moderna en el corazón
+          de Pasto.
+        </Typography>
+
+        <Stack
+          direction={{
+            xs: "column",
+            md: "row",
+          }}
+          spacing={3}
+          sx={{ mt: 6 }}
+        >
+          <Card
+            sx={{
+              flex: 1,
+              borderRadius: 4,
+              bgcolor: "#1e293b",
+              color: "white",
+            }}
+          >
+            <CardContent>
+              <RestaurantIcon />
+              <Typography
+                fontWeight={700}
+                mt={1}
+              >
+                Comida urbana
+              </Typography>
+
+              <Typography
+                sx={{ color: "#94a3b8" }}
+              >
+                Sabores intensos con identidad
+                local.
+              </Typography>
+            </CardContent>
+          </Card>
+
+          <Card
+            sx={{
+              flex: 1,
+              borderRadius: 4,
+              bgcolor: "#1e293b",
+              color: "white",
+            }}
+          >
+            <CardContent>
+              <LocalDiningIcon />
+              <Typography
+                fontWeight={700}
+                mt={1}
+              >
+                Ambiente moderno
+              </Typography>
+
+              <Typography
+                sx={{ color: "#94a3b8" }}
+              >
+                Diseño pensado para una
+                experiencia única.
+              </Typography>
+            </CardContent>
+          </Card>
+
+          <Card
+            sx={{
+              flex: 1,
+              borderRadius: 4,
+              bgcolor: "#1e293b",
+              color: "white",
+            }}
+          >
+            <CardContent>
+              <DeliveryDiningIcon />
+              <Typography
+                fontWeight={700}
+                mt={1}
+              >
+                Domicilios rápidos
+              </Typography>
+
+              <Typography
+                sx={{ color: "#94a3b8" }}
+              >
+                Llevamos el sabor hasta tu
+                puerta.
+              </Typography>
+            </CardContent>
+          </Card>
+        </Stack>
+      </Container>
+
+      {/* MENU */}
+      <Box
+        sx={{
+          bgcolor: "#0b1220",
+          py: 10,
+        }}
+      >
+        <Container>
+          <Typography
+            variant="h4"
+            textAlign="center"
+            fontWeight={700}
+          >
+            Menú Punto Urbano
+          </Typography>
+
+          <Stack
+            direction="row"
+            spacing={2}
+            justifyContent="center"
+            sx={{ mt: 4 }}
+          >
+            {[
+              "todo",
+              "comidas",
+              "bebidas",
+              "combos",
+            ].map((cat) => (
+              <Chip
+                key={cat}
+                label={cat.toUpperCase()}
+                onClick={() => setFilter(cat)}
+                sx={{
+                  bgcolor:
+                    filter === cat
+                      ? "#22c55e"
+                      : "#1e293b",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              />
+            ))}
+          </Stack>
+
+          <Stack
+            direction={{
+              xs: "column",
+              md: "row",
+            }}
+            spacing={3}
+            sx={{
+              mt: 6,
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            {filtered.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{
+                  opacity: 0,
+                  scale: 0.9,
+                }}
+                whileInView={{
+                  opacity: 1,
+                  scale: 1,
+                }}
+                transition={{
+                  delay: i * 0.05,
+                }}
+              >
+                <Card
+                  sx={{
+                    width: 280,
+                    borderRadius: 4,
+                    bgcolor: "#1e293b",
+                    color: "white",
+                    overflow: "hidden",
+                    transition: "0.3s",
+
+                    "&:hover": {
+                      transform:
+                        "translateY(-6px)",
+                    },
+                  }}
+                >
                   <CardMedia
                     component="img"
-                    height="180"
-                    image="https://png.pngtree.com/thumb_back/fh260/background/20230712/pngtree-3d-rendered-burger-with-explosive-presentation-image_3841356.jpg"
-                    alt={`Menu ${item}`}
-                    sx={{ borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
+                    height="160"
+                    image={item.image}
+                    alt={item.name}
                   />
+
                   <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: "bold", color: "#ff6f00" }}>
-                      Menú {item}
+                    <Typography fontWeight={700}>
+                      {item.name}
                     </Typography>
-                    <Typography color="textSecondary">
-                      Próximamente podrás ver más detalles.
+
+                    <Typography
+                      sx={{
+                        color: "#94a3b8",
+                        fontSize: 13,
+                      }}
+                    >
+                      {item.category}
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        mt: 2,
+                        fontWeight: 800,
+                        color: "#22c55e",
+                      }}
+                    >
+                      $
+                      {item.price.toLocaleString()}
                     </Typography>
                   </CardContent>
                 </Card>
               </motion.div>
-            </Box>
-          ))}
-        </Box>
-      </Container>
-
-      {/* Mapa interactivo */}
-      <Box sx={{ py: 10, textAlign: "center" }}>
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 4, color: "black",}}>
-          Encuéntranos aquí
-        </Typography>
-        <Box
-          component="iframe"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.9088414346297!2d-77.2862206!3d1.2233920000000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e2ed50011f1f199%3A0xa60292ceadf8990e!2sMestizo%20Restaurante%20Pasto!5e0!3m2!1ses!2sco!4v1774627619597!5m2!1ses!2sco"
-          width="100%"
-          height="450"
-          style={{ border: 80, borderRadius: 12, maxWidth: 800,}}
-          allowFullScreen
-          loading="lazy"
-        ></Box>
+            ))}
+          </Stack>
+        </Container>
       </Box>
 
-<Box
-  sx={{
-    bgcolor: "#f9f9f9", // fondo claro y limpio
-    p: { xs: 4, md: 6 }, // padding responsivo
-    borderRadius: 4, // bordes más redondeados
-    boxShadow: "0px 8px 24px rgba(0,0,0,0.1)", // sombra suave y profesional
-    maxWidth: 600, // más ancho para pantallas grandes
-    mx: "auto",
-    mt: 8,
-  }}
->
-  <Typography
-    variant="h5"
-    sx={{
-      fontWeight: "bold",
-      mb: 4,
-      textAlign: "center",
-      color: "#ff7f50", // naranja más limpio y moderno
-      letterSpacing: 1,
-    }}
-  >
-    Información de Contacto
-  </Typography>
-
-  <Stack spacing={3}>
-    {/* Dirección */}
-    <Stack direction="row" alignItems="center" spacing={2}>
-      <LocationOnIcon sx={{ color: "#ff7f50" }} />
-      <Typography sx={{ fontWeight: 500, color: "#333" }}>
-        Cra. 40 #16d-29, Pasto, Nariño
-      </Typography>
-    </Stack>
-
-    {/* Horarios */}
-    <Stack direction="row" alignItems="center" spacing={2}>
-      <ScheduleIcon sx={{ color: "#ff7f50" }} />
-      <Typography sx={{ fontWeight: 500, color: "#333" }}>
-        Abierto · Lunes a Sábado de 7:00 a.m. a 4:00 p.m.
-      </Typography>
-    </Stack>
-
-    {/* Teléfono */}
-    <Stack direction="row" alignItems="center" spacing={2}>
-      <LocalPhoneIcon sx={{ color: "#ff7f50" }} />
-      <Typography sx={{ fontWeight: 500, color: "#333" }}>
-        322 6665512
-      </Typography>
-    </Stack>
-
-    {/* Domicilios */}
-    <Stack direction="row" alignItems="center" spacing={2}>
-      <DeliveryDiningIcon sx={{ color: "#ff7f50" }} />
-      <Typography sx={{ fontWeight: 500, color: "#333" }}>
-        Servicio a domicilio disponible
-      </Typography>
-    </Stack>
-
-    {/* Reservas */}
-    <Stack direction="row" alignItems="center" spacing={2}>
-      <BookOnlineIcon sx={{ color: "#ff7f50" }} />
-      <Typography sx={{ fontWeight: 500, color: "#333" }}>
-        Reservas disponibles por teléfono
-      </Typography>
-    </Stack>
-  </Stack>
-</Box>
-
-      {/* Footer */}
-      <Box sx={{ bgcolor: "#333", py: 10, textAlign: "center", color: "#fff" }}>
-        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
-          Punto Urbano
-        </Typography>
+      {/* FOOTER */}
+      <Box
+        sx={{
+          py: 5,
+          textAlign: "center",
+          color: "#94a3b8",
+        }}
+      >
         <Typography>
-          Derechos reservados por Punto Urbano | By Ing. Alexis Caratar | Pasto - Nariño 2026
+          © {new Date().getFullYear()} Punto
+          Urbano · Pasto, Colombia
         </Typography>
+      </Box>
+
+      {/* BOTON WHATSAPP */}
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          zIndex: 9999,
+        }}
+      >
+        <Fab
+          component="a"
+          href="https://wa.me/573226665512"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp Punto Urbano"
+          sx={{
+            position: "relative",
+            bgcolor: "#22c55e",
+            color: "white",
+            width: 65,
+            height: 65,
+            boxShadow:
+              "0 10px 30px rgba(34,197,94,0.4)",
+
+            "@keyframes pulse": {
+              "0%": {
+                transform: "scale(1)",
+              },
+              "50%": {
+                transform: "scale(1.15)",
+              },
+              "100%": {
+                transform: "scale(1)",
+              },
+            },
+
+            "&:hover": {
+              bgcolor: "#16a34a",
+              transform: "scale(1.08)",
+            },
+          }}
+        >
+          {/* ICONO */}
+          <WhatsAppIcon sx={{ fontSize: 36 }} />
+
+          {/* NOTIFICACIÓN */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: -8,
+              m: 0,
+              right: 6,
+              width: 22,
+              height: 22,
+              borderRadius: "50%",
+              bgcolor: "#ef4444",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 11,
+              fontWeight: 800,
+              border: "2px solid white",
+              animation: "pulse 1.5s infinite",
+            }}
+          >
+            1
+          </Box>
+        </Fab>
       </Box>
     </Box>
   );
-};
-
-export default Home;
+}

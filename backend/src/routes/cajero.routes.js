@@ -27,8 +27,4 @@ router.post("/cancelarFactura",CajeroController.cancelarFactura);
 router.post("/obtener-inventario",CajeroController.obtenerInventario);
 router.post("/guardar-inventario",CajeroController.guardarInventario);
 
-
-
-
-
 export default router;
