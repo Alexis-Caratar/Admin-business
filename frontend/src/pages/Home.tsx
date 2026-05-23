@@ -21,77 +21,153 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 export default function Home() {
   const [filter, setFilter] = useState("todo");
 
-  // SEO
-  useEffect(() => {
-    document.title =
-      "Punto Urbano | Hamburguesas y Fast Food en Pasto";
+// SEO
+useEffect(() => {
+  document.title =
+    "Punto Urbano | Restaurante de Comidas Rápidas, Almuerzos y Cenas en Pasto";
 
-    const metaDescription = document.querySelector(
-      'meta[name="description"]'
+  const description =
+    "Punto Urbano en Pasto, Nariño. Restaurante de comidas rápidas, hamburguesas artesanales, almuerzos, cenas, fast food premium, domicilios y bebidas. Disfruta un ambiente moderno y el mejor sabor en Pasto.";
+
+  // DESCRIPTION
+  let metaDescription = document.querySelector(
+    'meta[name="description"]'
+  );
+
+  if (metaDescription) {
+    metaDescription.setAttribute(
+      "content",
+      description
+    );
+  } else {
+    metaDescription =
+      document.createElement("meta");
+
+    metaDescription.setAttribute(
+      "name",
+      "description"
     );
 
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        "content",
-        "Punto Urbano en Pasto. Hamburguesas irresistibles, comida rápida premium, ambiente moderno y experiencias únicas."
-      );
-    } else {
-      const meta = document.createElement("meta");
-      meta.name = "description";
-      meta.content =
-        "Punto Urbano en Pasto. Hamburguesas irresistibles, comida rápida premium, ambiente moderno y experiencias únicas.";
-      document.head.appendChild(meta);
-    }
-  }, []);
+    metaDescription.setAttribute(
+      "content",
+      description
+    );
 
-  const frases = [
-    "🍔✨ Restaurante Fast-food en Pasto",
-    "El lugar donde el sabor y la buena energía se encuentran.",
-    "Disfruta hamburguesas irresistibles y experiencias únicas.",
-    "No es solo comida, es vivir Punto Urbano.",
-  ];
+    document.head.appendChild(metaDescription);
+  }
+
+  // KEYWORDS
+  const keywords = `
+    restaurante en Pasto,
+    comidas rápidas Pasto,
+    hamburguesas en Pasto,
+    fast food Pasto,
+    almuerzos en Pasto,
+    cenas en Pasto,
+    comida casera Pasto,
+    domicilios Pasto,
+    restaurante moderno Pasto,
+    combos hamburguesas,
+    mejor restaurante en Pasto,
+    Punto Urbano Pasto
+  `;
+
+  let metaKeywords = document.querySelector(
+    'meta[name="keywords"]'
+  );
+
+  if (metaKeywords) {
+    metaKeywords.setAttribute(
+      "content",
+      keywords
+    );
+  } else {
+    metaKeywords =
+      document.createElement("meta");
+
+    metaKeywords.setAttribute(
+      "name",
+      "keywords"
+    );
+
+    metaKeywords.setAttribute(
+      "content",
+      keywords
+    );
+
+    document.head.appendChild(metaKeywords);
+  }
+}, []);
+
+ const frases = [
+  "🍔 Restaurante en el corazón de Pasto",
+  "🔥 Hamburguesas artesanales, carnes y experiencias únicas",
+  "🌆 Buen ambiente, buena música y el mejor sabor",  
+  "✨ Punto Urbano: donde cada comida se convierte en experiencia",
+];
 
   const [texto, setTexto] = useState("");
   const [fraseIndex, setFraseIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const menu = [
-    {
-      name: "Hamburguesa Urbana",
-      category: "comidas",
-      price: 18000,
-      image:
-        "https://images.unsplash.com/photo-1550547660-d9450f859349",
-    },
-    {
-      name: "Pizza Artesanal",
-      category: "comidas",
-      price: 25000,
-      image:
-        "https://images.unsplash.com/photo-1548365328-9f547f5d0f3b",
-    },
-    {
-      name: "Limonada Natural",
-      category: "bebidas",
-      price: 6000,
-      image:
-        "https://images.unsplash.com/photo-1528825871115-3581a5387919",
-    },
-    {
-      name: "Café Especial",
-      category: "bebidas",
-      price: 5000,
-      image:
-        "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
-    },
-    {
-      name: "Combo Punto Urbano",
-      category: "combos",
-      price: 32000,
-      image:
-        "https://images.unsplash.com/photo-1550317138-10000687a72b",
-    },
-  ];
+const menu = [
+  {
+    name: "Hamburguesa Urbana",
+    category: "comidas",
+    price: 0,
+    image:
+      "https://images.unsplash.com/photo-1550547660-d9450f859349",
+  },
+  {
+    name: "Pizza Pepperoni",
+    category: "comidas",
+    price: 0,
+    image:
+      "https://images.unsplash.com/photo-1513104890138-7c749659a591",
+  },
+  {
+    name: "Salchipapa Urbana",
+    category: "comidas",
+    price: 0,
+    image:
+      "https://img.magnific.com/foto-gratis/ternera-parrilla-papas-fritas-plato-rustico-generado-ia_188544-43099.jpg?semt=ais_hybrid&w=740&q=80",
+  },
+  {
+    name: "Tacos Mexicanos",
+    category: "comidas",
+    price: 0,
+    image:
+      "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85",
+  },
+  {
+    name: "Limonada Natural",
+    category: "bebidas",
+    price: 0,
+    image:
+      "https://img.freepik.com/fotos-premium/limonada-natural-menta-fruta-fresca-mesa-madera_158023-2865.jpg",
+  },
+  {
+    name: "Café Especial",
+    category: "bebidas",
+    price: 0,
+    image:
+      "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+  },
+  {
+    name: "Malteada de Chocolate",
+    category: "bebidas",
+    price: 0,
+    image:
+      "https://images.unsplash.com/photo-1577805947697-89e18249d767",
+  },
+  {
+    name: "Combo Punto Urbano",
+    category: "combos",
+    price: 0,
+    image:
+      "https://images.unsplash.com/photo-1550317138-10000687a72b",
+  },
+];
 
   const filtered =
     filter === "todo"
@@ -110,7 +186,7 @@ export default function Home() {
         if (texto === fraseActual) {
           setTimeout(() => {
             setIsDeleting(true);
-          }, 1800);
+          }, 100);
         }
       } else {
         setTexto(
@@ -148,7 +224,7 @@ export default function Home() {
           position: "relative",
           overflow: "hidden",
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba')",
+            "url('https://thumbs.dreamstime.com/b/impresionante-maqueta-de-logotipo-para-restaurante-carne-y-parrilla-alta-calidad-muestra-tu-marca-con-352794062.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
 
@@ -262,6 +338,10 @@ export default function Home() {
           >
             <Button
               variant="contained"
+              href="https://wa.me/573226665512"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp Punto Urbano"
               sx={{
                 bgcolor: "#22c55e",
                 borderRadius: 4,
@@ -284,6 +364,10 @@ export default function Home() {
             </Button>
 
             <Button
+            href="https://wa.me/573226665512"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp Punto Urbano"
               variant="outlined"
               sx={{
                 borderRadius: 4,
@@ -548,6 +632,288 @@ export default function Home() {
         </Container>
       </Box>
 
+      {/* UBICACIÓN / GOOGLE MAPS */}
+<Box
+  sx={{
+    py: 10,
+    px: 2,
+    background:
+      "linear-gradient(180deg,#0f172a 0%, #111827 100%)",
+  }}
+>
+  <Container maxWidth="md">
+    <Card
+      sx={{
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: 6,
+        bgcolor: "#111827",
+        color: "white",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+      }}
+    >
+      {/* EFECTO */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at top right, rgba(34,197,94,0.18), transparent 35%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      <CardContent
+        sx={{
+          p: { xs: 4, md: 6 },
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        {/* ICONO */}
+        <Box
+          sx={{
+            width: 90,
+            height: 90,
+            mx: "auto",
+            mb: 3,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background:
+              "linear-gradient(135deg,#22c55e,#16a34a)",
+            boxShadow:
+              "0 12px 30px rgba(34,197,94,0.35)",
+          }}
+        >
+          <DeliveryDiningIcon
+            sx={{
+              fontSize: 45,
+              color: "white",
+            }}
+          />
+        </Box>
+
+        {/* TITULO */}
+        <Typography
+          textAlign="center"
+          fontWeight={900}
+          sx={{
+            fontSize: {
+              xs: "1.8rem",
+              md: "2.5rem",
+            },
+            mb: 2,
+          }}
+        >
+          ¿Quieres llegar a Punto Urbano?
+        </Typography>
+
+        {/* TEXTO */}
+        <Typography
+          textAlign="center"
+          sx={{
+            color: "#cbd5e1",
+            maxWidth: 700,
+            mx: "auto",
+            fontSize: {
+              xs: 14,
+              md: 17,
+            },
+            lineHeight: 1.8,
+          }}
+        >
+          🍔 Vive la experiencia Punto Urbano.
+          Hamburguesas, comida rápida premium y
+          el mejor ambiente en Pasto.
+          <br />
+          <br />
+          🚗 Da clic en el botón y deja que Google
+          Maps te guíe directamente hasta nosotros.
+        </Typography>
+
+        {/* BOTON */}
+        <Box textAlign="center" mt={5}>
+          <Button
+            component="a"
+            href="https://maps.app.goo.gl/ZxZo7wb9VQ38qcht6"
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="contained"
+            size="large"
+            startIcon={<DeliveryDiningIcon />}
+            sx={{
+              borderRadius: 4,
+              px: 5,
+              py: 1.6,
+              textTransform: "none",
+              fontWeight: 800,
+              fontSize: 16,
+              background:
+                "linear-gradient(135deg,#22c55e,#16a34a)",
+              boxShadow:
+                "0 12px 30px rgba(34,197,94,0.35)",
+
+              transition: "all .25s ease",
+
+              "&:hover": {
+                transform: "translateY(-3px) scale(1.02)",
+                boxShadow:
+                  "0 18px 40px rgba(34,197,94,0.45)",
+              },
+            }}
+          >
+            Quiero llegar a Punto Urbano
+          </Button>
+        </Box>
+
+       
+      </CardContent>
+    </Card>
+  </Container>
+</Box>
+
+
+{/* CONTACTO */}
+<Box
+  sx={{
+    py: 10,
+    bgcolor: "#111827",
+    borderTop: "1px solid rgba(255,255,255,0.06)",
+  }}
+>
+  <Container maxWidth="md">
+    <Typography
+      variant="h4"
+      fontWeight={800}
+      textAlign="center"
+      mb={2}
+    >
+      Encuéntranos aquí
+    </Typography>
+
+    <Typography
+      textAlign="center"
+      color="#94a3b8"
+      mb={6}
+      sx={{ maxWidth: 700, mx: "auto" }}
+    >
+      Visítanos y disfruta una experiencia única
+      en Punto Urbano. Atención rápida, ambiente
+      moderno y el mejor sabor de Pasto.
+    </Typography>
+
+    <Stack spacing={3}>
+      {/* DIRECCIÓN */}
+      <Card
+        sx={{
+          borderRadius: 4,
+          bgcolor: "#1e293b",
+          color: "white",
+          p: 2,
+        }}
+      >
+        <CardContent>
+          <Typography fontWeight={700} mb={1}>
+            📍 Información de Contacto
+          </Typography>
+
+          <Typography color="#cbd5e1">
+            Cra. 40 #16d-29, Pasto, Nariño
+          </Typography>
+        </CardContent>
+      </Card>
+
+      {/* HORARIO */}
+      <Card
+        sx={{
+          borderRadius: 4,
+          bgcolor: "#1e293b",
+          color: "white",
+          p: 2,
+        }}
+      >
+        <CardContent>
+          <Typography fontWeight={700} mb={1}>
+            🕒 Horario de atención
+          </Typography>
+
+          <Typography color="#cbd5e1">
+            Abierto · Lunes a Sábado de 7:00 a.m.
+            a 4:00 p.m.
+          </Typography>
+        </CardContent>
+      </Card>
+
+      {/* TELÉFONO */}
+      <Card
+        sx={{
+          borderRadius: 4,
+          bgcolor: "#1e293b",
+          color: "white",
+          p: 2,
+        }}
+      >
+        <CardContent>
+          <Typography fontWeight={700} mb={1}>
+            📞 Teléfono
+          </Typography>
+
+          <Typography color="#22c55e" fontWeight={700}>
+            322 6665512
+          </Typography>
+        </CardContent>
+      </Card>
+
+      {/* SERVICIOS */}
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        spacing={2}
+      >
+        <Card
+          sx={{
+            flex: 1,
+            borderRadius: 4,
+            bgcolor: "#1e293b",
+            color: "white",
+          }}
+        >
+          <CardContent>
+            <Typography fontWeight={700} mb={1}>
+              🛵 Domicilios
+            </Typography>
+
+            <Typography color="#cbd5e1">
+              Servicio a domicilio disponible
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <Card
+          sx={{
+            flex: 1,
+            borderRadius: 4,
+            bgcolor: "#1e293b",
+            color: "white",
+          }}
+        >
+          <CardContent>
+            <Typography fontWeight={700} mb={1}>
+              🍽 Reservas
+            </Typography>
+
+            <Typography color="#cbd5e1">
+              Reservas disponibles por teléfono
+            </Typography>
+          </CardContent>
+        </Card>
+      </Stack>
+    </Stack>
+  </Container>
+</Box>
+
       {/* FOOTER */}
       <Box
         sx={{
@@ -558,7 +924,10 @@ export default function Home() {
       >
         <Typography>
           © {new Date().getFullYear()} Punto
-          Urbano · Pasto, Colombia
+          Urbano · Pasto, Colombia 
+        </Typography>
+          <Typography>
+            Enterprise Software by Eng. Alexis Caratar 
         </Typography>
       </Box>
 
