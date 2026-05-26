@@ -6,7 +6,6 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import PrintIcon from "@mui/icons-material/Print";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import PersonIcon from "@mui/icons-material/Person";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import SearchIcon from "@mui/icons-material/Search";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
@@ -20,9 +19,20 @@ import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import { facturaPorCaja, productosPorVenta,cancelarFactura, actualiza_venta,imprimircomanda,imprimirfactura } from "../../../../../../api/cajero";
+import { facturaPorCaja, productosPorVenta,cancelarFactura, actualiza_venta,imprimircomanda,imprimirfactura, apibuscar_cliente } from "../../../../../../api/cajero";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { useTheme, useMediaQuery } from "@mui/material";
+import { CrearClienteModal } from "../CrearClienteModal";
+
+
+
+type Cliente = {
+  id: number;
+  nombres: string;
+  apellidos: string;
+  identificacion: string;
+};
+
 
 export default function VentasDetalles({ open, onClose, id_caja }: any) {
 
@@ -41,7 +51,7 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
   const id_negocio = localStorage.getItem("id_negocio");
   const nombreuser = localStorage.getItem("nombre");
   const [openVentaRegistrada, setOpenVentaRegistrada] = useState(false);
-  const porPagina = 16;
+  const porPagina = 32;
   const cambioaux = montoRecibido - ventaSeleccionada?.venta_total || 0;
   const cambioSeguro = Math.max(cambioaux, 0);
   const [ventaPayload, setVentaPayload] = useState<any>(null);
@@ -50,7 +60,34 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
   const [motivo, setMotivo] = useState("");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const [clienteBuscado, setClienteBuscado] = useState("");
+  const [resultados, setResultados] = useState<Cliente[]>([]);
+  const [clienteSeleccionado, setClienteSeleccionado] =
+    useState<Cliente | null>(null);
+  const [modoEditarCliente, setModoEditarCliente] = useState(false);
+  const [openCrearModal, setOpenCrearModal] = useState(false);
   
+  
+  const handleBuscarCliente = async (term: string) => {
+    setClienteBuscado(term);
+  
+    if (term.trim().length < 2) {
+      setResultados([]);
+      return;
+    }
+  
+    const res = await apibuscar_cliente({
+      id_cliente: term,
+    });
+  
+    setResultados(res.data.result);
+  };
+  
+  const seleccionarCliente = (cli: Cliente) => {
+    setClienteSeleccionado(cli);
+    setResultados([]);
+    setClienteBuscado("");
+  };
 
   useEffect(() => {
     if (open && id_caja) cargarVentas();
@@ -139,6 +176,7 @@ const getMetodoPagoIcon = (metodo:any) => {
     setLoadingDetalle(true);
     const { data } = await productosPorVenta({ id_venta: venta.id_venta });
     if (data?.ok) setProductosDetalle(data.result);
+     setModoEditarCliente(false);
     setLoadingDetalle(false);
   };
 
@@ -213,7 +251,8 @@ const getMetodoPagoIcon = (metodo:any) => {
       monto_recibido: montoRecibido,
       cambio: cambio,
       id_mesa: ventaSeleccionada.id_mesa || 0,
-      total_pago: ventaSeleccionada.venta_total
+      total_pago: ventaSeleccionada.venta_total,
+      id_cliente:clienteSeleccionado?.id ||ventaSeleccionada.id_cliente,
     };
     try {
       const { data } = await actualiza_venta(payload);
@@ -789,6 +828,21 @@ const getMetodoPagoIcon = (metodo:any) => {
 
     {/* DERECHA (ACCIONES) */}
     <Stack direction="row" spacing={1}>
+
+      
+     <Chip
+        label={estado?.label}
+        size="small"
+        sx={{
+          bgcolor: estado?.color,
+          color: "#fff",
+          fontWeight: 700,
+          borderRadius: 2,
+          px: 1,
+          boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
+        }}
+      />
+
       
       {/* CANCELAR */}
      
@@ -837,42 +891,284 @@ const getMetodoPagoIcon = (metodo:any) => {
 </Box>
 
   {/* CLIENTE */}
-  <Box sx={{ p: 2, bgcolor: "#fff", borderBottom: "1px solid #eee" }}>
-    <Stack direction="row" spacing={2} alignItems="center">
-      <Avatar src={ventaSeleccionada?.cliente_imagen} sx={{ width: 46, height: 46 }}>
-        <PersonIcon />
-      </Avatar>
 
-      <Box>
-        <Typography fontSize={11} color="text.secondary">
-          Cliente
-        </Typography>
+ 
 
-        <Typography fontWeight={700} fontSize={14} noWrap>
-          {ventaSeleccionada?.nombre_completo}
-        </Typography>
+           <Box
+    sx={{
+      mb: 2.5,
+      borderRadius: 4,
+      overflow: "hidden",
+      border: "1px solid #e2e8f0",
+      background:
+        "linear-gradient(180deg,#ffffff 0%, #f8fafc 100%)",
+      boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
+    }}
+  >
 
-        <Typography fontSize={11} color="text.secondary">
-          {ventaSeleccionada?.identificacion_cliente}
-        </Typography>
-      </Box>
+    
 
-      <Box flex={1} />
-
-     <Chip
-        label={estado?.label}
-        size="small"
+  
+    {/* CUERPO */}
+    <Box sx={{ p: 2 }}>
+      {/* CLIENTE */}
+      <Box
         sx={{
-          bgcolor: estado?.color,
-          color: "#fff",
-          fontWeight: 700,
-          borderRadius: 2,
-          px: 1,
-          boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
+          p: 1.5,
+          borderRadius: 3,
+          border: "1px solid #e2e8f0",
+          bgcolor: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
         }}
-      />
-    </Stack>
+      >
+        {/* IZQUIERDA */}
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          sx={{ minWidth: 0 }}
+        >
+          
+          {/* AVATAR */}
+              <Box
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "50%",
+                        background:
+                          "linear-gradient(135deg,#0ea5e9,#2563eb)",
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: 700,
+                        fontSize: 14,
+                      }}
+                    >
+                       {(clienteSeleccionado?.nombres ||
+              ventaSeleccionada?.nombre_completo ||
+              "C")[0]}
+                    </Box>
+  
+  
+          {/* INFO */}
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+              fontWeight={800}
+              noWrap
+              sx={{
+                fontSize: {
+                  xs: 13,
+                  sm: 15,
+                },
+              }}
+            >
+              {clienteSeleccionado?.nombres ||
+                ventaSeleccionada?.nombre_completo}
+            </Typography>
+  
+            <Typography
+              color="text.secondary"
+              sx={{
+                fontSize: 12,
+              }}
+            >
+              Documento:{" "}
+              {clienteSeleccionado?.identificacion ||
+                ventaSeleccionada?.identificacion_cliente}
+            </Typography>
+          </Box>
+        </Stack>
+  
+        {/* BOTONES */}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+        >
+          { ventaSeleccionada?.estado_pago==false &&
+          !modoEditarCliente ? (
+            <Button
+              size="small"
+              variant="contained"
+              onClick={() => setModoEditarCliente(true)}
+              sx={{
+                textTransform: "none",
+                borderRadius: 2,
+                fontWeight: 700,
+                px: 2,
+                background:
+                 "linear-gradient(135deg,#0ea5e9,#2563eb)",
+  
+                "&:hover": {
+                  background:
+                    "linear-gradient(135deg,#1d4ed8,#1e40af)",
+                },
+              }}
+            >
+              ✏️ Cambiar
+            </Button>
+          ) : (
+            <Button
+              size="small"
+              color="inherit"
+              variant="outlined"
+              onClick={() => {
+                setModoEditarCliente(false);
+                setClienteBuscado("");
+                setResultados([]);
+              }}
+              sx={{
+                textTransform: "none",
+                borderRadius: 2,
+                fontWeight: 700,
+              }}
+            >
+              Cancelar
+            </Button>
+          )}
+        </Stack>
+      </Box>
+  
+      {/* MODO EDICIÓN */}
+      {modoEditarCliente && (
+        <Box mt={2}>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Buscar cliente por nombre o documento..."
+            value={clienteBuscado}
+            onChange={(e) =>
+              handleBuscarCliente(e.target.value)
+            }
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 3,
+                bgcolor: "#fff",
+              },
+            }}
+          />
+  
+          {/* RESULTADOS */}
+          {resultados.length > 0 && (
+            <Box
+              sx={{
+                mt: 1,
+                borderRadius: 3,
+                overflow: "hidden",
+                border: "1px solid #e2e8f0",
+                background: "#fff",
+                maxHeight: 240,
+                overflowY: "auto",
+              }}
+            >
+              {resultados.map((cli) => (
+                <Box
+                  key={cli.id}
+                  onClick={() => {
+                    seleccionarCliente(cli);
+                    setModoEditarCliente(false);
+                  }}
+                  sx={{
+                    p: 1.5,
+                    cursor: "pointer",
+                    transition: "all .2s ease",
+                    borderBottom:
+                      "1px solid rgba(226,232,240,.7)",
+  
+                    "&:hover": {
+                      background:
+                        "linear-gradient(135deg,#eff6ff,#f8fafc)",
+                    },
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={1.5}
+                    alignItems="center"
+                  >
+                    <Box
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "50%",
+                        background:
+                          "linear-gradient(135deg,#0ea5e9,#2563eb)",
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: 700,
+                        fontSize: 14,
+                      }}
+                    >
+                      {cli.nombres[0]}
+                    </Box>
+  
+                    <Box>
+                      <Typography
+                        fontWeight={700}
+                        fontSize={13}
+                      >
+                        {cli.nombres} {cli.apellidos}
+                      </Typography>
+  
+                      <Typography
+                        fontSize={11}
+                        color="text.secondary"
+                      >
+                        {cli.identificacion}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+              ))}
+            </Box>
+          )}
+  
+          {/* BOTONES */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1}
+            mt={2}
+          >
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={() => setOpenCrearModal(true)}
+              sx={{
+                borderRadius: 3,
+                py: 1,
+                textTransform: "none",
+                fontWeight: 700,
+              }}
+            >
+              + Crear Cliente / Empresa
+            </Button>
+          </Stack>
+  
+          {/* MODAL */}
+          <CrearClienteModal
+            open={openCrearModal}
+            onClose={() => setOpenCrearModal(false)}
+            onCreated={(nuevo: any) => {
+              const clienteFinal: Cliente = {
+                ...nuevo,
+              };
+  
+              setClienteSeleccionado(clienteFinal);
+              setModoEditarCliente(false);
+              setOpenCrearModal(false);
+            }}
+          />
+        </Box>
+      )}
+    </Box>
   </Box>
+
+
 
   {/* CONTENIDO CON SCROLL */}
  <DialogContent
@@ -1004,8 +1300,18 @@ const getMetodoPagoIcon = (metodo:any) => {
             <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
             <MenuItem value="NEQUI">📲 Nequi</MenuItem>
             <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
-            <MenuItem value="TIQUERERA">🎟️ Tiquetera</MenuItem>
-          </TextField>
+            <MenuItem value="TIQUERERA" disabled={!clienteSeleccionado} >🎟️ Tiquetera</MenuItem>
+                  {(!clienteSeleccionado ||
+                    clienteSeleccionado.identificacion?.toLowerCase().includes("22222222")) && (
+                    <Typography
+                      mt={1}
+                      fontSize={12}
+                      color="warning.main"
+                      fontWeight={600}
+                    >
+                      ⚠️ Debes seleccionar un cliente válido para usar tiquetera
+                    </Typography>
+                  )}              </TextField>
 
           {metodoPago === "EFECTIVO" && (
             <>

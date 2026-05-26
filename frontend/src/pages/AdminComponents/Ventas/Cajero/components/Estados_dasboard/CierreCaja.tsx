@@ -74,6 +74,12 @@ const ventaLibre = useMemo(() => {
   return toNumber(dineroContado) - toNumber(baseCaja);
 }, [dineroContado, baseCaja]);
 
+const baseCajaInvalida = useMemo(() => {
+  if (dineroContado === "" || baseCaja === "") return false;
+
+  return toNumber(baseCaja) > toNumber(dineroContado);
+}, [dineroContado, baseCaja]);
+
 const diferencia = useMemo(() => {
   if (dineroContado === "") return 0;
   return toNumber(dineroContado) - dineroEsperado;
@@ -496,16 +502,22 @@ const camposValidos = () => {
   )}
 
   {/* 🔹 BASE CAJA */}
-  <TextField
-    fullWidth
-    label="Base que queda en caja"
-    value={baseCaja === "" ? "" : formatCOP(Number(baseCaja))}
-    onChange={(e) => {
-      const valor = e.target.value.replace(/\D/g, "");
-      setBaseCaja(valor === "" ? "" : Number(valor));
-    }}
-    sx={{ mb: 2 }}
-  />
+    <TextField
+      fullWidth
+      label="Base que queda en caja"
+      value={baseCaja === "" ? "" : formatCOP(Number(baseCaja))}
+      onChange={(e) => {
+        const valor = e.target.value.replace(/\D/g, "");
+        setBaseCaja(valor === "" ? "" : Number(valor));
+      }}
+      error={baseCajaInvalida}
+      helperText={
+        baseCajaInvalida
+          ? "La base en caja no puede ser mayor al dinero contado"
+          : ""
+      }
+      sx={{ mb: 2 }}
+    />
 
   {/* 🔹 VENTA LIBRE */}
   <Box
@@ -568,9 +580,10 @@ const camposValidos = () => {
   variant="contained"
   onClick={() => setStep(step + 1)}
   disabled={
-    (step === 0 && !camposValidos()) ||
-    (step === 1 && !inventarioOk) 
-  }
+  (step === 0 &&
+    (!camposValidos() || baseCajaInvalida)) ||
+  (step === 1 && !inventarioOk)
+}
 >
   Siguiente
 </Button>
@@ -866,7 +879,7 @@ onClose={(_, reason) => {
       <DialogActions sx={{ px: 3, pb: 2 }}>
       <Box
           onClick={() => {
-              if (!inventarioOk) return; 
+             if (!inventarioOk || baseCajaInvalida) return;
               handleConfirmarCierre();
             }}
         sx={{

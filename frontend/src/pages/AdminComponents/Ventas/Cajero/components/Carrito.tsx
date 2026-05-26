@@ -226,8 +226,8 @@ export const Carrito: React.FC<Props> = ({
                 gap: 1.5,
                 border: "1px solid #c8e6c9",
               }}
-            >
-
+            > 
+              <CheckCircleIcon sx={{ fontSize: 30, color: "#2ecc71" }} />
               <PersonIcon sx={{ fontSize: 30, color: "primary.main" }} />
 
               <Box sx={{ flexGrow: 1 }}>
@@ -243,7 +243,22 @@ export const Carrito: React.FC<Props> = ({
                 </Box>
               </Box>
 
-              <CheckCircleIcon sx={{ fontSize: 30, color: "#2ecc71" }} />
+                  {/* BOTÓN LIMPIAR */}
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setClienteSeleccionado(null);
+                }}
+                sx={{
+                  bgcolor: "rgba(0,0,0,0.05)",
+                  "&:hover": {
+                    bgcolor: "rgba(255,0,0,0.1)",
+                  },
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+
             </Box>
           )}
 
@@ -503,7 +518,18 @@ export const Carrito: React.FC<Props> = ({
                 <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
                 <MenuItem value="NEQUI">📲 Nequi</MenuItem>
                 <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
-                <MenuItem value="TIQUERERA">🎟️ Tiquetera</MenuItem>
+                <MenuItem value="TIQUERERA" disabled={!clienteSeleccionado} >🎟️ Tiquetera</MenuItem>
+                    {(!clienteSeleccionado ||
+                                    clienteSeleccionado.identificacion?.toLowerCase().includes("22222222")) && (
+                                    <Typography
+                                      mt={1}
+                                      fontSize={12}
+                                      color="warning.main"
+                                      fontWeight={600}
+                                    >
+                                      ⚠️ Debes seleccionar un cliente válido para usar tiquetera
+                                    </Typography>
+                                  )}  
               </TextField>
 
               {/* MONTO RECIBIDO */}

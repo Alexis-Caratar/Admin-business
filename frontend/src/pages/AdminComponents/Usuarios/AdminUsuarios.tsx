@@ -61,7 +61,7 @@ const AdminUsuarios: React.FC = () => {
   const [sortField] = useState<keyof User>("nombres");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
-  const ITEMS_PER_PAGE = 6;
+  const ITEMS_PER_PAGE = 20;
   const [openModal, setOpenModal] = useState(false);
   const [openPermisos, setOpenPermisos] = useState(false);
   const [menusNegocio, setMenusNegocio] = useState<{ id: number; nombre: string, icono: string, url: string }[]>([]);
@@ -410,14 +410,17 @@ const AdminUsuarios: React.FC = () => {
         <Box display="flex" flexWrap="wrap" gap={2}>
           <AnimatePresence>
             {paginated.map((u) => (
-              <Box
-                key={u.id_usuario}
-                flex="1 1 calc(100% - 16px)" // xs: full width
-                sx={{
-                  '@media (min-width:600px)': { flex: '1 1 calc(50% - 16px)' },  // sm: 2 por fila
-                  '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 16px)' }, // md: 3 por fila
-                }}
-              >
+           <Box
+              key={u.id_usuario}
+              sx={{
+                flex: {
+                  xs: "1 1 100%",
+                  sm: "1 1 calc(50% - 16px)",
+                  md: "1 1 calc(25% - 16px)",
+                  lg: "1 1 calc(20% - 16px)",
+                }
+              }}
+            >
                 <motion.div
                   variants={cardVariants}
                   initial="hidden"

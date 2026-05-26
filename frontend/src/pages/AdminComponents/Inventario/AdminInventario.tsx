@@ -54,7 +54,7 @@ const AdminInventario: React.FC = () => {
   const [modoMovimiento, setModoMovimiento] = useState<"INDIVIDUAL" | "MASIVO">("MASIVO");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 24;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const rol = localStorage.getItem("rol") || "";
@@ -282,29 +282,46 @@ const AdminInventario: React.FC = () => {
 
 
       {/* LISTA */}
-      <Box
-        display="grid"
-        gridTemplateColumns="repeat(auto-fill, minmax(260px, 1fr))"
-        gap={3}
-      >
-
+     <Box
+  sx={{
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 3,
+  }}
+>
         {inventariosPaginados.map((inv) => {
          // const bajoStock = inv.stock_actual <= inv.stock_minimo;
           return (
-            <motion.div
-              key={inv.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card
-                sx={{
-                  borderRadius: 4,
-                  boxShadow: 2,
-                  transition: "0.2s",
-                  "&:hover": { boxShadow: 6 }
-                }}
-              >
+            <Box
+        key={inv.id}
+        sx={{
+          flex: {
+            xs: "0 0 40%",
+            sm: "0 0 calc(30% - 24px)",
+            md: "0 0 calc(25% - 24px)",
+            lg: "0 0 calc(20% - 24px)",
+            xl: "0 0 calc(16% - 24px)",
+          },
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.02 }}
+          style={{ height: "100%" }}
+        >
+                <Card
+            sx={{
+              height: "100%",
+              borderRadius: 4,
+              boxShadow: 2,
+              transition: "0.2s",
+
+              "&:hover": {
+                boxShadow: 6,
+              },
+            }}
+          >
                 <CardContent>
                   <Stack spacing={1.5}>
 
@@ -312,7 +329,7 @@ const AdminInventario: React.FC = () => {
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                       <Stack direction="row" alignItems="center" gap={1}>
                         <InventoryIcon fontSize="small" />
-                        <Typography fontWeight={600}>
+                        <Typography fontSize={12}fontWeight={600}>
                           {inv.nombre}
                         </Typography>
                       </Stack>
@@ -330,7 +347,7 @@ const AdminInventario: React.FC = () => {
                     </Stack>
 
                     {/* INFO */}
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary">
                       Unidad: {inv.unidad}
                     </Typography>
 
@@ -351,12 +368,12 @@ const AdminInventario: React.FC = () => {
                       >
                         <Stack direction="row" justifyContent="space-between" alignItems="center">
 
-                          <Typography fontSize={13} color="text.secondary">
+                          <Typography fontSize={12} color="text.secondary">
                             Stock actual
                           </Typography>
 
                           <Typography
-                            fontSize={22}
+                            fontSize={18}
                             fontWeight={900}
                             sx={{
                               color:
@@ -367,12 +384,12 @@ const AdminInventario: React.FC = () => {
                           </Typography>
                         </Stack>
 
-                        <Typography fontSize={11} color="text.secondary">
+                        <Typography fontSize={10} color="text.secondary">
                           Mínimo: {inv.stock_minimo}
                         </Typography>
 
                         {inv.stock_actual <= inv.stock_minimo && (
-                          <Typography fontSize={11} color="error.main" fontWeight={600}>
+                          <Typography fontSize={10} color="error.main" fontWeight={600}>
                             ⚠ Stock bajo
                           </Typography>
                         )}
@@ -380,11 +397,12 @@ const AdminInventario: React.FC = () => {
 
                     </Box>
 
-                    {/* COSTO */}
+                  {/* COSTO */}
+                  {rol == 'admin' && (
                     <Typography fontSize={13}>
                       $ {inv.costo_unitario}
                     </Typography>
-
+                   )}
                     {/* ACCIONES */}
 
 
@@ -446,6 +464,7 @@ const AdminInventario: React.FC = () => {
 
 
             </motion.div>
+            </Box>
           );
         })}
       </Box>

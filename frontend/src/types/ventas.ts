@@ -6,6 +6,7 @@ export interface Venta {
   identificacion_cliente:string;
   nombre_completo:string;
   fecha: string;
+  hora: string;
   subtotal: number;
   descuento: number;
   descuento_porcentaje: number;

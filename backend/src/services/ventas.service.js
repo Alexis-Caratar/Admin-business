@@ -10,6 +10,7 @@ export const VentasService = {
 
         `SELECT 
     v.fecha,
+        TO_CHAR(v.fecha, 'TMDay') AS dia,
     v.total,
     COALESCE(e.egresos, 0) AS egresos,
     v.cantidad

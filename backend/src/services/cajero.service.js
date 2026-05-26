@@ -1026,8 +1026,10 @@ actualizaventa: async (payload) => {
 
     const {
       idUsuario, id_negocio, id_venta,
-      metodo_pago, monto_recibido, cambio, id_mesa
+      metodo_pago, monto_recibido, cambio, id_mesa,id_cliente
     } = payload;
+    
+    console.log("pyaload",payload);
     
     // estado de pago
     const estado_pago_id = metodo_pago !== 'PENDIENTE' ? 1 : 0;
@@ -1055,7 +1057,15 @@ actualizaventa: async (payload) => {
       throw new Error("No se encontró el pago para la venta");
     }
 
-    // 2️⃣ Liberar mesa
+       // 2️⃣ actualizar cliente
+    await conn.query(`
+      UPDATE ventas SET id_cliente=$1 WHERE id=$2
+    `, [
+      id_cliente,
+      id_venta
+    ]);
+
+    //3 2️⃣ Liberar mesa
     await conn.query(
       `UPDATE mesas SET estado='Disponible' WHERE id = $1`,
       [id_mesa]

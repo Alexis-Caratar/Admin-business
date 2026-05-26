@@ -38,7 +38,7 @@ const AdminCategorias = () => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 15;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -187,24 +187,36 @@ const AdminCategorias = () => {
      {/* GRID CATEGORIAS */}
 <Box display="flex" flexWrap="wrap" gap={3}>
   {paginated.map((c: any) => (
-    <Box
-      key={c.id}
-      flex="1 1 calc(100% - 24px)" // xs: 1 por fila
-      sx={{
-        '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' }, // sm: 2 por fila
-        '@media (min-width:900px)': { flex: '1 1 calc(25% - 24px)' }, // md: 3 por fila
-      }}
-    >
-      <Card
-        sx={{
-          transition: "transform .2s, box-shadow .2s",
-          cursor: "pointer",
-          "&:hover": {
-            transform: "translateY(-6px)",
-            boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
-          },
-        }}
-      >
+<Box
+  key={c.id}
+  sx={{
+    flex: {
+      xs: "  0 100%",
+      sm: "0 0 calc(50% - 24px)",
+      md: "0 0 calc(33.33% - 24px)",
+      lg: "0 0 calc(25% - 24px)",
+      xl: "0 0 calc(20% - 24px)",
+    },
+    minWidth: 0,
+  }}
+>
+  <Card
+    sx={{
+      width: "100%",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      transition: "transform .2s, box-shadow .2s",
+      cursor: "pointer",
+
+      "&:hover": {
+        transform: "translateY(-6px)",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
+      },
+       
+    }}
+    
+  >
         <div onClick={() => handleOpenProductos(c.id)}>
           <CardMedia
             component="img"
@@ -215,8 +227,10 @@ const AdminCategorias = () => {
         </div>
 
         <CardContent>
-          <Typography variant="h6">{c.nombre}</Typography>
-          <Typography variant="body2">{c.descripcion}</Typography>
+          <Typography variant="body2" fontWeight={700}>
+            {c.nombre}
+          </Typography>  
+         <Typography variant="caption">{c.descripcion}</Typography>
 
           <Box mt={1} display="flex" gap={1}>
             <IconButton

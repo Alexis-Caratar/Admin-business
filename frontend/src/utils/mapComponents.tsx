@@ -4,7 +4,7 @@ import AdminNegocios from "../pages/AdminComponents/Negocios/AdminNegocios";
 //import AdminProductos from "../pages/AdminComponents/Productos/AdminProductos";
 import  AdminInventario  from "../pages/AdminComponents/Inventario/AdminInventario";
 import  AdminCategorias  from "../pages/AdminComponents/Categorias/AdminCategorias";
-import  AdminVentas  from "../pages/AdminComponents/Ventas/AdminVentas";
+import  AdminVentas  from "../pages/AdminComponents/Ventas/Admin/AdminVentas";
 import  CajeroDashboard  from "../pages/AdminComponents/Ventas/Cajero/CajeroDashboard";
 
 // Mapea componentes según el "codigo" que llega desde la BD

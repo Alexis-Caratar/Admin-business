@@ -77,7 +77,7 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
   const [openModal, setOpenModal] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 18;
   const [imgIndices, setImgIndices] = useState<{ [key: number]: number }>({});
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));

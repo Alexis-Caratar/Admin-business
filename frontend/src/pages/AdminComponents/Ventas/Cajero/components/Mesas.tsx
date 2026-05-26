@@ -12,6 +12,9 @@ import type { Mesa } from "./../../../../../types/cajero";
 import { apidetallesMesa, actualiza_venta, liberar_mesa, imprimircomanda } from "../../../../../api/cajero";
 import Swal from "sweetalert2";
 import ChairIcon from "@mui/icons-material/Chair";
+import { apibuscar_cliente } from "../../../../../api/cajero";
+import { CrearClienteModal } from "./CrearClienteModal";
+
 
 type Props = {
   idUsuario: number|null;
@@ -19,6 +22,13 @@ type Props = {
   mesas: Mesa[];
   mesaSeleccionada: Mesa | null;
   onSelect?: (m: Mesa | null) => void;
+};
+
+type Cliente = {
+  id: number;
+  nombres: string;
+  apellidos: string;
+  identificacion: string;
 };
 
 export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSeleccionada, onSelect }) => {
@@ -31,6 +41,34 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
   const [, setHabilitarPago] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [clienteBuscado, setClienteBuscado] = useState("");
+const [resultados, setResultados] = useState<Cliente[]>([]);
+const [clienteSeleccionado, setClienteSeleccionado] =
+  useState<Cliente | null>(null);
+const [modoEditarCliente, setModoEditarCliente] = useState(false);
+const [openCrearModal, setOpenCrearModal] = useState(false);
+
+
+const handleBuscarCliente = async (term: string) => {
+  setClienteBuscado(term);
+
+  if (term.trim().length < 2) {
+    setResultados([]);
+    return;
+  }
+
+  const res = await apibuscar_cliente({
+    id_cliente: term,
+  });
+
+  setResultados(res.data.result);
+};
+
+const seleccionarCliente = (cli: Cliente) => {
+  setClienteSeleccionado(cli);
+  setResultados([]);
+  setClienteBuscado("");
+};
 
   const getEstadoConfig = (estado: Mesa["estado"]) => {
     switch (estado) {
@@ -121,6 +159,8 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
       metodo_pago: metodoPago,
       monto_recibido: montoRecibido,
       cambio: cambioSeguro,
+      id_cliente:clienteSeleccionado?.id ||detalleVenta.id_cliente,
+
     };
 
     try {
@@ -437,49 +477,343 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
         <DialogContent dividers sx={{ bgcolor: "#f8fafc" }}>
           {!loadingDetalle && detalleVenta && (
             <>
+            <Box
+  sx={{
+    mb: 2.5,
+    borderRadius: 4,
+    overflow: "hidden",
+    border: "1px solid #e2e8f0",
+    background:
+      "linear-gradient(180deg,#ffffff 0%, #f8fafc 100%)",
+    boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
+  }}
+>
+  {/* HEADER FACTURA */}
+  <Box
+    sx={{
+      px: 2,
+      py: 1.5,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      background:
+        "linear-gradient(135deg,#0f172a,#1e293b)",
+      color: "#fff",
+    }}
+  >
+    <Stack direction="row" spacing={1.2} alignItems="center">
+      <Box
+        sx={{
+          width: 38,
+          height: 38,
+          borderRadius: 2,
+          background: "rgba(255,255,255,0.12)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 18,
+        }}
+      >
+        🧾
+      </Box>
+
+      <Box>
+        <Typography
+          fontWeight={800}
+          sx={{ fontSize: { xs: 14, sm: 16 } }}
+        >
+          Factura Numero
+        </Typography>
+
+        <Typography
+          sx={{
+            fontSize: 11,
+            opacity: 0.75,
+          }}
+        >
+          Información del cliente y venta
+        </Typography>
+      </Box>
+    </Stack>
+
+    {/* NUMERO FACTURA */}
+    <Box
+      sx={{
+        px: 2,
+        py: 0.8,
+        borderRadius: 2,
+        background:
+          "linear-gradient(135deg,#22c55e,#16a34a)",
+        boxShadow: "0 4px 14px rgba(34,197,94,.35)",
+        fontWeight: 800,
+        letterSpacing: 1,
+        fontSize: {
+          xs: "0.72rem",
+          sm: "0.82rem",
+        },
+      }}
+    >
+      {detalleVenta.numero_factura}
+    </Box>
+  </Box>
+
+  {/* CUERPO */}
+  <Box sx={{ p: 2 }}>
+    {/* CLIENTE */}
+    <Box
+      sx={{
+        p: 1.5,
+        borderRadius: 3,
+        border: "1px solid #e2e8f0",
+        bgcolor: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 2,
+      }}
+    >
+      {/* IZQUIERDA */}
+      <Stack
+        direction="row"
+        spacing={1.5}
+        alignItems="center"
+        sx={{ minWidth: 0 }}
+      >
+        {/* AVATAR */}
+            <Box
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: "50%",
+                      background:
+                        "linear-gradient(135deg,#0ea5e9,#2563eb)",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 700,
+                      fontSize: 14,
+                    }}
+                  >
+                     {(clienteSeleccionado?.nombres ||
+            detalleVenta.nombre_completo ||
+            "C")[0]}
+                  </Box>
+
+
+        {/* INFO */}
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            fontWeight={800}
+            noWrap
+            sx={{
+              fontSize: {
+                xs: 13,
+                sm: 15,
+              },
+            }}
+          >
+            {clienteSeleccionado?.nombres ||
+              detalleVenta.nombre_completo}
+          </Typography>
+
+          <Typography
+            color="text.secondary"
+            sx={{
+              fontSize: 12,
+            }}
+          >
+            Documento:{" "}
+            {clienteSeleccionado?.identificacion ||
+              detalleVenta.identificacion_cliente}
+          </Typography>
+        </Box>
+      </Stack>
+
+      {/* BOTONES */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1}
+      >
+        {detalleVenta.estado_pago_bool === false &&
+        !modoEditarCliente ? (
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => setModoEditarCliente(true)}
+            sx={{
+              textTransform: "none",
+              borderRadius: 2,
+              fontWeight: 700,
+              px: 2,
+              background:
+               "linear-gradient(135deg,#0ea5e9,#2563eb)",
+
+              "&:hover": {
+                background:
+                  "linear-gradient(135deg,#1d4ed8,#1e40af)",
+              },
+            }}
+          >
+            ✏️ Cambiar
+          </Button>
+        ) : (
+          <Button
+            size="small"
+            color="inherit"
+            variant="outlined"
+            onClick={() => {
+              setModoEditarCliente(false);
+              setClienteBuscado("");
+              setResultados([]);
+            }}
+            sx={{
+              textTransform: "none",
+              borderRadius: 2,
+              fontWeight: 700,
+            }}
+          >
+            Cancelar
+          </Button>
+        )}
+      </Stack>
+    </Box>
+
+    {/* MODO EDICIÓN */}
+    {modoEditarCliente && (
+      <Box mt={2}>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Buscar cliente por nombre o documento..."
+          value={clienteBuscado}
+          onChange={(e) =>
+            handleBuscarCliente(e.target.value)
+          }
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 3,
+              bgcolor: "#fff",
+            },
+          }}
+        />
+
+        {/* RESULTADOS */}
+        {resultados.length > 0 && (
+          <Box
+            sx={{
+              mt: 1,
+              borderRadius: 3,
+              overflow: "hidden",
+              border: "1px solid #e2e8f0",
+              background: "#fff",
+              maxHeight: 240,
+              overflowY: "auto",
+            }}
+          >
+            {resultados.map((cli) => (
               <Box
+                key={cli.id}
+                onClick={() => {
+                  seleccionarCliente(cli);
+                  setModoEditarCliente(false);
+                }}
                 sx={{
-                  p: 2,
-                  mb: 2,
-                  borderRadius: 3,
-                  bgcolor: "#fff",
-                  border: "1px solid #e5e7eb",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center"
+                  p: 1.5,
+                  cursor: "pointer",
+                  transition: "all .2s ease",
+                  borderBottom:
+                    "1px solid rgba(226,232,240,.7)",
+
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg,#eff6ff,#f8fafc)",
+                  },
                 }}
               >
-                {/* Cliente */}
-                <Box>
-                  <Typography fontWeight={700}>
-                    {detalleVenta.nombre_completo}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Documento: {detalleVenta.identificacion_cliente}
-                  </Typography>
-                </Box>
-
-                {/* Numero factura */}
-                <Box
-                  sx={{
-                    px: { xs: 1.5, sm: 2 },
-                    py: { xs: 0.6, sm: 0.8 },
-                    borderRadius: { xs: 1.5, sm: 2 },
-                    background: "linear-gradient(135deg,#1e293b,#111827)",
-                    color: "#fff",
-                    fontWeight: 700,
-                    fontSize: { xs: "0.75rem", sm: "0.85rem", md: "0.9rem" },
-                    letterSpacing: { xs: 0.5, sm: 1 },
-                    boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
-                    textAlign: "center",
-                    maxWidth: "100%",
-                    whiteSpace: "nowrap",
-                  }}
+                <Stack
+                  direction="row"
+                  spacing={1.5}
+                  alignItems="center"
                 >
-                  {detalleVenta.numero_factura}
-                </Box>
-              </Box>
+                  <Box
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: "50%",
+                      background:
+                        "linear-gradient(135deg,#0ea5e9,#2563eb)",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 700,
+                      fontSize: 14,
+                    }}
+                  >
+                    {cli.nombres[0]}
+                  </Box>
 
+                  <Box>
+                    <Typography
+                      fontWeight={700}
+                      fontSize={13}
+                    >
+                      {cli.nombres} {cli.apellidos}
+                    </Typography>
+
+                    <Typography
+                      fontSize={11}
+                      color="text.secondary"
+                    >
+                      {cli.identificacion}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        {/* BOTONES */}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          mt={2}
+        >
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={() => setOpenCrearModal(true)}
+            sx={{
+              borderRadius: 3,
+              py: 1,
+              textTransform: "none",
+              fontWeight: 700,
+            }}
+          >
+            + Crear Cliente / Empresa
+          </Button>
+        </Stack>
+
+        {/* MODAL */}
+        <CrearClienteModal
+          open={openCrearModal}
+          onClose={() => setOpenCrearModal(false)}
+          onCreated={(nuevo: any) => {
+            const clienteFinal: Cliente = {
+              ...nuevo,
+            };
+
+            setClienteSeleccionado(clienteFinal);
+            setModoEditarCliente(false);
+            setOpenCrearModal(false);
+          }}
+        />
+      </Box>
+    )}
+  </Box>
+</Box>
               <Typography fontWeight={600} mb={1}>Detalle de Productos</Typography>
               <Box sx={{ borderRadius: 3, overflow: "hidden", border: "1px solid #e5e7eb", bgcolor: "#fff" }}>
                 {detalleVenta.productos.map((prod: any) => (
@@ -598,7 +932,18 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
                   <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
                   <MenuItem value="NEQUI">📲 Nequi</MenuItem>
                   <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
-                  <MenuItem value="TIQUERERA">🎟️ Tiquetera</MenuItem>
+                 <MenuItem value="TIQUERERA" disabled={!clienteSeleccionado} >🎟️ Tiquetera</MenuItem>
+                  {(!clienteSeleccionado ||
+                    clienteSeleccionado.identificacion?.toLowerCase().includes("22222222")) && (
+                    <Typography
+                      mt={1}
+                      fontSize={12}
+                      color="warning.main"
+                      fontWeight={600}
+                    >
+                      ⚠️ Debes seleccionar un cliente válido para usar tiquetera
+                    </Typography>
+                  )}                  
                   </TextField>
 
                   {metodoPago === "EFECTIVO" && (
@@ -626,9 +971,6 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
                       Cambio: {formatCOP(cambioSeguro)}
                     </Typography>
                   )}
-
-
-
 
                   <Box
                     onClick={!(metodoPago === "EFECTIVO" && cambio < 0) ? handleFinalizarVenta : undefined}                    sx={{

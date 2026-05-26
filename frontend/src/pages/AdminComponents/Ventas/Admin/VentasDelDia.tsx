@@ -32,12 +32,12 @@ import PersonIcon from "@mui/icons-material/Person";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import SearchIcon from "@mui/icons-material/Search";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import type { Venta } from "../../../types/ventas";
-import { productosPorVenta, imprimircomanda, imprimirfactura,apiArqueoCaja} from "../../../api/cajero";
+import type { Venta } from "../../../../types/ventas";
+import { productosPorVenta, imprimircomanda, imprimirfactura,apiArqueoCaja} from "../../../../api/cajero";
 import Swal from "sweetalert2";
 import { Pagination } from "@mui/material";
 import { useTheme, useMediaQuery } from "@mui/material";
-import { ArqueoCajaModal } from "./Cajero/components/Estados_dasboard/ArqueoCaja";
+import { ArqueoCajaModal } from "../Cajero/components/Estados_dasboard/ArqueoCaja";
 
 interface Props {
   ventas: Venta[];
@@ -60,7 +60,7 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
   const [filtro, setFiltro] = useState("todas");
   const [busqueda, setBusqueda] = useState("");
   const [pagina, setPagina] = useState(1);
-  const porPagina = 16;
+  const porPagina = 35;
   const id_negocio = localStorage.getItem("id_negocio");
   const nombreuser = localStorage.getItem("nombre");
   const theme = useTheme();
@@ -639,18 +639,22 @@ const cajasData = ventas
         )}
 
 
-        {/* Facturas */}
+       {/* Facturas */}
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: {
-              xs: "repeat(2, 1fr)",
-              sm: "repeat(3, 1fr)",
-              md: "repeat(4, 1fr)",
-              lg: "repeat(6, 1fr)",
-              xl: "repeat(8, 1fr)",
+              xs: "repeat(auto-fill, minmax(140px, 1fr))",
+              sm: "repeat(auto-fill, minmax(160px, 1fr))",
+              md: "repeat(auto-fill, minmax(180px, 1fr))",
+              lg: "repeat(auto-fill, minmax(190px, 1fr))",
             },
-            gap: { xs: 1.2, md: 1.8 },
+            gap: {
+              xs: 1.2,
+              sm: 1.5,
+              md: 2,
+            },
+            alignItems: "stretch",
           }}
         >
           {ventasPagina.map((venta) => {
@@ -701,9 +705,8 @@ const cajasData = ventas
 
                     <Stack spacing={1.2}>
 
-                      {/* HEADER */}
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" spacing={1} alignItems="center">
+                   
+                              <Stack direction="row" spacing={1} alignItems="center">
                           <Avatar
                             sx={{
                               width: 30,
@@ -720,29 +723,39 @@ const cajasData = ventas
                           </Avatar>
 
                           <Box>
-                            <Typography fontWeight={700} fontSize={10}>
+                                <Typography fontWeight={700} fontSize={10}>
                               {venta.numero_factura}
                             </Typography>
-                            <Typography fontSize={10} color="text.secondary">
-                              {venta.fecha}
-                            </Typography>
+                         
+
                           </Box>
-                        </Stack>
-                        <Chip
+                               <Chip
                           label={`${estado.icon} ${estado.label}`}
                           size="small"
                           sx={{
-                            fontSize: 10,
+                            fontSize: 8,
                             fontWeight: 700,
                             bgcolor: estado.color,
                             color: "#fff",
                             borderRadius: 2,
-                            px: 0.5,
-                            letterSpacing: 0.3,
                             boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
                           }}
                         />
 
+                        </Stack>
+
+                      {/* HEADER */}
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="center">
+                      
+                          <Box>
+                           
+                            <Typography fontSize={10} color="text.secondary">
+                              {venta.fecha} / {venta.hora}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      
                       </Stack>
 
                       {/* CLIENTE */}
