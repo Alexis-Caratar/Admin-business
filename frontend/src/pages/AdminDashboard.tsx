@@ -237,23 +237,72 @@ const cerrarSesion = () => {
               title={!isSmallScreen && collapsed ? menu.nombre : ""}
               placement="right"
             >
-              <ListItemButton
-                selected={selected}
-                onClick={() => {
-                  navigate(`/admin/${menu.url}`);
-                  if (isSmallScreen) setDrawerOpen(false);
-                }}
-                sx={{
-                  color: selected ? "#fff" : "#9AA7B6",
-                  "&.Mui-selected": { bgcolor: "rgba(255,255,255,0.1)" },
-                }}
-              >
-                <ListItemIcon sx={{ color: "inherit" }}>
-                  {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
-                </ListItemIcon>
+             <ListItemButton
+  selected={selected}
+  onClick={() => {
+    navigate(`/admin/${menu.url}`);
 
-                {!collapsed && <ListItemText primary={menu.nombre} />}
-              </ListItemButton>
+    if (isSmallScreen) {
+      setDrawerOpen(false);
+    }
+  }}
+  sx={{
+    minHeight: 42,
+    borderRadius: 2.5,
+    mx: 1,
+    mb: 0.5,
+    px: 1.2,
+    py: 0.6,
+
+    color: selected ? "#fff" : "#94a3b8",
+
+    background: selected
+      ? "linear-gradient(135deg,#1196b7,#0ea5e9)"
+      : "transparent",
+
+    transition: "all .2s ease",
+
+    "&:hover": {
+      bgcolor: selected
+        ? undefined
+        : "rgba(255,255,255,0.05)",
+
+      color: "#fff",
+    },
+
+    "&.Mui-selected": {
+      boxShadow:
+        "0 6px 16px rgba(14,165,233,0.22)",
+    },
+  }}
+>
+  {/* ICONO */}
+  <ListItemIcon
+    sx={{
+      minWidth: 0,
+      mr: collapsed ? 0 : 1.2,
+      color: "inherit",
+
+      "& svg": {
+        fontSize: 19,
+      },
+    }}
+  >
+    {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
+  </ListItemIcon>
+
+  {/* TEXTO */}
+  {!collapsed && (
+    <ListItemText
+      primary={menu.nombre}
+      primaryTypographyProps={{
+        fontSize: 13,
+        fontWeight: selected ? 700 : 500,
+        noWrap: true,
+      }}
+    />
+  )}
+</ListItemButton>
             </Tooltip>
           );
         })}

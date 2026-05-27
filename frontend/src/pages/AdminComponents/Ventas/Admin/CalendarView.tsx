@@ -154,8 +154,8 @@ const CalendarView: React.FC<Props> = ({
             <Typography
               fontWeight={900}
               fontSize={{
-                xs: 22,
-                md: 28,
+                xs: 14,
+                md: 18,
               }}
               color="#0f172a"
             >
@@ -163,7 +163,7 @@ const CalendarView: React.FC<Props> = ({
             </Typography>
 
             <Typography
-              fontSize={14}
+              fontSize={12}
               color="text.secondary"
               mt={0.5}
             >
@@ -221,7 +221,7 @@ const CalendarView: React.FC<Props> = ({
             interactionPlugin,
           ]}
           initialView="dayGridMonth"
-          height="78vh"
+          height="110vh"
           events={events}
           dateClick={handleDateClick}
           selectable
@@ -384,7 +384,8 @@ const CalendarView: React.FC<Props> = ({
 
             .fc-daygrid-day-number {
               color: #0f172a;
-              font-weight: 700;
+              font-weight: 600;
+              font-size: 11px !important; 
               padding: 8px !important;
             }
 

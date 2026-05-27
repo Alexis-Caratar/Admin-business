@@ -9,7 +9,6 @@ import {
   Skeleton,
   Stack,
   Avatar,
-  Grid,
 } from "@mui/material";
 
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
@@ -55,17 +54,21 @@ const CardStat = ({
   <Paper
     elevation={0}
     sx={{
-      p: 2.5,
-      borderRadius: 5,
-      overflow: "hidden",
       position: "relative",
+      overflow: "hidden",
+      p: 2,
+      borderRadius: "22px",
       background: "#fff",
-      border: "1px solid #edf2f7",
-      transition: "all .25s ease",
+      border: "1px solid rgba(15,23,42,0.06)",
+      boxShadow:
+        "0 8px 24px rgba(15,23,42,0.05)",
 
+      transition: "all .25s ease",
+      minHeight: "unset",
       "&:hover": {
-        transform: "translateY(-6px)",
-        boxShadow: "0 15px 35px rgba(0,0,0,0.08)",
+        transform: "translateY(-3px)",
+        boxShadow:
+          "0 14px 35px rgba(15,23,42,0.09)",
       },
     }}
   >
@@ -73,10 +76,10 @@ const CardStat = ({
     <Box
       sx={{
         position: "absolute",
-        top: -40,
-        right: -40,
-        width: 140,
-        height: 140,
+        top: -35,
+        right: -35,
+        width: 100,
+
         borderRadius: "50%",
         background: gradient,
         opacity: 0.12,
@@ -87,12 +90,22 @@ const CardStat = ({
       direction="row"
       justifyContent="space-between"
       alignItems="flex-start"
+      spacing={1.5}
+      sx={{
+        position: "relative",
+        zIndex: 2,
+      }}
     >
-      <Box>
+      {/* INFO */}
+      <Box flex={1} minWidth={0}>
         <Typography
-          fontSize={13}
-          fontWeight={600}
-          color="text.secondary"
+          sx={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: "#64748b",
+            textTransform: "uppercase",
+
+          }}
         >
           {title}
         </Typography>
@@ -100,18 +113,21 @@ const CardStat = ({
         {loading ? (
           <Skeleton
             variant="text"
-            width={120}
-            height={45}
+            width={90}
+            height={35}
           />
         ) : (
           <Typography
-            fontSize={{
-              xs: 24,
-              md: 28,
+            sx={{
+              fontSize: {
+                xs: 14,
+                sm: 16,
+              },
+              fontWeight: 900,
+              lineHeight: 1,
+              color: "#0f172a",
+              wordBreak: "break-word",
             }}
-            fontWeight={900}
-            mt={1}
-            lineHeight={1}
           >
             {value}
           </Typography>
@@ -119,22 +135,31 @@ const CardStat = ({
 
         {subtitle && (
           <Typography
-            fontSize={12}
-            color="text.secondary"
-            mt={1}
+            sx={{
+              mt: 0.5,
+              fontSize: 11,
+              color: "#94a3b8",
+              lineHeight: 1.3,
+            }}
           >
             {subtitle}
           </Typography>
         )}
       </Box>
 
+      {/* ICON */}
       <Avatar
         sx={{
-          width: 52,
-          height: 52,
+          width: 42,
+          height: 42,
           background: gradient,
+
           boxShadow:
-            "0 10px 20px rgba(0,0,0,0.15)",
+            "0 10px 20px rgba(0,0,0,0.10)",
+
+          "& svg": {
+            fontSize: 20,
+          },
         }}
       >
         {icon}
@@ -149,9 +174,9 @@ const StatsCards: React.FC<Props> = ({
 }) => {
   const cards = [
     {
-      title: "Ventas Totales",
+      title: "Ventas",
       value: stats.totalVentas,
-      subtitle: "Cantidad de ventas realizadas",
+      subtitle: "Total realizadas",
       icon: <ShoppingCartIcon />,
       gradient:
         "linear-gradient(135deg,#2563eb,#60a5fa)",
@@ -169,7 +194,7 @@ const StatsCards: React.FC<Props> = ({
     {
       title: "Egresos",
       value: formatCOP(stats.totalEgresos),
-      subtitle: "Gastos registrados",
+      subtitle: "Gastos",
       icon: <AccountBalanceWalletIcon />,
       gradient:
         "linear-gradient(135deg,#dc2626,#f87171)",
@@ -185,9 +210,9 @@ const StatsCards: React.FC<Props> = ({
     },
 
     {
-      title: "Venta Más Alta",
+      title: "Venta Alta",
       value: formatCOP(stats.ventaMayor),
-      subtitle: "Mayor venta registrada",
+      subtitle: "Mayor venta",
       icon: <TrendingUpIcon />,
       gradient:
         "linear-gradient(135deg,#ea580c,#fb923c)",
@@ -195,31 +220,35 @@ const StatsCards: React.FC<Props> = ({
   ];
 
   return (
-    <Grid
-      container
-      spacing={2.5}
-      mb={3}
+    <Box
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 1,
+        mb: 2,
+      }}
     >
       {cards.map((card, index) => (
-      <Box
-  key={index}
-  sx={{
-    flex: {
-      xs: "1 1 100%",
-      sm: "1 1 calc(50% - 16px)",
-      md: "1 1 calc(33.33% - 16px)",
-      lg: "1 1 calc(20% - 16px)",
-    },
-    minWidth: 220,
-  }}
->
-  <CardStat
-    {...card}
-    loading={loading}
-  />
-</Box>
+        <Box
+          key={index}
+          sx={{
+            flex: {
+              xs: "1 1 100%",
+              sm: "1 1 calc(50% - 8px)",
+              md: "1 1 calc(33.33% - 12px)",
+              lg: "1 1 calc(20% - 13px)",
+            },
+
+            minWidth: 0,
+          }}
+        >
+          <CardStat
+            {...card}
+            loading={loading}
+          />
+        </Box>
       ))}
-    </Grid>
+    </Box>
   );
 };
 

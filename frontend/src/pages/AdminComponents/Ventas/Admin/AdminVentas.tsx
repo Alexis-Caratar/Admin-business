@@ -359,8 +359,8 @@ const AdminVentas: React.FC = () => {
             fontWeight={800}
             sx={{
               fontSize: {
-                xs: 26,
-                md: 34,
+                xs: 16,
+                md: 20,
               },
               lineHeight: 1.1,
               letterSpacing: "-1px",

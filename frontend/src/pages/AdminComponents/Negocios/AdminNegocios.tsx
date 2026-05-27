@@ -13,7 +13,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardActions,
   CardMedia,
   Typography,
   IconButton,
@@ -51,31 +50,31 @@ const AdminNegocios: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const tiposNegocio = [
-  "Restaurante",
-  "Cafetería",
-  "Bar",
-  "Tienda",
-  "Supermercado",
-  "Panadería",
-  "Comida rápida",
-  "Servicios",
-  "Otros",
-];
+    "Restaurante",
+    "Cafetería",
+    "Bar",
+    "Tienda",
+    "Supermercado",
+    "Panadería",
+    "Comida rápida",
+    "Servicios",
+    "Otros",
+  ];
 
-const [form, setForm] = useState<Negocio>({
-  nit: "",
-  nombre: "",
-  direccion: "",
-  telefono: "",
-  descripcion: "",
-  imagen: "",
-  correo: "",
-  ciudad: "",
-  hora_apertura:"",
-  hora_cierre:"",
-  tipo: "",
-  activo: true,
-});
+  const [form, setForm] = useState<Negocio>({
+    nit: "",
+    nombre: "",
+    direccion: "",
+    telefono: "",
+    descripcion: "",
+    imagen: "",
+    correo: "",
+    ciudad: "",
+    hora_apertura: "",
+    hora_cierre: "",
+    tipo: "",
+    activo: true,
+  });
 
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -114,20 +113,20 @@ const [form, setForm] = useState<Negocio>({
 
   const openCreateModal = () => {
     setForm({
-   nit: "",
-  nombre: "",
-  direccion: "",
-  telefono: "",
-  descripcion: "",
-  imagen: "",
-  correo: "",
-  ciudad: "",
-  hora_apertura:"",
-  hora_cierre:"",
-  tipo: "",
-  activo: true,
-  
-});
+      nit: "",
+      nombre: "",
+      direccion: "",
+      telefono: "",
+      descripcion: "",
+      imagen: "",
+      correo: "",
+      ciudad: "",
+      hora_apertura: "",
+      hora_cierre: "",
+      tipo: "",
+      activo: true,
+
+    });
     setEditingId(null);
     setIsModalOpen(true);
   };
@@ -188,313 +187,353 @@ const [form, setForm] = useState<Negocio>({
   return (
     <Box p={3}>
       {/* HEADER */}
-     {/* HEADER */}
-{/* HEADER */}
-<Box mb={3}>
-  
-  {/* FILA 1: TÍTULO CENTRADO + BOTÓN DERECHA */}
-  <Box
-    display="flex"
-    alignItems="center"
-    justifyContent="space-between"
-    mb={2}
-  >
-    {/* ESPACIO VACÍO PARA QUE EL TÍTULO QUEDE CENTRADO */}
-    
+      {/* HEADER */}
+      {/* HEADER */}
+      <Box mb={3}>
 
-    {/* TÍTULO Izquierda */}
-    <Typography
-  variant="h5"
-  fontWeight={600}
-  textAlign="left"
-  flex={1}
-  sx={{ display: "flex", alignItems: "center", gap: 1 }}
->
-  <StoreIcon sx={{ fontSize: 30 }} />
-  Administración de Negocios
-</Typography>
+        {/* FILA 1: TÍTULO CENTRADO + BOTÓN DERECHA */}
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={2}
+        >
+          {/* ESPACIO VACÍO PARA QUE EL TÍTULO QUEDE CENTRADO */}
 
-<Box width="240px" />
-    {/* BOTÓN DERECHA */}
-    <Button
-      variant="contained"
-      color="primary"
-      startIcon={<AddBusinessIcon />}
-      onClick={openCreateModal}
-      sx={{ height: 38 }}
-    >
-      Agregar Negocio
-    </Button>
-  </Box>
 
-  {/* FILA 2: BUSCADOR ABAJO A LA IZQUIERDA */}
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      background: "#f1f3f4",
-      px: 1.5,
-      borderRadius: 5,
-      width: "460px",
-      height: 36,
-      boxShadow: "inset 0 0 4px rgba(0,0,0,0.1)",
-    }}
-  >
-    <SearchIcon sx={{ opacity: 0.6, fontSize: 20, mr: 1 }} />
-    <TextField
-      variant="standard"
-      placeholder="Buscar..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      InputProps={{
-        disableUnderline: true,
-        style: { fontSize: 14 },
-      }}
-      fullWidth
-    />
-  </Box>
-
-</Box>
-
-   {/* GRID DE TARJETAS */}
-<Box display="flex" flexWrap="wrap" gap={3}>
-  {negociosPaginated.map((n) => (
-    <Box
-      key={n.id}
-      flex="1 1 calc(100% - 24px)" // xs: 1 por fila
-      sx={{
-        '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' },  // sm: 2 por fila
-        '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 24px)' }, // md: 3 por fila
-        '@media (min-width:1200px)': { flex: '1 1 calc(25% - 24px)' },  // lg: 4 por fila
-        maxWidth: 350, // opcional: ancho máximo de la tarjeta
-      }}
-    >
-      <Card
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          height: 350,
-          transition: "0.2s",
-          "&:hover": {
-            transform: "translateY(-5px)",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
-          },
-        }}
-      >
-        <CardMedia
-          component="img"
-          height="150"
-          image={
-            n.imagen ||
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQde1Zuns3SWsvZyR31zNW6hWWyf8N20bmBFA&s"
-          }
-          alt={n.nombre}
-        />
-
-        <CardContent sx={{ flex: 1 }}>
-          <Typography variant="h6" fontWeight={600} noWrap>
-            {n.nombre}
+          {/* TÍTULO Izquierda */}
+          <Typography
+            variant="h5"
+            fontWeight={600}
+            textAlign="left"
+            flex={1}
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          >
+            <StoreIcon sx={{ fontSize: 30 }} />
+            Administración de Negocios
           </Typography>
 
-          <Typography
-            variant="body2"
-            color="textSecondary"
+          <Box width="240px" />
+          {/* BOTÓN DERECHA */}
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddBusinessIcon />}
+            onClick={openCreateModal}
+            sx={{ height: 38 }}
+          >
+            Agregar Negocio
+          </Button>
+        </Box>
+
+        {/* FILA 2: BUSCADOR ABAJO A LA IZQUIERDA */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            background: "#f1f3f4",
+            px: 1.5,
+            borderRadius: 5,
+            width: "460px",
+            height: 36,
+            boxShadow: "inset 0 0 4px rgba(0,0,0,0.1)",
+          }}
+        >
+          <SearchIcon sx={{ opacity: 0.6, fontSize: 20, mr: 1 }} />
+          <TextField
+            variant="standard"
+            placeholder="Buscar..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              disableUnderline: true,
+              style: { fontSize: 14 },
+            }}
+            fullWidth
+          />
+        </Box>
+
+      </Box>
+
+      {/* GRID DE TARJETAS */}
+      <Box display="flex" flexWrap="wrap" gap={3}>
+        {negociosPaginated.map((n) => (
+          <Box
+            key={n.id}
+            flex="1 1 calc(100% - 24px)" // xs: 1 por fila
             sx={{
-              mt: 1,
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
+              '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' },  // sm: 2 por fila
+              '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 24px)' }, // md: 3 por fila
+              '@media (min-width:1200px)': { flex: '1 1 calc(25% - 24px)' },  // lg: 4 por fila
+              maxWidth: 350, // opcional: ancho máximo de la tarjeta
             }}
           >
-            {n.descripcion || "Sin descripción"}
-          </Typography>
+            <Card
+              sx={{
+                height: "100%",
+                borderRadius: "20px",
+                overflow: "hidden",
+                bgcolor: "#fff",
+                border: "1px solid rgba(15,23,42,0.06)",
+                boxShadow: "0 6px 18px rgba(15,23,42,0.06)",
+                display: "flex",
+                flexDirection: "column",
+                transition: "0.25s ease",
 
-          <Typography variant="body2" sx={{ mt: 1, fontSize: 14 }}>
-            📍 {n.direccion}
-            <br />
-            📞 {n.telefono}
-          </Typography>
-        </CardContent>
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 14px 30px rgba(15,23,42,0.12)",
+                },
+              }}
+            >
+              {/* IMAGE */}
+              <CardMedia
+                component="img"
+                height="120"
+                image={
+                  n.imagen ||
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQde1Zuns3SWsvZyR31zNW6hWWyf8N20bmBFA&s"
+                }
+                alt={n.nombre}
+                sx={{
+                  objectFit: "cover",
+                }}
+              />
 
-        <CardActions sx={{ justifyContent: "flex-end" }}>
-          <IconButton color="primary" onClick={() => openEditModal(n)}>
-            <EditIcon />
-          </IconButton>
-          <IconButton color="error" onClick={() => handleDelete(n.id)}>
-            <DeleteIcon />
-          </IconButton>
-        </CardActions>
-      </Card>
-    </Box>
-  ))}
-</Box>
+              <CardContent sx={{ py: 1.5, px: 2, flex: 1 }}>
+                {/* TITLE */}
+                <Typography
+                  fontWeight={800}
+                  fontSize={14}
+                  noWrap
+                  sx={{ color: "#0f172a" }}
+                >
+                  {n.nombre}
+                </Typography>
+
+                {/* DESCRIPTION */}
+                <Typography
+                  fontSize={12}
+                  color="text.secondary"
+                  sx={{
+                    mt: 0.5,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    minHeight: 32, // 🔥 elimina espacio raro abajo
+                  }}
+                >
+                  {n.descripcion || "Sin descripción"}
+                </Typography>
+
+                {/* INFO */}
+                <Box mt={1}>
+                  <Typography fontSize={11} color="text.secondary">
+                    📍 {n.direccion}
+                  </Typography>
+
+                  <Typography fontSize={11} color="text.secondary">
+                    📞 {n.telefono}
+                  </Typography>
+                </Box>
+              </CardContent>
+
+              {/* ACTIONS */}
+              <Box
+                sx={{
+                  px: 1,
+                  pb: 1,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 0.5,
+                }}
+              >
+                <IconButton
+                  size="small"
+                  sx={{ bgcolor: "#eff6ff" }}
+                  onClick={() => openEditModal(n)}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+
+                <IconButton
+                  size="small"
+                  sx={{ bgcolor: "#fef2f2" }}
+                  onClick={() => handleDelete(n.id)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </Card>
+          </Box>
+        ))}
+      </Box>
 
       {/* PAGINACIÓN */}
- 
-    {totalPages > 1 && (
-            <Stack alignItems="center" mt={3}>
-              <Pagination
-                count={totalPages}
-                page={page}
-              onChange={(_, value) => setPage(value)}
-                color="primary"
-                shape="rounded"
-                
-                size={isMobile ? "small" : "medium"}   // 👈 más compacto en móvil
-                
-                siblingCount={isMobile ? 0 : 1}        // 👈 menos botones en móvil
-                boundaryCount={isMobile ? 1 : 2}
 
-                showFirstButton={!isMobile}            // 👈 ocultar en móvil
-                showLastButton={!isMobile}
+      {totalPages > 1 && (
+        <Stack alignItems="center" mt={3}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+            shape="rounded"
 
-              />
-            </Stack>
-          )}
+            size={isMobile ? "small" : "medium"}   // 👈 más compacto en móvil
+
+            siblingCount={isMobile ? 0 : 1}        // 👈 menos botones en móvil
+            boundaryCount={isMobile ? 1 : 2}
+
+            showFirstButton={!isMobile}            // 👈 ocultar en móvil
+            showLastButton={!isMobile}
+
+          />
+        </Stack>
+      )}
 
       {/* MODAL */}
-     
-<Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="md">
-  <DialogTitle sx={{ fontWeight: 500, display: "flex", alignItems: "center", gap: 1 }}>
-    <BusinessIcon />
-    {editingId ? "Editar Negocio" : "Crear Negocio"}
-  </DialogTitle>
 
- <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 3 }}>
-  <Box display="flex" flexWrap="wrap" gap={2}>
-    {/* Primera columna */}
-    <Box flex="1 1 45%" minWidth={250}>
-      <TextField
-        label="NIT"
-        value={form.nit}
-        onChange={(e) => setForm({ ...form, nit: e.target.value })}
-        fullWidth
-        InputProps={{ startAdornment: <BusinessIcon sx={{ mr: 1 }} /> }}
-        sx={{ mt: 2 }} // <--- aumenta un poquito el margen superior
-      />
-        <TextField
-          label="Nombre"
-          value={form.nombre}
-          onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-          fullWidth
-          InputProps={{ startAdornment: <ApartmentIcon sx={{ mr: 1 }} /> }}
-          sx={{ mt: 1 }}
-        />
-        <TextField
-          label="Dirección"
-          value={form.direccion}
-          onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-          fullWidth
-          sx={{ mt: 1 }}
-          InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
-        />
-        <TextField
-          label="Ciudad"
-          value={form.ciudad}
-          onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
-          fullWidth
-          sx={{ mt: 1 }}
-          InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
-        />
-        <TextField
-          label="Teléfono"
-          value={form.telefono}
-          onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-          fullWidth
-          sx={{ mt: 1 }}
-          InputProps={{ startAdornment: <PhoneIcon sx={{ mr: 1 }} /> }}
-        />
-      </Box>
+      <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="md">
+        <DialogTitle sx={{ fontWeight: 500, display: "flex", alignItems: "center", gap: 1 }}>
+          <BusinessIcon />
+          {editingId ? "Editar Negocio" : "Crear Negocio"}
+        </DialogTitle>
 
-      {/* Segunda columna */}
-      <Box flex="1 1 45%" minWidth={250}>
-        <TextField
-          label="Correo Electrónico"
-          value={form.correo}
-          onChange={(e) => setForm({ ...form, correo: e.target.value })}
-          fullWidth
-           sx={{ mt: 2 }}
-          InputProps={{ startAdornment: <EmailIcon sx={{ mr: 1 }} /> }}
-        />
-       <Box display="flex" gap={2}>
-        <TextField
-          label="Hora Apertura"
-          type="time"
-          value={form.hora_apertura || ""}
-          onChange={(e) => setForm({ ...form, hora_apertura: e.target.value })}
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
-        <TextField
-          label="Hora Cierre"
-          type="time"
-          value={form.hora_cierre || ""}
-          onChange={(e) => setForm({ ...form, hora_cierre: e.target.value })}
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
-      </Box>
-       
-      <TextField
-        select
-        label="Tipo de negocio"
-        value={form.tipo}
-        onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-        fullWidth
-        sx={{ mt: 1 }}
-        InputProps={{ startAdornment: <CategoryIcon sx={{ mr: 1 }} /> }}
-      >
-        {tiposNegocio.map((tipo) => (
-          <MenuItem key={tipo} value={tipo}>
-            {tipo}
-          </MenuItem>
-        ))}
-      </TextField>
-        <TextField
-          label="URL Imagen"
-          value={form.imagen}
-          onChange={(e) => setForm({ ...form, imagen: e.target.value })}
-          fullWidth
-          sx={{ mt: 1 }}
-          InputProps={{ startAdornment: <ImageIcon sx={{ mr: 1 }} /> }}
-        />
-      </Box>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 3 }}>
+          <Box display="flex" flexWrap="wrap" gap={2}>
+            {/* Primera columna */}
+            <Box flex="1 1 45%" minWidth={250}>
+              <TextField
+                label="NIT"
+                value={form.nit}
+                onChange={(e) => setForm({ ...form, nit: e.target.value })}
+                fullWidth
+                InputProps={{ startAdornment: <BusinessIcon sx={{ mr: 1 }} /> }}
+                sx={{ mt: 2 }} // <--- aumenta un poquito el margen superior
+              />
+              <TextField
+                label="Nombre"
+                value={form.nombre}
+                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                fullWidth
+                InputProps={{ startAdornment: <ApartmentIcon sx={{ mr: 1 }} /> }}
+                sx={{ mt: 1 }}
+              />
+              <TextField
+                label="Dirección"
+                value={form.direccion}
+                onChange={(e) => setForm({ ...form, direccion: e.target.value })}
+                fullWidth
+                sx={{ mt: 1 }}
+                InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
+              />
+              <TextField
+                label="Ciudad"
+                value={form.ciudad}
+                onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
+                fullWidth
+                sx={{ mt: 1 }}
+                InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
+              />
+              <TextField
+                label="Teléfono"
+                value={form.telefono}
+                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                fullWidth
+                sx={{ mt: 1 }}
+                InputProps={{ startAdornment: <PhoneIcon sx={{ mr: 1 }} /> }}
+              />
+            </Box>
 
-      {/* Descripción */}
-      <Box flex="1 1 100%">
-        <TextField
-          label="Descripción"
-          multiline
-          rows={3}
-          value={form.descripcion}
-          onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-          fullWidth
-          sx={{ mt: 1 }}
-          InputProps={{ startAdornment: <DescriptionIcon sx={{ mr: 1 }} /> }}
-        />
-      </Box>
+            {/* Segunda columna */}
+            <Box flex="1 1 45%" minWidth={250}>
+              <TextField
+                label="Correo Electrónico"
+                value={form.correo}
+                onChange={(e) => setForm({ ...form, correo: e.target.value })}
+                fullWidth
+                sx={{ mt: 2 }}
+                InputProps={{ startAdornment: <EmailIcon sx={{ mr: 1 }} /> }}
+              />
+              <Box display="flex" gap={2}>
+                <TextField
+                  label="Hora Apertura"
+                  type="time"
+                  value={form.hora_apertura || ""}
+                  onChange={(e) => setForm({ ...form, hora_apertura: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="Hora Cierre"
+                  type="time"
+                  value={form.hora_cierre || ""}
+                  onChange={(e) => setForm({ ...form, hora_cierre: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+              </Box>
 
-      {/* Switch Activo */}
-      <Box display="flex" alignItems="center" gap={1}>
-        <Typography>Activo:</Typography>
-        <Switch
-          checked={form.activo}
-          onChange={(e) => setForm({ ...form, activo: e.target.checked })}
-          color="primary"
-        />
-      </Box>
-    </Box>
-  </DialogContent>
+              <TextField
+                select
+                label="Tipo de negocio"
+                value={form.tipo}
+                onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+                fullWidth
+                sx={{ mt: 1 }}
+                InputProps={{ startAdornment: <CategoryIcon sx={{ mr: 1 }} /> }}
+              >
+                {tiposNegocio.map((tipo) => (
+                  <MenuItem key={tipo} value={tipo}>
+                    {tipo}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                label="URL Imagen"
+                value={form.imagen}
+                onChange={(e) => setForm({ ...form, imagen: e.target.value })}
+                fullWidth
+                sx={{ mt: 1 }}
+                InputProps={{ startAdornment: <ImageIcon sx={{ mr: 1 }} /> }}
+              />
+            </Box>
 
-  <DialogActions>
-    <Button onClick={closeModal}>Cancelar</Button>
-    <Button onClick={handleSubmit} variant="contained" color="primary">
-      {editingId ? "Actualizar" : "Crear"}
-    </Button>
-  </DialogActions>
-</Dialog>
+            {/* Descripción */}
+            <Box flex="1 1 100%">
+              <TextField
+                label="Descripción"
+                multiline
+                rows={3}
+                value={form.descripcion}
+                onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                fullWidth
+                sx={{ mt: 1 }}
+                InputProps={{ startAdornment: <DescriptionIcon sx={{ mr: 1 }} /> }}
+              />
+            </Box>
+
+            {/* Switch Activo */}
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography>Activo:</Typography>
+              <Switch
+                checked={form.activo}
+                onChange={(e) => setForm({ ...form, activo: e.target.checked })}
+                color="primary"
+              />
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={closeModal}>Cancelar</Button>
+          <Button onClick={handleSubmit} variant="contained" color="primary">
+            {editingId ? "Actualizar" : "Crear"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

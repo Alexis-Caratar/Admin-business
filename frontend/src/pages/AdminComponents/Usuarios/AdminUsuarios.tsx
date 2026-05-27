@@ -8,8 +8,6 @@ import {
   DialogTitle,
   Typography,
   TextField,
-  Card,
-  CardContent,
   FormControl,
   InputLabel,
   Select,
@@ -19,9 +17,8 @@ import {
   Avatar,
   Stack,
   Checkbox,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
-
 import { motion, AnimatePresence } from "framer-motion";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -407,75 +404,180 @@ const AdminUsuarios: React.FC = () => {
           Total: <strong>{filtered.length}</strong> usuarios encontrados.
         </Typography>
 
-        <Box display="flex" flexWrap="wrap" gap={2}>
-          <AnimatePresence>
-            {paginated.map((u) => (
-           <Box
-              key={u.id_usuario}
+      <Box display="flex" flexWrap="wrap" gap={2}>
+  <AnimatePresence>
+    {paginated.map((u) => (
+      <Box
+        key={u.id_usuario}
+        sx={{
+          flex: {
+            xs: "1 1 100%",
+            sm: "1 1 calc(50% - 16px)",
+            md: "1 1 calc(25% - 16px)",
+            lg: "1 1 calc(20% - 16px)",
+          },
+        }}
+      >
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          whileHover={{
+            scale: 1.03,
+            transition: { duration: 0.2 },
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1,
+              px: 2.5,
+              py: 3,
+              borderRadius: "24px",
+              bgcolor: "#ffffff",
+              border: "1px solid rgba(15,23,42,0.06)",
+              boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
+              transition: "0.3s",
+              overflow: "hidden",
+
+              "&:hover": {
+                boxShadow: "0 16px 45px rgba(15,23,42,0.12)",
+              },
+            }}
+          >
+            {/* DECORACIÓN */}
+            <Box
               sx={{
-                flex: {
-                  xs: "1 1 100%",
-                  sm: "1 1 calc(50% - 16px)",
-                  md: "1 1 calc(25% - 16px)",
-                  lg: "1 1 calc(20% - 16px)",
-                }
+                position: "absolute",
+                top: -50,
+                right: -50,
+                width: 140,
+                height: 140,
+                borderRadius: "50%",
+                background:
+                  "linear-gradient(135deg, rgba(37,99,235,0.12), rgba(96,165,250,0.03))",
+              }}
+            />
+
+            {/* AVATAR */}
+            <Avatar
+              src={u.imagen || ""}
+              sx={{
+                width: 64,
+                height: 64,
+                bgcolor: "#eff6ff",
+                color: "#2563eb",
+                fontWeight: 900,
+                boxShadow: "0 10px 25px rgba(37,99,235,0.15)",
+                zIndex: 2,
               }}
             >
-                <motion.div
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  whileHover={{
-                    scale: 1.04,
-                    transition: { duration: 0.25 },
-                  }}
-                >
-                  <Card sx={{ borderRadius: 3 }}>
-                    <CardContent>
-                      <Box display="flex" justifyContent="center">
-                        <Avatar
-                          src={u.imagen || ""}
-                          sx={{ width: 80, height: 80, fontSize: 28 }}
-                        >
-                          {!u.imagen && u.nombres.charAt(0)}
-                        </Avatar>
-                      </Box>
+              {!u.imagen && u.nombres?.charAt(0)}
+            </Avatar>
 
-                      <Typography align="center" fontWeight="bold">
-                        {u.nombres} {u.apellidos}
-                      </Typography>
+            {/* NOMBRE */}
+            <Typography
+              sx={{
+                fontSize: 15,
+                fontWeight: 900,
+                color: "#0f172a",
+                lineHeight: 1.2,
+                zIndex: 2,
+              }}
+            >
+              {u.nombres} {u.apellidos}
+            </Typography>
 
-                      <Typography align="center">
-                        {u.tipo_identificacion}-{u.identificacion}
-                      </Typography>
+            {/* DOCUMENTO */}
+            <Typography
+              sx={{
+                fontSize: 13,
+                color: "#64748b",
+                zIndex: 2,
+              }}
+            >
+              {u.tipo_identificacion}-{u.identificacion}
+            </Typography>
 
-                      <Typography align="center">{u.email}</Typography>
+            {/* EMAIL */}
+            <Typography
+              sx={{
+                fontSize: 12.5,
+                color: "#64748b",
+                wordBreak: "break-word",
+                px: 1,
+                zIndex: 2,
+              }}
+            >
+              {u.email}
+            </Typography>
 
-                      <Typography align="center" variant="caption" fontWeight="bold">
-                        <strong>Rol:</strong> {u.rol}
-                      </Typography>
+            {/* ROL */}
+            <Box
+              sx={{
+                mt: 1,
+                px: 2,
+                py: 0.6,
+                borderRadius: 999,
+                bgcolor: "#f1f5f9",
+                fontSize: 12,
+                fontWeight: 700,
+                color: "#0f172a",
+                zIndex: 2,
+              }}
+            >
+              {u.rol}
+            </Box>
 
-                      {/* BOTONES */}
-                      <Stack direction="row" spacing={1} justifyContent="center" mt={2}>
-                        <IconButton color="primary" onClick={() => handleEdit(u)}>
-                          <EditIcon />
-                        </IconButton>
+            {/* BOTONES */}
+            <Stack
+              direction="row"
+              spacing={1}
+              justifyContent="center"
+              mt={2}
+              zIndex={2}
+            >
+              <IconButton
+                sx={{
+                  bgcolor: "#eff6ff",
+                  "&:hover": { bgcolor: "#dbeafe" },
+                }}
+                onClick={() => handleEdit(u)}
+              >
+                <EditIcon fontSize="small" color="primary" />
+              </IconButton>
 
-                        <IconButton color="error" onClick={() => handleDeleteUser(u.id_usuario)}>
-                          <DeleteIcon />
-                        </IconButton>
-                        <IconButton color="secondary" onClick={() => handlePermisos(u)}>
-                          <MenuBookIcon />
-                        </IconButton>
-                      </Stack>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </Box>
-            ))}
-          </AnimatePresence>
-        </Box>
+              <IconButton
+                sx={{
+                  bgcolor: "#fef2f2",
+                  "&:hover": { bgcolor: "#fee2e2" },
+                }}
+                onClick={() => handleDeleteUser(u.id_usuario)}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+
+              <IconButton
+                sx={{
+                  bgcolor: "#f5f3ff",
+                  "&:hover": { bgcolor: "#ede9fe" },
+                }}
+                onClick={() => handlePermisos(u)}
+              >
+                <MenuBookIcon fontSize="small" color="success" />
+              </IconButton>
+            </Stack>
+          </Box>
+        </motion.div>
+      </Box>
+    ))}
+  </AnimatePresence>
+</Box>
 
         {/* PAGINACIÓN */}
 

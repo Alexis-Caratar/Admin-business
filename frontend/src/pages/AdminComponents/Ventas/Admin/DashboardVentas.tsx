@@ -59,30 +59,8 @@ const formatFecha = (fecha: any) => {
       return limpia;
     }
 
-    const meses = [
-      "ene",
-      "feb",
-      "mar",
-      "abr",
-      "may",
-      "jun",
-      "jul",
-      "ago",
-      "sep",
-      "oct",
-      "nov",
-      "dic",
-    ];
-
-    const dias = [
-      "domingo",
-      "lunes",
-      "martes",
-      "miércoles",
-      "jueves",
-      "viernes",
-      "sábado",
-    ];
+    const meses = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+    const dias = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
 
     const date = new Date(year, month - 1, day);
 
@@ -183,8 +161,8 @@ const DashboardVentas: React.FC<Props> = ({
         <Typography
           sx={{
             fontSize: {
-              xs: 22,
-              md: 28,
+              xs: 14,
+              md: 18,
             },
             fontWeight: 900,
             color: "#0f172a",
@@ -198,7 +176,7 @@ const DashboardVentas: React.FC<Props> = ({
           sx={{
             mt: 1,
             color: "#64748b",
-            fontSize: 14,
+            fontSize: 12,
           }}
         >
           Visualiza el comportamiento de las
@@ -406,8 +384,8 @@ const DashboardVentas: React.FC<Props> = ({
         <Typography
           sx={{
             fontSize: {
-              xs: 22,
-              md: 26,
+              xs: 14,
+              md: 18,
             },
             fontWeight: 900,
             color: "#0f172a",
@@ -420,7 +398,7 @@ const DashboardVentas: React.FC<Props> = ({
           sx={{
             mt: 1,
             color: "#64748b",
-            fontSize: 14,
+            fontSize: 12,
           }}
         >
           Seguimiento de gastos y salidas
@@ -565,8 +543,8 @@ const DashboardVentas: React.FC<Props> = ({
         <Typography
           sx={{
             fontSize: {
-              xs: 22,
-              md: 26,
+              xs: 14,
+              md: 18,
             },
             fontWeight: 900,
             color: "#0f172a",
@@ -579,7 +557,7 @@ const DashboardVentas: React.FC<Props> = ({
           sx={{
             mt: 1,
             color: "#64748b",
-            fontSize: 14,
+            fontSize: 12,
           }}
         >
           Beneficio generado después de
