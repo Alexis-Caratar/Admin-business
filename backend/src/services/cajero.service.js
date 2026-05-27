@@ -838,6 +838,7 @@ crearcliente: async (payload) => {
     v.id AS id_venta,
     p.id_pago,
     v.numero_factura,
+    per.id as id_cliente,6
     per.identificacion AS identificacion_cliente,
     per.nombres || ' ' || per.apellidos AS nombre_completo,
     per.telefono,
@@ -895,6 +896,7 @@ GROUP BY
     v.id,
     p.id_pago,
     v.numero_factura,
+    per.id,
     per.identificacion,
     per.nombres,
     per.apellidos,
@@ -1115,6 +1117,7 @@ SELECT
     TO_CHAR(p.fecha AT TIME ZONE 'America/Bogota', 'DD/MM/YYYY HH12:MI:SS AM')::TEXT AS fecha_completa,
     TO_CHAR(NOW() AT TIME ZONE 'America/Bogota', 'DD/MM/YYYY HH12:MI:SS AM')::TEXT AS fecha_impresion, 
     CONCAT(p2.nombres,' ',p2.apellidos) AS nombre_vendedor,
+    per.id as id_cliente,
     per.identificacion AS identificacion_cliente,
     CONCAT(per.nombres,' ',per.apellidos) AS nombre_completo,
     per.telefono,

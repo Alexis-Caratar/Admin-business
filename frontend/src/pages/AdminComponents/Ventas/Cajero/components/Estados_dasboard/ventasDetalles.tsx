@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import {
-  Box, Card, Typography,Stack, Avatar, Chip, Dialog, DialogTitle, DialogContent, TextField, Pagination, IconButton, Paper, DialogActions, InputAdornment, Button, MenuItem, CircularProgress,
+  Box, Card, Typography, Stack, Avatar, Chip, Dialog, DialogTitle, DialogContent, TextField, Pagination, IconButton, Paper, DialogActions, InputAdornment, Button, MenuItem, CircularProgress,
   Tooltip
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -19,7 +19,7 @@ import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import { facturaPorCaja, productosPorVenta,cancelarFactura, actualiza_venta,imprimircomanda,imprimirfactura, apibuscar_cliente } from "../../../../../../api/cajero";
+import { facturaPorCaja, productosPorVenta, cancelarFactura, actualiza_venta, imprimircomanda, imprimirfactura, apibuscar_cliente } from "../../../../../../api/cajero";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { CrearClienteModal } from "../CrearClienteModal";
@@ -60,29 +60,29 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
   const [motivo, setMotivo] = useState("");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-    const [clienteBuscado, setClienteBuscado] = useState("");
+  const [clienteBuscado, setClienteBuscado] = useState("");
   const [resultados, setResultados] = useState<Cliente[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] =
     useState<Cliente | null>(null);
   const [modoEditarCliente, setModoEditarCliente] = useState(false);
   const [openCrearModal, setOpenCrearModal] = useState(false);
-  
-  
+
+
   const handleBuscarCliente = async (term: string) => {
     setClienteBuscado(term);
-  
+
     if (term.trim().length < 2) {
       setResultados([]);
       return;
     }
-  
+
     const res = await apibuscar_cliente({
       id_cliente: term,
     });
-  
+
     setResultados(res.data.result);
   };
-  
+
   const seleccionarCliente = (cli: Cliente) => {
     setClienteSeleccionado(cli);
     setResultados([]);
@@ -104,71 +104,71 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
     setCambio(recibido - total);
   }, [montoRecibido, metodoPago, ventaSeleccionada]);
 
-const cargarVentas = async () => {
-  try {
-    setLoading(true);
-    const { data } = await facturaPorCaja({ id_caja });
-    if (data?.ok) setVentas(data.result);
-  } finally {
-    setLoading(false);
-  }
-};
-
-const getEstadoChip = (venta: any) => {
-   if (!venta || typeof venta !== "object") {
-    return { label: "", color: "#ccc", icon: "" };
-  }
-  
-  if (venta.estado_venta === "cancelado") {
-    return {
-      label: "Cancelada",
-      color: "#d32f2f",
-      icon: "❌"
-    };
-  }
-
-  if (venta.estado_pago) {
-    return {
-      label: "Pagado",
-      color: "#2e7d32",
-      icon: "✔️"
-    };
-  }
-
-  return {
-    label: "Pendiente",
-    color: "#ed6c02",
-    icon: "⏳"
+  const cargarVentas = async () => {
+    try {
+      setLoading(true);
+      const { data } = await facturaPorCaja({ id_caja });
+      if (data?.ok) setVentas(data.result);
+    } finally {
+      setLoading(false);
+    }
   };
-};
 
-const estado = ventaSeleccionada? getEstadoChip(ventaSeleccionada): null;
+  const getEstadoChip = (venta: any) => {
+    if (!venta || typeof venta !== "object") {
+      return { label: "", color: "#ccc", icon: "" };
+    }
 
-const getMetodoPagoIcon = (metodo:any) => {
-  switch (metodo) {
-    case "PENDIENTE":
-      return <HourglassTopIcon sx={{ fontSize: 14, color: "#d32f2f" }} />;
+    if (venta.estado_venta === "cancelado") {
+      return {
+        label: "Cancelada",
+        color: "#d32f2f",
+        icon: "❌"
+      };
+    }
 
-    case "EFECTIVO":
-      return <PaymentsIcon sx={{ fontSize: 14, color: "#2e7d32" }} />;
+    if (venta.estado_pago) {
+      return {
+        label: "Pagado",
+        color: "#2e7d32",
+        icon: "✔️"
+      };
+    }
 
-    case "TRANSFERENCIA":
-      return <SyncAltIcon sx={{ fontSize: 14, color: "#1565c0" }} />;
+    return {
+      label: "Pendiente",
+      color: "#ed6c02",
+      icon: "⏳"
+    };
+  };
 
-    case "TARJETA":
-      return <CreditCardIcon sx={{ fontSize: 14, color: "#6a1b9a" }} />;
+  const estado = ventaSeleccionada ? getEstadoChip(ventaSeleccionada) : null;
 
-    case "NEQUI":
-    case "DAVIPLATA":
-      return <PhoneIphoneIcon sx={{ fontSize: 14, color: "#00838f" }} />;
+  const getMetodoPagoIcon = (metodo: any) => {
+    switch (metodo) {
+      case "PENDIENTE":
+        return <HourglassTopIcon sx={{ fontSize: 14, color: "#d32f2f" }} />;
 
-    case "TIQUERERA":
-      return <ConfirmationNumberIcon sx={{ fontSize: 14, color: "#ef6c00" }} />;
+      case "EFECTIVO":
+        return <PaymentsIcon sx={{ fontSize: 14, color: "#2e7d32" }} />;
 
-    default:
-      return <CreditCardIcon sx={{ fontSize: 14 }} />;
-  }
-};
+      case "TRANSFERENCIA":
+        return <SyncAltIcon sx={{ fontSize: 14, color: "#1565c0" }} />;
+
+      case "TARJETA":
+        return <CreditCardIcon sx={{ fontSize: 14, color: "#6a1b9a" }} />;
+
+      case "NEQUI":
+      case "DAVIPLATA":
+        return <PhoneIphoneIcon sx={{ fontSize: 14, color: "#00838f" }} />;
+
+      case "TIQUERERA":
+        return <ConfirmationNumberIcon sx={{ fontSize: 14, color: "#ef6c00" }} />;
+
+      default:
+        return <CreditCardIcon sx={{ fontSize: 14 }} />;
+    }
+  };
 
   const abrirDetalle = async (venta: any) => {
     setVentaSeleccionada(venta);
@@ -176,7 +176,7 @@ const getMetodoPagoIcon = (metodo:any) => {
     setLoadingDetalle(true);
     const { data } = await productosPorVenta({ id_venta: venta.id_venta });
     if (data?.ok) setProductosDetalle(data.result);
-     setModoEditarCliente(false);
+    setModoEditarCliente(false);
     setLoadingDetalle(false);
   };
 
@@ -184,22 +184,22 @@ const getMetodoPagoIcon = (metodo:any) => {
   /* ================= METRICAS ================= */
   const metrics = useMemo(() => {
     const totalPagadas = ventas.filter(v => v.estado_pago === true).length;
-    const totalPendientes = ventas.filter(v => v.estado_pago === false&& v.estado_venta!='cancelado').length;
-    const totalCancelado = ventas.filter(v =>  v.estado_venta==='cancelado').length;
+    const totalPendientes = ventas.filter(v => v.estado_pago === false && v.estado_venta != 'cancelado').length;
+    const totalCancelado = ventas.filter(v => v.estado_venta === 'cancelado').length;
 
     const totalVentas = ventas
       .filter(v => v.estado_pago === true)
       .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
 
     const pendiente_pago = ventas
-      .filter(v => v.estado_pago === false&&v.estado_venta==='activa')
+      .filter(v => v.estado_pago === false && v.estado_venta === 'activa')
       .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
 
-         const facturas_canceladas = ventas
-      .filter(v => v.estado_venta==='cancelado')
+    const facturas_canceladas = ventas
+      .filter(v => v.estado_venta === 'cancelado')
       .reduce((acc, v) => acc + Number(v.venta_total || 0), 0);
 
-    return { totalPagadas, totalPendientes, totalVentas, pendiente_pago,facturas_canceladas,totalCancelado};
+    return { totalPagadas, totalPendientes, totalVentas, pendiente_pago, facturas_canceladas, totalCancelado };
   }, [ventas]);
 
   /* ================= FILTROS ================= */
@@ -211,10 +211,10 @@ const getMetodoPagoIcon = (metodo:any) => {
     }
 
     if (filtro === "pendientes") {
-      data = data.filter(v => v.estado_pago === false&& v.estado_venta!='cancelado');
+      data = data.filter(v => v.estado_pago === false && v.estado_venta != 'cancelado');
     }
-      if (filtro === "cancelado") {
-      data = data.filter(v => v.estado_venta==='cancelado');
+    if (filtro === "cancelado") {
+      data = data.filter(v => v.estado_venta === 'cancelado');
     }
 
     if (busqueda) {
@@ -223,7 +223,7 @@ const getMetodoPagoIcon = (metodo:any) => {
       );
     }
 
-      return data;
+    return data;
   }, [ventas, filtro, busqueda]);
 
   const totalPaginas = Math.ceil(ventasFiltradas.length / porPagina);
@@ -242,7 +242,7 @@ const getMetodoPagoIcon = (metodo:any) => {
   /* ================= FINALIZAR VENTA ================= */
   const handleFinalizarVenta = async () => {
     if (!ventaSeleccionada) return;
-    
+
     const payload = {
       idUsuario,
       id_negocio,
@@ -252,7 +252,7 @@ const getMetodoPagoIcon = (metodo:any) => {
       cambio: cambio,
       id_mesa: ventaSeleccionada.id_mesa || 0,
       total_pago: ventaSeleccionada.venta_total,
-      id_cliente:clienteSeleccionado?.id ||ventaSeleccionada.id_cliente,
+      id_cliente: clienteSeleccionado?.id || ventaSeleccionada.id_cliente,
     };
     try {
       const { data } = await actualiza_venta(payload);
@@ -277,59 +277,59 @@ const getMetodoPagoIcon = (metodo:any) => {
     }
   };
 
- const imprimirFactura = async (estado_impresion:String) => {
-  try {
-    if (!ventaSeleccionada) return;    
-    const payload = {
-      id_negocio:id_negocio,
-      id_mesa:ventaSeleccionada.id_mesa,
-      mesa:ventaSeleccionada.mesa,
-      idUsuario:idUsuario,
-      nombre_vendedor:ventaSeleccionada.nombre_vendedor,
-      nota:ventaSeleccionada.nota,
-      venta: {
-        numero_factura: ventaSeleccionada.numero_factura,
-        fecha_completa: ventaSeleccionada.fecha_completa,
-        fecha_impresion: ventaSeleccionada.fecha_impresion,
-        nombre_vendedor: nombreuser, //revisar este estado esta duplicado en el payload
-        identificacion_cliente: ventaSeleccionada.identificacion_cliente,
-        nombre_completo: ventaSeleccionada.nombre_completo,
-        telefono: ventaSeleccionada.telefono,
-        email: ventaSeleccionada.email,
-        venta_total: ventaSeleccionada.venta_total,
-        descuento: 0,
-        metodo_pago: ventaSeleccionada.metodo_pago,
-        monto_recibido: ventaSeleccionada.monto_recibido,
-        cambio: ventaSeleccionada.cambio
-      },
-      productos: productosDetalle.map((p) => ({
-        id_producto: p.id_producto,
-        nombre: p.nombre,
-        cantidad: p.cantidad,
-        precio_unitario: p.precio_unitario,
-        subtotal: p.subtotal
-      }))
-    };
+  const imprimirFactura = async (estado_impresion: String) => {
+    try {
+      if (!ventaSeleccionada) return;
+      const payload = {
+        id_negocio: id_negocio,
+        id_mesa: ventaSeleccionada.id_mesa,
+        mesa: ventaSeleccionada.mesa,
+        idUsuario: idUsuario,
+        nombre_vendedor: ventaSeleccionada.nombre_vendedor,
+        nota: ventaSeleccionada.nota,
+        venta: {
+          numero_factura: ventaSeleccionada.numero_factura,
+          fecha_completa: ventaSeleccionada.fecha_completa,
+          fecha_impresion: ventaSeleccionada.fecha_impresion,
+          nombre_vendedor: nombreuser, //revisar este estado esta duplicado en el payload
+          identificacion_cliente: ventaSeleccionada.identificacion_cliente,
+          nombre_completo: ventaSeleccionada.nombre_completo,
+          telefono: ventaSeleccionada.telefono,
+          email: ventaSeleccionada.email,
+          venta_total: ventaSeleccionada.venta_total,
+          descuento: 0,
+          metodo_pago: ventaSeleccionada.metodo_pago,
+          monto_recibido: ventaSeleccionada.monto_recibido,
+          cambio: ventaSeleccionada.cambio
+        },
+        productos: productosDetalle.map((p) => ({
+          id_producto: p.id_producto,
+          nombre: p.nombre,
+          cantidad: p.cantidad,
+          precio_unitario: p.precio_unitario,
+          subtotal: p.subtotal
+        }))
+      };
 
-    if(estado_impresion=='comanda'){
-      await imprimircomanda(payload);
-    }else if(estado_impresion=='factura'){
-       await imprimirfactura(payload );
+      if (estado_impresion == 'comanda') {
+        await imprimircomanda(payload);
+      } else if (estado_impresion == 'factura') {
+        await imprimirfactura(payload);
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Enviado a impresión",
+        text: " Espere un momento se está imprimiendo...",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "No se pudo imprimir", "error");
     }
-      
-    Swal.fire({
-      icon: "success",
-      title: "Enviado a impresión",
-      text: " Espere un momento se está imprimiendo...",
-      timer: 1500,
-      showConfirmButton: false
-    });
-
-  } catch (error) {
-    console.error(error);
-    Swal.fire("Error", "No se pudo imprimir", "error");
-  }
-};
+  };
 
   return (
     <>
@@ -489,7 +489,7 @@ const getMetodoPagoIcon = (metodo:any) => {
               </Card>
             </Box>
 
-             {/* FACTURAS CANCELADAS */}
+            {/* FACTURAS CANCELADAS */}
             <Box flex="1 1 200px">
               <Card
                 onClick={() => setFiltro("cancelado")}
@@ -522,857 +522,848 @@ const getMetodoPagoIcon = (metodo:any) => {
             </Box>
 
 
-              <Stack direction="row" spacing={1} alignItems="center">
-            <Tooltip title="Refrescar ventas" arrow>
-              <IconButton
-                onClick={cargarVentas}
-                sx={{
-                  borderRadius: 2,
-                  bgcolor: "#f5f5f5",
-                  border: "1px solid #e0e0e0",
-                  transition: "all 0.2s ease",
-                  "&:hover": {
-                    bgcolor: "#e3f2fd",
-                    transform: "rotate(90deg)",
-                  },
-                }}
-              >
-                {loading ? (
-                  <CircularProgress size={18} />
-                ) : (
-                  <RefreshIcon sx={{ fontSize: 20 }} />
-                )}
-              </IconButton>
-            </Tooltip>
-          </Stack>
-          </Box>
-
-          {/* Facturas */}
-         <Box
-  sx={{
-    display: "grid",
-    gridTemplateColumns: {
-      xs: "repeat(2, 1fr)",
-      sm: "repeat(3, 1fr)",
-      md: "repeat(4, 1fr)",
-      lg: "repeat(6, 1fr)",
-      xl: "repeat(8, 1fr)",
-    },
-    gap: { xs: 1.2, md: 1.8 },
-  }}
->
-  {ventasPagina.map((venta) => {
-    const isPagado = venta.estado_pago;
-    const estado = getEstadoChip(venta); 
-    return (
-      <Box key={venta.id_venta}>
-        <motion.div whileHover={{ scale: 1.04 }}>
-          <Card
-            sx={{
-              borderRadius: 4,
-              p: 1.5,
-              cursor: "pointer",
-              position: "relative",
-              overflow: "hidden",
-              background:
-                venta.estado_venta === "cancelado"
-                  ? "linear-gradient(135deg,#ffebee,#ffffff)"
-                  : isPagado
-                  ? "linear-gradient(135deg,#e8f5e9,#ffffff)"
-                  : "linear-gradient(135deg,#fff3e0,#ffffff)",
-              border: "1px solid #eee",
-              transition: "all .25s ease",
-              "&:hover": {
-                transform: "translateY(-6px)",
-                boxShadow: "0 12px 30px rgba(0,0,0,0.12)"
-              }
-            }}
-            onClick={() => abrirDetalle(venta)}
-          >
-
-            {/* BARRA SUPERIOR COLOR */}
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: 4,
-                bgcolor:
-                venta.estado_venta === "cancelado"
-                  ? "#d32f2f"
-                  : isPagado
-                  ? "#2e7d32"
-                  : "#ed6c02"
-                            }}
-            />
-
-            <Stack spacing={1.2}>
-
-              {/* HEADER */}
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Avatar
-                    sx={{
-                      width: 30,
-                      height: 30,
-                      bgcolor: isPagado ? "#c8e6c9" : "#ffe0b2"
-                    }}
-                  >
-                    <ReceiptLongIcon
-                      sx={{
-                        fontSize: 18,
-                        color:"#0d4993" 
-                      }}
-                    />
-                  </Avatar>
-
-                  <Box>
-                    <Typography fontWeight={700} fontSize={10}>
-                      {venta.numero_factura}
-                    </Typography>
-                    <Typography fontSize={10} color="text.secondary">
-                      {venta.fecha}
-                    </Typography>
-                  </Box>
-                </Stack>
-                  <Chip
-            label={`${estado.icon} ${estado.label}`}
-            size="small"
-            sx={{
-              fontSize: 10,
-              fontWeight: 700,
-              bgcolor: estado.color,
-              color: "#fff",
-              borderRadius: 2,
-              px: 0.5,
-              letterSpacing: 0.3,
-              boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
-            }}
-          />
-            
-              </Stack>
-
-              {/* CLIENTE */}
-              <Box>
-                <Typography fontSize={11} fontWeight={600} noWrap>
-                  {venta.nombre_completo}
-                </Typography>
-                <Typography fontSize={10} color="text.secondary" noWrap>
-                  {venta.identificacion_cliente}
-                </Typography>
-              </Box>
-
-              {/* TOTAL DESTACADO */}
-              <Box
-                sx={{
-                  borderRadius: 2,
-                  p: 1,
-                  textAlign: "center",
-                       background:
-                venta.estado_venta === "cancelado"
-                  ? "linear-gradient(135deg,#ed0202,#f85b5b)"
-                  : isPagado
-                   ? "linear-gradient(135deg,#2e7d32,#66bb6a)"
-                    : "linear-gradient(135deg,#ed6c02,#ff9800)",
-                  color: "#fff"
-                }}
-              >
-                <Typography fontSize={10}>Total</Typography>
-                <Typography fontWeight={700} fontSize={14}>
-                  {formatCOP(venta.venta_total)}
-                </Typography>
-              </Box>
-
-              {/* INFO EXTRA */}
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                sx={{
-                  bgcolor: "#f9f9f9",
-                  borderRadius: 2,
-                  px: 1,
-                  py: 0.5
-                }}
-              >
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                {getMetodoPagoIcon(venta.metodo_pago)}
-                <Typography fontSize={10} color="text.secondary">
-                  {venta.metodo_pago}
-                </Typography>
-              </Stack>
-
-                <Typography fontSize={10}>
-                  🍽 {venta.mesa || "Sin mesa"}
-                </Typography>
-              </Stack>
-
-              {/* FOOTER */}
-              <Typography fontSize={9.5} color="text.secondary" noWrap>
-                👤 {venta.nombre_vendedor}
-              </Typography>
-
-            </Stack>
-          </Card>
-        </motion.div>
-      </Box>
-    );
-  })}
-        </Box>
-
-          {/* Paginación */}
-          <Box mt={4} display="flex" justifyContent="center">
-          
-            {totalPaginas > 1 && (
-                  <Stack alignItems="center" mt={3}>
-                    <Pagination
-                      count={totalPaginas}
-                      page={pagina}
-                      onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPagina(value)}
-                      color="primary"
-                      shape="rounded"
-                      size={isMobile ? "small" : "medium"}   // 👈 más compacto en móvil
-                      siblingCount={isMobile ? 0 : 1}        // 👈 menos botones en móvil
-                      boundaryCount={isMobile ? 1 : 2}
-                      showFirstButton={!isMobile}            // 👈 ocultar en móvil
-                      showLastButton={!isMobile}
-          
-                    />
-                  </Stack>
-                )}
-                
-          </Box>
-
-        
-
-        </DialogContent>
-        <DialogActions
-  sx={{
-    borderTop: "1px solid #eee",
-    justifyContent: "center"
-  }}
->
-  <Stack direction="row" spacing={2}>
-    <Paper sx={{ px: 3, py: 1, bgcolor: "#ffebee" }}>
-      <Typography color="error.main" fontWeight={700}>
-        Facturas canceladas: {formatCOP(metrics.facturas_canceladas)}
-      </Typography>
-    </Paper>
-    <Paper sx={{ px: 3, py: 1, bgcolor: "#ffffeb" }}>
-      <Typography color="warning" fontWeight={700}>
-        Por cobrar: {formatCOP(metrics.pendiente_pago)}
-      </Typography>
-    </Paper>
-
-    <Paper sx={{ px: 3, py: 1, bgcolor: "#e8f5e9" }}>
-      <Typography color="success.main" fontWeight={700}>
-        Vendido: {formatCOP(metrics.totalVentas)}
-      </Typography>
-    </Paper>
-  </Stack>
-</DialogActions>
-      </Dialog>
-
-      {/* ================= DETALLE FACTURA ================= */}
-    <Dialog
-  open={detalleOpen}
-  onClose={() => setDetalleOpen(false)}
-  PaperProps={{
-    sx: {
-      borderRadius: 4,
-      width: 420,
-      maxWidth: "95%",
-      overflow: "hidden"
-    }
-  }}
->
-  {/* HEADER */}
- <Box
-  sx={{
-    background: "linear-gradient(135deg,#1976d2,#42a5f5)",
-    color: "#fff",
-    px: 2.5,
-    py: 2,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16
-  }}
->
-  <Stack
-    direction="row"
-    justifyContent="space-between"
-    alignItems="center"
-  >
-    {/* IZQUIERDA */}
-    <Stack direction="row" spacing={1.5} alignItems="center">
-      <Avatar
-        sx={{
-          width: 42,
-          height: 42,
-          bgcolor: "rgba(255,255,255,0.2)",
-          backdropFilter: "blur(6px)"
-        }}
-      >
-        <ReceiptLongIcon />
-      </Avatar>
-
-      <Box>
-        <Typography fontWeight={800} fontSize={16}>
-          Factura
-        </Typography>
-
-        <Typography fontSize={12} sx={{ opacity: 0.9 }}>
-          #{ventaSeleccionada?.numero_factura}
-        </Typography>
-      </Box>
-    </Stack>
-
-    {/* DERECHA (ACCIONES) */}
-    <Stack direction="row" spacing={1}>
-
-      
-     <Chip
-        label={estado?.label}
-        size="small"
-        sx={{
-          bgcolor: estado?.color,
-          color: "#fff",
-          fontWeight: 700,
-          borderRadius: 2,
-          px: 1,
-          boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
-        }}
-      />
-
-      
-      {/* CANCELAR */}
-     
-     {ventaSeleccionada?.estado_venta!='cancelado'&& ventaSeleccionada?.estado_pago==false&& (
-  <Tooltip title="Cancelar factura" arrow>
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpenCancel(true);
-          }}
-          sx={{
-            color: "#fff",
-            bgcolor: "rgba(255,82,82,0.2)",
-            transition: "all .2s ease",
-            "&:hover": {
-              bgcolor: "#d32f2f",
-              transform: "scale(1.1)"
-            }
-          }}
-        >
-          <CancelOutlinedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-
-     )}
-    
-
-      {/* CERRAR */}
-      <Tooltip title="Cerrar" arrow>
-        <IconButton
-          onClick={() => setDetalleOpen(false)}
-          sx={{
-            color: "#fff",
-            bgcolor: "rgba(255,255,255,0.15)",
-            "&:hover": {
-              bgcolor: "rgba(255,255,255,0.3)"
-            }
-          }}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-
-    </Stack>
-  </Stack>
-</Box>
-
-  {/* CLIENTE */}
-
- 
-
-           <Box
-    sx={{
-      mb: 2.5,
-      borderRadius: 4,
-      overflow: "hidden",
-      border: "1px solid #e2e8f0",
-      background:
-        "linear-gradient(180deg,#ffffff 0%, #f8fafc 100%)",
-      boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
-    }}
-  >
-
-    
-
-  
-    {/* CUERPO */}
-    <Box sx={{ p: 2 }}>
-      {/* CLIENTE */}
-      <Box
-        sx={{
-          p: 1.5,
-          borderRadius: 3,
-          border: "1px solid #e2e8f0",
-          bgcolor: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-        }}
-      >
-        {/* IZQUIERDA */}
-        <Stack
-          direction="row"
-          spacing={1.5}
-          alignItems="center"
-          sx={{ minWidth: 0 }}
-        >
-          
-          {/* AVATAR */}
-              <Box
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: "50%",
-                        background:
-                          "linear-gradient(135deg,#0ea5e9,#2563eb)",
-                        color: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 700,
-                        fontSize: 14,
-                      }}
-                    >
-                       {(clienteSeleccionado?.nombres ||
-              ventaSeleccionada?.nombre_completo ||
-              "C")[0]}
-                    </Box>
-  
-  
-          {/* INFO */}
-          <Box sx={{ minWidth: 0 }}>
-            <Typography
-              fontWeight={800}
-              noWrap
-              sx={{
-                fontSize: {
-                  xs: 13,
-                  sm: 15,
-                },
-              }}
-            >
-              {clienteSeleccionado?.nombres ||
-                ventaSeleccionada?.nombre_completo}
-            </Typography>
-  
-            <Typography
-              color="text.secondary"
-              sx={{
-                fontSize: 12,
-              }}
-            >
-              Documento:{" "}
-              {clienteSeleccionado?.identificacion ||
-                ventaSeleccionada?.identificacion_cliente}
-            </Typography>
-          </Box>
-        </Stack>
-  
-        {/* BOTONES */}
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={1}
-        >
-          { ventaSeleccionada?.estado_pago==false &&
-          !modoEditarCliente ? (
-            <Button
-              size="small"
-              variant="contained"
-              onClick={() => setModoEditarCliente(true)}
-              sx={{
-                textTransform: "none",
-                borderRadius: 2,
-                fontWeight: 700,
-                px: 2,
-                background:
-                 "linear-gradient(135deg,#0ea5e9,#2563eb)",
-  
-                "&:hover": {
-                  background:
-                    "linear-gradient(135deg,#1d4ed8,#1e40af)",
-                },
-              }}
-            >
-              ✏️ Cambiar
-            </Button>
-          ) : (
-            <Button
-              size="small"
-              color="inherit"
-              variant="outlined"
-              onClick={() => {
-                setModoEditarCliente(false);
-                setClienteBuscado("");
-                setResultados([]);
-              }}
-              sx={{
-                textTransform: "none",
-                borderRadius: 2,
-                fontWeight: 700,
-              }}
-            >
-              Cancelar
-            </Button>
-          )}
-        </Stack>
-      </Box>
-  
-      {/* MODO EDICIÓN */}
-      {modoEditarCliente && (
-        <Box mt={2}>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Buscar cliente por nombre o documento..."
-            value={clienteBuscado}
-            onChange={(e) =>
-              handleBuscarCliente(e.target.value)
-            }
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 3,
-                bgcolor: "#fff",
-              },
-            }}
-          />
-  
-          {/* RESULTADOS */}
-          {resultados.length > 0 && (
-            <Box
-              sx={{
-                mt: 1,
-                borderRadius: 3,
-                overflow: "hidden",
-                border: "1px solid #e2e8f0",
-                background: "#fff",
-                maxHeight: 240,
-                overflowY: "auto",
-              }}
-            >
-              {resultados.map((cli) => (
-                <Box
-                  key={cli.id}
-                  onClick={() => {
-                    seleccionarCliente(cli);
-                    setModoEditarCliente(false);
-                  }}
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Tooltip title="Refrescar ventas" arrow>
+                <IconButton
+                  onClick={cargarVentas}
                   sx={{
-                    p: 1.5,
-                    cursor: "pointer",
-                    transition: "all .2s ease",
-                    borderBottom:
-                      "1px solid rgba(226,232,240,.7)",
-  
+                    borderRadius: 2,
+                    bgcolor: "#f5f5f5",
+                    border: "1px solid #e0e0e0",
+                    transition: "all 0.2s ease",
                     "&:hover": {
-                      background:
-                        "linear-gradient(135deg,#eff6ff,#f8fafc)",
+                      bgcolor: "#e3f2fd",
+                      transform: "rotate(90deg)",
                     },
                   }}
                 >
-                  <Stack
-                    direction="row"
-                    spacing={1.5}
-                    alignItems="center"
-                  >
-                    <Box
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: "50%",
-                        background:
-                          "linear-gradient(135deg,#0ea5e9,#2563eb)",
-                        color: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 700,
-                        fontSize: 14,
-                      }}
-                    >
-                      {cli.nombres[0]}
-                    </Box>
-  
-                    <Box>
-                      <Typography
-                        fontWeight={700}
-                        fontSize={13}
-                      >
-                        {cli.nombres} {cli.apellidos}
-                      </Typography>
-  
-                      <Typography
-                        fontSize={11}
-                        color="text.secondary"
-                      >
-                        {cli.identificacion}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Box>
-              ))}
-            </Box>
-          )}
-  
-          {/* BOTONES */}
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1}
-            mt={2}
-          >
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={() => setOpenCrearModal(true)}
-              sx={{
-                borderRadius: 3,
-                py: 1,
-                textTransform: "none",
-                fontWeight: 700,
-              }}
-            >
-              + Crear Cliente / Empresa
-            </Button>
-          </Stack>
-  
-          {/* MODAL */}
-          <CrearClienteModal
-            open={openCrearModal}
-            onClose={() => setOpenCrearModal(false)}
-            onCreated={(nuevo: any) => {
-              const clienteFinal: Cliente = {
-                ...nuevo,
-              };
-  
-              setClienteSeleccionado(clienteFinal);
-              setModoEditarCliente(false);
-              setOpenCrearModal(false);
+                  {loading ? (
+                    <CircularProgress size={18} />
+                  ) : (
+                    <RefreshIcon sx={{ fontSize: 20 }} />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Box>
+
+          {/* Facturas */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "repeat(2, 1fr)",
+                sm: "repeat(3, 1fr)",
+                md: "repeat(4, 1fr)",
+                lg: "repeat(6, 1fr)",
+                xl: "repeat(8, 1fr)",
+              },
+              gap: { xs: 1.2, md: 1.8 },
             }}
-          />
+          >
+            {ventasPagina.map((venta) => {
+              const isPagado = venta.estado_pago;
+              const estado = getEstadoChip(venta);
+              return (
+                <Box key={venta.id_venta}>
+                  <motion.div whileHover={{ scale: 1.04 }}>
+                    <Card
+                      sx={{
+                        borderRadius: 4,
+                        p: 1.5,
+                        cursor: "pointer",
+                        position: "relative",
+                        overflow: "hidden",
+                        background:
+                          venta.estado_venta === "cancelado"
+                            ? "linear-gradient(135deg,#ffebee,#ffffff)"
+                            : isPagado
+                              ? "linear-gradient(135deg,#e8f5e9,#ffffff)"
+                              : "linear-gradient(135deg,#fff3e0,#ffffff)",
+                        border: "1px solid #eee",
+                        transition: "all .25s ease",
+                        "&:hover": {
+                          transform: "translateY(-6px)",
+                          boxShadow: "0 12px 30px rgba(0,0,0,0.12)"
+                        }
+                      }}
+                      onClick={() => abrirDetalle(venta)}
+                    >
+
+                      {/* BARRA SUPERIOR COLOR */}
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: 4,
+                          bgcolor:
+                            venta.estado_venta === "cancelado"
+                              ? "#d32f2f"
+                              : isPagado
+                                ? "#2e7d32"
+                                : "#ed6c02"
+                        }}
+                      />
+
+                      <Stack spacing={1.2}>
+
+                        {/* HEADER */}
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Avatar
+                              sx={{
+                                width: 30,
+                                height: 30,
+                                bgcolor: isPagado ? "#c8e6c9" : "#ffe0b2"
+                              }}
+                            >
+                              <ReceiptLongIcon
+                                sx={{
+                                  fontSize: 18,
+                                  color: "#0d4993"
+                                }}
+                              />
+                            </Avatar>
+
+                            <Box>
+                              <Typography fontWeight={700} fontSize={10}>
+                                {venta.numero_factura}
+                              </Typography>
+                              <Typography fontSize={10} color="text.secondary">
+                                {venta.fecha}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                          <Chip
+                            label={`${estado.icon} ${estado.label}`}
+                            size="small"
+                            sx={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              bgcolor: estado.color,
+                              color: "#fff",
+                              borderRadius: 2,
+                              px: 0.5,
+                              letterSpacing: 0.3,
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+                            }}
+                          />
+
+                        </Stack>
+
+                        {/* CLIENTE */}
+                        <Box>
+                          <Typography fontSize={11} fontWeight={600} noWrap>
+                            {venta.nombre_completo}
+                          </Typography>
+                          <Typography fontSize={10} color="text.secondary" noWrap>
+                            {venta.identificacion_cliente}
+                          </Typography>
+                        </Box>
+
+                        {/* TOTAL DESTACADO */}
+                        <Box
+                          sx={{
+                            borderRadius: 2,
+                            p: 1,
+                            textAlign: "center",
+                            background:
+                              venta.estado_venta === "cancelado"
+                                ? "linear-gradient(135deg,#ed0202,#f85b5b)"
+                                : isPagado
+                                  ? "linear-gradient(135deg,#2e7d32,#66bb6a)"
+                                  : "linear-gradient(135deg,#ed6c02,#ff9800)",
+                            color: "#fff"
+                          }}
+                        >
+                          <Typography fontSize={10}>Total</Typography>
+                          <Typography fontWeight={700} fontSize={14}>
+                            {formatCOP(venta.venta_total)}
+                          </Typography>
+                        </Box>
+
+                        {/* INFO EXTRA */}
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          sx={{
+                            bgcolor: "#f9f9f9",
+                            borderRadius: 2,
+                            px: 1,
+                            py: 0.5
+                          }}
+                        >
+                          <Stack direction="row" alignItems="center" spacing={0.5}>
+                            {getMetodoPagoIcon(venta.metodo_pago)}
+                            <Typography fontSize={10} color="text.secondary">
+                              {venta.metodo_pago}
+                            </Typography>
+                          </Stack>
+
+                          <Typography fontSize={10}>
+                            🍽 {venta.mesa || "Sin mesa"}
+                          </Typography>
+                        </Stack>
+
+                        {/* FOOTER */}
+                        <Typography fontSize={9.5} color="text.secondary" noWrap>
+                          👤 {venta.nombre_vendedor}
+                        </Typography>
+
+                      </Stack>
+                    </Card>
+                  </motion.div>
+                </Box>
+              );
+            })}
+          </Box>
+
+          {/* Paginación */}
+          <Box mt={4} display="flex" justifyContent="center">
+
+            {totalPaginas > 1 && (
+              <Stack alignItems="center" mt={3}>
+                <Pagination
+                  count={totalPaginas}
+                  page={pagina}
+                  onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPagina(value)}
+                  color="primary"
+                  shape="rounded"
+                  size={isMobile ? "small" : "medium"}   // 👈 más compacto en móvil
+                  siblingCount={isMobile ? 0 : 1}        // 👈 menos botones en móvil
+                  boundaryCount={isMobile ? 1 : 2}
+                  showFirstButton={!isMobile}            // 👈 ocultar en móvil
+                  showLastButton={!isMobile}
+
+                />
+              </Stack>
+            )}
+
+          </Box>
+
+
+
+        </DialogContent>
+        <DialogActions
+          sx={{
+            borderTop: "1px solid #eee",
+            justifyContent: "center"
+          }}
+        >
+          <Stack direction="row" spacing={2}>
+            <Paper sx={{ px: 3, py: 1, bgcolor: "#ffebee" }}>
+              <Typography color="error.main" fontWeight={700}>
+                Facturas canceladas: {formatCOP(metrics.facturas_canceladas)}
+              </Typography>
+            </Paper>
+            <Paper sx={{ px: 3, py: 1, bgcolor: "#ffffeb" }}>
+              <Typography color="warning" fontWeight={700}>
+                Por cobrar: {formatCOP(metrics.pendiente_pago)}
+              </Typography>
+            </Paper>
+
+            <Paper sx={{ px: 3, py: 1, bgcolor: "#e8f5e9" }}>
+              <Typography color="success.main" fontWeight={700}>
+                Vendido: {formatCOP(metrics.totalVentas)}
+              </Typography>
+            </Paper>
+          </Stack>
+        </DialogActions>
+      </Dialog>
+
+      {/* ================= DETALLE FACTURA ================= */}
+      <Dialog
+        open={detalleOpen}
+        onClose={() => setDetalleOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            width: 420,
+            maxWidth: "95%",
+            overflow: "hidden"
+          }
+        }}
+      >
+        {/* HEADER */}
+        <Box
+          sx={{
+            background: "linear-gradient(135deg,#1976d2,#42a5f5)",
+            color: "#fff",
+            px: 2.5,
+            py: 2,
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16
+          }}
+        >
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            {/* IZQUIERDA */}
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Avatar
+                sx={{
+                  width: 42,
+                  height: 42,
+                  bgcolor: "rgba(255,255,255,0.2)",
+                  backdropFilter: "blur(6px)"
+                }}
+              >
+                <ReceiptLongIcon />
+              </Avatar>
+
+              <Box>
+                <Typography fontWeight={800} fontSize={16}>
+                  Factura
+                </Typography>
+
+                <Typography fontSize={12} sx={{ opacity: 0.9 }}>
+                  #{ventaSeleccionada?.numero_factura}
+                </Typography>
+              </Box>
+            </Stack>
+
+            {/* DERECHA (ACCIONES) */}
+            <Stack direction="row" spacing={1}>
+
+
+              <Chip
+                label={estado?.label}
+                size="small"
+                sx={{
+                  bgcolor: estado?.color,
+                  color: "#fff",
+                  fontWeight: 700,
+                  borderRadius: 2,
+                  px: 1,
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
+                }}
+              />
+
+
+              {/* CANCELAR */}
+
+              {ventaSeleccionada?.estado_venta != 'cancelado' && ventaSeleccionada?.estado_pago == false && (
+                <Tooltip title="Cancelar factura" arrow>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenCancel(true);
+                    }}
+                    sx={{
+                      color: "#fff",
+                      bgcolor: "rgba(255,82,82,0.2)",
+                      transition: "all .2s ease",
+                      "&:hover": {
+                        bgcolor: "#d32f2f",
+                        transform: "scale(1.1)"
+                      }
+                    }}
+                  >
+                    <CancelOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+
+              )}
+
+
+              {/* CERRAR */}
+              <Tooltip title="Cerrar" arrow>
+                <IconButton
+                  onClick={() => setDetalleOpen(false)}
+                  sx={{
+                    color: "#fff",
+                    bgcolor: "rgba(255,255,255,0.15)",
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.3)"
+                    }
+                  }}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+
+            </Stack>
+          </Stack>
         </Box>
-      )}
-    </Box>
-  </Box>
+
+        {/* CLIENTE */}
 
 
 
-  {/* CONTENIDO CON SCROLL */}
- <DialogContent
-  sx={{
-    p: 0,
-    display: "flex",
-    flexDirection: "column",
-    minHeight: 150, 
-    maxHeight: "60vh",
-    background: "#fafafa"
-  }}
->
-    <Box
-      sx={{
-        flex: 1,
-        overflowY: "auto",
-        px: 2,
-        py: 1,
+        <Box
+     
+        >
 
-        "&::-webkit-scrollbar": {
-          width: 6
-        },
-        "&::-webkit-scrollbar-thumb": {
-          background: "#ccc",
-          borderRadius: 10
-        }
-      }}
-    >
-      {loadingDetalle ? (
-        <Box py={4} textAlign="center">
-          <CircularProgress size={26} />
-        </Box>
-      ) : (
-        <Stack spacing={1.2}>
-          {productosDetalle.map((p) => (
-            <Card
-              key={p.id_producto}
+
+
+
+          {/* CUERPO */}
+          <Box sx={{ p: 2 }}>
+            {/* CLIENTE */}
+            <Box
               sx={{
-                p: 1.2,
+                p: 1.5,
                 borderRadius: 3,
+                border: "1px solid #e2e8f0",
+                bgcolor: "#fff",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: 1,
-                border: "1px solid #eee",
-                boxShadow: "none"
+                gap: 2,
               }}
             >
-              <Stack direction="row" spacing={1} alignItems="center" flex={1}>
-                <Avatar
-                  src={p.url_imagen}
-                  variant="rounded"
-                  sx={{ width: 42, height: 42 }}
-                />
+              {/* IZQUIERDA */}
+              <Stack
+                direction="row"
+                spacing={1.5}
+                alignItems="center"
+                sx={{ minWidth: 0 }}
+              >
 
-                <Box>
-                  <Typography fontSize={12.5} fontWeight={600} noWrap>
-                    {p.nombre}
+                {/* AVATAR */}
+                <Box
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    background:
+                      "linear-gradient(135deg,#0ea5e9,#2563eb)",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                    fontSize: 14,
+                  }}
+                >
+                  {(clienteSeleccionado?.nombres ||
+                    ventaSeleccionada?.nombre_completo ||
+                    "C")[0]}
+                </Box>
+
+
+                {/* INFO */}
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
+                    fontWeight={800}
+                    noWrap
+                    sx={{
+                      fontSize: {
+                        xs: 13,
+                        sm: 15,
+                      },
+                    }}
+                  >
+                    {clienteSeleccionado?.nombres ||
+                      ventaSeleccionada?.nombre_completo}
                   </Typography>
 
-                  <Typography fontSize={11} color="text.secondary">
-                    x{p.cantidad}
+                  <Typography
+                    color="text.secondary"
+                    sx={{
+                      fontSize: 12,
+                    }}
+                  >
+                    Documento:{" "}
+                    {clienteSeleccionado?.identificacion ||
+                      ventaSeleccionada?.identificacion_cliente}
                   </Typography>
                 </Box>
               </Stack>
 
-              <Typography fontWeight={700} fontSize={12.5}>
-                {formatCOP(p.subtotal)}
-              </Typography>
-            </Card>
-          ))}
-        </Stack>
-      )}
+              {/* BOTONES */}
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+              >
+                {ventaSeleccionada?.estado_pago === false && !modoEditarCliente ? (
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={() => setModoEditarCliente(true)}
+                    sx={{
+                      textTransform: "none",
+                      borderRadius: 2,
+                      fontWeight: 700,
+                      px: 2,
+                      background:
+                        "linear-gradient(135deg,#0ea5e9,#2563eb)",
 
-      {/* NOTA */}
-      {ventaSeleccionada?.nota && (
-        <Box
+                      "&:hover": {
+                        background:
+                          "linear-gradient(135deg,#1d4ed8,#1e40af)",
+                      },
+                    }}
+                  >
+                    ✏️ Cambiar
+                  </Button>
+                ) : (
+                  <Button
+                    size="small"
+                    color="inherit"
+                    variant="outlined"
+                    onClick={() => {
+                      setModoEditarCliente(false);
+                      setClienteBuscado("");
+                      setResultados([]);
+                    }}
+                    sx={{
+                      textTransform: "none",
+                      borderRadius: 2,
+                      fontWeight: 700,
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                )}
+              </Stack>
+            </Box>
+
+            {/* MODO EDICIÓN */}
+            {modoEditarCliente && (
+              <Box mt={2}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="Buscar cliente por nombre o documento..."
+                  value={clienteBuscado}
+                  onChange={(e) =>
+                    handleBuscarCliente(e.target.value)
+                  }
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                      bgcolor: "#fff",
+                    },
+                  }}
+                />
+
+                {/* RESULTADOS */}
+                {resultados.length > 0 && (
+                  <Box
+                    sx={{
+                      mt: 1,
+                      borderRadius: 3,
+                      overflow: "hidden",
+                      border: "1px solid #e2e8f0",
+                      background: "#fff",
+                      maxHeight: 240,
+                      overflowY: "auto",
+                    }}
+                  >
+                    {resultados.map((cli) => (
+                      <Box
+                        key={cli.id}
+                        onClick={() => {
+                          seleccionarCliente(cli);
+                          setModoEditarCliente(false);
+                        }}
+                        sx={{
+                          p: 1.5,
+                          cursor: "pointer",
+                          transition: "all .2s ease",
+                          borderBottom:
+                            "1px solid rgba(226,232,240,.7)",
+
+                          "&:hover": {
+                            background:
+                              "linear-gradient(135deg,#eff6ff,#f8fafc)",
+                          },
+                        }}
+                      >
+                        <Stack
+                          direction="row"
+                          spacing={1.5}
+                          alignItems="center"
+                        >
+                          <Box
+                            sx={{
+                              width: 36,
+                              height: 36,
+                              borderRadius: "50%",
+                              background:
+                                "linear-gradient(135deg,#0ea5e9,#2563eb)",
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 700,
+                              fontSize: 14,
+                            }}
+                          >
+                            {cli.nombres[0]}
+                          </Box>
+
+                          <Box>
+                            <Typography
+                              fontWeight={700}
+                              fontSize={13}
+                            >
+                              {cli.nombres} {cli.apellidos}
+                            </Typography>
+
+                            <Typography
+                              fontSize={11}
+                              color="text.secondary"
+                            >
+                              {cli.identificacion}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+
+                {/* BOTONES */}
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={1}
+                  mt={2}
+                >
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => setOpenCrearModal(true)}
+                    sx={{
+                      borderRadius: 3,
+                      py: 1,
+                      textTransform: "none",
+                      fontWeight: 700,
+                    }}
+                  >
+                    + Crear Cliente / Empresa
+                  </Button>
+                </Stack>
+
+                {/* MODAL */}
+                <CrearClienteModal
+                  open={openCrearModal}
+                  onClose={() => setOpenCrearModal(false)}
+                  onCreated={(nuevo: any) => {
+                    const clienteFinal: Cliente = {
+                      ...nuevo,
+                    };
+
+                    setClienteSeleccionado(clienteFinal);
+                    setModoEditarCliente(false);
+                    setOpenCrearModal(false);
+                  }}
+                />
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+
+
+        {/* CONTENIDO CON SCROLL */}
+        <DialogContent
           sx={{
-            p: 1,
-            mt: 2,
-            borderRadius: 2,
-            bgcolor: "#f9fafb",
-            border: "1px dashed #d1d5db"
+            p: 0,
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "auto",
+            maxHeight: "60vh",
+            background: "#fafafa"
           }}
         >
-          <Typography fontSize={11} color="text.secondary">
-            📝 {ventaSeleccionada.nota}
-          </Typography>
-        </Box>
-      )}
-    </Box>
-  </DialogContent>
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: "auto",
+              px: 2,
+              py: 1,
 
-  {/* FOOTER */}
-  <DialogActions sx={{ p: 2 }}>
-    <Stack spacing={1} width="100%">
-
-      {/* TOTAL */}
-      <Box
-        sx={{
-          p: 1.2,
-          borderRadius: 3,
-          background: "linear-gradient(135deg,#111827,#1f2937)",
-          color: "#fff",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
-        }}
-      >
-        <Typography fontWeight={600}>Total</Typography>
-        <Typography fontWeight={800}>
-          {formatCOP(ventaSeleccionada?.venta_total)}
-        </Typography>
-      </Box>
-
-      {/* FORM PAGO */}
-      { ventaSeleccionada?.estado_venta!='cancelado'&&ventaSeleccionada?.estado_pago === false && (
-        <>
-          <TextField
-            select
-            fullWidth
-            label="Método de Pago"
-            size="small"
-            value={metodoPago}
-            onChange={(e) => setMetodoPago(e.target.value)}
+              "&::-webkit-scrollbar": {
+                width: 6
+              },
+              "&::-webkit-scrollbar-thumb": {
+                background: "#ccc",
+                borderRadius: 10
+              }
+            }}
           >
-            <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
-            <MenuItem value="TRANSFERENCIA">🔁 Transferencia</MenuItem>
-            <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
-            <MenuItem value="NEQUI">📲 Nequi</MenuItem>
-            <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
-            <MenuItem value="TIQUERERA" disabled={!clienteSeleccionado} >🎟️ Tiquetera</MenuItem>
+            {loadingDetalle ? (
+              <Box py={4} textAlign="center">
+                <CircularProgress size={26} />
+              </Box>
+            ) : (
+              <Stack spacing={1.2}>
+                {productosDetalle.map((p) => (
+                  <Card
+                    key={p.id_producto}
+                    sx={{
+                      p: 1.2,
+                      borderRadius: 3,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 1,
+                      border: "1px solid #eee",
+                      boxShadow: "none"
+                    }}
+                  >
+                    <Stack direction="row" spacing={1} alignItems="center" flex={1}>
+                      <Avatar
+                        src={p.url_imagen}
+                        variant="rounded"
+                        sx={{ width: 42, height: 42 }}
+                      />
+
+                      <Box>
+                        <Typography fontSize={12.5} fontWeight={600} noWrap>
+                          {p.nombre}
+                        </Typography>
+
+                        <Typography fontSize={11} color="text.secondary">
+                          x{p.cantidad}
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    <Typography fontWeight={700} fontSize={12.5}>
+                      {formatCOP(p.subtotal)}
+                    </Typography>
+                  </Card>
+                ))}
+              </Stack>
+            )}
+
+            {/* NOTA */}
+            {ventaSeleccionada?.nota && (
+              <Box
+                sx={{
+                  p: 1,
+                  mt: 2,
+                  borderRadius: 2,
+                  bgcolor: "#f9fafb",
+                  border: "1px dashed #d1d5db"
+                }}
+              >
+                <Typography fontSize={11} color="text.secondary">
+                  📝 {ventaSeleccionada.nota}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </DialogContent>
+
+        {/* FOOTER */}
+        <DialogActions sx={{ p: 2 }}>
+          <Stack spacing={1} width="100%">
+
+            {/* TOTAL */}
+            <Box
+              sx={{
+                p: 1.2,
+                borderRadius: 3,
+                background: "linear-gradient(135deg,#111827,#1f2937)",
+                color: "#fff",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}
+            >
+              <Typography fontWeight={600}>Total</Typography>
+              <Typography fontWeight={800}>
+                {formatCOP(ventaSeleccionada?.venta_total)}
+              </Typography>
+            </Box>
+
+            {/* FORM PAGO */}
+            {ventaSeleccionada?.estado_venta != 'cancelado' && ventaSeleccionada?.estado_pago === false && (
+              <>
+                <TextField
+                  select
+                  fullWidth
+                  label="Método de Pago"
+                  size="small"
+                  value={metodoPago}
+                  onChange={(e) => setMetodoPago(e.target.value)}
+                >
+                  <MenuItem value="EFECTIVO">💵 Efectivo</MenuItem>
+                  <MenuItem value="TRANSFERENCIA">🔁 Transferencia</MenuItem>
+                  <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
+                  <MenuItem value="NEQUI">📲 Nequi</MenuItem>
+                  <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
+                  <MenuItem value="TIQUERERA" disabled={!clienteSeleccionado} >🎟️ Tiquetera</MenuItem>
                   {(!clienteSeleccionado ||
                     clienteSeleccionado.identificacion?.toLowerCase().includes("22222222")) && (
+                      <Typography
+                        mt={1}
+                        fontSize={12}
+                        color="warning.main"
+                        fontWeight={600}
+                      >
+                        ⚠️ Debes seleccionar un cliente válido para usar tiquetera
+                      </Typography>
+                    )}              </TextField>
+
+                {metodoPago === "EFECTIVO" && (
+                  <>
+                    <TextField
+                      fullWidth
+                      label="Monto recibido"
+                      size="small"
+                      type="text"
+                      inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                      sx={{ mt: 1 }}
+                      value={montoRecibido === "" ? "" : formatCOP(montoRecibido)}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, "");
+                        setMontoRecibido(raw === "" ? "" : Number(raw));
+                      }}
+                    />
+
+                    {montoRecibido !== "" && cambio < 0 && (
+                      <Typography color="error" variant="caption">
+                        El monto recibido es menor al total
+                      </Typography>
+                    )}
+
                     <Typography
-                      mt={1}
-                      fontSize={12}
-                      color="warning.main"
-                      fontWeight={600}
+                      sx={{ mt: 1, fontWeight: 800 }}
+                      color={cambio < 0 ? "error.main" : "success.main"}
                     >
-                      ⚠️ Debes seleccionar un cliente válido para usar tiquetera
+                      Cambio: {formatCOP(cambioSeguro)}
                     </Typography>
-                  )}              </TextField>
+                  </>
+                )}
 
-          {metodoPago === "EFECTIVO" && (
-            <>
-              <TextField
-                fullWidth
-                label="Monto recibido"
-                size="small"
-                type="text"
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-                sx={{ mt: 1 }}
-                value={montoRecibido === "" ? "" : formatCOP(montoRecibido)}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/\D/g, "");
-                  setMontoRecibido(raw === "" ? "" : Number(raw));
-                }}
-              />
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="success"
+                  disabled={metodoPago === "EFECTIVO" && cambio < 0}
+                  startIcon={<AddShoppingCartIcon />}
+                  onClick={handleFinalizarVenta}
+                  sx={{ borderRadius: 3, fontWeight: 700 }}
+                >
+                  PAGAR FACTURA
+                </Button>
+              </>
+            )}
 
-              {montoRecibido !== "" && cambio < 0 && (
-                <Typography color="error" variant="caption">
-                  El monto recibido es menor al total
-                </Typography>
-              )}
+            {/*  IMPRESIONES COMANDA O FACTURA */}
 
-              <Typography
-                sx={{ mt: 1, fontWeight: 800 }}
-                color={cambio < 0 ? "error.main" : "success.main"}
-              >
-                Cambio: {formatCOP(cambioSeguro)}
-              </Typography>
-            </>
-          )}
+            {/*{ventaSeleccionada?.estado_pago === false && ( */}
+            <Button
+              fullWidth
+              startIcon={<PrintIcon />}
+              variant="contained"
+              color="primary"
+              sx={{ borderRadius: 3, fontWeight: 700 }}
+              onClick={() => imprimirFactura("comanda")}
+            >
+              Imprimir Comanda
+            </Button>
 
-          <Button
-            fullWidth
-            variant="contained"
-            color="success"
-            disabled={metodoPago === "EFECTIVO" && cambio < 0}
-            startIcon={<AddShoppingCartIcon />}
-            onClick={handleFinalizarVenta}
-            sx={{ borderRadius: 3, fontWeight: 700 }}
-          >
-            PAGAR FACTURA
-          </Button>
-        </>
-      )}
-
-      {/*  IMPRESIONES COMANDA O FACTURA */}
-
-    {/*{ventaSeleccionada?.estado_pago === false && ( */}
-      <Button
-          fullWidth
-          startIcon={<PrintIcon />}
-          variant="contained"
-          color="primary"
-          sx={{ borderRadius: 3, fontWeight: 700 }}
-          onClick={() => imprimirFactura("comanda")}
-        >
-          Imprimir Comanda
-        </Button>
-    
-    {/*
+            {/*
     )}
     
    
@@ -1390,11 +1381,11 @@ const getMetodoPagoIcon = (metodo:any) => {
 
      )}
      */}
-    
 
-    </Stack>
-  </DialogActions>
-</Dialog>
+
+          </Stack>
+        </DialogActions>
+      </Dialog>
 
       {/* === DIALOG VENTA REGISTRADA === */}
       <Dialog
