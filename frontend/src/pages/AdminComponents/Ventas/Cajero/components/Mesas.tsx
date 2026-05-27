@@ -154,7 +154,7 @@ const seleccionarCliente = (cli: Cliente) => {
     const payload = {
       idUsuario: idUsuario,
       id_negocio: id_negocio,
-      id_venta: detalleVenta.id_pago,
+      id_venta: detalleVenta.id_venta,
       id_mesa: mesaOrden?.id,
       metodo_pago: metodoPago,
       monto_recibido: montoRecibido,
