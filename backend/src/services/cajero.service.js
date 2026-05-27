@@ -838,7 +838,7 @@ crearcliente: async (payload) => {
     v.id AS id_venta,
     p.id_pago,
     v.numero_factura,
-    per.id as id_cliente,6
+    per.id as id_cliente,
     per.identificacion AS identificacion_cliente,
     per.nombres || ' ' || per.apellidos AS nombre_completo,
     per.telefono,
