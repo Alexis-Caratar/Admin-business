@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 
-const { imprimirFactura } = require("../services/imprimir.service.js");
+const { status } = require("../services/imprimir.service.js");
 
-router.post("/imprimir", async (req, res) => {
+router.get("/status", async (req, res) => {
   try {
-    const result = await imprimirFactura(req.body);
+    const result = await status();
+    console.log("result",result);
+    
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -12,10 +12,13 @@ app.use(bodyParser.json());
 
 //ruta principal que hace ping y se sabe si esta en linea
 app.get("/", (req, res) => {
-    res.json({status: " SERVIDOR AGENTE LOCAL OK",service: "printer-agent",time: new Date()});});
+    res.json({status: " SERVIDOR AGENTE LOCAL OK",service: "printer-agent",time: new Date()});
+  });
+app.use("/api", imprimirRoutes);
+
 
 // 🔹 Rutas
-app.use("/api", imprimirRoutes);
+//app.use("/api", imprimirRoutes);
 
 app.listen(PORT, () => {
   console.log(`

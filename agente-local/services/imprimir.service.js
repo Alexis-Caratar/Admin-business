@@ -1,8 +1,40 @@
 const escpos = require("@node-escpos/core");
 const USB = require("@node-escpos/usb-adapter");
+const printer = require("pdf-to-printer");
 
 const { formatCOP, line, center, twoCols } = require("../utils/formatter");
 const printers = require("../config/printers");
+
+
+
+async function status() {
+
+  try {
+    const printerName =process.env.IMPRESORAPRINCIPAL_CAJA;
+    const printers =await printer.getPrinters();
+    const printerFound =
+      printers.find(p =>
+          p.name === printerName
+      );
+
+    if (printerFound) {
+      return { ok: true, connected: true, status: "ONLINE",
+         printer: {
+          name: printerFound.name,
+          driver: printerFound.driverName,
+          port: printerFound.portName,
+          paper: printerFound.paperSizes ||[],
+          default: printerFound.isDefault ||false,
+        },
+      };
+    }
+    return {ok: false, connected: false, status: "OFFLINE", message:"Impresora no encontrada",
+    };
+
+  } catch (error) {
+    return {ok: false,connected: false,status: "ERROR", error: error.message,};
+  }
+}
 
 async function imprimirFactura(data) {
   
@@ -227,4 +259,4 @@ async function imprimirComanda(data) {
   });
 }
 
-module.exports = { imprimirFactura,imprimirComanda };
+module.exports = { imprimirFactura,imprimirComanda,status };

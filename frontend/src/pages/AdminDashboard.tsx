@@ -3,10 +3,11 @@ import {
   Box, List, ListItemButton, ListItemIcon, ListItemText, Paper,
   Typography, Divider, IconButton, Avatar, Tooltip,
   AppBar, Toolbar, Menu, MenuItem,
-  useMediaQuery, useTheme, Drawer
+  useMediaQuery, useTheme, Drawer,
+  Button,Stack,
+  Chip
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -20,8 +21,12 @@ import { iconMap } from "../utils/mapIcons";
 import { componentMap } from "../utils/mapComponents";
 import { useIdleLogout } from "../hooks/useIdleLogout";
 import CambiarPasswordModal from "../components/CambiarPasswordModal";
-import {cambiopassword} from "./../api/auth"
+import { cambiopassword } from "./../api/auth"
 import Loader from "../components/Loader";
+import PrintIcon from "@mui/icons-material/Print";
+import SyncIcon from "@mui/icons-material/Sync"; 
+import SettingsIcon from "@mui/icons-material/Settings";
+
 const DEFAULT_AVATAR =
   "https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png";
 
@@ -49,24 +54,24 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const handleStorage = (e: StorageEvent) => {
-    if (e.key === "logout") {
-      navigate("/");
-    }
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "logout") {
+        navigate("/");
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [navigate]);
+
+  const cerrarSesion = () => {
+    localStorage.clear();
+    localStorage.setItem("logout", Date.now().toString());
+    navigate("/login");
   };
-
-  window.addEventListener("storage", handleStorage);
-
-  return () => {
-    window.removeEventListener("storage", handleStorage);
-  };
-}, [navigate]);
-
-const cerrarSesion = () => {
-  localStorage.clear();
-  localStorage.setItem("logout", Date.now().toString());
-  navigate("/login");
-};
 
   useIdleLogout({
     timeout: 120 * 60 * 1000, // 2 horas de inactividad
@@ -92,7 +97,7 @@ const cerrarSesion = () => {
     const storedNombre = localStorage.getItem("nombre") || "";
     const storedRol = localStorage.getItem("rol") || "";
     const rawImagen = localStorage.getItem("imagen");
-    const id_usuario = localStorage.getItem("id_usuario")||"";
+    const id_usuario = localStorage.getItem("id_usuario") || "";
 
     setNombreNegocio(storedNegocio);
     setImagenNegocio(imagenNegocio);
@@ -120,88 +125,92 @@ const cerrarSesion = () => {
 
   const ActiveComponent = modulo ? componentMap[modulo] : null;
 
+const reconnectPrinter = () => {
+  console.log("Reconectando...");
+};
+
   // 🔥 SIDEBAR
   const sidebar = (
-   <Box
-  sx={{
-    width: collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH,
-    ...(isSmallScreen
-      ? { height: "100%",}
-      : {
-          position: "fixed",
-          top: 0,
-          left: 0,
-          bottom: 0,
-          height: "100vh",
-        }),
-    bgcolor: "#25313F",
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    transition: "all 0.3s ease",
-    zIndex:20
-  }}
->
+    <Box
+      sx={{
+        width: collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH,
+        ...(isSmallScreen
+          ? { height: "100%", }
+          : {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            height: "100vh",
+          }),
+        bgcolor: "#25313F",
+        display: "flex",
+        flexDirection: "column",
+        overflowY: "auto",
+        transition: "all 0.3s ease",
+        zIndex: 20
+      }}
+    >
       {/* HEADER */}
       <Box display="flex" alignItems="center" justifyContent="space-between" p={1}>
-       <Box display="flex" alignItems="center" gap={1.5}>
-  
-        {/* Logo */}
-        <Box
-          sx={{
-            width: 40,
-            height: 40,
-            borderRadius: "12px",
-            overflow: "hidden",
-            background: "rgba(255,255,255,0.1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          {imagen_negocio ? (
-            <img
-              src={imagen_negocio}
-              alt="Negocio"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <StorefrontIcon sx={{ color: "#fff", fontSize: 20 }} />
+        <Box display="flex" alignItems="center" gap={1.5}>
+
+          {/* Logo */}
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: "12px",
+              overflow: "hidden",
+              background: "rgba(255,255,255,0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            {imagen_negocio ? (
+              <img
+                src={imagen_negocio}
+                alt="Negocio"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <StorefrontIcon sx={{ color: "#fff", fontSize: 20 }} />
+            )}
+          </Box>
+
+          {/* Nombre */}
+          {!collapsed && (
+            <Box sx={{ maxWidth: 150 }}>
+              <Typography
+                sx={{
+                  color: "#fff",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  lineHeight: 1.2,
+                  wordBreak: "break-word", // 🔥 clave
+                }}
+              >
+                {nombre_negocio}
+              </Typography>
+
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "#9AA7B6",
+                  fontSize: 11,
+                }}
+              >
+                Mi negocio
+              </Typography>
+            </Box>
           )}
         </Box>
-
-        {/* Nombre */}
-        {!collapsed && (
-          <Box sx={{ maxWidth: 150 }}>
-            <Typography
-              sx={{
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: 14,
-                lineHeight: 1.2,
-                wordBreak: "break-word", // 🔥 clave
-              }}
-            >
-              {nombre_negocio}
-            </Typography>
-
-            <Typography
-              variant="caption"
-              sx={{
-                color: "#9AA7B6",
-                fontSize: 11,
-              }}
-            >
-              Mi negocio
-            </Typography>
-          </Box>
-        )}
-      </Box>
 
         {!isSmallScreen && (
           <IconButton
@@ -218,7 +227,7 @@ const cerrarSesion = () => {
         <Avatar src={imagen} sx={{ width: 50, height: 50 }} />
         {!collapsed && (
           <>
-            <Typography sx={{ color: "#fff",fontSize: 13}}>{nombre}</Typography>
+            <Typography sx={{ color: "#fff", fontSize: 13 }}>{nombre}</Typography>
             <Typography sx={{ color: "#fff" }} variant="caption">{rol}</Typography>
           </>
         )}
@@ -237,72 +246,72 @@ const cerrarSesion = () => {
               title={!isSmallScreen && collapsed ? menu.nombre : ""}
               placement="right"
             >
-             <ListItemButton
-  selected={selected}
-  onClick={() => {
-    navigate(`/admin/${menu.url}`);
+              <ListItemButton
+                selected={selected}
+                onClick={() => {
+                  navigate(`/admin/${menu.url}`);
 
-    if (isSmallScreen) {
-      setDrawerOpen(false);
-    }
-  }}
-  sx={{
-    minHeight: 42,
-    borderRadius: 2.5,
-    mx: 1,
-    mb: 0.5,
-    px: 1.2,
-    py: 0.6,
+                  if (isSmallScreen) {
+                    setDrawerOpen(false);
+                  }
+                }}
+                sx={{
+                  minHeight: 42,
+                  borderRadius: 2.5,
+                  mx: 1,
+                  mb: 0.5,
+                  px: 1.2,
+                  py: 0.6,
 
-    color: selected ? "#fff" : "#94a3b8",
+                  color: selected ? "#fff" : "#94a3b8",
 
-    background: selected
-      ? "linear-gradient(135deg,#1196b7,#0ea5e9)"
-      : "transparent",
+                  background: selected
+                    ? "linear-gradient(135deg,#1196b7,#0ea5e9)"
+                    : "transparent",
 
-    transition: "all .2s ease",
+                  transition: "all .2s ease",
 
-    "&:hover": {
-      bgcolor: selected
-        ? undefined
-        : "rgba(255,255,255,0.05)",
+                  "&:hover": {
+                    bgcolor: selected
+                      ? undefined
+                      : "rgba(255,255,255,0.05)",
 
-      color: "#fff",
-    },
+                    color: "#fff",
+                  },
 
-    "&.Mui-selected": {
-      boxShadow:
-        "0 6px 16px rgba(14,165,233,0.22)",
-    },
-  }}
->
-  {/* ICONO */}
-  <ListItemIcon
-    sx={{
-      minWidth: 0,
-      mr: collapsed ? 0 : 1.2,
-      color: "inherit",
+                  "&.Mui-selected": {
+                    boxShadow:
+                      "0 6px 16px rgba(14,165,233,0.22)",
+                  },
+                }}
+              >
+                {/* ICONO */}
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: collapsed ? 0 : 1.2,
+                    color: "inherit",
 
-      "& svg": {
-        fontSize: 19,
-      },
-    }}
-  >
-    {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
-  </ListItemIcon>
+                    "& svg": {
+                      fontSize: 19,
+                    },
+                  }}
+                >
+                  {iconMap[menu.icono ?? "default"] ?? <MenuIcon />}
+                </ListItemIcon>
 
-  {/* TEXTO */}
-  {!collapsed && (
-    <ListItemText
-      primary={menu.nombre}
-      primaryTypographyProps={{
-        fontSize: 13,
-        fontWeight: selected ? 700 : 500,
-        noWrap: true,
-      }}
-    />
-  )}
-</ListItemButton>
+                {/* TEXTO */}
+                {!collapsed && (
+                  <ListItemText
+                    primary={menu.nombre}
+                    primaryTypographyProps={{
+                      fontSize: 13,
+                      fontWeight: selected ? 700 : 500,
+                      noWrap: true,
+                    }}
+                  />
+                )}
+              </ListItemButton>
             </Tooltip>
           );
         })}
@@ -311,16 +320,16 @@ const cerrarSesion = () => {
   );
 
   if (loading) {
-  return (
-    <Loader 
-      text="Cargando sistema..."
-      logo={imagen_negocio}
-    />
-  );
-}
+    return (
+      <Loader
+        text="Cargando sistema..."
+        logo={imagen_negocio}
+      />
+    );
+  }
   return (
     <Box display="flex" height="100vh" width="100%">
-      
+
       {/* DESKTOP */}
       {!isSmallScreen && sidebar}
 
@@ -330,7 +339,7 @@ const cerrarSesion = () => {
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           PaperProps={{
-            sx: { width: 245 }, 
+            sx: { width: 245 },
           }}
         >
           {sidebar}
@@ -339,7 +348,7 @@ const cerrarSesion = () => {
 
       {/* CONTENIDO */}
       <Box flex={1} display="flex" flexDirection="column" bgcolor="#f3f4f6">
-        
+
         <AppBar position="static" sx={{ bgcolor: "#25313F" }}>
           <Toolbar>
             {isSmallScreen && (
@@ -353,19 +362,276 @@ const cerrarSesion = () => {
                 <NotificationsIcon />
               </IconButton>
 
-              <IconButton sx={{ color: "#fff" }}>
-              <MenuItem onClick={() => setOpenPasswordModal(true)}>
-               <LockResetIcon sx={{ mr: 1, color: "#f59e0b" }} />
-                Cambiar contraseña
-              </MenuItem>
-              </IconButton>
+
+        
+          
+              
+            <Box
+              sx={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                overflow: "hidden",
+                transition: "all .35s ease",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  pointerEvents: "none",
+                },
+              }}
+            >
+              <Tooltip
+                arrow
+                placement="bottom-end"
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      background: "#0f172a",
+                      borderRadius: "18px",
+                      p: 0,
+                      minWidth: 320,
+                      boxShadow:
+                        "0 20px 50px rgba(0,0,0,.35)",
+                      border:
+                        "1px solid rgba(255,255,255,.08)",
+                    },
+                  },
+                  arrow: {
+                    sx: {
+                      color: "#0f172a",
+                    },
+                  },
+                }}
+                title={
+                  <Box>
+                    {/* HEADER */}
+                    <Box
+                      sx={{
+                        px: 2,
+                        py: 1.5,
+                        borderBottom:
+                          "1px solid rgba(255,255,255,.06)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Box>
+                        <Typography
+                          sx={{
+                            color: "#fff",
+                            fontWeight: 700,
+                            fontSize: 14,
+                          }}
+                        >
+                          Epson TM-T20III
+                        </Typography>
+
+                        <Typography
+                          sx={{
+                            color: "#94a3b8",
+                            fontSize: 12,
+                          }}
+                        >
+                          Impresora térmica principal
+                        </Typography>
+                      </Box>
+
+                      <Chip
+                        label="ONLINE"
+                        size="small"
+                        sx={{
+                          bgcolor:
+                            "rgba(34,197,94,.18)",
+                          color: "#4ade80",
+                          fontWeight: 700,
+                          fontSize: 11,
+                        }}
+                      />
+                    </Box>
+
+                    {/* BODY */}
+                    <Box sx={{ p: 2 }}>
+                      <Stack spacing={1.2}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent:
+                              "space-between",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              color: "#94a3b8",
+                              fontSize: 13,
+                            }}
+                          >
+                            Estado
+                          </Typography>
+
+                          <Typography
+                            sx={{
+                              color: "#4ade80",
+                              fontSize: 13,
+                              fontWeight: 700,
+                            }}
+                          >
+                            Conectada
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent:
+                              "space-between",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              color: "#94a3b8",
+                              fontSize: 13,
+                            }}
+                          >
+                            Puerto
+                          </Typography>
+
+                          <Typography
+                            sx={{
+                              color: "#fff",
+                              fontSize: 13,
+                            }}
+                          >
+                            USB
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent:
+                              "space-between",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              color: "#94a3b8",
+                              fontSize: 13,
+                            }}
+                          >
+                            Papel
+                          </Typography>
+
+                          <Typography
+                            sx={{
+                              color: "#fff",
+                              fontSize: 13,
+                            }}
+                          >
+                            80mm
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent:
+                              "space-between",
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              color: "#94a3b8",
+                              fontSize: 13,
+                            }}
+                          >
+                            Última conexión
+                          </Typography>
+
+                          <Typography
+                            sx={{
+                              color: "#fff",
+                              fontSize: 13,
+                            }}
+                          >
+                            Hace 2 min
+                          </Typography>
+                        </Box>
+                      </Stack>
+
+                      <Divider
+                        sx={{
+                          my: 2,
+                          borderColor:
+                            "rgba(255,255,255,.08)",
+                        }}
+                      />
+
+                      {/* ACTIONS */}
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                      >
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          startIcon={<SyncIcon/>}
+                          onClick={reconnectPrinter}
+                          sx={{
+                            borderRadius: "12px",
+                            textTransform: "none",
+                            fontWeight: 700,
+                            bgcolor: "#16a34a",
+                            "&:hover": {
+                              bgcolor: "#15803d",
+                            },
+                          }}
+                        >
+                          Reconectar
+                        </Button>
+                      </Stack>
+                    </Box>
+                  </Box>
+                }
+              >
+                <Button
+                  onClick={() =>
+                    setOpenPasswordModal(true)
+                  }
+                  startIcon={
+                    <PrintIcon
+                    
+                      sx={{
+                        fontSize: 22,
+                        //color: "#4ade80",
+                         color: "#c7330e",
+                      }}
+                    />
+                  }
+                  sx={{
+                    px: 2,
+                    py: 1.2,
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: 14,
+                    borderRadius: "18px",
+                    textTransform: "none",
+                    letterSpacing: ".3px",
+                  }}
+                >
+                  Impresora conectada
+                </Button>
+              </Tooltip>
+            </Box>
+
+
 
               <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
                 <Avatar src={imagen} />
                 <ArrowDropDownIcon />
               </IconButton>
 
-            <Menu
+              <Menu
                 anchorEl={anchorEl}
                 open={openMenu}
                 onClose={() => setAnchorEl(null)}
@@ -381,30 +647,21 @@ const cerrarSesion = () => {
                   },
                 }}
               >
-                {/* Menu Items */}
+                {/* Menu Items al salir */}
                 <MenuItem
-                  sx={{
-                    borderRadius: 1,
-                    px: 2,
-                    py: 1,
-                    mb: 0.5,
-                    transition: "all 0.2s",
-                    "&:hover": { bgcolor: "#E3F2FD" },
-                  }}
-                >
+                  sx={{borderRadius: 1,px: 2,py: 1,mb: 0.5,transition: "all 0.2s","&:hover": { bgcolor: "#E3F2FD" },}}>
                   <PersonIcon sx={{ mr: 1, color: "#1976d2" }} /> Perfil
                 </MenuItem>
 
                 <MenuItem
+                  onClick={() => setOpenPasswordModal(true)}
+                  sx={{borderRadius: 1,px: 2,py: 1,transition: "all 0.2s","&:hover": { bgcolor: "#fffceb" },}}>
+                  <LockResetIcon sx={{ mr: 1, color: "#f59e0b" }} /> Cambiar contraseña
+                </MenuItem>
+
+                <MenuItem
                   onClick={() => cerrarSesion()}
-                  sx={{
-                    borderRadius: 1,
-                    px: 2,
-                    py: 1,
-                    transition: "all 0.2s",
-                    "&:hover": { bgcolor: "#FFEBEE" },
-                  }}
-                >
+                  sx={{ borderRadius: 1, px: 2, py: 1, transition: "all 0.2s", "&:hover": { bgcolor: "#FFEBEE" },}}>
                   <LogoutIcon sx={{ mr: 1, color: "#D32F2F" }} /> Salir
                 </MenuItem>
               </Menu>
@@ -413,17 +670,17 @@ const cerrarSesion = () => {
         </AppBar>
 
         <Box flex={1} p={0.5}
-         sx={{
-    ...(isSmallScreen
-      ? {}
-      : {
-          ml: `${collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH}px`,
-        }),
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-  }}
-  >
+          sx={{
+            ...(isSmallScreen
+              ? {}
+              : {
+                ml: `${collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH}px`,
+              }),
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <Paper sx={{ p: 1 }}>
             {sinModulos ? (
               <Typography>Sin acceso</Typography>
@@ -436,21 +693,21 @@ const cerrarSesion = () => {
         </Box>
       </Box>
       {/*Modal cambio de contraseña */}
-            <CambiarPasswordModal
+      <CambiarPasswordModal
         open={openPasswordModal}
         onClose={() => setOpenPasswordModal(false)}
-       onSubmit={async ({ currentPassword, newPassword }) => {
-        const payload = {currentPassword,newPassword,id_usuario,};
-        await cambiopassword(payload);
+        onSubmit={async ({ currentPassword, newPassword }) => {
+          const payload = { currentPassword, newPassword, id_usuario, };
+          await cambiopassword(payload);
 
-        localStorage.clear();
-        localStorage.setItem("logout", Date.now().toString()); // multi-tab
-        navigate("/login");
-      }}
+          localStorage.clear();
+          localStorage.setItem("logout", Date.now().toString()); // multi-tab
+          navigate("/login");
+        }}
       />
 
     </Box>
-    
+
   );
 };
 

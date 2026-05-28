@@ -10,12 +10,24 @@ export const initWebSockets = (server) => {
     ws.on("message", async (msg) => {
       try {
         const data = JSON.parse(msg.toString());
+     // REGISTRAR FRONTEND
+        if (data.tipo === "register_frontend") { ws.isFrontend = true; console.log( "Frontend conectado" ); }
 
         // REGISTRAR AGENTES DE IMPRESIÓN FACTURAS
         if (data.tipo === "register_agent" && data.isPrintAgent) {
           ws.isPrintAgent = true;
           console.log("Agente local registrado para impresión");
         }
+     
+         //ESTADO IMPRESORA 
+         if ( data.tipo === "estado_impresora" ) 
+          { console.log( "Estado impresora:", data.payload ); 
+            
+            // reenviar a frontends
+             wss.clients.forEach( (client) => {
+               if ( client.readyState === 1 && client.isFrontend ) {
+                 client.send( JSON.stringify({ tipo: "printer_status", payload: data.payload, }) );
+                 } } ); }
 
         // SUSCRIPCIÓN A MESAS
         if (data.tipo === "suscribirse_mesas") {
