@@ -42,6 +42,7 @@ export const authService = {
   // Login
   login: async ({ email, password }) => {
 
+    const emaile = email.trim().toLowerCase();
 
     const [rows] = await db.query(
       `SELECT u.*, n.nombre AS nombre_negocio, p.id as id_persona,concat(p.nombres,' ',p.apellidos) as nombres_persona,
@@ -50,7 +51,7 @@ export const authService = {
        LEFT JOIN negocios n ON u.id_negocio = n.id
        LEFT jOIN personas p On u.id_persona=p.id
        WHERE u.email = $1`,
-      [email]
+      [emaile]
     );
 
     

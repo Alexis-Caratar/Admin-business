@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const { status } = require("../services/imprimir.service.js");
+const { getPrinterStatus } = require("../services/imprimir.service.js");
 
 router.get("/status", async (req, res) => {
   try {
-    const result = await status();
+    const result = await getPrinterStatus();
     console.log("result",result);
     
     res.json(result);

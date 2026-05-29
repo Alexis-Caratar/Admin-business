@@ -6,36 +6,80 @@ const { formatCOP, line, center, twoCols } = require("../utils/formatter");
 const printers = require("../config/printers");
 
 
-
-async function status() {
-
+//saber estado de la impresora
+async function getPrinterStatus() {
   try {
-    const printerName =process.env.IMPRESORAPRINCIPAL_CAJA;
-    const printers =await printer.getPrinters();
-    const printerFound =
-      printers.find(p =>
-          p.name === printerName
-      );
 
-    if (printerFound) {
-      return { ok: true, connected: true, status: "ONLINE",
-         printer: {
+    const printers = await printer.getPrinters();
+
+    const printerFound = printers.find(p =>
+      p.name === PRINTER_NAME
+    );
+
+    if (!printerFound) {
+      return {
+        ok: false,
+        status: "OFFLINE",
+        connected: false,
+        message: "Impresora no encontrada"
+      };
+    }
+
+    // 🔥 TEST SILENCIOSO REAL
+    try {
+      await testPrintSilencioso(PRINTER_NAME);
+
+      return {
+        ok: true,
+        status: "ONLINE",
+        connected: true,
+        message: "Impresora funcionando correctamente",
+        printer: {
           name: printerFound.name,
           driver: printerFound.driverName,
           port: printerFound.portName,
-          paper: printerFound.paperSizes ||[],
-          default: printerFound.isDefault ||false,
-        },
+          isDefault: printerFound.isDefault || false,
+        }
+      };
+
+    } catch (err) {
+
+      return {
+        ok: false,
+        status: "ERROR",
+        connected: false,
+        message: "La impresora no responde",
+        error: err.message
       };
     }
-    return {ok: false, connected: false, status: "OFFLINE", message:"Impresora no encontrada",
-    };
 
   } catch (error) {
-    return {ok: false,connected: false,status: "ERROR", error: error.message,};
+
+    return {
+      ok: false,
+      status: "ERROR_SYSTEM",
+      connected: false,
+      message: error.message
+    };
   }
 }
 
+// Prueba silenciosa para verificar estado sin imprimir realmente
+function testPrintSilencioso(printerName) {
+  return new Promise((resolve, reject) => {
+
+    printer.printDirect({
+      data: Buffer.from("\x1B\x40TEST\n\n"), 
+      printer: printerName,
+      type: "RAW",
+      success: resolve,
+      error: reject
+    });
+
+  });
+}
+
+// Función para imprimir factura
 async function imprimirFactura(data) {
   
   const { negocio, venta, productos, printerName } = data;
@@ -172,7 +216,7 @@ async function imprimirFactura(data) {
     });
   });
 }
-
+// Función para imprimir comanda
 async function imprimirComanda(data) {
   
   const { negocio, mesa, usuario,productos, printerName,fecha,nota } = data;
@@ -259,4 +303,4 @@ async function imprimirComanda(data) {
   });
 }
 
-module.exports = { imprimirFactura,imprimirComanda,status };
+module.exports = { imprimirFactura,imprimirComanda,getPrinterStatus };

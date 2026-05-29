@@ -1,7 +1,7 @@
-import { WebSocketServer } from "ws";
 import CajeroService from "./services/cajero.service.js";
-
+import { WebSocketServer, WebSocket } from "ws";
 export let wss; // exportarlo para usarlo en el controller de impresión
+let ultimoEstadoImpresora = null;
 
 export const initWebSockets = (server) => {
   wss = new WebSocketServer({ server });
@@ -10,8 +10,17 @@ export const initWebSockets = (server) => {
     ws.on("message", async (msg) => {
       try {
         const data = JSON.parse(msg.toString());
-     // REGISTRAR FRONTEND
-        if (data.tipo === "register_frontend") { ws.isFrontend = true; console.log( "Frontend conectado" ); }
+        
+        //conectar frontend
+       if (data.tipo === "register_frontend") {
+            ws.isFrontend = true;
+            if (ultimoEstadoImpresora) {
+              ws.send(JSON.stringify({
+                tipo: "printer_status",
+                payload: ultimoEstadoImpresora
+              }));
+            }
+          }
 
         // REGISTRAR AGENTES DE IMPRESIÓN FACTURAS
         if (data.tipo === "register_agent" && data.isPrintAgent) {
@@ -21,53 +30,57 @@ export const initWebSockets = (server) => {
      
          //ESTADO IMPRESORA 
          if ( data.tipo === "estado_impresora" ) 
-          { console.log( "Estado impresora:", data.payload ); 
-            
+          { 
+          ultimoEstadoImpresora = data.payload;
             // reenviar a frontends
              wss.clients.forEach( (client) => {
-               if ( client.readyState === 1 && client.isFrontend ) {
+               if ( client.readyState === WebSocket.OPEN && client.isFrontend ) {
                  client.send( JSON.stringify({ tipo: "printer_status", payload: data.payload, }) );
                  } } ); }
+
 
         // SUSCRIPCIÓN A MESAS
         if (data.tipo === "suscribirse_mesas") {
           ws.idNegocio = data.id_negocio;
-
           const mesas = await CajeroService.mesas(data.id_negocio);
-
-          ws.send(
-            JSON.stringify({
-              tipo: "mesas",
-              mesas,
-            })
-          );
+          ws.send(JSON.stringify({tipo: "mesas",mesas,}));
         }
-
         // SUSCRIPCIÓN A CAJA
         if (data.tipo === "suscribirse_caja") {
           ws.idUsuario = data.id_usuario;
-
-          const rows = await CajeroService.estadoCaja({
-            id_usuario: data.id_usuario,
-          });
-
-          ws.send(
-            JSON.stringify({
-              tipo: "actualizar_caja",
-              caja: rows.length ? rows[0] : null,
-            })
-          );
+          const rows = await CajeroService.estadoCaja({id_usuario: data.id_usuario});
+          ws.send( JSON.stringify({tipo: "actualizar_caja",caja: rows.length ? rows[0] : null,}));
         }
+
       } catch (error) {
         console.error("Error WS:", error);
       }
     });
 
     ws.on("close", () => {
-      // Opcional: limpiar datos si quieres
+      if (ws.isPrintAgent) {//para saber cuando el agente esta caido
+
+        ultimoEstadoImpresora = {
+          ok: false,
+          status: "OFFLINE",
+          connected: false,
+          message: "Agente desconectado"
+        };
+
+        // reenviar OFFLINE
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN &&client.isFrontend) {
+            client.send(JSON.stringify({
+              tipo: "printer_status",
+              payload: ultimoEstadoImpresora,
+            }));
+          }
+        });
+      }
     });
   });
 };
+
 
 // 🔵 NOTIFICAR MESAS
 export const notificarMesas = async (id_negocio) => {
@@ -81,7 +94,7 @@ export const notificarMesas = async (id_negocio) => {
   });
 
   wss.clients.forEach((client) => {
-    if (client.readyState === 1 && client.idNegocio == id_negocio) {
+    if (client.readyState === WebSocket.OPEN && client.idNegocio == id_negocio) {
       client.send(data);
     }
   });
@@ -99,7 +112,7 @@ export const notificarCaja = async (id_usuario) => {
   });
 
   wss.clients.forEach((client) => {
-    if (client.readyState === 1 && client.idUsuario == id_usuario) {
+    if (client.readyState === WebSocket.OPEN && client.idUsuario == id_usuario) {
       client.send(data);
     }
   });

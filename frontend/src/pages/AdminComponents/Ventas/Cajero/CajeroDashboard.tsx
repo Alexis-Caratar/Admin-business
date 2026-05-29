@@ -66,49 +66,35 @@ export const CajeroDashboard: React.FC = () => {
   useEffect(() => {
   const ws = new WebSocket(import.meta.env.VITE_WS_URL);
   ws.onopen = () => {
-    ws.send(JSON.stringify({
-      tipo: "suscribirse_mesas",
-      id_negocio
-    }));
-
-    ws.send(JSON.stringify({
-      tipo: "suscribirse_caja",
-      id_usuario: idUsuario
-    }));
+    ws.send(JSON.stringify({tipo: "suscribirse_mesas",id_negocio }));
+    ws.send(JSON.stringify({tipo: "suscribirse_caja",id_usuario: idUsuario}));
   };
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
     // MESAS
-    if (msg.tipo === "mesas") {
-//      console.log("Mesas actualizadas", msg.mesas);
-      setMesas(msg.mesas);
-    }
+    if (msg.tipo === "mesas") {setMesas(msg.mesas);}
     // CAJA
     if (msg.tipo === "actualizar_caja") {
-  // console.log("caja actualizadas", msg.caja);
       const c = msg.caja;
       if (!c) return;
       setCaja(c);
       setCajaAbierta(c.estado === "ABIERTA");
       setIdCaja(c.id);
       if (msg.tipo === "actualizar_caja") {
-  const c = msg.caja;
-  if (!c) return;
-
-  setCaja(c);
-  setCajaAbierta(c.estado === "ABIERTA");
-  setIdCaja(c.id);
-
-  if (c.estado === "ABIERTA") {
-    setMontoApertura(String(c.monto_inicial));
-  } else {
-    setMontoApertura("");
-  }
-}
+        const c = msg.caja;
+        if (!c) return;
+        setCaja(c);
+        setCajaAbierta(c.estado === "ABIERTA");
+        setIdCaja(c.id);
+        if (c.estado === "ABIERTA") {
+          setMontoApertura(String(c.monto_inicial));
+        } else {
+          setMontoApertura("");
+        }
+      }
     }
   };
   ws.onclose = () => console.log("WS cerrado");
- // ws.onerror = (err) => console.error("WS error", err);
   return () => ws.close();
 }, [id_negocio, idUsuario]);
 

@@ -1,40 +1,51 @@
 const WebSocket = require("ws");
 const dotenv = require("dotenv");
 dotenv.config();
-const { imprimirFactura,imprimirComanda } = require("./services/imprimir.service.js");
+const { imprimirFactura,imprimirComanda,getPrinterStatus } = require("./services/imprimir.service.js");
 
 let ws;
 
 function initWS() {
   ws = new WebSocket(process.env.WS_BACKEND_URL);
-  ws.on("open", () => {
-    console.log("Conectado al backend WebSocket");
-    // Registrarse como agente de impresión
-    ws.send(JSON.stringify({
-      tipo: "register_agent",
-      isPrintAgent: true
-    }));
-  });
+ ws.on("open", () => {
+  console.log("Conectado al backend WebSocket");
+  ws.send(JSON.stringify({
+    tipo: "register_agent",
+    isPrintAgent: true
+  }));
+
+ 
+  setInterval(async () => {  // estado impresora cada minuto
+    const status = await getPrinterStatus();
+    ws.send(JSON.stringify({tipo: "estado_impresora",payload: status}));
+  }, 60000);
+});
 
   ws.on("message", async (msg) => {
     try {
       const data = JSON.parse(msg.toString());
-      // Cuando llegue la orden de impresión
-      if (data.tipo === "imprimir_venta") {
+
+      if (data.tipo === "imprimir_venta") {  // Cuando llegue la orden de impresión
         try {
+          const status = await getPrinterStatus();
+          if (!status.ok) {
+            ws.send(JSON.stringify({tipo: "error_impresora",message: "Impresora no disponible"})); return;
+          }
           const result = await imprimirFactura(data.payload);
-          console.log("Factura impresa correctamente:", result);
         } catch (err) {
           console.error("Error al imprimir factura:", err);
         }
       }
-        //cuando llegan orden de comandas
-       if (data.tipo === "imprimir_comanda") {
+        
+       if (data.tipo === "imprimir_comanda") {//cuando llegan orden de comandas
         try {
-          const result = await imprimirComanda(data.payload);
-          console.log("Factura impresa correctamente:", result);
+        const status = await getPrinterStatus();
+        if (!status.ok) {
+          ws.send(JSON.stringify({tipo: "error_impresora",message: "Impresora no disponible"})); return;
+        }
+        const result = await imprimirComanda(data.payload);        
         } catch (err) {
-          console.error("Error al imprimir factura:", err);
+          console.error("Error al imprimir comanda:", err);
         }
       }
 

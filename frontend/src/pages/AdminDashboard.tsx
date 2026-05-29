@@ -4,7 +4,7 @@ import {
   Typography, Divider, IconButton, Avatar, Tooltip,
   AppBar, Toolbar, Menu, MenuItem,
   useMediaQuery, useTheme, Drawer,
-  Button,Stack,
+  Button, Stack,
   Chip
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
@@ -24,7 +24,7 @@ import CambiarPasswordModal from "../components/CambiarPasswordModal";
 import { cambiopassword } from "./../api/auth"
 import Loader from "../components/Loader";
 import PrintIcon from "@mui/icons-material/Print";
-import SyncIcon from "@mui/icons-material/Sync"; 
+import SyncIcon from "@mui/icons-material/Sync";
 import SettingsIcon from "@mui/icons-material/Settings";
 
 const DEFAULT_AVATAR =
@@ -52,6 +52,8 @@ const AdminDashboard: React.FC = () => {
   const openMenu = Boolean(anchorEl);
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [printerStatus, setPrinterStatus] = useState<any>(null);
+  const [printerConnected, setPrinterConnected] = useState(false);
 
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
@@ -66,6 +68,33 @@ const AdminDashboard: React.FC = () => {
       window.removeEventListener("storage", handleStorage);
     };
   }, [navigate]);
+
+  useEffect(() => {
+
+    const ws = new WebSocket(
+      import.meta.env.VITE_WS_URL
+    );
+
+    ws.onopen = () => {
+      console.log("WS conectado");
+      ws.send(JSON.stringify({ tipo: "register_frontend", }) // registrar frontend
+      );
+    };
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.tipo === "printer_status") {// ESTADO IMPRESORA
+        console.log("Estado impresora:", msg.payload);
+        setPrinterStatus(msg.payload);
+        setPrinterConnected(msg.payload?.connected || false);
+      }
+    };
+
+    ws.onclose = () => { console.log("WS cerrado"); setPrinterConnected(false); };
+    ws.onerror = () => { setPrinterConnected(false); };
+    return () => ws.close();
+
+  }, []);
 
   const cerrarSesion = () => {
     localStorage.clear();
@@ -125,9 +154,9 @@ const AdminDashboard: React.FC = () => {
 
   const ActiveComponent = modulo ? componentMap[modulo] : null;
 
-const reconnectPrinter = () => {
-  console.log("Reconectando...");
-};
+  const reconnectPrinter = () => {
+    console.log("Reconectando...");
+  };
 
   // 🔥 SIDEBAR
   const sidebar = (
@@ -362,267 +391,287 @@ const reconnectPrinter = () => {
                 <NotificationsIcon />
               </IconButton>
 
-
-        
-          
-              
-            <Box
-              sx={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                overflow: "hidden",
-                transition: "all .35s ease",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  pointerEvents: "none",
-                },
-              }}
-            >
-              <Tooltip
-                arrow
-                placement="bottom-end"
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      background: "#0f172a",
-                      borderRadius: "18px",
-                      p: 0,
-                      minWidth: 320,
-                      boxShadow:
-                        "0 20px 50px rgba(0,0,0,.35)",
-                      border:
-                        "1px solid rgba(255,255,255,.08)",
-                    },
-                  },
-                  arrow: {
-                    sx: {
-                      color: "#0f172a",
-                    },
+              <Box
+                sx={{
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  overflow: "hidden",
+                  transition: "all .35s ease",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    pointerEvents: "none",
                   },
                 }}
-                title={
-                  <Box>
-                    {/* HEADER */}
-                    <Box
-                      sx={{
-                        px: 2,
-                        py: 1.5,
-                        borderBottom:
-                          "1px solid rgba(255,255,255,.06)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography
-                          sx={{
-                            color: "#fff",
-                            fontWeight: 700,
-                            fontSize: 14,
-                          }}
-                        >
-                          Epson TM-T20III
-                        </Typography>
+              >
+                <Tooltip
+                  arrow
+                  placement="bottom-end"
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        background: "#0f172a",
+                        borderRadius: "18px",
+                        p: 0,
+                        minWidth: 320,
+                        boxShadow:
+                          "0 20px 50px rgba(0,0,0,.35)",
+                        border:
+                          "1px solid rgba(255,255,255,.08)",
+                      },
+                    },
+                    arrow: {
+                      sx: {
+                        color: "#0f172a",
+                      },
+                    },
+                  }}
+                  title={
+                    <Box>
+                      {/* HEADER */}
+                      <Box
+                        sx={{
+                          px: 2,
+                          py: 1.5,
+                          borderBottom:
+                            "1px solid rgba(255,255,255,.06)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <Box>
+                          <Typography
+                            sx={{
+                              color: "#fff",
+                              fontWeight: 700,
+                              fontSize: 14,
+                            }}
+                          >
+                           {printerStatus?.printer?.name?.join(", ") || "-"}
+                          </Typography>
 
-                        <Typography
+                          <Typography
+                            sx={{
+                              color: "#94a3b8",
+                              fontSize: 12,
+                            }}
+                          >
+                            Impresora térmica principal
+                          </Typography>
+                        </Box>
+
+                        <Chip
+                          label={printerStatus?.status || "OFFLINE"}
+                          size="small"
                           sx={{
-                            color: "#94a3b8",
-                            fontSize: 12,
+                            bgcolor: printerConnected
+                              ? "rgba(34,197,94,.18)"
+                              : "rgba(239,68,68,.18)",
+
+                            color: printerConnected
+                              ? "#4ade80"
+                              : "#f87171",
+
+                            fontWeight: 700,
+                            fontSize: 11,
                           }}
-                        >
-                          Impresora térmica principal
-                        </Typography>
+                        />
                       </Box>
 
-                      <Chip
-                        label="ONLINE"
-                        size="small"
-                        sx={{
-                          bgcolor:
-                            "rgba(34,197,94,.18)",
-                          color: "#4ade80",
-                          fontWeight: 700,
-                          fontSize: 11,
-                        }}
-                      />
-                    </Box>
-
-                    {/* BODY */}
-                    <Box sx={{ p: 2 }}>
-                      <Stack spacing={1.2}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent:
-                              "space-between",
-                          }}
-                        >
-                          <Typography
+                      {/* BODY */}
+                      <Box sx={{ p: 2 }}>
+                        <Stack spacing={1.2}>
+                          <Box
                             sx={{
-                              color: "#94a3b8",
-                              fontSize: 13,
+                              display: "flex",
+                              justifyContent:
+                                "space-between",
                             }}
                           >
-                            Estado
-                          </Typography>
+                            <Typography
+                              sx={{
+                                color: "#94a3b8",
+                                fontSize: 13,
+                              }}
+                            >
+                              Estado
+                            </Typography>
 
-                          <Typography
+                            <Typography
+                              sx={{
+                                   color: printerConnected
+                              ? "#4ade80"
+                              : "#f87171",
+
+                                fontSize: 13,
+                                fontWeight: 700,
+                              }}
+                            >
+                               {
+                            printerConnected
+                              ? "CONNECTED"
+                              : "DISCONNECTED"
+                          }
+                            </Typography>
+                          </Box>
+
+                              {printerConnected && (
+                                <>
+                                <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent:
+                                        "space-between",
+                                    }}
+                                  >
+                                    <Typography
+                                      sx={{
+                                        color: "#94a3b8",
+                                        fontSize: 13,
+                                      }}
+                                    >
+                                      Puerto
+                                    </Typography>
+
+                                    <Typography
+                                      sx={{
+                                        color: "#fff",
+                                        fontSize: 13,
+                                      }}
+                                    >
+                                      {printerStatus?.printer?.port || "-"}
+                                    </Typography>
+                                  </Box>
+
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent:
+                                        "space-between",
+                                    }}
+                                  >
+                                    <Typography
+                                      sx={{
+                                        color: "#94a3b8",
+                                        fontSize: 13,
+                                      }}
+                                    >
+                                      Papel
+                                    </Typography>
+
+                                    <Typography
+                                      sx={{
+                                        color: "#fff",
+                                        fontSize: 13,
+                                      }}
+                                    >
+                                      {printerStatus?.printer?.paper?.join(", ") || "-"}
+                                    </Typography>
+                                  </Box>
+
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent:
+                                        "space-between",
+                                    }}
+                                  >
+                                    <Typography
+                                      sx={{
+                                        color: "#94a3b8",
+                                        fontSize: 13,
+                                      }}
+                                    >
+                                      Última conexión
+                                    </Typography>
+
+                                    <Typography
+                                      sx={{
+                                        color: "#94a3b8",
+                                        fontSize: 13,
+                                      }}
+                                    >
+                                      Hace 2 min
+                                    </Typography>
+
+                                  </Box>
+                              </>
+                            )}
+                                                    
+                           <Typography
+                              sx={{
+                                color: "#94a3b8",
+                                fontSize: 10,
+                              }}
+                            >
+                              Mensaje: {printerStatus?.message || " "}
+                            </Typography>
+                        </Stack>
+
+                        <Divider
+                          sx={{
+                            my: 2,
+                            borderColor:
+                              "rgba(255,255,255,.08)",
+                          }}
+                        />
+
+                        {/* ACTIONS */}
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                        >
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            startIcon={<SyncIcon />}
+                            onClick={reconnectPrinter}
                             sx={{
-                              color: "#4ade80",
-                              fontSize: 13,
+                              borderRadius: "12px",
+                              textTransform: "none",
                               fontWeight: 700,
+                              bgcolor: "#16a34a",
+                              "&:hover": {
+                                bgcolor: "#15803d",
+                              },
                             }}
                           >
-                            Conectada
-                          </Typography>
-                        </Box>
-
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent:
-                              "space-between",
-                          }}
-                        >
-                          <Typography
-                            sx={{
-                              color: "#94a3b8",
-                              fontSize: 13,
-                            }}
-                          >
-                            Puerto
-                          </Typography>
-
-                          <Typography
-                            sx={{
-                              color: "#fff",
-                              fontSize: 13,
-                            }}
-                          >
-                            USB
-                          </Typography>
-                        </Box>
-
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent:
-                              "space-between",
-                          }}
-                        >
-                          <Typography
-                            sx={{
-                              color: "#94a3b8",
-                              fontSize: 13,
-                            }}
-                          >
-                            Papel
-                          </Typography>
-
-                          <Typography
-                            sx={{
-                              color: "#fff",
-                              fontSize: 13,
-                            }}
-                          >
-                            80mm
-                          </Typography>
-                        </Box>
-
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent:
-                              "space-between",
-                          }}
-                        >
-                          <Typography
-                            sx={{
-                              color: "#94a3b8",
-                              fontSize: 13,
-                            }}
-                          >
-                            Última conexión
-                          </Typography>
-
-                          <Typography
-                            sx={{
-                              color: "#fff",
-                              fontSize: 13,
-                            }}
-                          >
-                            Hace 2 min
-                          </Typography>
-                        </Box>
-                      </Stack>
-
-                      <Divider
+                            Reconectar
+                          </Button>
+                        </Stack>
+                      </Box>
+                    </Box>
+                  }
+                >
+                  <Button
+                    startIcon={
+                      <PrintIcon
                         sx={{
-                          my: 2,
-                          borderColor:
-                            "rgba(255,255,255,.08)",
+                          fontSize: 22,
+                          color: printerConnected
+                            ? "#4ade80"
+                            : "#ef4444",
                         }}
                       />
+                    }
 
-                      {/* ACTIONS */}
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                      >
-                        <Button
-                          fullWidth
-                          variant="contained"
-                          startIcon={<SyncIcon/>}
-                          onClick={reconnectPrinter}
-                          sx={{
-                            borderRadius: "12px",
-                            textTransform: "none",
-                            fontWeight: 700,
-                            bgcolor: "#16a34a",
-                            "&:hover": {
-                              bgcolor: "#15803d",
-                            },
-                          }}
-                        >
-                          Reconectar
-                        </Button>
-                      </Stack>
-                    </Box>
-                  </Box>
-                }
-              >
-                <Button
-                  onClick={() =>
-                    setOpenPasswordModal(true)
-                  }
-                  startIcon={
-                    <PrintIcon
-                    
-                      sx={{
-                        fontSize: 22,
-                        //color: "#4ade80",
-                         color: "#c7330e",
-                      }}
-                    />
-                  }
-                  sx={{
-                    px: 2,
-                    py: 1.2,
-                    color: "#fff",
-                    fontWeight: 700,
-                    fontSize: 14,
-                    borderRadius: "18px",
-                    textTransform: "none",
-                    letterSpacing: ".3px",
-                  }}
-                >
-                  Impresora conectada
-                </Button>
-              </Tooltip>
-            </Box>
+                    sx={{
+                      px: 2,
+                      py: 1.2,
+                      color: "#fff",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      borderRadius: "18px",
+                      textTransform: "none",
+                      letterSpacing: ".3px",
+                    }}
+                  >
+                    {printerConnected ? "Impresora conectada" : "Impresora desconectada"}
+                  </Button>
+                </Tooltip>
+              </Box>
 
 
 
@@ -649,19 +698,19 @@ const reconnectPrinter = () => {
               >
                 {/* Menu Items al salir */}
                 <MenuItem
-                  sx={{borderRadius: 1,px: 2,py: 1,mb: 0.5,transition: "all 0.2s","&:hover": { bgcolor: "#E3F2FD" },}}>
+                  sx={{ borderRadius: 1, px: 2, py: 1, mb: 0.5, transition: "all 0.2s", "&:hover": { bgcolor: "#E3F2FD" }, }}>
                   <PersonIcon sx={{ mr: 1, color: "#1976d2" }} /> Perfil
                 </MenuItem>
 
                 <MenuItem
                   onClick={() => setOpenPasswordModal(true)}
-                  sx={{borderRadius: 1,px: 2,py: 1,transition: "all 0.2s","&:hover": { bgcolor: "#fffceb" },}}>
+                  sx={{ borderRadius: 1, px: 2, py: 1, transition: "all 0.2s", "&:hover": { bgcolor: "#fffceb" }, }}>
                   <LockResetIcon sx={{ mr: 1, color: "#f59e0b" }} /> Cambiar contraseña
                 </MenuItem>
 
                 <MenuItem
                   onClick={() => cerrarSesion()}
-                  sx={{ borderRadius: 1, px: 2, py: 1, transition: "all 0.2s", "&:hover": { bgcolor: "#FFEBEE" },}}>
+                  sx={{ borderRadius: 1, px: 2, py: 1, transition: "all 0.2s", "&:hover": { bgcolor: "#FFEBEE" }, }}>
                   <LogoutIcon sx={{ mr: 1, color: "#D32F2F" }} /> Salir
                 </MenuItem>
               </Menu>
@@ -692,6 +741,8 @@ const reconnectPrinter = () => {
           </Paper>
         </Box>
       </Box>
+
+      
       {/*Modal cambio de contraseña */}
       <CambiarPasswordModal
         open={openPasswordModal}
