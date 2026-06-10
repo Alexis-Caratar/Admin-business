@@ -4,46 +4,130 @@ export const VentasService = {
   // Crear una venta con sus items
 
       // Obtener  resumen todas las ventas
-  resumenventas: async (id_negocio) => {
-    const [rows] = await db.query(
-   //   `SELECT * FROM ventas ORDER BY fecha DESC`
+ resumenventas: async ({id_negocio,tipoFiltro,fechaInicio = null,fechaFin = null}) => {
 
-        `SELECT 
-    v.fecha,
-        TO_CHAR(v.fecha, 'TMDay') AS dia,
-    v.total,
-    COALESCE(e.egresos, 0) AS egresos,
-    v.cantidad
-FROM (
-    -- 🔥 VENTAS
-    SELECT
-        (v.fecha AT TIME ZONE 'America/Bogota')::date AS fecha,
-        SUM(v.total) AS total,
-        COUNT(v.id) AS cantidad
-    FROM ventas v
-    INNER JOIN caja c ON v.id_caja = c.id
-    INNER JOIN usuarios u ON c.id_usuario = u.id
-    INNER JOIN negocios n ON u.id_negocio = n.id
-    WHERE n.id = $1
-      AND v.estado != 'cancelado'
-    GROUP BY (v.fecha AT TIME ZONE 'America/Bogota')::date
-) v
-
-LEFT JOIN (
-    -- 🔥 EGRESOS
-    SELECT
-        (e.created_at AT TIME ZONE 'America/Bogota')::date AS fecha,
-        SUM(e.monto) AS egresos
-    FROM egresos e
-    GROUP BY (e.created_at AT TIME ZONE 'America/Bogota')::date
-) e ON v.fecha = e.fecha
-
-ORDER BY v.fecha ASC;`
-    ,[id_negocio]);
-
+    console.log("{id_negocio,tipoFiltro,fechaInicio = null,fechaFin = null}",id_negocio,tipoFiltro,fechaInicio ,fechaFin);
     
-    return rows;
-  },
+  let filtroFecha = "";
+
+  switch (tipoFiltro) {
+
+    case "hoy":
+      filtroFecha = `AND (v.fecha AT TIME ZONE 'America/Bogota')::date =
+            (NOW() AT TIME ZONE 'America/Bogota')::date
+      `;
+      break;
+
+    case "ayer":
+      filtroFecha = `AND (v.fecha AT TIME ZONE 'America/Bogota')::date =
+            ((NOW() AT TIME ZONE 'America/Bogota')::date - INTERVAL '1 day')
+      `;
+      break;
+
+    case "semana_actual":
+      filtroFecha = `AND DATE_TRUNC(
+              'week',
+              (v.fecha AT TIME ZONE 'America/Bogota')
+            ) =
+            DATE_TRUNC(
+              'week',
+              (NOW() AT TIME ZONE 'America/Bogota')
+            )
+      `;
+      break;
+
+    case "semana_anterior":
+      filtroFecha = `AND DATE_TRUNC(
+              'week',
+              (v.fecha AT TIME ZONE 'America/Bogota')
+            ) =
+            DATE_TRUNC(
+              'week',
+              (NOW() AT TIME ZONE 'America/Bogota')
+            ) - INTERVAL '1 week'
+      `;
+      break;
+
+    case "mes_actual":
+      filtroFecha = `
+        AND EXTRACT(MONTH FROM (v.fecha AT TIME ZONE 'America/Bogota'))
+            =
+            EXTRACT(MONTH FROM (NOW() AT TIME ZONE 'America/Bogota'))
+        AND EXTRACT(YEAR FROM (v.fecha AT TIME ZONE 'America/Bogota'))
+            =
+            EXTRACT(YEAR FROM (NOW() AT TIME ZONE 'America/Bogota'))
+      `;
+      break;
+
+    case "mes_anterior":
+      filtroFecha = `
+        AND DATE_TRUNC(
+              'month',
+              (v.fecha AT TIME ZONE 'America/Bogota')
+            ) =
+            DATE_TRUNC(
+              'month',
+              (NOW() AT TIME ZONE 'America/Bogota')
+            ) - INTERVAL '1 month'
+      `;
+      break;
+
+    case "anio":
+      filtroFecha = `
+        AND EXTRACT(YEAR FROM (v.fecha AT TIME ZONE 'America/Bogota'))
+            =
+            EXTRACT(YEAR FROM (NOW() AT TIME ZONE 'America/Bogota'))
+      `;
+      break;
+
+    case "fecha_fecha":
+      if (fechaInicio && fechaFin) {
+        filtroFecha = `
+          AND (v.fecha AT TIME ZONE 'America/Bogota')::date
+              BETWEEN '${fechaInicio}' AND '${fechaFin}'
+        `;
+      }
+      break;
+  }
+
+  const [rows] = await db.query(
+    `
+    SELECT
+        v.fecha,
+        TO_CHAR(v.fecha, 'TMDay') AS dia,
+        v.total,
+        COALESCE(e.egresos, 0) AS egresos,
+        v.cantidad
+    FROM (
+        SELECT
+            (v.fecha AT TIME ZONE 'America/Bogota')::date AS fecha,
+            SUM(v.total) AS total,
+            COUNT(v.id) AS cantidad
+        FROM ventas v
+        INNER JOIN caja c ON v.id_caja = c.id
+        INNER JOIN usuarios u ON c.id_usuario = u.id
+        INNER JOIN negocios n ON u.id_negocio = n.id
+        WHERE n.id = $1
+          AND v.estado <> 'cancelado'
+          ${filtroFecha}
+        GROUP BY (v.fecha AT TIME ZONE 'America/Bogota')::date
+    ) v
+
+    LEFT JOIN (
+        SELECT
+            (e.created_at AT TIME ZONE 'America/Bogota')::date AS fecha,
+            SUM(e.monto) AS egresos
+        FROM egresos e
+        GROUP BY (e.created_at AT TIME ZONE 'America/Bogota')::date
+    ) e ON v.fecha = e.fecha
+
+    ORDER BY v.fecha ASC
+    `,
+    [id_negocio]
+  );
+
+  return rows;
+},
  
     // Obtener todas las ventas por fecha
   

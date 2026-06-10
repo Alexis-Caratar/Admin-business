@@ -6,12 +6,14 @@ import  AdminInventario  from "../pages/AdminComponents/Inventario/AdminInventar
 import  AdminCategorias  from "../pages/AdminComponents/Categorias/AdminCategorias";
 import  AdminVentas  from "../pages/AdminComponents/Ventas/Admin/AdminVentas";
 import  CajeroDashboard  from "../pages/AdminComponents/Ventas/Cajero/CajeroDashboard";
+import AdminCompras from "../pages/AdminComponents/Compras/AdminCompras";
 
 // Mapea componentes según el "codigo" que llega desde la BD
 export const componentMap: Record<string, React.FC> = {
   usuarios: AdminUsuarios,
   negocios: AdminNegocios,
  // productos: AdminProductos,
+  compras:AdminCompras,
   inventario: AdminInventario,
   ventas:AdminVentas,
   cajero:CajeroDashboard,

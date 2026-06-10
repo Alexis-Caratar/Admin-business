@@ -314,11 +314,9 @@ WHERE mn.id_negocio = $1
 ORDER BY m.orden;`,
     [id]
   );
-  console.log("rows negocio",rows);
   
 return rows;
 };
-
 
 export const modulos_usuario = async (id,id_negocio) => {
 
@@ -338,23 +336,18 @@ const [rows]= await db.query(
         ORDER BY m.orden;`,
     [id,id_negocio]
   );
-  console.log("rows usuarios",rows);
   
 return rows;
 };
 
 export const modulos_usuariocrear = async (id, id_menu) => {
-  console.log("ingreso 2");
   const client = await pool.connect();
   
-console.log("ingreso");
-
   try {
     await client.query("BEGIN");
 
     // 🔥 Caso: si no mandan nada → desactiva todo
  if (!id_menu || id_menu.length === 0) {
-  console.log("ENTRADO AQUI");
   
   await client.query(
     `
@@ -390,9 +383,6 @@ console.log("ingreso");
         [id, menuId]
       );
     }
-
-
-console.log("salidad");
 
     await client.query("COMMIT");
     return { ok: true };

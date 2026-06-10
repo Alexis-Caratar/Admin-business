@@ -27,10 +27,11 @@ function initWS() {
 
       if (data.tipo === "imprimir_venta") {  // Cuando llegue la orden de impresión
         try {
-          const status = await getPrinterStatus();
+          /*const status = await getPrinterStatus();
           if (!status.ok) {
             ws.send(JSON.stringify({tipo: "error_impresora",message: "Impresora no disponible"})); return;
           }
+          */
           const result = await imprimirFactura(data.payload);
         } catch (err) {
           console.error("Error al imprimir factura:", err);
@@ -39,10 +40,11 @@ function initWS() {
         
        if (data.tipo === "imprimir_comanda") {//cuando llegan orden de comandas
         try {
-        const status = await getPrinterStatus();
+        /*const status = await getPrinterStatus();
         if (!status.ok) {
           ws.send(JSON.stringify({tipo: "error_impresora",message: "Impresora no disponible"})); return;
         }
+        */
         const result = await imprimirComanda(data.payload);        
         } catch (err) {
           console.error("Error al imprimir comanda:", err);

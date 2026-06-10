@@ -56,25 +56,65 @@ const AdminVentas: React.FC = () => {
   // CARGAR DATA
   // =====================================================
 
-  const loadResumen = useCallback(async () => {
-    try {
-      setLoading(true);
+ const loadResumen = useCallback(async () => {
+  try {
+    setLoading(true);
 
-      const data = await getResumenVentas();
+    const data = await getResumenVentas(
+      tipoFiltro,
+      fechaInicio,
+      fechaFin
+    );
 
-      setResumen(data.ventas || []);
-    } catch (error) {
-      console.error(error);
-      setResumen([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    setResumen(data.ventas || []);
+  } catch (error) {
+    console.error(error);
+    setResumen([]);
+  } finally {
+    setLoading(false);
+  }
+}, [
+  tipoFiltro,
+  fechaInicio,
+  fechaFin,
+]);
+
+useEffect(() => {
+  // filtros normales
+  if (tipoFiltro !== "fecha_fecha") {
+    loadResumen();
+    return;
+  }
+
+  if (fechaInicio && fechaFin) {
+    loadResumen();
+  }
+
+}, [
+  tipoFiltro,
+  fechaInicio,
+  fechaFin,
+  loadResumen,
+]);
+
 
   useEffect(() => {
-    loadResumen();
-  }, [loadResumen]);
 
+      if (
+        tipoFiltro === "fecha_fecha" &&
+        (!fechaInicio || !fechaFin)
+      ) {
+        return;
+      }
+
+      loadResumen();
+
+    }, [
+      tipoFiltro,
+      fechaInicio,
+      fechaFin,
+      loadResumen
+    ]);
   // =====================================================
   // CLICK DIA
   // =====================================================
@@ -96,85 +136,7 @@ const AdminVentas: React.FC = () => {
     }
   };
 
-  // =====================================================
-  // FILTRAR DATA
-  // =====================================================
-
- const ventasFiltradas = useMemo(() => {
-
-  // 🔥 FECHA ACTUAL COLOMBIA
-  const now = new Date(
-    new Date().toLocaleString("en-US", {
-      timeZone: "America/Bogota",
-    })
-  );
-
-  const hoy = now.toISOString().split("T")[0];
-
-  return resumen.filter((v) => {
-    if (!v.fecha) return false;
-
-    // 🔥 LIMPIAR FECHA
-    const fechaTexto = String(v.fecha).split("T")[0];
-
-    const fecha = new Date(
-      `${fechaTexto}T00:00:00`
-    );
-
-    // =====================================================
-    // HOY
-    // =====================================================
-
-    if (tipoFiltro === "hoy") {
-      return fechaTexto === hoy;
-    }
-
-    // =====================================================
-    // MES ACTUAL
-    // =====================================================
-
-    if (tipoFiltro === "mes_actual") {
-      return (
-        fecha.getMonth() === now.getMonth() &&
-        fecha.getFullYear() ===
-          now.getFullYear()
-      );
-    }
-
-    // =====================================================
-    // AÑO
-    // =====================================================
-
-    if (tipoFiltro === "anio") {
-      return (
-        fecha.getFullYear() ===
-        now.getFullYear()
-      );
-    }
-
-    // =====================================================
-    // FECHA A FECHA
-    // =====================================================
-
-    if (
-      tipoFiltro === "fecha_fecha" &&
-      fechaInicio &&
-      fechaFin
-    ) {
-      return (
-        fechaTexto >= fechaInicio &&
-        fechaTexto <= fechaFin
-      );
-    }
-
-    return true;
-  });
-}, [
-  resumen,
-  tipoFiltro,
-  fechaInicio,
-  fechaFin,
-]);
+const ventasFiltradas = resumen;
   // =====================================================
   // STATS
   // =====================================================
@@ -481,21 +443,39 @@ const AdminVentas: React.FC = () => {
             },
           }}
         >
-          <MenuItem value="mes_actual">
-            Mes Actual
-          </MenuItem>
 
-          <MenuItem value="hoy">
-            Hoy
-          </MenuItem>
 
-          <MenuItem value="anio">
-            Año Actual
-          </MenuItem>
+         <MenuItem value="hoy">
+          Hoy
+        </MenuItem>
 
-          <MenuItem value="fecha_fecha">
-            Fecha a Fecha
-          </MenuItem>
+        <MenuItem value="ayer">
+          Ayer
+        </MenuItem>
+
+        <MenuItem value="semana_actual">
+          Semana Actual
+        </MenuItem>
+
+        <MenuItem value="semana_anterior">
+          Semana Anterior
+        </MenuItem>
+
+        <MenuItem value="mes_actual">
+          Mes Actual
+        </MenuItem>
+
+        <MenuItem value="mes_anterior">
+          Mes Anterior
+        </MenuItem>
+        <MenuItem value="anio">
+          Año Actual
+        </MenuItem>
+
+        <MenuItem value="fecha_fecha">
+          Fecha a Fecha
+        </MenuItem>
+
         </TextField>
 
         {tipoFiltro === "fecha_fecha" && (

@@ -67,8 +67,7 @@ export const eliminar = async (req, res) => {
   }
 };
 
-export const menus_negocio
- = async (req, res) => {
+export const menus_negocio= async (req, res) => {
   try {
    const data= await service.menus_negocio(req.params.id);
    res.json(data);
@@ -77,7 +76,6 @@ export const menus_negocio
     res.status(500).json({ error: err.message });
   }
 };
-
 
 export const modulos_usuario = async (req, res) => {
   try {
@@ -92,11 +90,7 @@ export const modulos_usuario = async (req, res) => {
 export const modulos_usuariocrear = async (req, res) => {
   try {
     const { id, id_menu } = req.body;
-    console.log("req",req.body);
-    
    const data= await service.modulos_usuariocrear(id,id_menu);
-console.log("DATA",data);
-
     res.json({ ok: true });
   } catch (error) {
     res.status(500).json({ error: "Error interno" });

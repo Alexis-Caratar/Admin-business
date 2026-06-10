@@ -5,7 +5,7 @@ import {
   actualizarNegocio,
   eliminarNegocio,
 } from "../../../api/negocios";
-import type { Negocio } from "../../../types";
+import type { Negocio, User } from "../../../types";
 import Swal from "sweetalert2";
 
 import {
@@ -25,7 +25,12 @@ import {
   Switch,
   MenuItem,
   Stack,
+  Avatar,
+  CircularProgress,
+  Checkbox,
 } from "@mui/material";
+
+import {asignarMenuEmpresa, getMenusempresaTotal,getMenusEmpresa} from "../../../api/negocios";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -41,6 +46,8 @@ import ImageIcon from "@mui/icons-material/Image";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import CategoryIcon from "@mui/icons-material/Category";
 import { useTheme, useMediaQuery } from "@mui/material";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 
 
 const AdminNegocios: React.FC = () => {
@@ -48,6 +55,14 @@ const AdminNegocios: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  
+    const [selectedUsuario, setSelectedUsuario] = useState<Negocio | null>(null);
+    const [loadingPermisos, setLoadingPermisos] = useState(false);
+    const [savingPermisos, setSavingPermisos] = useState(false);
+    const [openPermisos, setOpenPermisos] = useState(false);
+    const [menusNegocio, setMenusNegocio] = useState<{ id: number; nombre: string, icono: string, url: string }[]>([]);
+    const [menusUsuario, setMenusUsuario] = useState<number[]>([]);
 
   const tiposNegocio = [
     "Restaurante",
@@ -184,7 +199,52 @@ const AdminNegocios: React.FC = () => {
     }
   };
 
+    const handlePermisos = async (n: Negocio) => {
+      setSelectedUsuario(n);
+      setLoadingPermisos(true);
+      setOpenPermisos(true);
+  
+      try {
+        const [allMenus, userMenus] = await Promise.all([
+          getMenusempresaTotal(),    // tu API que trae todos los menús del negocio
+          getMenusEmpresa(n.id), // tu API que trae los menús que tiene el usuario
+        ]);
+  
+        setMenusNegocio(allMenus);
+        setMenusUsuario(userMenus.map((m: any) => m.id));
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "No se pudieron cargar los permisos", "error");
+      } finally {
+        setLoadingPermisos(false);
+      }
+    };
+  
+
+      const toggleMenuUsuario = (idMenu: number) => {
+    setMenusUsuario(prev =>
+      prev.includes(idMenu) ? prev.filter(m => m !== idMenu) : [...prev, idMenu]
+    );
+  };
+
+    const savePermisos = async () => {
+      if (!selectedUsuario) return;
+      setSavingPermisos(true);
+      try {
+        await asignarMenuEmpresa(selectedUsuario.id, menusUsuario); // tu API para guardar permisos
+        Swal.fire("Éxito", "Permisos actualizados", "success");
+        setOpenPermisos(false);
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "No se pudieron guardar los permisos", "error");
+      } finally {
+        setSavingPermisos(false);
+      }
+    };
+  
+
   return (
+    <>
     <Box p={3}>
       {/* HEADER */}
       {/* HEADER */}
@@ -364,6 +424,16 @@ const AdminNegocios: React.FC = () => {
                 >
                   <DeleteIcon fontSize="small" />
                 </IconButton>
+                  <IconButton
+                sx={{
+                  bgcolor: "#f5f3ff",
+                  "&:hover": { bgcolor: "#ede9fe" },
+                }}
+                onClick={() => handlePermisos(n)}
+              >
+                <MenuBookIcon fontSize="small" color="success" />
+              </IconButton>
+
               </Box>
             </Card>
           </Box>
@@ -535,6 +605,174 @@ const AdminNegocios: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Box>
+
+       {/* MODAL PARA PERMISOS DE LA PERSONA O MODULOS*/}
+      <Dialog
+        open={openPermisos}
+        onClose={() => setOpenPermisos(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        {/* HEADER */}
+        <DialogTitle sx={{ p: 0 }}>
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={2}
+            px={3}
+            py={2}
+            sx={{
+              bgcolor: "#f9fafb",
+              borderBottom: "1px solid #e5e7eb",
+            }}
+          >
+            {/* AVATAR */}
+            <Avatar
+              src={selectedUsuario?.imagen || ""}
+              sx={{ width: 50, height: 50, fontSize: 20 }}
+            >
+             {selectedUsuario?.nombre?.charAt(0)}
+            </Avatar>
+
+            {/* INFO */}
+            <Box flex={1}>
+              <Typography fontWeight={600} fontSize={16}>
+                {selectedUsuario?.nit} {selectedUsuario?.nombre}
+              </Typography>
+            </Box>
+
+            {/* ROL */}
+            <Box
+              sx={{
+                bgcolor: "primary.main",
+                color: "#fff",
+                px: 2,
+                py: 0.5,
+                borderRadius: 2,
+                fontSize: 12,
+                fontWeight: 500,
+              }}
+            >
+              {selectedUsuario?.tipo}
+            </Box>
+          </Box>
+
+          {/* SUBTÍTULO */}
+          <Box px={3} py={1}>
+            <Typography variant="body2" color="text.secondary">
+              Asigna los módulos disponibles en el sistema
+            </Typography>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {loadingPermisos ? (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          ) : menusNegocio.length === 0 ? (
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              py={5}
+              color="text.secondary"
+            >
+              <StorefrontIcon sx={{ fontSize: 40, mb: 1, opacity: 0.6 }} />
+              <Typography fontWeight={500}>
+                Ningún módulo disponible
+              </Typography>
+              <Typography fontSize={13}>
+                No hay módulos configurados para este negocio
+              </Typography>
+            </Box>
+          ) : (
+            <Box display="flex" flexDirection="column" gap={1.2}>
+              {menusNegocio.map((menu) => {
+                const checked = menusUsuario.includes(menu.id);
+
+                return (
+                  <Box
+                    key={menu.id}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    px={2}
+                    py={1.5}
+                    borderRadius={2}
+                    sx={{
+                      bgcolor: checked ? "rgba(25,118,210,0.08)" : "#f9fafb",
+                      border: "1px solid",
+                      borderColor: checked ? "primary.main" : "#e5e7eb",
+                      transition: "all 0.2s ease",
+                      cursor: "pointer",
+                      "&:hover": {
+                        bgcolor: "rgba(25,118,210,0.12)",
+                      },
+                    }}
+                    onClick={() => toggleMenuUsuario(menu.id)}
+                  >
+
+
+
+                    {/* IZQUIERDA */}
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Box
+                        sx={{
+                          bgcolor: checked ? "primary.main" : "#e5e7eb",
+                          color: checked ? "#fff" : "#6b7280",
+                          borderRadius: 2,
+                          p: 1,
+                          display: "flex",
+                        }}
+                      >
+
+                      </Box>
+
+                      <Box>
+                        <Typography fontSize={14} fontWeight={500}>
+                          {menu.nombre}
+                        </Typography>
+                        <Typography fontSize={12} color="text.secondary">
+                          /{menu.url}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* DERECHA */}
+                    <Checkbox
+                      checked={checked}
+                      onChange={() => toggleMenuUsuario(menu.id)}
+                    />
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
+        </DialogContent>
+
+        {/* FOOTER */}
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={() => setOpenPermisos(false)} color="inherit">
+            Cancelar
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={savePermisos}
+            disabled={savingPermisos}
+            sx={{
+              textTransform: "none",
+              px: 3,
+              borderRadius: 2,
+            }}
+          >
+            {savingPermisos ? "Guardando..." : "Guardar cambios"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      </>
   );
 };
 

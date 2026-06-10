@@ -6,4 +6,7 @@ router.get("/:id", controller.obtener);
 router.post("/", controller.crear);
 router.put("/:id", controller.actualizar);
 router.delete("/:id", controller.eliminar);
+router.post("/menusnegocio", controller.menus_negocio);
+router.get("/menus_usuario/:idNegocio", controller.modulos_usuario);
+router.post("/menus_usuariocrear", controller.modulos_usuariocrear);
 export default router;
