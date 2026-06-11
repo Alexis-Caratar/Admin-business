@@ -325,10 +325,8 @@ const [rows]= await db.query(
         SELECT DISTINCT m.*
         FROM app_modulos m
         INNER JOIN app_modulos_negocio mn ON m.id = mn.id_modulo
-        INNER JOIN app_modulos_negocio_rol mr 
-              ON mn.id = mr.id_app_modulos_negocio
-        INNER JOIN app_usuario_modulos um
-              ON um.id_modulo_negocio_rol = m.id AND um.id_usuario = $1
+        LEFT JOIN app_modulos_negocio_rol mr ON mn.id = mr.id_app_modulos_negocio
+        INNER JOIN app_usuario_modulos um ON um.id_modulo_negocio_rol = m.id AND um.id_usuario = $1
         WHERE mn.id_negocio = $2
           AND mn.activo=true
           AND m.activo = true

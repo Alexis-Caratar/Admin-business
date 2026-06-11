@@ -19,6 +19,7 @@
     "@fullcalendar/react": "^6.1.19",
     "@mui/icons-material": "^7.3.9",
     "@mui/material": "^7.3.9",
+    "@mui/x-data-grid": "^9.5.0",
     "axios": "^1.13.2",
     "framer-motion": "^12.35.2",
     "jwt-decode": "^4.0.0",

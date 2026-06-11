@@ -5,7 +5,7 @@ import {
   actualizarNegocio,
   eliminarNegocio,
 } from "../../../api/negocios";
-import type { Negocio, User } from "../../../types";
+import type { Negocio} from "../../../types";
 import Swal from "sweetalert2";
 
 import {
@@ -207,7 +207,7 @@ const AdminNegocios: React.FC = () => {
       try {
         const [allMenus, userMenus] = await Promise.all([
           getMenusempresaTotal(),    // tu API que trae todos los menús del negocio
-          getMenusEmpresa(n.id), // tu API que trae los menús que tiene el usuario
+          getMenusEmpresa(n.id||0), // tu API que trae los menús que tiene el usuario
         ]);
   
         setMenusNegocio(allMenus);
@@ -231,7 +231,7 @@ const AdminNegocios: React.FC = () => {
       if (!selectedUsuario) return;
       setSavingPermisos(true);
       try {
-        await asignarMenuEmpresa(selectedUsuario.id, menusUsuario); // tu API para guardar permisos
+        await asignarMenuEmpresa(selectedUsuario.id||0, menusUsuario); // tu API para guardar permisos
         Swal.fire("Éxito", "Permisos actualizados", "success");
         setOpenPermisos(false);
       } catch (err) {

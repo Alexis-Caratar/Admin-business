@@ -25,7 +25,6 @@ import { cambiopassword } from "./../api/auth"
 import Loader from "../components/Loader";
 import PrintIcon from "@mui/icons-material/Print";
 import SyncIcon from "@mui/icons-material/Sync";
-import SettingsIcon from "@mui/icons-material/Settings";
 
 const DEFAULT_AVATAR =
   "https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png";

@@ -2,33 +2,24 @@ import { db } from "../config/db.js";
 
 export const ComprasService = {
 listarCompras: async (id_negocio) => {
-
+  
   const [rows] = await db.query(`
   
     SELECT
       c.id,
+      c.numero_compra,
       c.numero_factura,
       c.fecha_compra,
       c.total,
       c.estado,
-      c.tipo_compra,
+      c.tipo_documento,
       p.identificacion,
-      CONCAT(
-        p.nombres,
-        ' ',
-        COALESCE(p.apellidos,'')
-      ) proveedor,
+      CONCAT(p.nombres,' ',COALESCE(p.apellidos,'')) proveedor,
       mp.nombre metodo_pago
     FROM compras c
-
-    INNER JOIN personas p
-      ON p.id = c.id_proveedor
-
-    INNER JOIN metodos_pago mp
-      ON mp.id = c.id_metodo_pago
-
+    INNER JOIN personas p ON p.id = c.id_proveedor
+    INNER JOIN metodos_pago mp ON mp.id = c.id_metodo_pago
     WHERE c.id_negocio = $1
-
     ORDER BY c.id DESC
 
   `,[id_negocio]);
