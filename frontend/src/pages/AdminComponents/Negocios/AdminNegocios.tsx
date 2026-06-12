@@ -28,10 +28,11 @@ import {
   Avatar,
   CircularProgress,
   Checkbox,
+  Tooltip,
 } from "@mui/material";
 
 import {asignarMenuEmpresa, getMenusempresaTotal,getMenusEmpresa} from "../../../api/negocios";
-
+import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
@@ -48,6 +49,8 @@ import CategoryIcon from "@mui/icons-material/Category";
 import { useTheme, useMediaQuery } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import AdminUsuarios from "../Usuarios/AdminUsuarios";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 
 
 const AdminNegocios: React.FC = () => {
@@ -63,7 +66,7 @@ const AdminNegocios: React.FC = () => {
     const [openPermisos, setOpenPermisos] = useState(false);
     const [menusNegocio, setMenusNegocio] = useState<{ id: number; nombre: string, icono: string, url: string }[]>([]);
     const [menusUsuario, setMenusUsuario] = useState<number[]>([]);
-
+    const [openUsuarios, setOpenUsuarios] = useState(false);
   const tiposNegocio = [
     "Restaurante",
     "Cafetería",
@@ -424,6 +427,7 @@ const AdminNegocios: React.FC = () => {
                 >
                   <DeleteIcon fontSize="small" />
                 </IconButton>
+
                   <IconButton
                 sx={{
                   bgcolor: "#f5f3ff",
@@ -433,6 +437,21 @@ const AdminNegocios: React.FC = () => {
               >
                 <MenuBookIcon fontSize="small" color="success" />
               </IconButton>
+
+            <Tooltip title="Usuarios" arrow>
+              <IconButton
+                onClick={() => setOpenUsuarios(true)}
+                 size="small"
+                  sx={{ bgcolor: "#9dc1db" }}
+              >
+                <PeopleAltOutlinedIcon
+                  sx={{
+                    color: "#000000",
+                    fontSize: 24,
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
 
               </Box>
             </Card>
@@ -772,6 +791,33 @@ const AdminNegocios: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+    
+    <Dialog
+  open={openUsuarios}
+  onClose={() => setOpenUsuarios(false)}
+  maxWidth="xl"
+  fullWidth
+>
+  <DialogTitle>
+    Usuarios
+
+    <IconButton
+      onClick={() => setOpenUsuarios(false)}
+      sx={{
+        position: "absolute",
+        right: 8,
+        top: 8,
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+
+  <DialogContent>
+    <AdminUsuarios />
+  </DialogContent>
+</Dialog>
       </>
   );
 };
