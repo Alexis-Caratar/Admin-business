@@ -1030,9 +1030,7 @@ actualizaventa: async (payload) => {
       idUsuario, id_negocio, id_venta,
       metodo_pago, monto_recibido, cambio, id_mesa,id_cliente
     } = payload;
-    
-    console.log("pyaload",payload);
-    
+        
     // estado de pago
     const estado_pago_id = metodo_pago !== 'PENDIENTE' ? 1 : 0;
 
@@ -1308,6 +1306,82 @@ guardar_inventario: async (payload,id_usuario) => {
     conn.release();
   }
 },
+
+apiEliminarCaja: async (payload) => {
+  const conn = await pool.connect();
+
+  try {
+    await conn.query("BEGIN");
+
+    const { id_caja } = payload;
+
+    // Obtener ventas asociadas a la caja
+    const ventasResult = await conn.query(
+      `SELECT id FROM ventas WHERE id_caja = $1`,
+      [id_caja]
+    );
+
+    const idsVentas = ventasResult.rows.map(v => v.id);
+
+    if (idsVentas.length > 0) {
+      // Eliminar items de ventas
+      await conn.query(
+        `DELETE FROM ventas_items
+         WHERE id_venta = ANY($1::int[])`,
+        [idsVentas]
+      );
+
+      // Eliminar pagos
+      await conn.query(
+        `DELETE FROM pagos
+         WHERE id_venta = ANY($1::int[])`,
+        [idsVentas]
+      );
+
+      // Eliminar ventas
+      await conn.query(
+        `DELETE FROM ventas
+         WHERE id_caja = $1`,
+        [id_caja]
+      );
+    }
+
+    // Eliminar egresos
+    await conn.query(
+      `DElETE FROM egresos
+       WHERE id_caja = $1`,
+      [id_caja]
+    );
+
+    // Eliminar inventario de caja
+    await conn.query(
+      `DELETE FROM inventario_caja
+       WHERE id_caja = $1`,
+      [id_caja]
+    );
+
+    // Eliminar caja
+    await conn.query(
+      `DELETE FROM caja
+       WHERE id = $1`,
+      [id_caja]
+    );
+
+    await conn.query("COMMIT");
+
+    return {
+      ok: true,
+      message: "Caja eliminada correctamente",
+    };
+
+  } catch (err) {
+    await conn.query("ROLLBACK");
+    console.error("Error eliminando caja:", err.message);
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
 
 
 }

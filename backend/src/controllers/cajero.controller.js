@@ -402,3 +402,14 @@ export const guardarInventario = async (req, res) => {
   
 };
 
+export const apiEliminarCaja = async (req, res) => {
+  try {    
+   const payload = req.body;
+     const result= await CajeroService.apiEliminarCaja(payload)
+      res.json({ok: true, result});
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+  
+};
+

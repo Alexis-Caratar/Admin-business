@@ -38,10 +38,12 @@ import Swal from "sweetalert2";
 import { Pagination } from "@mui/material";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { ArqueoCajaModal } from "../Cajero/components/Estados_dasboard/ArqueoCaja";
+import EliminarCaja from "./EliminarCaja";
 
 interface Props {
   ventas: Venta[];
   fecha: string;
+  onCajaEliminada: () => void;
 }
 
 const formatCOP = (value: number) =>
@@ -51,7 +53,7 @@ const formatCOP = (value: number) =>
     minimumFractionDigits: 0,
   }).format(value);
 
-const VentasDelDia: React.FC<Props> = ({ ventas, fecha }) => {
+const VentasDelDia: React.FC<Props> = ({ ventas, fecha,onCajaEliminada }) => {
 
   const [ventaSeleccionada, setVentaSeleccionada] = useState<any>(null);
   const [detalleOpen, setDetalleOpen] = useState(false);
@@ -413,63 +415,69 @@ const cajasData = ventas
         </Box>
 
              {/* cajeros */}
-<Box
-  sx={{
-    display: "grid",
+  <Box
+    sx={{
+      display: "grid",
     gridTemplateColumns: {
-      xs: "repeat(2, 1fr)",
-      sm: "repeat(3, 1fr)",
-      md: "repeat(4, 1fr)",
-      lg: "repeat(6, 1fr)",
-    },
-    gap: 1.5,
-    mb: 3,
-  }}
->
-  {cajasArray.map((caja, index) => (
+    xs: "repeat(1, 1fr)",
+    sm: "repeat(2, 1fr)",
+    md: "repeat(3, 1fr)",
+    lg: "repeat(4, 1fr)",
+  },
+      gap: 1.5,
+      mb: 3,
+    }}
+  >
+    {cajasArray.map((caja, index) => (
     <Card
-      key={index}
-      onClick={() => abrirArqueo(caja)}
-      sx={{
-        p: 1.2,
-        borderRadius: 3,
-        cursor: "pointer",
-        border: "1px solid #eee",
-        transition: "all .2s ease",
-        "&:hover": {
-          transform: "translateY(-3px)",
-          boxShadow: 3,
-        },
-      }}
+    key={index}
+    onClick={() => abrirArqueo(caja)}
+    sx={{
+      p: 1.4,
+      borderRadius: 3,
+      cursor: "pointer",
+      border: "1px solid #eee",
+      position: "relative",
+      transition: "all .2s ease",
+      "&:hover": {
+        transform: "translateY(-3px)",
+        boxShadow: 3,
+      },
+    }}
+  >
+
+{/*opcion que llama el componente para eliminar de forma permante la caja */}
+  <EliminarCaja id_caja={caja.id_caja} onSuccess={onCajaEliminada} />
+
+  <Stack spacing={0.5}>
+    <Typography fontSize={11} fontWeight={700} noWrap>
+      {caja.nombre}
+    </Typography>
+
+    <Typography fontSize={10} color="text.secondary">
+      Caja #{caja.id_caja}
+    </Typography>
+
+    <Stack
+      direction="row"
+      justifyContent="space-between"
+      alignItems="center"
+      mt={0.5}
     >
-      <Stack spacing={0.5}>
-        
-        {/* Nombre + caja */}
-        <Typography fontSize={11} fontWeight={700} noWrap>
-          {caja.nombre}
-        </Typography>
+      <Typography fontSize={10}>
+        {caja.cantidad} ventas
+      </Typography>
 
-        <Typography fontSize={10} color="text.secondary">
-          Caja #{caja.id_caja}
-        </Typography>
-
-        {/* Métricas */}
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          mt={0.5}
-        >
-          <Typography fontSize={10}>
-            {caja.cantidad} ventas
-          </Typography>
-
-          <Typography fontSize={11} fontWeight={800} color="success.main">
-            {formatCOP(caja.total)}
-          </Typography>
-        </Stack>
-      </Stack>
-    </Card>
+      <Typography
+        fontSize={11}
+        fontWeight={800}
+        color="success.main"
+      >
+        {formatCOP(caja.total)}
+      </Typography>
+    </Stack>
+  </Stack>
+</Card>
   ))}
 </Box>
 

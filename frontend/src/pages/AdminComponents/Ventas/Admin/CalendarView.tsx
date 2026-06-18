@@ -221,7 +221,7 @@ const CalendarView: React.FC<Props> = ({
             interactionPlugin,
           ]}
           initialView="dayGridMonth"
-          height="110vh"
+          height="70vh"
           events={events}
           dateClick={handleDateClick}
           selectable

@@ -88,3 +88,7 @@ export const apiObtenerInventario = (data:any) => {
 export const apiGuardarInventario = (data:any) => {
   return axios.post(`cajero/guardar-inventario`, data);
 };
+
+export const apiEliminarCaja = (data:any) => {
+  return axios.post(`cajero/apiEliminarCaja`, data);
+};

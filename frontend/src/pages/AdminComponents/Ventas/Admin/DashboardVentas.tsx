@@ -29,6 +29,7 @@ import {
 interface Props {
   chartData: any[];
   stats: any;
+  onSelectDate: (fecha: string) => void;
 }
 
 const formatCOP = (value: number) =>
@@ -75,6 +76,7 @@ const formatFecha = (fecha: any) => {
 const DashboardVentas: React.FC<Props> = ({
   chartData,
   stats,
+  onSelectDate,
 }) => {
   return (
     <Box p={3}>
@@ -217,8 +219,17 @@ const DashboardVentas: React.FC<Props> = ({
         width="100%"
         height="100%"
       >
-        <AreaChart data={chartData}>
-          <defs>
+      <AreaChart
+        data={chartData}
+        onClick={(e) => {
+          const rawFecha = (e as any)?.activeLabel;
+          if (rawFecha) {
+            const fecha = rawFecha.split("T")[0];
+            onSelectDate(fecha);
+          }
+        }}
+>
+            <defs>
             <linearGradient
               id="ventasGradient"
               x1="0"
@@ -419,7 +430,17 @@ const DashboardVentas: React.FC<Props> = ({
           width="100%"
           height="100%"
         >
-          <LineChart data={chartData}>
+          <LineChart
+              data={chartData}
+              onClick={(e: any) => {
+                const rawFecha = e?.activeLabel;
+
+                if (rawFecha) {
+                  const fecha = rawFecha.split("T")[0];
+                  onSelectDate(fecha);
+                }
+              }}
+            >
             <CartesianGrid
               strokeDasharray="4 4"
               vertical={false}
@@ -578,7 +599,17 @@ const DashboardVentas: React.FC<Props> = ({
           width="100%"
           height="100%"
         >
-          <BarChart data={chartData}>
+    <BarChart
+        data={chartData}
+        onClick={(data: any) => {
+
+          if (data?.activeLabel) {
+            onSelectDate(
+              data.activeLabel.split("T")[0]
+            );
+          }
+        }}
+      >
             <CartesianGrid
               strokeDasharray="4 4"
               vertical={false}

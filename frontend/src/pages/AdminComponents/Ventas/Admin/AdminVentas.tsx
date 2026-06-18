@@ -56,6 +56,15 @@ const AdminVentas: React.FC = () => {
   // CARGAR DATA
   // =====================================================
 
+  const recargarDatos = async () => {
+  await loadResumen();
+
+  if (selectedDate) {
+    const data = await getVentasPorDia(selectedDate);
+    setVentasDelDia(data.ventas || []);
+  }
+};
+
  const loadResumen = useCallback(async () => {
   try {
     setLoading(true);
@@ -78,6 +87,7 @@ const AdminVentas: React.FC = () => {
   fechaInicio,
   fechaFin,
 ]);
+
 
 useEffect(() => {
   // filtros normales
@@ -119,23 +129,22 @@ useEffect(() => {
   // CLICK DIA
   // =====================================================
 
-  const handleDateClick = async (fecha: string) => {
-    try {
-      setLoading(true);
+const abrirVentasDelDia = async (fecha: string) => {
+  try {
+    setLoading(true);
 
-      setSelectedDate(fecha);
+    setSelectedDate(fecha);
 
-      const data = await getVentasPorDia(fecha);
+    const data = await getVentasPorDia(fecha);
 
-      setVentasDelDia(data.ventas || []);
-    } catch (error) {
-      console.error(error);
-      setVentasDelDia([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    setVentasDelDia(data.ventas || []);
+  } catch (error) {
+    console.error(error);
+    setVentasDelDia([]);
+  } finally {
+    setLoading(false);
+  }
+};
 const ventasFiltradas = resumen;
   // =====================================================
   // STATS
@@ -586,6 +595,8 @@ const ventasFiltradas = resumen;
            <DashboardVentas
           chartData={chartData}
           stats={stats}
+          onSelectDate={abrirVentasDelDia}
+
         />
           </Box>
         )}
@@ -598,9 +609,7 @@ const ventasFiltradas = resumen;
     <Box p={2}>
             <CalendarView
               ventas={ventasFiltradas}
-              onSelectDate={
-                handleDateClick
-              }
+               onSelectDate={abrirVentasDelDia}
             />
           </Box>
 
@@ -627,6 +636,7 @@ const ventasFiltradas = resumen;
               <VentasDelDia
                 ventas={ventasDelDia}
                 fecha={selectedDate}
+                 onCajaEliminada={recargarDatos}
               />
             )
           )}
