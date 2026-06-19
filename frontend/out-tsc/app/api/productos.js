@@ -45,7 +45,6 @@ var getProductos = function (id) { return __awaiter(void 0, void 0, void 0, func
             case 0: return [4 /*yield*/, axios_1.default.get("/productos/categorias/".concat(id))];
             case 1:
                 data = (_a.sent()).data;
-                console.log("data productos", data);
                 return [2 /*return*/, data];
         }
     });

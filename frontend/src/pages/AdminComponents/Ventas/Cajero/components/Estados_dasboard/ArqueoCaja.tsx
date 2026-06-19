@@ -723,7 +723,6 @@ const totalDigital =
 
 
 {/* TOTAL INVENTARIO */}
-{/* TOTAL INVENTARIO */}
 <Accordion
   sx={{
     borderRadius: 3,
@@ -763,13 +762,11 @@ const totalDigital =
         <thead>
           <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
             <th>Producto</th>
-            <th>Sistema</th>
-            <th>Físico</th>
-            <th>Ingresos</th>
+            <th>Stock Inicial</th>
+            <th>Entradas</th>
+            <th>Total </th>
             <th>Ventas</th>
-            <th>Salidas</th>
-            <th>Cierre</th>
-            <th>Diferencia</th>
+            <th>Stock Final</th>
           </tr>
         </thead>
 
@@ -777,14 +774,6 @@ const totalDigital =
 
           {arqueoInfo?.inventario?.map((p: any) => {
 
-            const diff = p.diferencia ?? 0;
-
-            const color =
-              diff === 0
-                ? "green"
-                : diff > 0
-                ? "blue"
-                : "red";
 
             return (
               <tr
@@ -799,35 +788,27 @@ const totalDigital =
                   <b>{p.nombre}</b>
                 </td>
 
-                {/* SISTEMA */}
-                <td>{p.stock_sistema}</td>
-
                 {/* FISICO */}
-                <td>{p.stock_apertura}</td>
+                <td>{p.stock_apertura||0}</td>
 
                 {/* INGRESOS */}
                 <td style={{ color: "green" }}>
-                  +{p.ingresos}
+                  {p.ingresos}
+                </td>
+
+                 {/* TOTAL */}
+                <td style={{ color: "green" }}>
+                  {p.stock_apertura+p.ingresos||0}
                 </td>
 
                 {/* VENTAS */}
                 <td style={{ color: "blue" }}>
-                  -{p.ventas}
+                  {p.ventas||0}
                 </td>
 
-                {/* SALIDAS */}
-                <td style={{ color: "orange" }}>
-                  -{p.salidas}
-                </td>
-
-                {/* CIERRE */}
-                <td>
-                  {p.cierre_sistema}
-                </td>
-
-                {/* DIFERENCIA */}
-                <td style={{ fontWeight: "bold", color }}>
-                  {diff > 0 ? `+${diff}` : diff}
+                  {/* FIN */}
+                <td style={{ color: "green" }}>
+                  {(p.stock_apertura+p.ingresos)-p.ventas||0}
                 </td>
 
               </tr>

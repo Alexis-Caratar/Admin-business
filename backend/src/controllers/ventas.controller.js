@@ -4,7 +4,6 @@ export const VentasController = {
 
      resumeventa: async (req, res) => {    
     try {
-      console.log("req.query",req.query);
       
       const ventas = await VentasService.resumenventas(req.query);
       return res.json({ ok: true, ventas });

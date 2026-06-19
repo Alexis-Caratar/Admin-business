@@ -25,7 +25,6 @@ export const initWebSockets = (server) => {
         // REGISTRAR AGENTES DE IMPRESIÓN FACTURAS
         if (data.tipo === "register_agent" && data.isPrintAgent) {
           ws.isPrintAgent = true;
-          console.log("Agente local registrado para impresión");
         }
      
          //ESTADO IMPRESORA 

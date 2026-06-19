@@ -128,12 +128,10 @@ var CajeroDashboard = function () {
             var msg = JSON.parse(event.data);
             // MESAS
             if (msg.tipo === "mesas") {
-                console.log("Mesas actualizadas", msg.mesas);
                 setMesas(msg.mesas);
             }
             // CAJA
             if (msg.tipo === "actualizar_caja") {
-                console.log("Mesas actualizadas", msg.caja);
                 var c = msg.caja;
                 if (!c)
                     return;

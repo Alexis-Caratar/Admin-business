@@ -241,7 +241,6 @@ export const crear = async (payload) => {
 
 // 5 INSERTAR PRODUCTOS COMPLEMENTOS
 // ============================
-console.log("productos_complementos",productos_complementos);
 
 if (productos_complementos?.length > 0) {
   for (const complemento of productos_complementos) {

@@ -283,8 +283,6 @@ const clearMesa = () => {
   //aperturar la caja 
 const abrirCajaReal = async (payload: any) => {
   try {
-    console.log("🚀 payload recibido:", payload);
-
     const { data } = await apiAbrirCaja({
       id_usuario: idUsuario,
       monto_inicial: payload.monto_inicial,

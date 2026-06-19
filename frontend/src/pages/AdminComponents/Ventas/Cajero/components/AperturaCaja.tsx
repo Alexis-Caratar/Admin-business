@@ -59,20 +59,117 @@ export const AperturaCajaModal: React.FC<Props> = ({
 
   // 🔥 FINAL → enviar TODO junto
  const handleFinalizar = async () => {
-  const confirm = await Swal.fire({
-  title: "¿Abrir caja?",
-  text: "Verifica el monto inicial y el inventario antes de continuar.",
-  icon: "warning",
-  showCancelButton: true,
-  confirmButtonText: "Sí, abrir",
-  cancelButtonText: "Cancelar",
-  backdrop: true,
-  allowOutsideClick: false,
-  didOpen: () => {
-    const swal = document.querySelector('.swal2-container') as HTMLElement;
-    if (swal) swal.style.zIndex = '2000';
-  }
+const ahora = new Date();
+
+const fecha = ahora.toLocaleDateString("es-CO", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
 });
+
+const hora = ahora.toLocaleTimeString("es-CO", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+
+  const confirm = await Swal.fire({
+    title: "Confirmar apertura de caja",
+    html: `
+      <div style="text-align:left;font-size:14px;">
+
+        <div style="
+          padding:12px;
+          border:1px solid #e5e7eb;
+          border-radius:10px;
+          margin-bottom:14px;
+          background:#fafafa;
+        ">
+          <div><strong>Fecha:</strong> ${fecha}</div>
+          <div><strong>Hora:</strong> ${hora}</div>
+        </div>
+
+        <p style="margin-bottom:12px;">
+          Se registrará una nueva apertura de caja con la siguiente información:
+        </p>
+
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:6px 0;"><strong>Monto inicial</strong></td>
+            <td style="text-align:right;">
+              $${new Intl.NumberFormat("es-CO").format(Number(monto))}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:6px 0;"><strong>Inventario inicial</strong></td>
+            <td style="text-align:right;">Confirmado y validado</td>
+          </tr>
+        </table>
+
+        <hr style="margin:14px 0;border:none;border-top:1px solid #e5e7eb;" />
+
+        <p style="color:#555;margin-bottom:10px;">
+          Al confirmar, el monto inicial y el inventario quedarán registrados
+          como base operativa para la jornada actual.
+        </p>
+
+        <div style="
+          text-align:center;
+          font-weight:600;
+          color:#1976d2;
+          font-size:16px;
+        ">
+          Habilitando confirmación en
+          <span id="countdown">5</span>s
+        </div>
+
+      </div>
+    `,
+    icon: "info",
+    showCancelButton: true,
+    confirmButtonText: "Confirmar apertura",
+    cancelButtonText: "Revisar datos",
+    allowOutsideClick: false,
+
+  didOpen: () => {
+    const swal = document.querySelector(".swal2-container") as HTMLElement;
+    if (swal) swal.style.zIndex = "2000";
+
+    const confirmBtn = Swal.getConfirmButton();
+
+    if (!confirmBtn) return;
+
+    confirmBtn.disabled = true;
+
+    let segundos = 5;
+
+    confirmBtn.textContent = `Confirmar apertura (${segundos})`;
+
+    const countdownEl = document.getElementById("countdown");
+
+    const interval = setInterval(() => {
+      segundos--;
+
+      if (countdownEl) {
+        countdownEl.textContent = String(segundos);
+      }
+
+      if (segundos > 0) {
+        confirmBtn.textContent = `Confirmar apertura (${segundos})`;
+      } else {
+        clearInterval(interval);
+
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "Confirmar apertura";
+
+        if (countdownEl) {
+          countdownEl.textContent = "0";
+        }
+      }
+    }, 1000);
+  }
+  });
+
 
   if (!confirm.isConfirmed) return;
 

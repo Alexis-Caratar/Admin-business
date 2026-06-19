@@ -12,9 +12,7 @@ export const listar = async (req, res) => {
 
 // CREAR
 export const crear = async (req, res) => {
-  try {
-    console.log(req.user);
-    
+  try {    
     const data = await service.crear(req.body,req.user.id_negocio);
     res.status(201).json(data);
   } catch (err) {

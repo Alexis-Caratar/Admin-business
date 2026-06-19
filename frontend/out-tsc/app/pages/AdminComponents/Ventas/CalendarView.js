@@ -17,7 +17,6 @@ var CalendarView = function (_a) {
         };
     });
     var handleDateClick = function (info) {
-        console.log("Click en fecha:", info.dateStr);
         onSelectDate(info.dateStr); // <-- Aquí siempre abre modal
     };
     return ((0, jsx_runtime_1.jsx)(react_1.default, { plugins: [daygrid_1.default, interaction_1.default], initialView: "dayGridMonth", height: "80vh", events: events, dateClick: handleDateClick, selectable: true, dayMaxEvents: 2, headerToolbar: {

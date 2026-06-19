@@ -159,7 +159,6 @@ function VentasDetalles(_a) {
                 case 0:
                     if (!ventaSeleccionada)
                         return [2 /*return*/];
-                    console.log("ventaSeleccionada", ventaSeleccionada);
                     payload = {
                         idUsuario: idUsuario,
                         id_negocio: id_negocio,

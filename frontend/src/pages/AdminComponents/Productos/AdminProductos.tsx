@@ -199,7 +199,6 @@ const handleOpenModal = (producto?: Producto) => {
 
 
 const handleSubmit = async () => {
-  console.log("control", form.tipo_control);
   
 const payload = {
   producto: {

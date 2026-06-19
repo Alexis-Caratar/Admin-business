@@ -21,8 +21,4 @@ app.use("/api", imprimirRoutes);
 //app.use("/api", imprimirRoutes);
 
 app.listen(PORT, () => {
-  console.log(`
-🤖 Servidor listo
-🌐 http://localhost:${PORT}
-  `);
-});
+  console.log(`🤖 Servidor listo🌐 http://localhost:${PORT}`);});

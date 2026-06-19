@@ -161,7 +161,6 @@ var AdminUsuarios = function () {
                         .toLowerCase();
                     email = "".concat(nombresUsuario, "@gmail.com");
                     password = ultimos4;
-                    console.log("form", form);
                     payload = {
                         persona: {
                             tipo_identificacion: form.tipo_identificacion,

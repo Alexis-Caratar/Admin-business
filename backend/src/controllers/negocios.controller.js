@@ -16,11 +16,8 @@ export const eliminar = async (req, res) => {
 };
 
 export const menus_negocio= async (req, res) => {
-  console.log("entrada");
   
   try {
-      console.log("ingreso");
-
    const data= await service.menus_negocio();
    res.json(data);
   } catch (err) {

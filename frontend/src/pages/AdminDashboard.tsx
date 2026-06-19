@@ -83,7 +83,6 @@ const AdminDashboard: React.FC = () => {
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.tipo === "printer_status") {// ESTADO IMPRESORA
-        console.log("Estado impresora:", msg.payload);
         setPrinterStatus(msg.payload);
         setPrinterConnected(msg.payload?.connected || false);
       }
@@ -386,10 +385,7 @@ const AdminDashboard: React.FC = () => {
             )}
 
             <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
-              <IconButton sx={{ color: "#fff" }}>
-                <NotificationsIcon />
-              </IconButton>
-
+            
               <Box
                 sx={{
                   position: "relative",
@@ -655,7 +651,6 @@ const AdminDashboard: React.FC = () => {
                         }}
                       />
                     }
-
                     sx={{
                       px: 2,
                       py: 1.2,
@@ -667,16 +662,34 @@ const AdminDashboard: React.FC = () => {
                       letterSpacing: ".3px",
                     }}
                   >
-                    {printerConnected ? "Impresora conectada" : "Impresora desconectada"}
                   </Button>
                 </Tooltip>
               </Box>
-
+              <Tooltip
+                title="Notificaciones"
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      bgcolor: "#fff",
+                      color: "#333",
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                      boxShadow: 3,
+                      border: "1px solid #e0e0e0",
+                    },
+                  },
+                  arrow: {sx: {color: "#fff",},},}}
+              >
+                <IconButton sx={{ color: "#fff" }}>
+                  <NotificationsIcon />
+                </IconButton>
+              </Tooltip>
 
 
               <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
                 <Avatar src={imagen} />
-                <ArrowDropDownIcon />
+               <ArrowDropDownIcon sx={{ color: "white" }} />
               </IconButton>
 
               <Menu

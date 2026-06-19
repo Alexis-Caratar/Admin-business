@@ -6,7 +6,6 @@ export const VentasService = {
       // Obtener  resumen todas las ventas
  resumenventas: async ({id_negocio,tipoFiltro,fechaInicio = null,fechaFin = null}) => {
 
-    console.log("{id_negocio,tipoFiltro,fechaInicio = null,fechaFin = null}",id_negocio,tipoFiltro,fechaInicio ,fechaFin);
     
   let filtroFecha = "";
 

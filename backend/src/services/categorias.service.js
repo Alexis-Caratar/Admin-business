@@ -34,14 +34,11 @@ export const crearCategoriaService = async (data) => {
       cleanData.activo,
     ]
   );
-console.log("rowas",rows);
 
   return rows[0];
 };
 
 export const actualizarCategoriaService = async (id, data) => {
-  console.log("data", data);
-  console.log("id", id);
 
   if (!id) {
     throw new Error("El id es obligatorio");

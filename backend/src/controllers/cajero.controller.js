@@ -367,9 +367,7 @@ export const imprimirfactura = async (req, res) => {
 
 export const cancelarFactura = async (req, res) => {
   try {
-   const payload = req.body;
-   console.log("payload",payload);
-   
+   const payload = req.body;   
      const result= await CajeroService.cancelar_factura(payload)
       res.json({ok: true, result});
   } catch (e) {

@@ -56,7 +56,6 @@ export const getMenusNegocio = async (id: number) => {
 export const getMenusUsuario = async (id: number,idNegocio:number) => {
   try {
     const { data } = await axios.get(`/usuarios/menus_usuario/${id}/${idNegocio}`);
-    console.log("data",data);
     
     return data;
   } catch (error) {
@@ -67,15 +66,11 @@ export const getMenusUsuario = async (id: number,idNegocio:number) => {
 
 export const asignarMenuUsuario = async (id: number, id_menu: number[]) => {
   try {
-    console.log("id", id);
-    console.log("id_menu", id_menu);
-
     const { data } = await axios.post(`/usuarios/menus_usuariocrear`, {
       id,
       id_menu
     });
 
-    console.log("data", data);
     return data;
   } catch (error) {
     console.error(`Error llamar menus_usuarios /usuarios/${id}:`, error);
