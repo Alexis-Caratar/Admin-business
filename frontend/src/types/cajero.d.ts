@@ -1,7 +1,7 @@
 export interface ProductoCajero {
   id: number;
   codigo_barra: string;
-  stock_actual:string;
+  stock_actual:Number| 99;
   nombre: string;
   precio_venta: number;
   parent_id: number | null;

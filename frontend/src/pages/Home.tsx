@@ -17,10 +17,14 @@ import RestaurantIcon from "@mui/icons-material/Restaurant";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import DeliveryDiningIcon from "@mui/icons-material/DeliveryDining";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import { useNavigate } from "react-router-dom";
+import logo from './../assets/img/img_puntourbano/logosinfondo.jpeg'
 
 export default function Home() {
   const [filter, setFilter] = useState("todo");
+  const navigate = useNavigate();
 
+  
 // SEO
 useEffect(() => {
   document.title =
@@ -213,6 +217,38 @@ const menu = [
         minHeight: "100vh",
       }}
     >
+
+      <Box
+      sx={{
+        position: "fixed",
+        top: 20,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        display: "flex",
+        justifyContent: "flex-end",
+        pr: 5,
+      }}
+    >
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+      >
+      
+        <Button
+          onClick={() => navigate("/login")}
+          sx={{
+            color: "#22c55e",
+            textTransform: "none",
+            fontWeight: 800,
+          }}
+        >
+          Acceso al sistema
+        </Button>
+      </Stack>
+    </Box>
+
       {/* HERO */}
       <Box
         sx={{
@@ -267,7 +303,7 @@ const menu = [
           {/* LOGO */}
           <CardMedia
             component="img"
-            image="https://scontent.fpso2-1.fna.fbcdn.net/v/t39.30808-1/656542185_1537348755058274_911175189399496857_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=103&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=2hjiczlQeBQQ7kNvwH-L5Bo&_nc_oc=AdppFpGQC__PnwIXgPna_pVzSvFdERdENhZfWHY1U1f4kqe9p8BHZR17c4jcdqHojYU&_nc_zt=24&_nc_ht=scontent.fpso2-1.fna&_nc_gid=c6bSqwNcatHn268CjGPRrQ&_nc_ss=7a2a8&oh=00_Af6C_vgFSrc4VGT_JOQCyl3Eo7Z09nznQcIbIhF0yvXcog&oe=6A162494"
+            image={logo}
             alt="Punto Urbano Pasto"
             sx={{
               width: 180,

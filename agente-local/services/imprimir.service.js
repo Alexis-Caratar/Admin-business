@@ -6,58 +6,31 @@ const { formatCOP, line, center, twoCols } = require("../utils/formatter");
 const printers = require("../config/printers");
 
 
-//saber estado de la impresora
 async function getPrinterStatus() {
   try {
+    const device = escpos.USB.findPrinter();
 
-    const printers = await printer.getPrinters();
-
-    const printerFound = printers.find(p =>
-      p.name === PRINTER_NAME
-    );
-
-    if (!printerFound) {
+    if (!device) {
       return {
         ok: false,
         status: "OFFLINE",
         connected: false,
-        message: "Impresora no encontrada"
+        message: "No se detectó impresora USB"
       };
     }
-
-    // 🔥 TEST SILENCIOSO REAL
-    try {
-      await testPrintSilencioso(PRINTER_NAME);
-
-      return {
-        ok: true,
-        status: "ONLINE",
-        connected: true,
-        message: "Impresora funcionando correctamente",
-        printer: {
-          name: printerFound.name,
-          driver: printerFound.driverName,
-          port: printerFound.portName,
-          isDefault: printerFound.isDefault || false,
-        }
-      };
-
-    } catch (err) {
-
-      return {
-        ok: false,
-        status: "ERROR",
-        connected: false,
-        message: "La impresora no responde",
-        error: err.message
-      };
-    }
-
-  } catch (error) {
 
     return {
+      ok: true,
+      status: "ONLINE",
+      connected: true,
+      message: "Impresora USB detectada",
+      device
+    };
+
+  } catch (error) {
+    return {
       ok: false,
-      status: "ERROR_SYSTEM",
+      status: "ERROR",
       connected: false,
       message: error.message
     };

@@ -656,7 +656,10 @@ const AdminNegocios: React.FC = () => {
             {/* INFO */}
             <Box flex={1}>
               <Typography fontWeight={600} fontSize={16}>
-                {selectedUsuario?.nit} {selectedUsuario?.nombre}
+               Nit: {selectedUsuario?.nit} 
+              </Typography>
+              <Typography  fontSize={16}>
+               empresa: {selectedUsuario?.nombre}
               </Typography>
             </Box>
 

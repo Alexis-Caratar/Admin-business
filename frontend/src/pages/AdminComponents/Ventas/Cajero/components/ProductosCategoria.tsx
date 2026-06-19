@@ -112,7 +112,6 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
       precio_venta: Number(prod.precio_venta ?? 0),
     });
 
-    toastr.success(`${prod.nombre} agregado`);
   };
 
 
@@ -327,12 +326,12 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                             nombre: prod.nombre,
                             imagen: prod.imagen_plato ?? null,
                             precio_venta: prod.precio_venta,
+                            stock_actual:prod.stock_actual,
                             cantidad: 1,
                             tipo: "plato",
                           };
 
                           onAgregar(plato as any);
-                          toastr.success(`${prod.nombre} agregado`);
                           return;
                         }
 
@@ -372,7 +371,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                       <Tooltip title="Stock disponible actualmente" arrow>
                         <Chip
                           icon={<Inventory2Icon sx={{ fontSize: 14 }} />}
-                          label={prod.stock_actual}
+                          label={String(prod.stock_actual || 999)}
                           size="small"
                           sx={{
                             position: "absolute",
@@ -629,6 +628,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                       nombre: c.nombre,
                       imagenes: c.imagenes[0],
                       precio_venta: c.precio_venta,
+                      stock_actual:c.stock_actual,
                       cantidad: 1,
                       tipo: "extra",
                       parent_id: productoSeleccionado?.id,
@@ -640,6 +640,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                       nombre: productoSeleccionado.nombre,
                       imagenes: productoSeleccionado.imagenes[0],
                       precio_venta: productoSeleccionado.precio_venta,
+                      stock_actual:productoSeleccionado.stock_actual,
                       cantidad: 1,
                       tipo: "plato",
                     };

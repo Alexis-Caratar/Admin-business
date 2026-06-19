@@ -21,6 +21,8 @@ import VentasDetalles from "./components/Estados_dasboard/ventasDetalles";
 import CajaPanel from "./components/Estados_dasboard/CajaPanel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Loader from "../../../../components/Loader";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
 interface AnimItem {
   img: string;
@@ -57,7 +59,6 @@ export const CajeroDashboard: React.FC = () => {
   const [openVentasDetalles, setOpenVentasDetalles] = useState(false);
   const [animItem, setAnimItem] = useState<AnimItem | null>(null);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
-
   const abrirCarrito = () => {
     setOpenCarrito(true);
   };
@@ -155,41 +156,61 @@ const cargarCategorias = async () => {
 };
 
 
-  const getPrecio = (p: Partial<ProductoCajero>) => Number(p.precio_venta ?? 0);
-  const addCart = (p: ProductoCajero) => {
-    const precio = getPrecio(p);
-    setCarrito((prev) => {
-      const existe = prev.find((x) => x.id === p.id);
-      if (existe) {
-        return prev.map((x) =>
-          x.id === p.id ? { ...x, cantidad: x.cantidad + 1 } : x
-        );
-      }
-      return [...prev, { ...p, cantidad: 1, precio_venta: precio }];
-    });
-  };
+ const addCart = (p: ProductoCajero) => {
+  setCarrito((prev) => {
+    const item = prev.find((x) => x.id === p.id);
+    const stock = Number(p.stock_actual ?? 999);
+    const cantidadActual = item?.cantidad ?? 0;
 
-  const sumarCantidad = (id: number) => {
-    setCarrito((prev) =>
-      prev.map((item) =>
+    if (cantidadActual >= stock) {
+      toastr.error(`No hay más unidades disponibles de "${p.nombre}".`);      return prev;
+    }else{
+         toastr.success(`${p.nombre} agregado`);
+
+    }
+
+    if (item) {
+      return prev.map((x) =>
+        x.id === p.id
+          ? { ...x, cantidad: x.cantidad + 1 }
+          : x
+      );
+    }
+    return [...prev, { ...p, cantidad: 1 }];
+  });
+};
+const sumarCantidad = (id: number) => {
+  setCarrito((prev) => {
+    const item = prev.find((x) => x.id === id);
+    if (!item) return prev;
+
+    const stock = Number(item.stock_actual ?? 0);
+
+    if (item.cantidad >= stock) {
+    toastr.error(`No hay más unidades disponibles de "${item.nombre}".`);
+      return prev;
+    }
+
+    return prev.map((x) =>
+      x.id === id
+        ? { ...x, cantidad: x.cantidad + 1 }
+        : x
+    );
+  });
+};
+
+const restarCantidad = (id: number) => {
+  setCarrito((prev) =>
+    prev
+      .map((item) =>
         item.id === id
-          ? { ...item, cantidad: item.cantidad + 1 }
+          ? { ...item, cantidad: item.cantidad - 1 }
           : item
       )
-    );
-  };
+      .filter((item) => item.cantidad > 0)
+  );
+};
 
-  const restarCantidad = (id: number) => {
-    setCarrito((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? { ...item, cantidad: item.cantidad - 1 }
-            : item
-        )
-        .filter((item) => item.cantidad > 0)
-    );
-  };
 
   const removeItem = (id: number) => {
     setCarrito((prev) =>
