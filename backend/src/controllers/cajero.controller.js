@@ -98,7 +98,8 @@ const payloadComanda = {
     nombre: payload.nombre_vendedor
   },
   fecha: datos_negocio.fecha_impresion,
-  nota: payload.nota,                        
+  nota: payload.nota,    
+  venta:payload.venta,                    
   productos: payload.productos
 };
     

@@ -1,5 +1,6 @@
-const escpos = require("@node-escpos/core");
 const USB = require("@node-escpos/usb-adapter");
+const escpos = require("@node-escpos/core");
+
 const printer = require("pdf-to-printer");
 
 const { formatCOP, line, center, twoCols } = require("../utils/formatter");
@@ -8,49 +9,37 @@ const printers = require("../config/printers");
 
 async function getPrinterStatus() {
   try {
-    const device = escpos.USB.findPrinter();
+    const printers = USB.findPrinter();
 
-    if (!device) {
+    if (!printers || printers.length === 0) {
       return {
         ok: false,
         status: "OFFLINE",
         connected: false,
-        message: "No se detectó impresora USB"
+        message: "No se detectó impresora USB",
       };
     }
+
+    const printerInfo = printers[0];
 
     return {
       ok: true,
       status: "ONLINE",
       connected: true,
-      message: "Impresora USB detectada",
-      device
+      vendorId: printerInfo.deviceDescriptor.idVendor,
+      productId: printerInfo.deviceDescriptor.idProduct,
+      message: "Impresora detectada",
     };
-
   } catch (error) {
     return {
       ok: false,
       status: "ERROR",
       connected: false,
-      message: error.message
+      message: error.message,
     };
   }
 }
 
-// Prueba silenciosa para verificar estado sin imprimir realmente
-function testPrintSilencioso(printerName) {
-  return new Promise((resolve, reject) => {
-
-    printer.printDirect({
-      data: Buffer.from("\x1B\x40TEST\n\n"), 
-      printer: printerName,
-      type: "RAW",
-      success: resolve,
-      error: reject
-    });
-
-  });
-}
 
 // Función para imprimir factura
 async function imprimirFactura(data) {
@@ -192,7 +181,7 @@ async function imprimirFactura(data) {
 // Función para imprimir comanda
 async function imprimirComanda(data) {
   
-  const { negocio, mesa, usuario,productos, printerName,fecha,nota } = data;
+  const { negocio, mesa, usuario,productos, printerName,fecha,nota,venta } = data;  
 
   // 🔹 Seleccionar impresora
   const selected = printers[printerName] || printers["caja1"];
@@ -231,6 +220,7 @@ async function imprimirComanda(data) {
 
         // FACTURA
         printer.raw(Buffer.from([0x1B, 0x61, 0x00]));
+        await printer.text(`Factura: ${venta.numero_factura}`);
         await printer.text(`fecha venta: ${fecha}`);
         await printer.text(`Mesero: ${usuario.nombre}`);
         await printer.text(`MESA: ${mesa.nombre}`);

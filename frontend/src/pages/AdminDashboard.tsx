@@ -68,31 +68,46 @@ const AdminDashboard: React.FC = () => {
     };
   }, [navigate]);
 
-  useEffect(() => {
+useEffect(() => {
+  const ws = new WebSocket(import.meta.env.VITE_WS_URL);
 
-    const ws = new WebSocket(
-      import.meta.env.VITE_WS_URL
+  ws.onopen = () => {
+    console.log("WS conectado");
+
+    ws.send(
+      JSON.stringify({
+        tipo: "register_frontend",
+      })
     );
+  };
 
-    ws.onopen = () => {
-      console.log("WS conectado");
-      ws.send(JSON.stringify({ tipo: "register_frontend", }) // registrar frontend
+  ws.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+
+    if (msg.tipo === "printer_status") {
+      console.log("Estado impresora:", msg.payload);
+
+      setPrinterStatus(msg.payload);
+
+      setPrinterConnected(
+        msg.payload?.ok === true &&
+        msg.payload?.connected === true
       );
-    };
+    }
+  };
 
-    ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      if (msg.tipo === "printer_status") {// ESTADO IMPRESORA
-        setPrinterStatus(msg.payload);
-        setPrinterConnected(msg.payload?.connected || false);
-      }
-    };
+  ws.onclose = () => {
+    console.log("WS cerrado");
+    setPrinterConnected(false);
+  };
 
-    ws.onclose = () => { console.log("WS cerrado"); setPrinterConnected(false); };
-    ws.onerror = () => { setPrinterConnected(false); };
-    return () => ws.close();
+  ws.onerror = (err) => {
+    console.error("WS error", err);
+    setPrinterConnected(false);
+  };
 
-  }, []);
+  return () => ws.close();
+}, []);
 
   const cerrarSesion = () => {
     localStorage.clear();
