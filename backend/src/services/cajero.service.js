@@ -538,15 +538,21 @@ SELECT
   ),0)::int AS ingresos,
 
   -- 🔥 VENTAS (solo caja)
-  COALESCE(SUM(
-    CASE 
-      WHEN m.tipo = 'VENTA' 
-      AND m.id_caja = $1
-      THEN m.cantidad 
-      ELSE 0 
-    END
-  ),0)::int AS ventas,
+COALESCE(
+    SUM(
+        CASE
+            WHEN m.tipo = 'VENTA'
+             AND m.id_caja = $1
+            THEN m.cantidad
 
+            WHEN m.tipo = 'ANULACION'
+             AND m.id_caja = $1
+            THEN -m.cantidad
+
+            ELSE 0
+        END
+    ),0
+)::int AS ventas,
   -- 🔥 SALIDAS (globales)
   COALESCE(SUM(
     CASE 
@@ -558,10 +564,25 @@ SELECT
   -- 🔥 CÁLCULO FINAL
   (
     a.stock_sistema
-    + COALESCE(SUM(CASE WHEN m.tipo = 'ENTRADA' THEN m.cantidad ELSE 0 END),0)
-    - COALESCE(SUM(CASE WHEN m.tipo = 'VENTA' AND m.id_caja = $1 THEN m.cantidad ELSE 0 END),0)
-    - COALESCE(SUM(CASE WHEN m.tipo = 'SALIDA' THEN m.cantidad ELSE 0 END),0)
-  )::int AS cierre_sistema
+    + COALESCE(SUM(CASE WHEN m.tipo='ENTRADA' THEN m.cantidad ELSE 0 END),0)
+
+    - COALESCE(
+        SUM(
+            CASE
+                WHEN m.tipo='VENTA'
+                 AND m.id_caja=$1
+                THEN m.cantidad
+
+                WHEN m.tipo='ANULACION'
+                 AND m.id_caja=$1
+                THEN -m.cantidad
+
+                ELSE 0
+            END
+        ),0)
+
+    - COALESCE(SUM(CASE WHEN m.tipo='SALIDA' THEN m.cantidad ELSE 0 END),0)
+)::int AS cierre_sistema
 
 FROM inventario i
 

@@ -1,9 +1,9 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import AdminDashboard from "./pages/AdminDashboard";
+import Home from "./pages/PublicComponents/Home";
+import Login from "./pages/AdminComponents/Login";
+import AdminDashboard from "./pages/AdminComponents/AdminDashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import NotFound from "./pages/NotFound";
 

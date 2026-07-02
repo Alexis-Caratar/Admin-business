@@ -71,6 +71,34 @@ export const authService = {
       throw error;
     }
 
+        const [rolesSistema] = await db.query(
+      `SELECT rs.nombre
+      FROM usuarios_roles_sistema urs
+      INNER JOIN roles_sistema rs
+          ON rs.id = urs.id_rol_sistema
+      WHERE urs.id_usuario = $1
+        AND urs.estado = TRUE`,
+      [user.id]
+    );
+
+    const contextos = [];
+    // Si tiene rol global
+    if (rolesSistema.length > 0) {
+      contextos.push({
+        tipo: "SISTEMA",
+        nombre: "Administración del Sistema",
+        roles: rolesSistema.map(r => r.nombre)
+      });
+    }
+
+    // Siempre agregar el negocio al que pertenece
+    contextos.push({
+      tipo: "NEGOCIO",
+      id_negocio: user.id_negocio,
+      nombre: user.nombre_negocio,
+      imagen: user.imagen_negocio
+    });
+
     const payload = {
       id: user.id,
       id_persona:user.id_persona,
@@ -90,7 +118,7 @@ export const authService = {
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
 
-    return { token, user: payload };
+    return { token, user: payload,contextos };
   },
 
  
