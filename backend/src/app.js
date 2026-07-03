@@ -15,6 +15,8 @@ import ventasRoutes from "./routes/ventas.routes.js";
 import categoriasRouter from "./routes/categorias.routes.js";
 import cajero from "./routes/cajero.routes.js";
 import compras from "./routes/compras.routes.js";
+import ai from "./routes/ai.route.js";
+
 
 
 
@@ -35,6 +37,8 @@ app.use("/api/auth", authRoutes);
 
 // CRUD de usuarios (si quieres que estos SÍ requieran token, los mueves abajo)
 app.use("/api/usuarios", usuariosRoutes);
+//ruta ia
+app.use("/api/ai",   ai);
 
 // ---------------------------
 //  RUTAS PROTEGIDAS
