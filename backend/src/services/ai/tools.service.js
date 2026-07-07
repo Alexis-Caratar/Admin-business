@@ -1,36 +1,51 @@
-import {db  } from "../../config/db.js";
+import { pool } from "../../config/db.js";
 
 export const tools = {
 
-    obtenerHora: async () => {
+    obtenerFechaHora: {
+        tipo: "texto",
+        titulo: "Fecha y hora",
+        useAI: false,
 
-        return {
-            hora: new Date().toLocaleTimeString("es-CO"),
-        };
+        execute: async () => {
 
-    },
+            return { fecha: new Date().toLocaleDateString("es-CO"), hora: new Date().toLocaleTimeString("es-CO") };
+        },
 
-    obtenerFecha: async () => {
-
-        return {
-            fecha: new Date().toLocaleDateString("es-CO"),
-        };
+        format(data) { return `Hoy es ${data.fecha} y la hora actual es ${data.hora}.`; }
 
     },
 
-    obtenerVentasHoy: async () => {
+    obtenerVentasHoy: {
+        tipo: "tarjetas",
+        titulo: "Ventas de hoy",
+        useAI: false,
 
-        const sql = `
+        execute: async () => {
+
+            const sql = `
             SELECT
-                COALESCE(SUM(total),0) AS total
+                COUNT(*)::int AS cantidad,
+                COALESCE(SUM(total), 0) AS total
             FROM ventas
-            WHERE estado='activa'
-            AND DATE(fecha)=CURRENT_DATE
+            WHERE estado = 'activa'
+            AND DATE(fecha) = CURRENT_DATE
         `;
 
-        const { rows } = await db.query(sql);
+            const { rows } = await pool.query(sql);
 
-        return rows[0];
+            return {
+                resumen: {
+                    cantidad: rows[0].cantidad,
+                    total: Number(rows[0].total)
+                }
+            };
+
+        },
+
+        format(data) {
+            return `Hoy llevas ${data.resumen.cantidad} venta(s) por un total de $${data.resumen.total.toLocaleString("es-CO")}.`;
+        }
 
     },
 
@@ -52,27 +67,66 @@ export const tools = {
 
     },
 
-    obtenerInventario: async ({ nombre }) => {
+    obtenerInventario: {
+        tipo: "tabla",
+        titulo: "Inventario",
+        useAI: false,
 
-        const sql = `
+        execute: async (params = {}) => {
+
+            const { nombre = "" } = params;
+
+            let sql = `
             SELECT
                 id,
                 nombre,
                 stock_actual
             FROM inventario
-            WHERE nombre ILIKE $1
-            LIMIT 20
         `;
 
-        const { rows } = await db.query(sql, [`%${nombre}%`]);
+            const values = [];
 
-        return rows;
+            if (nombre) {
+                sql += ` WHERE nombre ILIKE $1`;
+                values.push(`%${nombre}%`);
+            }
+
+            sql += ` ORDER BY nombre LIMIT 20`;
+
+            const { rows } = await pool.query(sql, values);
+
+            return {
+                resumen: {
+                    total: rows.length
+                },
+                productos: rows
+            };
+
+        },
+
+        format(data) {
+
+            if (data.resumen.total === 0) {
+                return "No se encontraron productos en el inventario.";
+            }
+
+            if (data.resumen.total === 1) {
+                return "Se encontró 1 producto en el inventario.";
+            }
+
+            return `Se encontraron ${data.resumen.total} productos en el inventario.`;
+
+        }
 
     },
 
-    obtenerMesas: async () => {
+    obtenerMesas: {
+        tipo: "texto",
+        titulo: "Estado de las mesas",
+        useAI: false,
+        execute: async () => {
 
-        const sql = `
+            const sql = `
             SELECT
                 id,
                 nombre,
@@ -81,44 +135,22 @@ export const tools = {
             ORDER BY nombre
         `;
 
-        const { rows } = await db.query(sql);
+            const { rows } = await pool.query(sql);
 
-        return rows;
+            return {
+                total: rows.length,
+                ocupadas: rows.filter(x => x.estado === "Ocupada").length,
+                disponibles: rows.filter(x => x.estado === "Disponible").length,
+                mesas: rows
+            };
 
-    },
+        },
 
-    obtenerMesasOcupadas: async () => {
+        format(data) {
 
-        const sql = `
-            SELECT
-                id,
-                nombre,
-                estado
-            FROM mesas
-            WHERE estado='Ocupada'
-            ORDER BY nombre
-        `;
+            return `Actualmente tienes ${data.total} mesas registradas. ${data.ocupadas} están ocupadas y ${data.disponibles} disponibles.`;
 
-        const { rows } = await db.query(sql);
-
-        return rows;
-
-    },
-    obtenerMesasDisponibles: async () => {
-
-        const sql = `
-            SELECT
-                id,
-                nombre,
-                estado
-            FROM mesas
-            WHERE estado='Disponible'
-            ORDER BY nombre
-        `;
-
-        const { rows } = await db.query(sql);
-
-        return rows;
+        }
 
     },
 

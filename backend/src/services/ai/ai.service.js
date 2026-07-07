@@ -1,34 +1,63 @@
-import { preguntarGemini } from "./gemini/gemini.service.js";
+import dotenv from "dotenv";
+
 import { detectarIntent } from "./intent.router.js";
+import { preguntarGemini } from "./gemini/gemini.service.js";
 import { tools } from "./tools.service.js";
 
-import dotenv from "dotenv";
 dotenv.config();
 
 export const preguntarIA = async (mensaje) => {
 
-    const proveedor = process.env.AI_PROVIDER;
+    const intent = detectarIntent(mensaje);
 
-    switch (proveedor) {
+    // Preguntas generales → IA
+    if (intent.tipo === "ia") {
 
-        case "gemini":
-           // 1. detectar intención
-                const intent = detectarIntent(mensaje);
-                let data = null;
-                // 2. ejecutar tool si existe intención
-                if (intent && tools[intent]) {
-                    data = await tools[intent]();
-                }
-                // 3. mandar a Gemini con o sin contexto
-                const respuesta = await preguntarGemini(mensaje, data);
-                console.log("Respuesta de Gemini:", respuesta);
-                return respuesta;
+        return {
+            ok: true,
+            tipo: "texto",
+            mensaje: await preguntarGemini(mensaje),
+            data: null
+        };
 
-        case "openai":
-         //   return await preguntarOpenAI(mensaje);
-
-        default:
-            throw new Error("Proveedor de IA no configurado.");
     }
+
+    const tool = tools[intent.tool];
+
+    if (!tool) {
+
+        return {
+            ok: false,
+            tipo: "error",
+            mensaje: "No existe la herramienta solicitada.",
+            data: null
+        };
+
+    }
+
+    const resultado = await tool.execute(intent.params);
+
+    // Herramientas que responden directamente
+    if (!tool.useAI) {
+
+        return {
+            ok: true,
+            tipo: tool.tipo ?? "texto",
+            titulo: tool.titulo ?? "",
+            mensaje: tool.format(resultado, intent),
+            data: resultado
+        };
+
+    }
+
+    // Herramientas que necesitan interpretación de la IA
+    const respuestaIA = await preguntarGemini(mensaje, resultado);
+
+    return {
+        ok: true,
+        tipo: "texto",
+        mensaje: respuestaIA,
+        data: resultado
+    };
 
 };
