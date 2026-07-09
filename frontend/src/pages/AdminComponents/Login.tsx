@@ -203,7 +203,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   },
                 }}
               >
-                Sign Up
+                login
               </Button>
             </form>
           </Box>

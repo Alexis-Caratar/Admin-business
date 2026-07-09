@@ -5,7 +5,7 @@ import {
   actualizarNegocio,
   eliminarNegocio,
 } from "../../../api/negocios";
-import type { Negocio} from "../../../types";
+import type { Negocio } from "../../../types";
 import Swal from "sweetalert2";
 
 import {
@@ -29,9 +29,11 @@ import {
   CircularProgress,
   Checkbox,
   Tooltip,
+  Paper,
+  Chip,
 } from "@mui/material";
 
-import {asignarMenuEmpresa, getMenusempresaTotal,getMenusEmpresa} from "../../../api/negocios";
+import { asignarMenuEmpresa, getMenusempresaTotal, getMenusEmpresa } from "../../../api/negocios";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -51,7 +53,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import AdminUsuarios from "../Usuarios/AdminUsuarios";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
-
+import SettingsIcon from "@mui/icons-material/Settings";
 
 const AdminNegocios: React.FC = () => {
   const [negocios, setNegocios] = useState<Negocio[]>([]);
@@ -59,14 +61,17 @@ const AdminNegocios: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  
-    const [selectedUsuario, setSelectedUsuario] = useState<Negocio | null>(null);
-    const [loadingPermisos, setLoadingPermisos] = useState(false);
-    const [savingPermisos, setSavingPermisos] = useState(false);
-    const [openPermisos, setOpenPermisos] = useState(false);
-    const [menusNegocio, setMenusNegocio] = useState<{ id: number; nombre: string, icono: string, url: string }[]>([]);
-    const [menusUsuario, setMenusUsuario] = useState<number[]>([]);
-    const [openUsuarios, setOpenUsuarios] = useState(false);
+
+  const [selectedUsuario, setSelectedUsuario] = useState<Negocio | null>(null);
+  const [loadingPermisos, setLoadingPermisos] = useState(false);
+  const [savingPermisos, setSavingPermisos] = useState(false);
+  const [openPermisos, setOpenPermisos] = useState(false);
+  const [menusNegocio, setMenusNegocio] = useState<{ id: number; nombre: string, icono: string, url: string }[]>([]);
+  const [menusUsuario, setMenusUsuario] = useState<number[]>([]);
+  const [openUsuarios, setOpenUsuarios] = useState(false);
+  const [negocioSeleccionado, setNegocioSeleccionado] =
+    useState<Negocio | null>(null);
+
   const tiposNegocio = [
     "Restaurante",
     "Cafetería",
@@ -74,7 +79,7 @@ const AdminNegocios: React.FC = () => {
     "Tienda",
     "Supermercado",
     "Panadería",
-    "Comida rápida",
+    "Comida rápidas",
     "Servicios",
     "Otros",
   ];
@@ -202,351 +207,822 @@ const AdminNegocios: React.FC = () => {
     }
   };
 
-    const handlePermisos = async (n: Negocio) => {
-      setSelectedUsuario(n);
-      setLoadingPermisos(true);
-      setOpenPermisos(true);
-  
-      try {
-        const [allMenus, userMenus] = await Promise.all([
-          getMenusempresaTotal(),    // tu API que trae todos los menús del negocio
-          getMenusEmpresa(n.id||0), // tu API que trae los menús que tiene el usuario
-        ]);
-  
-        setMenusNegocio(allMenus);
-        setMenusUsuario(userMenus.map((m: any) => m.id));
-      } catch (err) {
-        console.error(err);
-        Swal.fire("Error", "No se pudieron cargar los permisos", "error");
-      } finally {
-        setLoadingPermisos(false);
-      }
-    };
-  
+  const handlePermisos = async (n: Negocio) => {
+    setSelectedUsuario(n);
+    setLoadingPermisos(true);
+    setOpenPermisos(true);
 
-      const toggleMenuUsuario = (idMenu: number) => {
+    try {
+      const [allMenus, userMenus] = await Promise.all([
+        getMenusempresaTotal(),    // tu API que trae todos los menús del negocio
+        getMenusEmpresa(n.id || 0), // tu API que trae los menús que tiene el usuario
+      ]);
+
+      setMenusNegocio(allMenus);
+      setMenusUsuario(userMenus.map((m: any) => m.id));
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "No se pudieron cargar los permisos", "error");
+    } finally {
+      setLoadingPermisos(false);
+    }
+  };
+
+
+  const toggleMenuUsuario = (idMenu: number) => {
     setMenusUsuario(prev =>
       prev.includes(idMenu) ? prev.filter(m => m !== idMenu) : [...prev, idMenu]
     );
   };
 
-    const savePermisos = async () => {
-      if (!selectedUsuario) return;
-      setSavingPermisos(true);
-      try {
-        await asignarMenuEmpresa(selectedUsuario.id||0, menusUsuario); // tu API para guardar permisos
-        Swal.fire("Éxito", "Permisos actualizados", "success");
-        setOpenPermisos(false);
-      } catch (err) {
-        console.error(err);
-        Swal.fire("Error", "No se pudieron guardar los permisos", "error");
-      } finally {
-        setSavingPermisos(false);
-      }
-    };
-  
+  const savePermisos = async () => {
+    if (!selectedUsuario) return;
+    setSavingPermisos(true);
+    try {
+      await asignarMenuEmpresa(selectedUsuario.id || 0, menusUsuario); // tu API para guardar permisos
+      Swal.fire("Éxito", "Permisos actualizados", "success");
+      setOpenPermisos(false);
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "No se pudieron guardar los permisos", "error");
+    } finally {
+      setSavingPermisos(false);
+    }
+  };
+
+  const handleUsuarios = (negocio: Negocio) => {
+    setNegocioSeleccionado(negocio);
+    setOpenUsuarios(true);
+  };
 
   return (
     <>
-    <Box p={3}>
-      {/* HEADER */}
-      {/* HEADER */}
-      {/* HEADER */}
-      <Box mb={3}>
+      <Box p={3}>
+        {/* HEADER */}
+        {/* HEADER */}
+        {/* HEADER */}
+        <Box mb={3}>
 
-        {/* FILA 1: TÍTULO CENTRADO + BOTÓN DERECHA */}
         <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          mb={2}
+    sx={{
+      mb: 3,
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      alignItems: { xs: "flex-start", md: "center" },
+      justifyContent: "space-between",
+      gap: 2,
+    }}
+  >
+    {/* IZQUIERDA */}
+    <Box
+      display="flex"
+      alignItems="center"
+      gap={2}
+    >
+      <Avatar
+        sx={{
+          width: 54,
+          height: 54,
+          bgcolor: "#EFF6FF",
+          color: "#2563EB",
+        }}
+      >
+        <StoreIcon fontSize="medium" />
+      </Avatar>
+
+      <Box>
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          color="#0F172A"
+          lineHeight={1.2}
         >
-          {/* ESPACIO VACÍO PARA QUE EL TÍTULO QUEDE CENTRADO */}
+          Administración de Negocios
+        </Typography>
 
-
-          {/* TÍTULO Izquierda */}
-          <Typography
-            variant="h5"
-            fontWeight={600}
-            textAlign="left"
-            flex={1}
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-          >
-            <StoreIcon sx={{ fontSize: 30 }} />
-            Administración de Negocios
-          </Typography>
-
-          <Box width="240px" />
-          {/* BOTÓN DERECHA */}
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddBusinessIcon />}
-            onClick={openCreateModal}
-            sx={{ height: 38 }}
-          >
-            Agregar Negocio
-          </Button>
-        </Box>
-
-        {/* FILA 2: BUSCADOR ABAJO A LA IZQUIERDA */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            background: "#f1f3f4",
-            px: 1.5,
-            borderRadius: 5,
-            width: "460px",
-            height: 36,
-            boxShadow: "inset 0 0 4px rgba(0,0,0,0.1)",
-          }}
+        <Typography
+          variant="body2"
+          color="#64748B"
         >
-          <SearchIcon sx={{ opacity: 0.6, fontSize: 20, mr: 1 }} />
-          <TextField
-            variant="standard"
-            placeholder="Buscar..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              disableUnderline: true,
-              style: { fontSize: 14 },
-            }}
-            fullWidth
-          />
-        </Box>
-
+          Administre la información, configuración y estado de los negocios registrados.
+        </Typography>
       </Box>
+    </Box>
 
-      {/* GRID DE TARJETAS */}
-      <Box display="flex" flexWrap="wrap" gap={3}>
-        {negociosPaginated.map((n) => (
-          <Box
-            key={n.id}
-            flex="1 1 calc(100% - 24px)" // xs: 1 por fila
-            sx={{
-              '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' },  // sm: 2 por fila
-              '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 24px)' }, // md: 3 por fila
-              '@media (min-width:1200px)': { flex: '1 1 calc(25% - 24px)' },  // lg: 4 por fila
-              maxWidth: 350, // opcional: ancho máximo de la tarjeta
-            }}
-          >
-            <Card
+    {/* DERECHA */}
+    <Button
+      variant="contained"
+      startIcon={<AddBusinessIcon />}
+      onClick={openCreateModal}
+      sx={{
+        height: 46,
+        px: 3,
+        borderRadius: 3,
+        textTransform: "none",
+        fontWeight: 600,
+        boxShadow: "none",
+        minWidth: { xs: "100%", sm: 220 },
+
+        "&:hover": {
+          boxShadow: "0 8px 20px rgba(37,99,235,.18)",
+        },
+      }}
+    >
+      Agregar negocio
+    </Button>
+        </Box>
+
+        <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      width: {
+        xs: "100%",
+        sm: 320,
+        md: 420,
+        lg: 460,
+      },
+      height: 44,
+      px: 2,
+      borderRadius: 3,
+      bgcolor: "#FFFFFF",
+      border: "1px solid #E2E8F0",
+      boxShadow: "0 2px 10px rgba(15,23,42,.04)",
+      transition: ".25s",
+
+      "&:hover": {
+        borderColor: "#93C5FD",
+        boxShadow: "0 6px 18px rgba(37,99,235,.08)",
+      },
+
+      "&:focus-within": {
+        borderColor: "#2563EB",
+        boxShadow: "0 0 0 4px rgba(37,99,235,.08)",
+      },
+    }}
+  >
+    <SearchIcon
+      sx={{
+        color: "#64748B",
+        fontSize: 20,
+        mr: 1.5,
+      }}
+    />
+
+    <TextField
+      variant="standard"
+      placeholder="Buscar negocio..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      fullWidth
+      InputProps={{
+        disableUnderline: true,
+        sx: {
+          fontSize: 14,
+          color: "#0F172A",
+
+          "& input::placeholder": {
+            color: "#94A3B8",
+            opacity: 1,
+          },
+        },
+      }}
+    />
+        </Box>
+        </Box>
+
+        {/* GRID DE TARJETAS */}
+        <Box display="flex" flexWrap="wrap" gap={3}>
+          {negociosPaginated.map((n) => (
+            <Box
+              key={n.id}
+              flex="1 1 calc(100% - 24px)" // xs: 1 por fila
               sx={{
-                height: "100%",
-                borderRadius: "20px",
-                overflow: "hidden",
-                bgcolor: "#fff",
-                border: "1px solid rgba(15,23,42,0.06)",
-                boxShadow: "0 6px 18px rgba(15,23,42,0.06)",
-                display: "flex",
-                flexDirection: "column",
-                transition: "0.25s ease",
-
-                "&:hover": {
-                  transform: "translateY(-4px)",
-                  boxShadow: "0 14px 30px rgba(15,23,42,0.12)",
-                },
+                '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' },  // sm: 2 por fila
+                '@media (min-width:900px)': { flex: '1 1 calc(33.33% - 24px)' }, // md: 3 por fila
+                '@media (min-width:1200px)': { flex: '1 1 calc(25% - 24px)' },  // lg: 4 por fila
+                maxWidth: 350, // opcional: ancho máximo de la tarjeta
               }}
             >
-              {/* IMAGE */}
-              <CardMedia
-                component="img"
-                height="120"
-                image={
-                  n.imagen ||
-                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQde1Zuns3SWsvZyR31zNW6hWWyf8N20bmBFA&s"
-                }
-                alt={n.nombre}
+              <Card
                 sx={{
-                  objectFit: "cover",
-                }}
-              />
-
-              <CardContent sx={{ py: 1.5, px: 2, flex: 1 }}>
-                {/* TITLE */}
-                <Typography
-                  fontWeight={800}
-                  fontSize={14}
-                  noWrap
-                  sx={{ color: "#0f172a" }}
-                >
-                  {n.nombre}
-                </Typography>
-
-                {/* DESCRIPTION */}
-                <Typography
-                  fontSize={12}
-                  color="text.secondary"
-                  sx={{
-                    mt: 0.5,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    minHeight: 32, // 🔥 elimina espacio raro abajo
-                  }}
-                >
-                  {n.descripcion || "Sin descripción"}
-                </Typography>
-
-                {/* INFO */}
-                <Box mt={1}>
-                  <Typography fontSize={11} color="text.secondary">
-                    📍 {n.direccion}
-                  </Typography>
-
-                  <Typography fontSize={11} color="text.secondary">
-                    📞 {n.telefono}
-                  </Typography>
-                </Box>
-              </CardContent>
-
-              {/* ACTIONS */}
-              <Box
-                sx={{
-                  px: 1,
-                  pb: 1,
+                  height: "100%",
+                  borderRadius: "20px",
+                  overflow: "hidden",
+                  bgcolor: "#fff",
+                  border: "1px solid rgba(15,23,42,0.06)",
+                  boxShadow: "0 6px 18px rgba(15,23,42,0.06)",
                   display: "flex",
-                  justifyContent: "flex-end",
-                  gap: 0.5,
+                  flexDirection: "column",
+                  transition: "0.25s ease",
+
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 14px 30px rgba(15,23,42,0.12)",
+                  },
                 }}
               >
-                <IconButton
-                  size="small"
-                  sx={{ bgcolor: "#eff6ff" }}
-                  onClick={() => openEditModal(n)}
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
-
-                <IconButton
-                  size="small"
-                  sx={{ bgcolor: "#fef2f2" }}
-                  onClick={() => handleDelete(n.id)}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-
-                  <IconButton
-                sx={{
-                  bgcolor: "#f5f3ff",
-                  "&:hover": { bgcolor: "#ede9fe" },
-                }}
-                onClick={() => handlePermisos(n)}
-              >
-                <MenuBookIcon fontSize="small" color="success" />
-              </IconButton>
-
-            <Tooltip title="Usuarios" arrow>
-              <IconButton
-                onClick={() => setOpenUsuarios(true)}
-                 size="small"
-                  sx={{ bgcolor: "#9dc1db" }}
-              >
-                <PeopleAltOutlinedIcon
+                {/* IMAGE */}
+                <CardMedia
+                  component="img"
+                  height="120"
+                  image={
+                    n.imagen ||
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQde1Zuns3SWsvZyR31zNW6hWWyf8N20bmBFA&s"
+                  }
+                  alt={n.nombre}
                   sx={{
-                    color: "#000000",
-                    fontSize: 24,
+                    objectFit: "cover",
                   }}
                 />
-              </IconButton>
-            </Tooltip>
 
-              </Box>
-            </Card>
-          </Box>
-        ))}
-      </Box>
+                <CardContent sx={{ py: 1.5, px: 2, flex: 1 }}>
+                  {/* TITLE */}
+                  <Typography
+                    fontWeight={800}
+                    fontSize={14}
+                    noWrap
+                    sx={{ color: "#0f172a" }}
+                  >
+                    {n.nombre}
+                  </Typography>
 
-      {/* PAGINACIÓN */}
+                  {/* DESCRIPTION */}
+                  <Typography
+                    fontSize={12}
+                    color="text.secondary"
+                    sx={{
+                      mt: 0.5,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      minHeight: 32, // 🔥 elimina espacio raro abajo
+                    }}
+                  >
+                    {n.descripcion || "Sin descripción"}
+                  </Typography>
 
-      {totalPages > 1 && (
-        <Stack alignItems="center" mt={3}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={(_, value) => setPage(value)}
-            color="primary"
-            shape="rounded"
+                  {/* INFO */}
+                  <Box mt={1}>
+                    <Typography fontSize={11} color="text.secondary">
+                      📍 {n.direccion}
+                    </Typography>
 
-            size={isMobile ? "small" : "medium"}   // 👈 más compacto en móvil
+                    <Typography fontSize={11} color="text.secondary">
+                      📞 {n.telefono}
+                    </Typography>
+                  </Box>
+                </CardContent>
 
-            siblingCount={isMobile ? 0 : 1}        // 👈 menos botones en móvil
-            boundaryCount={isMobile ? 1 : 2}
+                {/* ACTIONS */}
+                <Box
+                  sx={{
+                    px: 1,
+                    pb: 1,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 0.5,
+                  }}
+                >
+                  <Tooltip title="Editar negocio" arrow>
+                    <IconButton
+                      onClick={() => openEditModal(n)}
+                      sx={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 3,
+                        bgcolor: "#FFFFFF",
+                        color: "#2563EB",
+                        border: "1px solid #E2E8F0",
+                        transition: "all .25s ease",
 
-            showFirstButton={!isMobile}            // 👈 ocultar en móvil
-            showLastButton={!isMobile}
+                        "&:hover": {
+                          bgcolor: "#2563EB",
+                          color: "#FFF",
+                          borderColor: "#2563EB",
+                          boxShadow: "0 12px 24px rgba(37,99,235,.20)",
+                          transform: "translateY(-3px)",
+                        },
+                      }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Eliminar negocio" arrow>
+                    <IconButton
+                      onClick={() => handleDelete(n.id)}
+                      sx={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 3,
+                        bgcolor: "#FFFFFF",
+                        color: "#EF4444",
+                        border: "1px solid #E2E8F0",
+                        transition: "all .25s ease",
 
-          />
-        </Stack>
-      )}
+                        "&:hover": {
+                          bgcolor: "#EF4444",
+                          color: "#FFF",
+                          borderColor: "#EF4444",
+                          boxShadow: "0 12px 24px rgba(239,68,68,.20)",
+                          transform: "translateY(-3px)",
+                        },
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Permisos y módulos" arrow>
+                    <IconButton
+                      onClick={() => handlePermisos(n)}
+                      sx={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 3,
+                        bgcolor: "#FFFFFF",
+                        color: "#10B981",
+                        border: "1px solid #E2E8F0",
+                        transition: "all .25s ease",
 
-      {/* MODAL */}
+                        "&:hover": {
+                          bgcolor: "#10B981",
+                          color: "#FFF",
+                          borderColor: "#10B981",
+                          boxShadow: "0 12px 24px rgba(16,185,129,.20)",
+                          transform: "translateY(-3px)",
+                        },
+                      }}
+                    >
+                      <MenuBookIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Usuarios del negocio" arrow>
+                    <IconButton
+                      onClick={() => handleUsuarios(n)}
+                      sx={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 3,
+                        bgcolor: "#FFFFFF",
+                        color: "#0EA5E9",
+                        border: "1px solid #E2E8F0",
+                        transition: "all .25s ease",
 
-      <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="md">
-        <DialogTitle sx={{ fontWeight: 500, display: "flex", alignItems: "center", gap: 1 }}>
-          <BusinessIcon />
-          {editingId ? "Editar Negocio" : "Crear Negocio"}
-        </DialogTitle>
+                        "&:hover": {
+                          bgcolor: "#0EA5E9",
+                          color: "#FFF",
+                          borderColor: "#0EA5E9",
+                          boxShadow: "0 12px 24px rgba(14,165,233,.20)",
+                          transform: "translateY(-3px)",
+                        },
+                      }}
+                    >
+                      <PeopleAltOutlinedIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
 
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 3 }}>
-          <Box display="flex" flexWrap="wrap" gap={2}>
-            {/* Primera columna */}
-            <Box flex="1 1 45%" minWidth={250}>
-              <TextField
-                label="NIT"
-                value={form.nit}
-                onChange={(e) => setForm({ ...form, nit: e.target.value })}
-                fullWidth
-                InputProps={{ startAdornment: <BusinessIcon sx={{ mr: 1 }} /> }}
-                sx={{ mt: 2 }} // <--- aumenta un poquito el margen superior
-              />
-              <TextField
-                label="Nombre"
-                value={form.nombre}
-                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                fullWidth
-                InputProps={{ startAdornment: <ApartmentIcon sx={{ mr: 1 }} /> }}
-                sx={{ mt: 1 }}
-              />
-              <TextField
-                label="Dirección"
-                value={form.direccion}
-                onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-                fullWidth
-                sx={{ mt: 1 }}
-                InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
-              />
-              <TextField
-                label="Ciudad"
-                value={form.ciudad}
-                onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
-                fullWidth
-                sx={{ mt: 1 }}
-                InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
-              />
-              <TextField
-                label="Teléfono"
-                value={form.telefono}
-                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                fullWidth
-                sx={{ mt: 1 }}
-                InputProps={{ startAdornment: <PhoneIcon sx={{ mr: 1 }} /> }}
-              />
+                </Box>
+              </Card>
             </Box>
+          ))}
+        </Box>
 
-            {/* Segunda columna */}
-            <Box flex="1 1 45%" minWidth={250}>
-              <TextField
-                label="Correo Electrónico"
-                value={form.correo}
-                onChange={(e) => setForm({ ...form, correo: e.target.value })}
-                fullWidth
-                sx={{ mt: 2 }}
-                InputProps={{ startAdornment: <EmailIcon sx={{ mr: 1 }} /> }}
-              />
-              <Box display="flex" gap={2}>
+        {/* PAGINACIÓN */}
+
+        {totalPages > 1 && (
+          <Stack alignItems="center" mt={3}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+              color="primary"
+              shape="rounded"
+
+              size={isMobile ? "small" : "medium"}   // 👈 más compacto en móvil
+
+              siblingCount={isMobile ? 0 : 1}        // 👈 menos botones en móvil
+              boundaryCount={isMobile ? 1 : 2}
+
+              showFirstButton={!isMobile}            // 👈 ocultar en móvil
+              showLastButton={!isMobile}
+
+            />
+          </Stack>
+        )}
+
+        {/* MODAL EDITAR ADICIONAR */}
+
+        <Dialog
+          open={isModalOpen}
+          onClose={closeModal}
+          fullWidth
+          maxWidth="lg"
+          PaperProps={{
+            sx: {
+              borderRadius: 5,
+              overflow: "hidden",
+              boxShadow: "0 18px 45px rgba(15,23,42,.12)",
+              bgcolor: "#F8FAFC",
+            },
+          }}
+        >
+          <DialogTitle sx={{ p: 0 }}>
+            <Box
+              sx={{
+                background: "linear-gradient(135deg,#F8FAFC,#EEF6FF)",
+                borderBottom: "1px solid #E2E8F0",
+                px: { xs: 2, sm: 3, md: 4 },
+                py: { xs: 2, md: 2.5 },
+
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 2,
+              }}
+            >
+              {/* INFORMACIÓN */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: { xs: 1.5, md: 2.5 },
+                  flex: 1,
+                  minWidth: 0,
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: { xs: 46, md: 58 },
+                    height: { xs: 46, md: 58 },
+                    bgcolor: "#DBEAFE",
+                    color: "#2563EB",
+                    boxShadow: "0 6px 16px rgba(37,99,235,.10)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <BusinessIcon
+                    sx={{
+                      fontSize: { xs: 24, md: 30 },
+                    }}
+                  />
+                </Avatar>
+
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: {
+                        xs: 18,
+                        sm: 20,
+                        md: 22,
+                      },
+                      fontWeight: 700,
+                      color: "#0F172A",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {editingId ? "Editar negocio" : "Nuevo negocio"}
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 0.5,
+                      fontSize: {
+                        xs: 12,
+                        md: 13,
+                      },
+                      color: "#64748B",
+                      lineHeight: 1.4,
+
+                      display: {
+                        xs: "none",
+                        sm: "block",
+                      },
+                    }}
+                  >
+                    Complete la información del establecimiento para continuar.
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* BOTÓN CERRAR */}
+              <IconButton
+                onClick={closeModal}
+                sx={{
+                  width: { xs: 38, md: 42 },
+                  height: { xs: 38, md: 42 },
+                  bgcolor: "#FFFFFF",
+                  color: "#64748B",
+                  border: "1px solid #E2E8F0",
+                  flexShrink: 0,
+
+                  transition: ".25s",
+
+                  "&:hover": {
+                    bgcolor: "#F1F5F9",
+                    color: "#0F172A",
+                    transform: "rotate(90deg)",
+                  },
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </DialogTitle>
+
+          <DialogContent
+            sx={{
+              bgcolor: "#F8FAFC",
+              p: 4
+            }}
+          >
+
+            <Box
+              display="grid"
+              gridTemplateColumns={{
+                xs: "1fr",
+                lg: "1fr 1fr"
+              }}
+              gap={3}
+            >
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: 4,
+                  border: "1px solid #E2E8F0",
+                  background: "#FFFFFF"
+                }}
+              >
+
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                  mb={1}
+                >
+
+                  <BusinessIcon color="primary" />
+
+                  <Typography
+                    fontWeight={700}
+                    fontSize={17}
+                  >
+
+                    Información General
+
+                  </Typography>
+
+                </Box>
+
+                <TextField
+                  label="NIT"
+                  value={form.nit}
+                  onChange={(e) => setForm({ ...form, nit: e.target.value })}
+                  fullWidth
+                  InputProps={{ startAdornment: <BusinessIcon sx={{ mr: 1 }} /> }}
+                 sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                />
+                <TextField
+                  label="Nombre"
+                  value={form.nombre}
+                  onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                  fullWidth
+                  InputProps={{ startAdornment: <ApartmentIcon sx={{ mr: 1 }} /> }}
+                  sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
+                />
+                <TextField
+                  label="Dirección"
+                  value={form.direccion}
+                  onChange={(e) => setForm({ ...form, direccion: e.target.value })}
+                  fullWidth
+                   sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
+                  InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
+                />
+                <TextField
+                  label="Ciudad"
+                  value={form.ciudad}
+                  onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
+                  fullWidth
+                   sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
+                  InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1 }} /> }}
+                />
+              </Paper>
+
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: 4,
+                  border: "1px solid #E2E8F0",
+                  background: "#FFFFFF"
+                }}
+              >
+
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                  mb={1}
+                >
+
+                  <PhoneIcon color="success" />
+
+                  <Typography
+                    fontWeight={700}
+                    fontSize={17}
+                  >
+
+                    Información de contacto
+
+                  </Typography>
+
+
+                </Box>
+
+                <TextField
+                  label="Correo Electrónico"
+                  value={form.correo}
+                  onChange={(e) => setForm({ ...form, correo: e.target.value })}
+                  fullWidth
+                  sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
+                  InputProps={{ startAdornment: <EmailIcon sx={{ mr: 1 }} /> }}
+                />
+                <TextField
+                  label="Teléfono"
+                  value={form.telefono}
+                  onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                  fullWidth
+                   sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
+                  InputProps={{ startAdornment: <PhoneIcon sx={{ mr: 1 }} /> }}
+                />
+              </Paper>
+
+              <Paper
+                elevation={0}
+                sx={{
+                  mt: 0,
+                  p: 2,
+                  borderRadius: 4,
+                  border: "1px solid #E2E8F0"
+                }}
+              >
+
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                  mb={1}
+                >
+
+                  <SettingsIcon color="warning" />
+
+                  <Typography
+                    fontWeight={700}
+                    fontSize={17}
+                  >
+
+                    Configuración
+
+                  </Typography>
+
+                </Box>
+
+                <TextField
+                  select
+                  label="Tipo de negocio"
+                  value={form.tipo}
+                  onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+                  fullWidth
+                   sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
+                  InputProps={{ startAdornment: <CategoryIcon sx={{ mr: 1 }} /> }}
+                >
+                  {tiposNegocio.map((tipo) => (
+                    <MenuItem key={tipo} value={tipo}>
+                      {tipo}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+
                 <TextField
                   label="Hora Apertura"
                   type="time"
@@ -554,6 +1030,24 @@ const AdminNegocios: React.FC = () => {
                   onChange={(e) => setForm({ ...form, hora_apertura: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
+                   sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
                 />
                 <TextField
                   label="Hora Cierre"
@@ -562,70 +1056,274 @@ const AdminNegocios: React.FC = () => {
                   onChange={(e) => setForm({ ...form, hora_cierre: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
+                   sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
                 />
+
+                <TextField
+                  label="URL Imagen"
+                  value={form.imagen}
+                  onChange={(e) => setForm({ ...form, imagen: e.target.value })}
+                  fullWidth
+                   sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
+                  InputProps={{ startAdornment: <ImageIcon sx={{ mr: 1 }} /> }}
+                />
+              </Paper>
+
+              <Paper
+                elevation={0}
+                sx={{
+                  mt: 0,
+                  p: 2,
+                  borderRadius: 4,
+                  border: "1px solid #E2E8F0"
+                }}
+              >
+
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                  mb={1}
+                >
+
+                  <DescriptionIcon color="info" />
+
+                  <Typography
+                    fontWeight={700}
+                  >
+
+                    Descripción
+
+                  </Typography>
+
+                </Box>
+                {/* Descripción */}
+                <TextField
+                  label="Descripción"
+                  multiline
+                  rows={3}
+                  value={form.descripcion}
+                  onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                  fullWidth
+                   sx={{
+                  mt: 1,
+                  "& .MuiOutlinedInput-root": {
+                    minHeight: 42, // antes ~56px
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    fontSize: 13,
+                    "& fieldset": {borderColor: "#E2E8F0",},
+                    "&:hover fieldset": {borderColor: "#93C5FD",},
+                    "&.Mui-focused fieldset": {borderColor: "#2563EB",borderWidth: 2,},
+                    "& input": {padding: "10px 14px",},},
+                  "& .MuiInputLabel-root": {fontSize: 13,},
+                  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                    fontSize: 18,
+                    color: "#64748B",
+                  },
+                }}
+                
+                  InputProps={{ startAdornment: <DescriptionIcon sx={{ mr: 1 }} /> }}
+                />
+              </Paper>
+            </Box>
+          </DialogContent>
+
+          <DialogActions
+            sx={{
+              px: { xs: 2, sm: 3, md: 4 },
+              py: 2.5,
+              borderTop: "1px solid #E2E8F0",
+              bgcolor: "#F8FAFC",
+
+              display: "flex",
+              flexDirection: {
+                xs: "column",
+                md: "row",
+              },
+
+              alignItems: "stretch",
+              justifyContent: "space-between",
+              gap: 2,
+            }}
+          >
+            {/* ESTADO */}
+            <Paper
+              elevation={0}
+              sx={{
+                flex: 1,
+                width: "100%",
+                maxWidth: { xs: "100%", md: 420 },
+
+                px: 2,
+                py: 1.5,
+
+                borderRadius: 3,
+                border: "1px solid #E2E8F0",
+                bgcolor: "#FFFFFF",
+
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              <Avatar
+                sx={{
+                  width: 42,
+                  height: 42,
+                  bgcolor: form.activo ? "#ECFDF5" : "#FEF2F2",
+                  color: form.activo ? "#16A34A" : "#DC2626",
+                  flexShrink: 0,
+                }}
+              >
+                <BusinessIcon fontSize="small" />
+              </Avatar>
+
+              <Box flex={1} minWidth={0}>
+                <Typography
+                  fontSize={13}
+                  fontWeight={700}
+                  color="#0F172A"
+                >
+                  Estado del negocio
+                </Typography>
+
+                <Typography
+                  fontSize={12}
+                  color="#64748B"
+                  noWrap
+                >
+                  {form.activo
+                    ? "Disponible para operar."
+                    : "Actualmente deshabilitado."}
+                </Typography>
               </Box>
 
-              <TextField
-                select
-                label="Tipo de negocio"
-                value={form.tipo}
-                onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-                fullWidth
-                sx={{ mt: 1 }}
-                InputProps={{ startAdornment: <CategoryIcon sx={{ mr: 1 }} /> }}
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1}
+                flexShrink={0}
               >
-                {tiposNegocio.map((tipo) => (
-                  <MenuItem key={tipo} value={tipo}>
-                    {tipo}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                label="URL Imagen"
-                value={form.imagen}
-                onChange={(e) => setForm({ ...form, imagen: e.target.value })}
-                fullWidth
-                sx={{ mt: 1 }}
-                InputProps={{ startAdornment: <ImageIcon sx={{ mr: 1 }} /> }}
-              />
+                <Chip
+                  size="small"
+                  label={form.activo ? "ACTIVO" : "INACTIVO"}
+                  color={form.activo ? "success" : "error"}
+                  variant="filled"
+                  sx={{
+                    fontWeight: 700,
+                    minWidth: 90,
+                  }}
+                />
+
+                <Switch
+                  checked={form.activo}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      activo: e.target.checked,
+                    })
+                  }
+                />
+              </Box>
+            </Paper>
+
+            {/* BOTONES */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                width: {
+                  xs: "100%",
+                  md: "auto",
+                },
+                flexDirection: "row",
+                justifyContent: "flex-end",
+              }}
+            >
+              <Button
+                variant="outlined"
+                onClick={closeModal}
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  height: 46,
+                  borderRadius: 3,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderColor: "#CBD5E1",
+                  color: "#475569",
+
+                  "&:hover": {
+                    bgcolor: "#F8FAFC",
+                    borderColor: "#94A3B8",
+                  },
+                }}
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  height: 46,
+                  borderRadius: 3,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  background: "linear-gradient(135deg,#2563EB,#3B82F6)",
+                  boxShadow: "0 8px 20px rgba(37,99,235,.20)",
+
+                  "&:hover": {
+                    background: "linear-gradient(135deg,#1D4ED8,#2563EB)",
+                    transform: "translateY(-1px)",
+                  },
+                }}
+              >
+                {editingId ? "Guardar" : "Crear"}
+              </Button>
             </Box>
+          </DialogActions>
+        </Dialog>
+      </Box>
 
-            {/* Descripción */}
-            <Box flex="1 1 100%">
-              <TextField
-                label="Descripción"
-                multiline
-                rows={3}
-                value={form.descripcion}
-                onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-                fullWidth
-                sx={{ mt: 1 }}
-                InputProps={{ startAdornment: <DescriptionIcon sx={{ mr: 1 }} /> }}
-              />
-            </Box>
-
-            {/* Switch Activo */}
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography>Activo:</Typography>
-              <Switch
-                checked={form.activo}
-                onChange={(e) => setForm({ ...form, activo: e.target.checked })}
-                color="primary"
-              />
-            </Box>
-          </Box>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={closeModal}>Cancelar</Button>
-          <Button onClick={handleSubmit} variant="contained" color="primary">
-            {editingId ? "Actualizar" : "Crear"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-
-       {/* MODAL PARA PERMISOS DE LA PERSONA O MODULOS*/}
+      {/* MODAL PARA PERMISOS DE LA PERSONA O MODULOS*/}
       <Dialog
         open={openPermisos}
         onClose={() => setOpenPermisos(false)}
@@ -650,16 +1348,16 @@ const AdminNegocios: React.FC = () => {
               src={selectedUsuario?.imagen || ""}
               sx={{ width: 50, height: 50, fontSize: 20 }}
             >
-             {selectedUsuario?.nombre?.charAt(0)}
+              {selectedUsuario?.nombre?.charAt(0)}
             </Avatar>
 
             {/* INFO */}
             <Box flex={1}>
               <Typography fontWeight={600} fontSize={16}>
-               Nit: {selectedUsuario?.nit} 
+                Nit: {selectedUsuario?.nit}
               </Typography>
-              <Typography  fontSize={16}>
-               empresa: {selectedUsuario?.nombre}
+              <Typography fontSize={16}>
+                empresa: {selectedUsuario?.nombre}
               </Typography>
             </Box>
 
@@ -795,33 +1493,114 @@ const AdminNegocios: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-    
-    <Dialog
-  open={openUsuarios}
-  onClose={() => setOpenUsuarios(false)}
-  maxWidth="xl"
-  fullWidth
->
-  <DialogTitle>
-    Usuarios
+      {/* MODAL PARA USUARIOS DEL NEGOCIO */}
+      <Dialog
+        open={openUsuarios}
+        onClose={() => setOpenUsuarios(false)}
+        maxWidth="xl"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            p: 0,
+            overflow: "hidden",
+            borderBottom: "1px solid #BFDBFE",
+          }}
+        >
+          <Box
+            sx={{
+              bgcolor: "#DBEAFE",
+              px: 3,
+              py: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box display="flex" alignItems="center" gap={2}>
+              <Avatar
+                sx={{
+                  bgcolor: "#2563EB",
+                  color: "#FFFFFF",
+                  width: 48,
+                  height: 48,
+                }}
+              >
+                <PeopleAltOutlinedIcon />
+              </Avatar>
 
-    <IconButton
-      onClick={() => setOpenUsuarios(false)}
-      sx={{
-        position: "absolute",
-        right: 8,
-        top: 8,
-      }}
-    >
-      <CloseIcon />
-    </IconButton>
-  </DialogTitle>
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                }}
+              >
+                <Typography
+                  noWrap
+                  title={negocioSeleccionado?.nombre}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: {
+                      xs: 16,
+                      sm: 18,
+                      md: 20,
+                    },
+                    color: "#1E3A8A",
+                    lineHeight: 1.2,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {negocioSeleccionado?.nombre}
+                </Typography>
 
-  <DialogContent>
-    <AdminUsuarios />
-  </DialogContent>
-</Dialog>
-      </>
+                <Typography
+                  sx={{
+                    mt: 0.5,
+                    fontSize: {
+                      xs: 12,
+                      sm: 13,
+                    },
+                    color: "#64748B",
+                    display: {
+                      xs: "none",
+                      sm: "block",
+                    },
+                  }}
+                >
+                  Administración de usuarios
+                </Typography>
+              </Box>
+            </Box>
+
+            <IconButton
+              onClick={() => setOpenUsuarios(false)}
+              sx={{
+                color: "#1E40AF",
+                bgcolor: "#FFFFFF",
+                border: "1px solid #BFDBFE",
+                transition: "all .2s",
+
+                "&:hover": {
+                  bgcolor: "#EFF6FF",
+                  borderColor: "#93C5FD",
+                  transform: "rotate(90deg)",
+                },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 5 }}>
+          <AdminUsuarios
+            idNegocio={negocioSeleccionado?.id}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

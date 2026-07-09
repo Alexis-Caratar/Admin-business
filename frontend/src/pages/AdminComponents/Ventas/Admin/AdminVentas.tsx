@@ -19,6 +19,7 @@ import {
   Avatar,
   Divider,
   Chip,
+  InputAdornment,
 } from "@mui/material";
 
 
@@ -228,330 +229,351 @@ const ventasFiltradas = resumen;
     <Box
       sx={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(180deg,#f5f7fb,#eef4ff)",
-        p: 3,
+        background:"linear-gradient(180deg,#f5f7fb,#eef4ff)",
+        p: 1,
       }}
     >
 
-   <Card
-  sx={{
-    mb: 3,
-    borderRadius: "32px",
-    overflow: "hidden",
-    position: "relative",
-    background:
-      "linear-gradient(135deg,#071021 0%,#0f172a 35%,#172554 100%)",
-    color: "#fff",
-    border: "1px solid rgba(255,255,255,0.08)",
-    boxShadow:
-      "0 25px 60px rgba(15,23,42,0.35)",
-  }}
->
-  {/* EFECTOS FONDO */}
+      <Card
+        sx={{
+          mb: 2,
+          borderRadius: 5,
+          overflow: "hidden",
+          position: "relative",
+          bgcolor: "#FFFFFF",
+          border: "1px solid #E2E8F0",
+          boxShadow: "0 12px 35px rgba(15,23,42,.06)",
 
-  <Box
-    sx={{
-      position: "absolute",
-      top: -120,
-      right: -120,
-      width: 320,
-      height: 320,
-      borderRadius: "50%",
-      background:
-        "radial-gradient(circle, rgba(59,130,246,.35), transparent 70%)",
-    }}
-  />
-
-  <Box
-    sx={{
-      position: "absolute",
-      bottom: -100,
-      left: -100,
-      width: 260,
-      height: 260,
-      borderRadius: "50%",
-      background:
-        "radial-gradient(circle, rgba(139,92,246,.25), transparent 70%)",
-    }}
-  />
-
-  <Box
-    sx={{
-      position: "relative",
-      zIndex: 2,
-      p: {
-        xs: 2.5,
-        md: 4,
-      },
-    }}
-  >
-    <Stack
-      direction={{
-        xs: "column",
-        lg: "row",
-      }}
-      justifyContent="space-between"
-      spacing={4}
-    >
-      {/* ================================================= */}
-      {/* LEFT */}
-      {/* ================================================= */}
-
-      <Stack
-        direction="row"
-        spacing={2.5}
-        alignItems="center"
-      >
-        <Avatar
-          sx={{
-            width: 78,
-            height: 78,
-            borderRadius: "24px",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: 5,
             background:
-              "linear-gradient(135deg,rgba(59,130,246,.25),rgba(255,255,255,.08))",
-            backdropFilter: "blur(10px)",
-            border:
-              "1px solid rgba(255,255,255,.12)",
-            boxShadow:
-              "0 10px 30px rgba(0,0,0,.25)",
+              "linear-gradient(90deg,#2563EB,#3B82F6,#60A5FA)",
+          },
+        }}
+      >
+        {/* EFECTOS FONDO */}
+
+        <Box
+          sx={{
+            position: "absolute",
+            top: -80,
+            right: -80,
+            width: 220,
+            height: 220,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(37,99,235,.08), transparent 70%)",
+          }}
+        />
+
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: -120,
+            left: -120,
+            width: 260,
+            height: 260,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(96,165,250,.05), transparent 70%)",
+          }}
+        />
+        <Box
+          sx={{
+            position: "relative",
+            zIndex: 2,
+            p: {
+              xs: 1,
+              md: 2,
+            },
           }}
         >
-          <InsightsIcon
-            sx={{
-              fontSize: 42,
-              color: "#fff",
-            }}
-          />
-        </Avatar>
-
-        <Box>
-          <Typography
-            fontWeight={800}
-            sx={{
-              fontSize: {
-                xs: 16,
-                md: 20,
-              },
-              lineHeight: 1.1,
-              letterSpacing: "-1px",
-            }}
-          >
-            Dashboard Financiero
-          </Typography>
-
-          <Typography
-            sx={{
-              mt: 1,
-              opacity: 0.75,
-              fontSize: 10,
-              maxWidth: 520,
-            }}
-          >
-            Analiza ingresos, egresos,
-            utilidades y el crecimiento de tu
-            negocio en tiempo real.
-          </Typography>
-
           <Stack
-            direction="row"
-            spacing={1.2}
-            mt={2}
-            flexWrap="wrap"
-            useFlexGap
+            direction={{
+              xs: "column",
+              lg: "row",
+            }}
+            justifyContent="space-between"
+            spacing={2}
           >
-            {[
-              "Ventas",
-              "Utilidades",
-              "Contabilidad",
-              "Reportes",
-            ].map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                sx={{
-                  height: 25,
-                  px: 1,
-                  borderRadius: "12px",
-                  color: "#fff",
-                  fontWeight: 700,
-                  bgcolor:
-                    "rgba(255,255,255,.08)",
-                  border:
-                    "1px solid rgba(255,255,255,.10)",
-                  backdropFilter: "blur(10px)",
+            {/* ================================================= */}
+            {/* LEFT */}
+            {/* ================================================= */}
 
-                  "& .MuiChip-label": {
-                    px: 1,
-                  },
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+            >
+              <Avatar
+                sx={{
+                  width: {sx:50,md:62},
+                  height: {sx:50,md:62},
+                  borderRadius: 4,
+                  bgcolor: "#EFF6FF",
+                  color: "#2563EB",
+                  border: "1px solid #BFDBFE",
+                  boxShadow:
+                    "0 10px 25px rgba(37,99,235,.10)",
                 }}
-              />
-            ))}
+              >
+                <InsightsIcon sx={{ fontSize: 38 }} />
+              </Avatar>
+
+              <Box>
+                <Typography
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: {
+                      xs: 14,
+                      md: 20
+                    },
+                    color: "#0F172A",
+                    letterSpacing: -.5
+                  }}
+                >
+                  Dashboard Financiero
+                </Typography>
+
+                <Typography
+                  sx={{
+                    mt: .8,
+                    color: "#64748B",
+                    fontSize: {
+                      xs: 10,
+                      md: 12
+                    },
+                    maxWidth: 520,
+                    lineHeight: 1.6
+                  }}
+                >
+                  Visualice en tiempo real las ventas, ingresos, egresos,
+                  rentabilidad y principales indicadores financieros del negocio.
+                </Typography>
+
+                <Stack
+                  direction="row"
+                  spacing={1.2}
+                  mt={1}
+                  flexWrap="wrap"
+                  useFlexGap
+                >
+                  {[
+                    "Ventas",
+                    "Utilidades",
+                    "Contabilidad",
+                    "Reportes",
+                  ].map((item) => (
+                    <Chip
+                      label={item}
+                      sx={{
+                        height: 32,
+                        borderRadius: 2,
+                        fontWeight: 600,
+                        fontSize: {xs:8,md:12},
+
+                        bgcolor: "#F8FAFC",
+
+                        color: "#334155",
+
+                        border: "1px solid #E2E8F0",
+
+                        "&:hover": {
+                          bgcolor: "#EFF6FF",
+                          borderColor: "#BFDBFE"
+                        }
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+            </Stack>
+
+            {/* ================================================= */}
+            {/* FILTROS */}
+            {/* ================================================= */}
+
+            <Stack
+              direction={{
+                xs: "column",
+                sm: "row",
+              }}
+              spacing={2}
+              alignItems={{
+                xs: "stretch",
+                sm: "center",
+              }}
+              justifyContent="flex-end"
+              flexWrap="wrap"
+              useFlexGap
+            >
+              <TextField
+                select
+                size="small"
+                value={tipoFiltro}
+                onChange={(e) =>
+                  setTipoFiltro(e.target.value)
+                }
+                sx={{
+                  minWidth: 220,
+                  "& .MuiOutlinedInput-root": {
+                    height: 46,
+                    borderRadius: 3,
+                    background: "#FFFFFF",
+                    "& fieldset": {
+                      borderColor: "#CBD5E1"
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#93C5FD"
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#2563EB",
+                      borderWidth: 2
+                    }
+                  }
+                }}
+              >
+
+
+                <MenuItem value="hoy">
+                  Hoy
+                </MenuItem>
+
+                <MenuItem value="ayer">
+                  Ayer
+                </MenuItem>
+
+                <MenuItem value="semana_actual">
+                  Semana Actual
+                </MenuItem>
+
+                <MenuItem value="semana_anterior">
+                  Semana Anterior
+                </MenuItem>
+
+                <MenuItem value="mes_actual">
+                  Mes Actual
+                </MenuItem>
+
+                <MenuItem value="mes_anterior">
+                  Mes Anterior
+                </MenuItem>
+                <MenuItem value="anio">
+                  Año Actual
+                </MenuItem>
+
+                <MenuItem value="fecha_fecha">
+                  Fecha a Fecha
+                </MenuItem>
+
+              </TextField>
+
+              {tipoFiltro === "fecha_fecha" && (
+                <Box
+                  display="flex"
+                  flexWrap="wrap"
+                  gap={2}
+                  alignItems="center"
+                >
+                  <TextField
+                    label="Fecha inicial"
+                    type="date"
+                    size="small"
+                    value={fechaInicio}
+                    onChange={(e) => setFechaInicio(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarMonthIcon
+                            sx={{
+                              color: "#64748B",
+                              fontSize: 20,
+                            }}
+                          />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      flex: 1,
+                      minWidth: { xs: "100%", sm: 220 },
+
+                      "& .MuiOutlinedInput-root": {
+                        height: 46,
+                        borderRadius: 3,
+                        bgcolor: "#FFFFFF",
+                        transition: ".25s",
+                        "& fieldset": { borderColor: "#CBD5E1", },
+                        "&:hover": { boxShadow: "0 4px 12px rgba(37,99,235,.08)", },
+                        "&:hover fieldset": { borderColor: "#93C5FD", },
+                        "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(37,99,235,.10)", },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#2563EB",
+                          borderWidth: 2,
+                        },
+                      },
+
+                      "& .MuiInputLabel-root": {
+                        color: "#64748B",
+                        fontWeight: 500,
+                      },
+                    }}
+                  />
+
+                  <TextField
+                    label="Fecha final"
+                    type="date"
+                    size="small"
+                    value={fechaFin}
+                    onChange={(e) => setFechaFin(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarMonthIcon
+                            sx={{
+                              color: "#64748B",
+                              fontSize: 20,
+                            }}
+                          />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      flex: 1,
+                      minWidth: { xs: "100%", sm: 220 },
+
+                      "& .MuiOutlinedInput-root": {
+                        height: 46,
+                        borderRadius: 3,
+                        bgcolor: "#FFFFFF",
+                        transition: ".25s",
+                        "& fieldset": { borderColor: "#CBD5E1", },
+                        "&:hover": { boxShadow: "0 4px 12px rgba(37,99,235,.08)", },
+                        "&:hover fieldset": { borderColor: "#93C5FD", },
+                        "&.Mui-focused": { boxShadow: "0 0 0 4px rgba(37,99,235,.10)", },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#2563EB",
+                          borderWidth: 2,
+                        },
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "#64748B",
+                        fontWeight: 500,
+                      },
+                    }}
+                  />
+                </Box>
+              )}
+            </Stack>
           </Stack>
         </Box>
-      </Stack>
-
-      {/* ================================================= */}
-      {/* FILTROS */}
-      {/* ================================================= */}
-
-      <Stack
-        direction={{
-          xs: "column",
-          sm: "row",
-        }}
-        spacing={2}
-        alignItems={{
-          xs: "stretch",
-          sm: "center",
-        }}
-        justifyContent="flex-end"
-        flexWrap="wrap"
-        useFlexGap
-      >
-        <TextField
-          select
-          size="small"
-          value={tipoFiltro}
-          onChange={(e) =>
-            setTipoFiltro(e.target.value)
-          }
-          sx={{
-            minWidth: 240,
-
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "16px",
-              bgcolor:
-                "rgba(255,255,255,.08)",
-              color: "#fff",
-              backdropFilter: "blur(10px)",
-
-              "& fieldset": {
-                border:
-                  "1px solid rgba(255,255,255,.12)",
-              },
-
-              "&:hover fieldset": {
-                border:
-                  "1px solid rgba(255,255,255,.25)",
-              },
-
-              "&.Mui-focused fieldset": {
-                border:
-                  "1px solid rgba(96,165,250,.9)",
-              },
-            },
-
-            "& .MuiSvgIcon-root": {
-              color: "#fff",
-            },
-
-            "& .MuiInputBase-input": {
-              color: "#fff",
-              fontWeight: 600,
-            },
-          }}
-        >
-
-
-         <MenuItem value="hoy">
-          Hoy
-        </MenuItem>
-
-        <MenuItem value="ayer">
-          Ayer
-        </MenuItem>
-
-        <MenuItem value="semana_actual">
-          Semana Actual
-        </MenuItem>
-
-        <MenuItem value="semana_anterior">
-          Semana Anterior
-        </MenuItem>
-
-        <MenuItem value="mes_actual">
-          Mes Actual
-        </MenuItem>
-
-        <MenuItem value="mes_anterior">
-          Mes Anterior
-        </MenuItem>
-        <MenuItem value="anio">
-          Año Actual
-        </MenuItem>
-
-        <MenuItem value="fecha_fecha">
-          Fecha a Fecha
-        </MenuItem>
-
-        </TextField>
-
-        {tipoFiltro === "fecha_fecha" && (
-          <>
-            <TextField
-              type="date"
-              size="small"
-              value={fechaInicio}
-              onChange={(e) =>
-                setFechaInicio(
-                  e.target.value
-                )
-              }
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "16px",
-                  bgcolor:
-                    "rgba(255,255,255,.08)",
-                  color: "#fff",
-
-                  "& fieldset": {
-                    border:
-                      "1px solid rgba(255,255,255,.12)",
-                  },
-                },
-
-                "& input": {
-                  color: "#fff",
-                  fontWeight: 600,
-                },
-              }}
-            />
-
-            <TextField
-              type="date"
-              size="small"
-              value={fechaFin}
-              onChange={(e) =>
-                setFechaFin(
-                  e.target.value
-                )
-              }
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "16px",
-                  bgcolor:
-                    "rgba(255,255,255,.08)",
-                  color: "#fff",
-
-                  "& fieldset": {
-                    border:
-                      "1px solid rgba(255,255,255,.12)",
-                  },
-                },
-
-                "& input": {
-                  color: "#fff",
-                  fontWeight: 600,
-                },
-              }}
-            />
-          </>
-        )}
-      </Stack>
-    </Stack>
-  </Box>
-</Card>
+      </Card>
 
       {/* stas informativos */}
       <StatsCards

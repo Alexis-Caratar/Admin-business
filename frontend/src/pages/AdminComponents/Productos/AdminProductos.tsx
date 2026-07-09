@@ -27,6 +27,7 @@ import {
   InputAdornment,
   Stack,
   Avatar,
+  Paper,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -49,7 +50,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ImageIcon from "@mui/icons-material/Image";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { useTheme, useMediaQuery } from "@mui/material";
-
+import SearchOffOutlinedIcon from "@mui/icons-material/SearchOffOutlined";
 import { inventario } from "./../../../api/productos";
 
 interface Props {
@@ -319,44 +320,129 @@ if (producto.tipo_control === "receta" && producto.receta) {
       </Button>
 
       <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
+        sx={{
+          mb: 3,
+          display: "flex",
+          flexDirection: {
+            xs: "column",
+            sm: "row",
+          },
+          justifyContent: "space-between",
+          alignItems: {
+            xs: "stretch",
+            sm: "center",
+          },
+          gap: 2,
+        }}
       >
-        <Typography
-          variant="h5"
-          fontWeight={600}
-          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+        {/* TÍTULO + DESCRIPCIÓN */}
+        <Box>
+          <Typography
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.2,
+              fontWeight: 700,
+              fontSize: {
+                xs: 22,
+                md: 28,
+              },
+              color: "#0F172A",
+            }}
+          >
+            <ShoppingBagIcon
+              sx={{
+                fontSize: {
+                  xs: 28,
+                  md: 32,
+                },
+                color: "#2563EB",
+              }}
+            />
+            Administrar Productos
+          </Typography>
+
+          <Typography
+            sx={{
+              mt: 0.5,
+              ml: { xs: 0, sm: 5.5 }, // Alinea el texto con el título (después del icono)
+              fontSize: 13,
+              color: "#64748B",
+            }}
+          >
+            Gestione los productos registrados en el sistema.
+          </Typography>
+        </Box>
+
+        {/* BOTÓN */}
+        <Button
+          variant="contained"
+          startIcon={<ShoppingBagIcon />}
+          onClick={() => handleOpenModal()}
+          sx={{
+            width: {
+              xs: "100%",
+              sm: "auto",
+            },
+            minWidth: {
+              sm: 190,
+            },
+            height: 46,
+            borderRadius: 3,
+            textTransform: "none",
+            fontWeight: 700,
+            background: "linear-gradient(135deg,#2563EB,#3B82F6)",
+            boxShadow: "0 8px 18px rgba(37,99,235,.20)",
+
+            "&:hover": {
+              background: "linear-gradient(135deg,#1D4ED8,#2563EB)",
+              transform: "translateY(-1px)",
+              boxShadow: "0 12px 24px rgba(37,99,235,.28)",
+            },
+          }}
         >
-          <ShoppingBagIcon sx={{ fontSize: 28 }} />
-          Administrar Productos
-        </Typography>
-
-            <Button
-        variant="contained"
-        color="primary"
-        startIcon={<ShoppingBagIcon />}
-        onClick={() => handleOpenModal()} // ✅ envolvemos la función
-      >
-        Crear Producto
-      </Button>
+          Crear Producto
+        </Button>
       </Box>
-
       {/* Buscador */}
-      <Box mb={3}>
+      <Box
+        sx={{
+          mb: 3,
+          display: "flex",
+          justifyContent: "flex-start",
+        }}
+      >
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            background: "#f1f3f4",
+            width: "100%",
+            maxWidth: { xs: "100%", sm: 420, md: 450 },
+            height: 44,
             px: 2,
-            borderRadius: 5,
-            width: 450,
-            height: 38,
+            borderRadius: 3,
+            bgcolor: "#F8FAFC",
+            border: "1px solid #E2E8F0",
+            transition: "all .25s ease",
+
+            "&:hover": {
+              borderColor: "#CBD5E1",
+            },
+
+            "&:focus-within": {
+              borderColor: "#2563EB",
+              boxShadow: "0 0 0 3px rgba(37,99,235,.10)",
+            },
           }}
         >
-          <SearchIcon sx={{ opacity: 0.6, mr: 1 }} />
+          <SearchIcon
+            sx={{
+              color: "#64748B",
+              fontSize: 20,
+              mr: 1.5,
+            }}
+          />
+
           <TextField
             variant="standard"
             placeholder="Buscar producto..."
@@ -365,234 +451,325 @@ if (producto.tipo_control === "receta" && producto.receta) {
               setSearch(e.target.value);
               setPage(1);
             }}
-            InputProps={{ disableUnderline: true }}
             fullWidth
+            InputProps={{
+              disableUnderline: true,
+            }}
+            sx={{
+              "& .MuiInputBase-input": {
+                fontSize: 14,
+                color: "#0F172A",
+              },
+            }}
           />
         </Box>
       </Box>
 
-  {/* Grid productos reemplazado por Box */}
-<Box display="flex" flexWrap="wrap" gap={3}>
-  {paginated.map((p) => {
-    const imgIndex = imgIndices[p.id!] ?? 0;
-
-    return (
-      <Box
-        key={p.id}
-        flex="1 1 calc(100% - 24px)" // xs: full width
-        sx={{
-          '@media (min-width:600px)': { flex: '1 1 calc(50% - 24px)' },  // sm: 2 por fila
-          '@media (min-width:900px)': { flex: '1 1 calc(25% - 24px)' },  // md: 4 por fila
-          maxWidth: 200, // opcional: ancho máximo para las tarjetas
-        }}
-      >
-        <Card
+{/* Grid productos */}
+    <Box display="flex" flexWrap="wrap" gap={3}>
+      {paginated.length === 0 ? (
+        <Paper
+          elevation={0}
           sx={{
             width: "100%",
-            height: 320,
+            minHeight: "calc(100vh - 260px)",
+            borderRadius: 4,
+            border: "1px dashed #CBD5E1",
+            bgcolor: "#F8FAFC",
             display: "flex",
             flexDirection: "column",
-            borderRadius: 3,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            transition: "all 0.3s ease",
-            position: "relative",
-            "&:hover": {
-              transform: "translateY(-4px)",
-              boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-            },
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            px: 4,
           }}
         >
-          {/* ESTADO */}
-         {p.estado !== undefined && (
-  <Box
-    sx={{
-      position: "absolute",
-      top: 10,
-      right: 10,
-      px: 1.5,
-      py: 0.4,
-      zIndex: 1,
-      borderRadius: 2,
-      fontSize: 12,
-      fontWeight: 600,
-      color: "#fff",
-      bgcolor: (() => {
-        if (p.estado === true) return "success.main";
-        if (p.estado === false) return "warning.main";
-        if (p.estado === 2) return "error.main";
-        return "grey.500";
-      })(),
-    }}
-  >
-    {(() => {
-      if (p.estado === true) return "Activo";
-      if (p.estado === false) return "Inactivo";
-      if (p.estado === 2) return "Descontinuado";
-      return "Sin estado";
-    })()}
-  </Box>
-)}
-
-          {/* CARRUSEL DE IMÁGENES */}
           <Box
             sx={{
-              position: "relative",
-              width: "100%",
-              height: 150,
-              minWidth:10,
-              overflow: "hidden",
-              borderTopLeftRadius: 12,
-              borderTopRightRadius: 12,
+              width: 100,
+              height: 100,
+              borderRadius: "50%",
+              bgcolor: "#EFF6FF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 3,
             }}
           >
-            <CardMedia
-              component="img"
-              image={p.imagenes && p.imagenes.length > 0 ? p.imagenes[imgIndex].url : defaultImage}
-              alt={p.nombre}
-              sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+            <SearchOffOutlinedIcon
+              sx={{
+                fontSize: 50,
+                color: "#2563EB",
+              }}
             />
-            {p.imagenes && p.imagenes.length > 1 && (
-              <>
-                <IconButton
-                  sx={{
-                    position: "absolute",
-                    top: "50%",
-                    left: 4,
-                    transform: "translateY(-50%)",
-                    bgcolor: "rgba(0,0,0,0.3)",
-                    color: "#fff",
-                    "&:hover": { bgcolor: "rgba(0,0,0,0.5)" },
-                  }}
-                  size="small"
-                  onClick={() => prevImage(p.id!, p.imagenes!.length)}
-                >
-                  <ArrowBackIosNewIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  sx={{
-                    position: "absolute",
-                    top: "50%",
-                    right: 4,
-                    transform: "translateY(-50%)",
-                    bgcolor: "rgba(0,0,0,0.3)",
-                    color: "#fff",
-                    "&:hover": { bgcolor: "rgba(0,0,0,0.5)" },
-                  }}
-                  size="small"
-                  onClick={() => nextImage(p.id!, p.imagenes!.length)}
-                >
-                  <ArrowForwardIosIcon fontSize="small" />
-                </IconButton>
-              </>
-            )}
           </Box>
 
-          {/* CONTENIDO PRINCIPAL */}
-          <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
-            <Typography variant="subtitle2" color="textSecondary" noWrap>
-              <QrCode2Icon fontSize="small" sx={{ color: "#fb8c00" }} />
-              Codigo:<b>{p.codigo_barra}</b>
-            </Typography>
+          <Typography
+            sx={{
+              fontSize: 24,
+              fontWeight: 700,
+              color: "#0F172A",
+              mb: 1,
+            }}
+          >
+            No se encontraron productos
+          </Typography>
 
-            <Box
+          <Typography
+            sx={{
+              maxWidth: 650,
+              fontSize: 15,
+              lineHeight: 1.8,
+              color: "#64748B",
+              mb: 4,
+            }}
+          >
+            Actualmente no existen productos registrados o ninguno coincide con los
+            criterios de búsqueda aplicados. Agrega un nuevo producto o modifica los
+            filtros para visualizar la información disponible.
+          </Typography>
+
+          <Button
+            variant="contained"
+          startIcon={<ShoppingBagIcon />}
+            onClick={() => handleOpenModal()}
+            sx={{
+              px: 4,
+              py: 1.2,
+              borderRadius: 30,
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            Agregar producto
+          </Button>
+        </Paper>
+      ) : (
+        paginated.map((p) => {
+          const imgIndex = imgIndices[p.id!] ?? 0;
+
+        return (
+        <Box
+            key={p.id}
+            sx={{
+              flex: {
+                xs: "0 0 calc(50% - 12px)", // 2 tarjetas en móvil
+                sm: "0 0 calc(50% - 12px)", // 2 tarjetas
+                md: "0 0 calc(25% - 18px)", // 4 tarjetas
+                lg: "0 0 calc(20% - 20px)", // 5 tarjetas
+                xl: "0 0 calc(16.66% - 20px)", // 6 tarjetas
+              },
+              minWidth: 0,
+            }}
+          >
+            <Card
               sx={{
-                mt: 0.2,
-                p: 0.2,
                 width: "100%",
-                minWidth: 80,
-                background: "#f5f5f5",
-                borderRadius: 1,
-                maxHeight: 90,
-                overflowY: "auto",
-                fontSize: 13,
+                height: 320,
+                display: "flex",
+                flexDirection: "column",
+                borderRadius: 3,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                transition: "all 0.3s ease",
+                position: "relative",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                },
               }}
             >
-              <Typography variant="body2" fontWeight={700} noWrap>
-                {p.nombre}
-              </Typography>
-            </Box>
+              {/* ESTADO */}
+            {p.estado !== undefined && (
+      <Box
+        sx={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          px: 1.5,
+          py: 0.4,
+          zIndex: 1,
+          borderRadius: 2,
+          fontSize: 12,
+          fontWeight: 600,
+          color: "#fff",
+          bgcolor: (() => {
+            if (p.estado === true) return "success.main";
+            if (p.estado === false) return "warning.main";
+            if (p.estado === 2) return "error.main";
+            return "grey.500";
+          })(),
+        }}
+      >
+        {(() => {
+          if (p.estado === true) return "Activo";
+          if (p.estado === false) return "Inactivo";
+          if (p.estado === 2) return "Descontinuado";
+          return "Sin estado";
+        })()}
+      </Box>
+    )}
 
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              {p.stock_actual !== undefined && (
-                <Typography
-                  variant="body2"
-                  color={p.stock_actual <= 5 ? "error.main" : "textSecondary"}
-                >
-                  Stock: {p.stock_actual}
-                </Typography>
-              )}
-              <Typography variant="body1" fontWeight={1000} color="success.main">
-                {p.precios?.precio_venta != null
-                  ? new Intl.NumberFormat("es-CO", {
-                    style: "currency",
-                    currency: "COP",
-                    minimumFractionDigits: 2,
-                  }).format(Number(p.precios.precio_venta))
-                  : "$0.00"}
-              </Typography>
-            </Box>
-
-            <Typography variant="body2">Unidad: {p.unidad_medida || "N/A"}</Typography>
-
-            {p.descripcion && (
-              <Box mt={0.5}>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  gap={0.5}
-                  sx={{ cursor: "pointer" }}
-                  onClick={() =>
-                    setProductos((prev) =>
-                      prev.map((x) => (x.id === p.id ? { ...x, showDesc: !x.showDesc } : x))
-                    )
-                  }
-                >
-                  <ExpandMoreIcon
-                    sx={{
-                      transition: "0.3s",
-                      transform: p.showDesc ? "rotate(180deg)" : "rotate(0deg)",
-                      color: "#1976d2",
-                    }}
-                  />
-                  <Typography variant="body2" fontWeight={600} color="primary">
-                    Descripción
-                  </Typography>
-                </Box>
-                {p.showDesc && (
-                  <Box
-                    sx={{
-                      mt: 1,
-                      p: 1,
-                      width: "100%",
-                      maxWidth: 200,
-                      background: "#f5f5f5",
-                      borderRadius: 1,
-                      maxHeight: 90,
-                      overflowY: "auto",
-                      fontSize: 13,
-                    }}
-                  >
-                    {p.descripcion || "Sin descripción"}
-                  </Box>
+              {/* CARRUSEL DE IMÁGENES */}
+              <Box
+                sx={{
+                  position: "relative",
+                  width: "100%",
+                  height: 150,
+                  minWidth:10,
+                  overflow: "hidden",
+                  borderTopLeftRadius: 12,
+                  borderTopRightRadius: 12,
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  image={p.imagenes && p.imagenes.length > 0 ? p.imagenes[imgIndex].url : defaultImage}
+                  alt={p.nombre}
+                  sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+                {p.imagenes && p.imagenes.length > 1 && (
+                  <>
+                    <IconButton
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: 4,
+                        transform: "translateY(-50%)",
+                        bgcolor: "rgba(0,0,0,0.3)",
+                        color: "#fff",
+                        "&:hover": { bgcolor: "rgba(0,0,0,0.5)" },
+                      }}
+                      size="small"
+                      onClick={() => prevImage(p.id!, p.imagenes!.length)}
+                    >
+                      <ArrowBackIosNewIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        right: 4,
+                        transform: "translateY(-50%)",
+                        bgcolor: "rgba(0,0,0,0.3)",
+                        color: "#fff",
+                        "&:hover": { bgcolor: "rgba(0,0,0,0.5)" },
+                      }}
+                      size="small"
+                      onClick={() => nextImage(p.id!, p.imagenes!.length)}
+                    >
+                      <ArrowForwardIosIcon fontSize="small" />
+                    </IconButton>
+                  </>
                 )}
               </Box>
-            )}
 
-            {/* ACCIONES SUBIDAS */}
-            <Box display="flex" justifyContent="flex-end" mt={1}>
-              <IconButton color="primary" onClick={() => handleEdit(p)}>
-                <EditIcon />
-              </IconButton>
-              <IconButton color="error" onClick={() => handleDelete(p.id)}>
-                <DeleteIcon />
-              </IconButton>
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
-    );
-  })}
-</Box>
+              {/* CONTENIDO PRINCIPAL */}
+              <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+                <Typography variant="subtitle2" color="textSecondary" noWrap>
+                  <QrCode2Icon fontSize="small" sx={{ color: "#fb8c00" }} />
+                  Codigo:<b>{p.codigo_barra}</b>
+                </Typography>
+
+                <Box
+                  sx={{
+                    mt: 0.2,
+                    p: 0.2,
+                    width: "100%",
+                    minWidth: 80,
+                    background: "#f5f5f5",
+                    borderRadius: 1,
+                    maxHeight: 90,
+                    overflowY: "auto",
+                    fontSize: 13,
+                  }}
+                >
+                  <Typography variant="body2" fontWeight={700} noWrap>
+                    {p.nombre}
+                  </Typography>
+                </Box>
+
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  {p.stock_actual !== undefined && (
+                    <Typography
+                      variant="body2"
+                      color={p.stock_actual <= 5 ? "error.main" : "textSecondary"}
+                    >
+                      Stock: {p.stock_actual}
+                    </Typography>
+                  )}
+                  <Typography variant="body1" fontWeight={1000} color="success.main">
+                    {p.precios?.precio_venta != null
+                      ? new Intl.NumberFormat("es-CO", {
+                        style: "currency",
+                        currency: "COP",
+                        minimumFractionDigits: 2,
+                      }).format(Number(p.precios.precio_venta))
+                      : "$0.00"}
+                  </Typography>
+                </Box>
+
+                <Typography variant="body2">Unidad: {p.unidad_medida || "N/A"}</Typography>
+
+                {p.descripcion && (
+                  <Box mt={0.5}>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={0.5}
+                      sx={{ cursor: "pointer" }}
+                      onClick={() =>
+                        setProductos((prev) =>
+                          prev.map((x) => (x.id === p.id ? { ...x, showDesc: !x.showDesc } : x))
+                        )
+                      }
+                    >
+                      <ExpandMoreIcon
+                        sx={{
+                          transition: "0.3s",
+                          transform: p.showDesc ? "rotate(180deg)" : "rotate(0deg)",
+                          color: "#1976d2",
+                        }}
+                      />
+                      <Typography variant="body2" fontWeight={600} color="primary">
+                        Descripción
+                      </Typography>
+                    </Box>
+                    {p.showDesc && (
+                      <Box
+                        sx={{
+                          mt: 1,
+                          p: 1,
+                          width: "100%",
+                          maxWidth: 200,
+                          background: "#f5f5f5",
+                          borderRadius: 1,
+                          maxHeight: 90,
+                          overflowY: "auto",
+                          fontSize: 13,
+                        }}
+                      >
+                        {p.descripcion || "Sin descripción"}
+                      </Box>
+                    )}
+                  </Box>
+                )}
+
+                {/* ACCIONES SUBIDAS */}
+                <Box display="flex" justifyContent="flex-end" mt={1}>
+                  <IconButton color="primary" onClick={() => handleEdit(p)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton color="error" onClick={() => handleDelete(p.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+          );
+        })
+      )}
+    </Box>
 
       {/* Paginación */}
         {totalPages > 1 && (

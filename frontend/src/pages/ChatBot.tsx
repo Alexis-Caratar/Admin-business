@@ -122,12 +122,14 @@ export default function ChatBot() {
       {!open && (
 
         <Fab
-          color="primary"
+          color="success"
           onClick={() => setOpen(true)}
           sx={{
             position: "fixed",
             bottom: 20,
-            right: 50
+            right: 80,
+            top: 800,
+            bgcolor: "#10B981"
           }}
         >
           <ChatIcon />

@@ -34,7 +34,7 @@ import { useTheme, useMediaQuery } from "@mui/material";
 import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import SearchIcon from "@mui/icons-material/Search";
-
+import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import {
   getInventarios,
   deleteInventario,
@@ -196,68 +196,155 @@ const AdminInventario: React.FC = () => {
     <Box p={2}>
       {/* HEADER */}
 
-      <Box
-        display="flex"
-        flexDirection={isMobile ? "column" : "row"}
-        justifyContent="space-between"
-        alignItems={isMobile ? "flex-start" : "center"}
-        gap={2}
-        mb={4}
-      >
-        {/* TITULO */}
-        <Box>
-          <Typography variant="h5" fontWeight={700}>
-            Inventario
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Gestiona productos, stock y movimientos
-          </Typography>
-        </Box>
+    <Box
+  sx={{
+    mb: 4,
+    display: "flex",
+    flexDirection: {
+      xs: "column",
+      md: "row",
+    },
+    justifyContent: "space-between",
+    alignItems: {
+      xs: "stretch",
+      md: "center",
+    },
+    gap: 3,
+  }}
+>
+  {/* TÍTULO */}
+  <Box>
+    <Typography
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1.2,
+        fontWeight: 700,
+        fontSize: {
+          xs: 24,
+          md: 30,
+        },
+        color: "#0F172A",
+      }}
+    >
+      <Inventory2RoundedIcon
+        sx={{
+          fontSize: {
+            xs: 30,
+            md: 34,
+          },
+          color: "#2563EB",
+        }}
+      />
+      Inventario
+    </Typography>
 
-        {/* ACCIONES */}
-        <Stack
-          direction={isMobile ? "column" : "row"}
-          spacing={2}
-          width={isMobile ? "100%" : "auto"}
+    <Typography
+      sx={{
+        mt: 0.5,
+        ml: { xs: 0, sm: 5.5 },
+        fontSize: 13,
+        color: "#64748B",
+      }}
+    >
+      Administre productos, existencias y movimientos del inventario.
+    </Typography>
+  </Box>
+
+  {/* BOTONES */}
+  <Stack
+    direction={{
+      xs: "column",
+      sm: "row",
+    }}
+    spacing={2}
+    sx={{
+      width: {
+        xs: "100%",
+        md: "auto",
+      },
+    }}
+  >
+    <Button
+      variant="outlined"
+      startIcon={<TrendingUpIcon />}
+      onClick={() => abrirMovimiento("ENTRADA", "MASIVO")}
+      sx={{
+        width: { xs: "100%", sm: "auto" },
+        height: 46,
+        borderRadius: 3,
+        textTransform: "none",
+        fontWeight: 600,
+        borderColor: "#22C55E",
+        color: "#16A34A",
+
+        "&:hover": {
+          bgcolor: "#F0FDF4",
+          borderColor: "#16A34A",
+        },
+      }}
+    >
+      Registrar entradas
+    </Button>
+
+    {rol === "admin" && (
+      <>
+        <Button
+          variant="outlined"
+          startIcon={<TrendingDownIcon />}
+          onClick={() => abrirMovimiento("SALIDA", "MASIVO")}
+          sx={{
+            width: { xs: "100%", sm: "auto" },
+            height: 46,
+            borderRadius: 3,
+            textTransform: "none",
+            fontWeight: 600,
+            borderColor: "#F59E0B",
+            color: "#D97706",
+
+            "&:hover": {
+              bgcolor: "#FFFBEB",
+              borderColor: "#D97706",
+            },
+          }}
         >
-          <Button
-            variant="outlined"
-            color="success"
-            startIcon={<TrendingUpIcon />}
-            onClick={() => abrirMovimiento("ENTRADA", "MASIVO")}
-            sx={{ borderRadius: 2 }}
-          >
-            Registrar entradas
-          </Button>
+          Registrar salidas
+        </Button>
 
-          {rol == 'admin' && (
-            <>
-              <Button
-                variant="outlined"
-                color="warning"
-                startIcon={<TrendingDownIcon />}
-                onClick={() => abrirMovimiento("SALIDA", "MASIVO")}
-                sx={{ borderRadius: 2 }}
-              >
-                Registrar Salidas
-              </Button>
+        <Button
+          variant="contained"
+          startIcon={<AddBoxIcon />}
+          onClick={() => {
+            resetForm();
+            setOpenModal(true);
+          }}
+          sx={{
+            width: { xs: "100%", sm: "auto" },
+            minWidth: 180,
+            height: 46,
+            borderRadius: 3,
+            textTransform: "none",
+            fontWeight: 700,
+            background:
+              "linear-gradient(135deg,#2563EB,#3B82F6)",
+            boxShadow:
+              "0 8px 20px rgba(37,99,235,.20)",
 
-              <Button
-                variant="contained"
-                startIcon={<AddBoxIcon />}
-                onClick={() => {
-                  resetForm();
-                  setOpenModal(true);
-                }}
-                sx={{ borderRadius: 2, px: 3 }}
-              >
-                Nuevo
-              </Button>
-            </>
-          )}
-
-        </Stack>
-      </Box>
+            "&:hover": {
+              background:
+                "linear-gradient(135deg,#1D4ED8,#2563EB)",
+              transform: "translateY(-1px)",
+              boxShadow:
+                "0 12px 26px rgba(37,99,235,.28)",
+            },
+          }}
+        >
+          Nuevo Producto
+        </Button>
+      </>
+    )}
+  </Stack>
+</Box>
 
       <Box mb={3} display="flex" justifyContent="space-between">
         <TextField
@@ -282,233 +369,240 @@ const AdminInventario: React.FC = () => {
 
 
       {/* LISTA */}
-     <Box
-  sx={{
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 3,
-  }}
->
-        {inventariosPaginados.map((inv) => {
-         // const bajoStock = inv.stock_actual <= inv.stock_minimo;
-          return (
-            <Box
-        key={inv.id}
+      <Box
         sx={{
-          flex: {
-            xs: "0 0 40%",
-            sm: "0 0 calc(30% - 24px)",
-            md: "0 0 calc(25% - 24px)",
-            lg: "0 0 calc(20% - 24px)",
-            xl: "0 0 calc(16% - 24px)",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: {
+            xs: 1,
+            sm: 2,
+            md: 3,
           },
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.02 }}
-          style={{ height: "100%" }}
-        >
-      <Card
-  sx={{
-    position: "relative",
-    height: "100%",
-    borderRadius: "20px",
-    p: 1.5,
-    pb: 1, // 🔥 clave: reduce aire inferior
-    bgcolor: "#fff",
-    border: "1px solid rgba(15,23,42,0.06)",
-    boxShadow: "0 6px 18px rgba(15,23,42,0.05)",
-    transition: "0.2s ease",
-
-    "&:hover": {
-      transform: "translateY(-2px)",
-      boxShadow: "0 12px 28px rgba(15,23,42,0.10)",
-    },
-  }}
->
-  {/* DECORACIÓN */}
-  <Box
-    sx={{
-      position: "absolute",
-      top: -50,
-      right: -50,
-      width: 120,
-      height: 120,
-      borderRadius: "50%",
-      background:
-        "linear-gradient(135deg, rgba(37,99,235,0.10), rgba(96,165,250,0.02))",
-    }}
-  />
-
-  <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
-    <Stack
-      spacing={0.3}
-      sx={{
-        position: "relative",
-        zIndex: 2,
-      }}
-    >
-
-      {/* HEADER */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Stack direction="row" alignItems="center" spacing={0.5}>
-          <InventoryIcon sx={{ fontSize: 16, color: "#2563eb" }} />
-
-          <Typography
-            sx={{
-              fontSize: 11,
-              fontWeight: 800,
-              lineHeight: 1,
-              m: 0,
-              p:0.5,
-            }}
-          >
-            {inv.nombre}
-          </Typography>
-        </Stack>
-
-        <Box
-          sx={{
-            px: 0.8,
-            py: 0.2,
-            p:0.5,
-            borderRadius: 999,
-            fontSize: 10,
-            fontWeight: 700,
-            bgcolor: "#f1f5f9",
-          }}
-        >
-          {inv.tipo}
-        </Box>
-      </Stack>
-
-      {/* UNIDAD */}
-      <Typography sx={{ p:0.5,fontSize: 11, color: "#64748b", m: 0, lineHeight: 1.1 }}>
-        Unidad: {inv.unidad}
-      </Typography>
-
-      {/* STOCK */}
-      <Box
-        sx={{
-          p: 0.8,
-          borderRadius: 2,
-          bgcolor: inv.stock_actual <= inv.stock_minimo ? "#fef2f2" : "#f0fdf4",
-          border: "1px solid",
-          borderColor: inv.stock_actual <= inv.stock_minimo ? "#fecaca" : "#bbf7d0",
-        }}
-      >
-        <Stack direction="row" justifyContent="space-between">
-          <Typography sx={{ fontSize: 10, color: "#64748b" }}>
-            Stock
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: 15,
-              fontWeight: 900,
-              lineHeight: 1,
-              color:
-                inv.stock_actual <= inv.stock_minimo ? "#dc2626" : "#16a34a",
-            }}
-          >
-            {inv.stock_actual}
-          </Typography>
-        </Stack>
-
-        <Typography sx={{ fontSize: 10, color: "#94a3b8", lineHeight: 1 }}>
-          Mín: {inv.stock_minimo}
-        </Typography>
-
-        {inv.stock_actual <= inv.stock_minimo && (
-          <Typography sx={{ fontSize: 10, color: "#dc2626", fontWeight: 700 }}>
-            ⚠ Bajo stock
-          </Typography>
-        )}
-      </Box>
-
-      {/* COSTO */}
-      {rol === "admin" && (
-        <Typography
-          sx={{
-            fontSize: 11,
-            fontWeight: 700,
-            m: 0,
-            lineHeight: 1,
-          }}
-        >
-          $ {inv.costo_unitario}
-        </Typography>
-      )}
-
-      {/* ACCIONES (SIN ESPACIO EXTRA) */}
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mt: 0.2 }}   // 🔥 mínimo espacio controlado
-      >
-        {rol === "admin" && (
-          <Stack direction="row" spacing={0.5}>
-            <IconButton size="small" sx={{ p: 0.4 }} onClick={() => handleEdit(inv)}>
-              <EditIcon fontSize="small" />
-            </IconButton>
-
-            <IconButton size="small" sx={{ p: 0.4 }} onClick={() => handleDelete(inv.id)}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Stack>
-        )}
-
-        <Stack direction="row" spacing={0.5}>
-          <Button
-            size="small"
-            sx={{
-              minWidth: 28,
-              height: 26,
-              fontSize: 11,
-              borderRadius: 1.5,
-              p: 0,
-            }}
-            variant="outlined"
-            color="success"
-            onClick={(e) => {
-              e.stopPropagation();
-              abrirMovimiento("ENTRADA", "INDIVIDUAL", inv.id);
-            }}
-          >
-            +
-          </Button>
-
-          {rol === "admin" && (
-            <Button
-              size="small"
+        {inventariosPaginados.map((inv) => {
+          // const bajoStock = inv.stock_actual <= inv.stock_minimo;
+          return (
+            <Box
+              key={inv.id}
               sx={{
-                minWidth: 28,
-                height: 26,
-                fontSize: 11,
-                borderRadius: 1.5,
-                p: 0,
-              }}
-              variant="outlined"
-              color="warning"
-              onClick={(e) => {
-                e.stopPropagation();
-                abrirMovimiento("SALIDA", "INDIVIDUAL", inv.id);
+                flex: {
+                  xs: "0 0 calc(50% - 8px)",   // 📱 2 tarjetas
+                  sm: "0 0 calc(33.33% - 12px)", // 📱 Tablets: 3
+                  md: "0 0 calc(20% - 16px)",    // 💻 4
+                  lg: "0 0 calc(16% - 16px)",    // 💻 5
+                  xl: "0 0 calc(13.66% - 16px)", // 🖥️ 6
+                },
+                minWidth: 0,
               }}
             >
-              -
-            </Button>
-          )}
-        </Stack>
-      </Stack>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.02 }}
+                style={{ height: "100%" }}
+              >
+                <Card
+                  sx={{
+                    position: "relative",
+                    height: "100%",
+                    borderRadius: 5,
+                    p: 1.5,
+                    pb: 1,
+                    bgcolor: "#fff",
+                    border: "1px solid #E2E8F0",
+                    boxShadow: "0 6px 18px rgba(15,23,42,.05)",
+                    transition: ".25s",
 
-    </Stack>
-  </CardContent>
-</Card>
+                    "&:hover": {
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 12px 28px rgba(15,23,42,.10)",
+                    },
+                  }}
+                >
 
-            </motion.div>
+
+                  {/* DECORACIÓN */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: -50,
+                      right: -50,
+                      width: 120,
+                      height: 120,
+                      borderRadius: "50%",
+                      background:
+                        "linear-gradient(135deg, rgba(37,99,235,0.10), rgba(96,165,250,0.02))",
+                    }}
+                  />
+
+                  <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+                    <Stack
+                      spacing={0.3}
+                      sx={{
+                        position: "relative",
+                        zIndex: 2,
+                      }}
+                    >
+
+                      {/* HEADER */}
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" alignItems="center" spacing={0.5}>
+                          <InventoryIcon sx={{ fontSize: 16, color: "#2563eb" }} />
+
+                          <Typography
+                            sx={{
+                              fontSize: 11,
+                              fontWeight: 800,
+                              lineHeight: 1,
+                              m: 0,
+                              p: 0.5,
+                            }}
+                          >
+                            {inv.nombre}
+                          </Typography>
+                        </Stack>
+
+                        <Box
+                          sx={{
+                            px: 0.8,
+                            py: 0.2,
+                            p: 0.5,
+                            borderRadius: 999,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            bgcolor: "#f1f5f9",
+                          }}
+                        >
+                          {inv.tipo}
+                        </Box>
+                      </Stack>
+
+                      {/* UNIDAD */}
+                      <Typography sx={{ p: 0.5, fontSize: 11, color: "#64748b", m: 0, lineHeight: 1.1 }}>
+                        Unidad: {inv.unidad}
+                      </Typography>
+
+                      {/* STOCK */}
+                      <Box
+                        sx={{
+                          p: 0.8,
+                          borderRadius: 2,
+                          bgcolor: inv.stock_actual <= inv.stock_minimo ? "#fef2f2" : "#f0fdf4",
+                          border: "1px solid",
+                          borderColor: inv.stock_actual <= inv.stock_minimo ? "#fecaca" : "#bbf7d0",
+                        }}
+                      >
+                        <Stack direction="row" justifyContent="space-between">
+                          <Typography sx={{ fontSize: 10, color: "#64748b" }}>
+                            Stock
+                          </Typography>
+
+                          <Typography
+                            sx={{
+                              fontSize: 15,
+                              fontWeight: 900,
+                              lineHeight: 1,
+                              color:
+                                inv.stock_actual <= inv.stock_minimo ? "#dc2626" : "#16a34a",
+                            }}
+                          >
+                            {inv.stock_actual}
+                          </Typography>
+                        </Stack>
+
+                        <Typography sx={{ fontSize: 10, color: "#94a3b8", lineHeight: 1 }}>
+                          Mín: {inv.stock_minimo}
+                        </Typography>
+
+                        {inv.stock_actual <= inv.stock_minimo && (
+                          <Typography sx={{ fontSize: 10, color: "#dc2626", fontWeight: 700 }}>
+                            ⚠ Bajo stock
+                          </Typography>
+                        )}
+                      </Box>
+
+                      {/* COSTO */}
+                      {rol === "admin" && (
+                        <Typography
+                          sx={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            m: 0,
+                            lineHeight: 1,
+                          }}
+                        >
+                          $ {inv.costo_unitario}
+                        </Typography>
+                      )}
+
+                      {/* ACCIONES (SIN ESPACIO EXTRA) */}
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        sx={{ mt: 0.2 }}   // 🔥 mínimo espacio controlado
+                      >
+                        {rol === "admin" && (
+                          <Stack direction="row" spacing={0.5}>
+                            <IconButton size="small" sx={{ p: 0.4 }} onClick={() => handleEdit(inv)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+
+                            <IconButton size="small" sx={{ p: 0.4 }} onClick={() => handleDelete(inv.id)}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Stack>
+                        )}
+
+                        <Stack direction="row" spacing={0.5}>
+                          <Button
+                            size="small"
+                            sx={{
+                              minWidth: 28,
+                              height: 26,
+                              fontSize: 11,
+                              borderRadius: 1.5,
+                              p: 0,
+                            }}
+                            variant="outlined"
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              abrirMovimiento("ENTRADA", "INDIVIDUAL", inv.id);
+                            }}
+                          >
+                            +
+                          </Button>
+
+                          {rol === "admin" && (
+                            <Button
+                              size="small"
+                              sx={{
+                                minWidth: 28,
+                                height: 26,
+                                fontSize: 11,
+                                borderRadius: 1.5,
+                                p: 0,
+                              }}
+                              variant="outlined"
+                              color="warning"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                abrirMovimiento("SALIDA", "INDIVIDUAL", inv.id);
+                              }}
+                            >
+                              -
+                            </Button>
+                          )}
+                        </Stack>
+                      </Stack>
+
+                    </Stack>
+                  </CardContent>
+                </Card>
+
+              </motion.div>
             </Box>
           );
         })}
@@ -531,7 +625,6 @@ const AdminInventario: React.FC = () => {
           />
         </Stack>
       )}
-
 
       {/* MODAL */}
 

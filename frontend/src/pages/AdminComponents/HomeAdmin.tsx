@@ -76,8 +76,8 @@ export default function HomeAdmin() {
   sx={{
     position: "relative",
     overflow: "hidden",
-    borderRadius: 5,
-    p: 4,
+    borderRadius: 4,
+    p: { xs: 2, sm: 3, md: 4 },
     mb: 4,
     border: "1px solid",
     borderColor: "divider",
@@ -97,31 +97,41 @@ export default function HomeAdmin() {
   }}
 >
   <Stack
-    direction={{ xs: "column", md: "row" }}
+    direction={{ xs: "column", lg: "row" }}
+    spacing={{ xs: 3, md: 4 }}
     justifyContent="space-between"
-    spacing={4}
+    alignItems={{ xs: "center", lg: "flex-start" }}
   >
-    {/* Información */}
+    {/* INFORMACIÓN */}
     <Stack
-      direction="row"
+      direction={{ xs: "column", sm: "row" }}
       spacing={3}
-      alignItems="center"
+      alignItems={{ xs: "center", sm: "center" }}
+      sx={{ width: "100%" }}
     >
       <Avatar
         src={imagen}
         sx={{
-          width: 72,
-          height: 72,
+          width: { xs: 60, sm: 70, md: 72 },
+          height: { xs: 60, sm: 70, md: 72 },
           bgcolor: "#2563EB",
-          fontSize: 28,
+          fontSize: { xs: 24, md: 28 },
           fontWeight: 700,
+          flexShrink: 0,
         }}
       />
 
-      <Box>
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          textAlign: { xs: "center", sm: "left" },
+        }}
+      >
         <Stack
           direction="row"
           spacing={1}
+          justifyContent={{ xs: "center", sm: "flex-start" }}
           alignItems="center"
           mb={1}
         >
@@ -133,9 +143,15 @@ export default function HomeAdmin() {
           />
 
           <Typography
-            variant="h4"
-            fontWeight={700}
-            color="text.primary"
+            sx={{
+              fontWeight: 700,
+              color: "#0F172A",
+              fontSize: {
+                xs: 24,
+                sm: 28,
+                md: 32,
+              },
+            }}
           >
             Hola, {nombre}
           </Typography>
@@ -143,58 +159,69 @@ export default function HomeAdmin() {
 
         <Typography
           color="text.secondary"
-          sx={{ mb: 2 }}
+          sx={{
+            mb: 2,
+            fontSize: {
+              xs: 13,
+              sm: 14,
+            },
+          }}
         >
-          Bienvenid@.
+          Bienvenid@ al panel administrativo.
         </Typography>
 
-     <Stack
-  direction="row"
-  spacing={1.5}
-  flexWrap="wrap"
->
-  <Chip
-    avatar={
-      <Avatar
-        src={imagen_negocio}
-        alt={negocio}
-        sx={{
-          width: 24,
-          height: 24,
-        }}
-      />
-    }
-    label={negocio}
-    variant="outlined"
-    sx={{
-      height: 40,
-      borderRadius: 3,
-      fontWeight: 600,
-      "& .MuiChip-label": {
-        px: 1.5,
-      },
-    }}
-  />
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          sx={{ width: "100%" }}
+        >
+          <Chip
+            avatar={
+              <Avatar
+                src={imagen_negocio}
+                sx={{
+                  width: 24,
+                  height: 24,
+                }}
+              />
+            }
+            label={negocio}
+            variant="outlined"
+            sx={{
+              width: { xs: "100%", sm: "auto" },
+              justifyContent: "flex-start",
+              height: 38,
+              borderRadius: 3,
+              fontWeight: 600,
+            }}
+          />
 
-  <Chip
-    label={tipoContexto}
-    color="primary"
-    sx={{
-      height: 40,
-      borderRadius: 3,
-      fontWeight: 600,
-    }}
-  />
-</Stack>
+          <Chip
+            label={tipoContexto}
+            color="primary"
+            sx={{
+              width: { xs: "100%", sm: "auto" },
+              height: 38,
+              borderRadius: 3,
+              fontWeight: 600,
+            }}
+          />
+        </Stack>
       </Box>
     </Stack>
 
-    {/* Información lateral */}
+    {/* LATERAL */}
     <Stack
-      spacing={2}
+      spacing={1.5}
       alignItems={{
-        xs: "flex-start",
-        md: "flex-end",
+        xs: "center",
+        lg: "flex-end",
+      }}
+      sx={{
+        width: {
+          xs: "100%",
+          lg: "auto",
+        },
       }}
     >
       <Typography
@@ -205,8 +232,17 @@ export default function HomeAdmin() {
       </Typography>
 
       <Typography
-        fontWeight={700}
-        fontSize={18}
+        sx={{
+          fontWeight: 700,
+          fontSize: {
+            xs: 15,
+            sm: 17,
+          },
+          textAlign: {
+            xs: "center",
+            lg: "right",
+          },
+        }}
       >
         {new Date().toLocaleDateString("es-CO", {
           weekday: "long",
@@ -216,12 +252,30 @@ export default function HomeAdmin() {
         })}
       </Typography>
 
-      <Divider sx={{ width: 180 }} />
+      <Divider
+        sx={{
+          width: {
+            xs: "100%",
+            sm: 220,
+          },
+        }}
+      />
 
-      <Stack direction="row" spacing={1}>
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
+        justifyContent={{
+          xs: "center",
+          lg: "flex-end",
+        }}
+      >
         <CalendarMonthIcon color="primary" />
 
-        <Typography color="text.secondary">
+        <Typography
+          color="text.secondary"
+          fontSize={14}
+        >
           Panel Administrativo
         </Typography>
       </Stack>

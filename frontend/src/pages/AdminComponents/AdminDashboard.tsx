@@ -32,7 +32,7 @@ import { cambiopassword } from "../../api/auth"
 import Loader from "../../components/Loader";
 import PrintIcon from "@mui/icons-material/Print";
 import SyncIcon from "@mui/icons-material/Sync";
-import ChatBot from "../ChatBot";
+//import ChatBot from "../ChatBot";
 
 const DEFAULT_AVATAR =
   "https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png";
@@ -63,21 +63,22 @@ const AdminDashboard: React.FC = () => {
   const [printerConnected, setPrinterConnected] = useState(false);
   const contextos = JSON.parse(localStorage.getItem("contextos") || "[]");
   const [openSeleccionContexto, setOpenSeleccionContexto] = useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-useEffect(() => {
-  const contextoActivo = localStorage.getItem("contexto_activo");
-  if (contextoActivo) {
-    cargarDatos();
-    return;
-  }
-  const contextos = JSON.parse(localStorage.getItem("contextos") || "[]");
+  useEffect(() => {
+    const contextoActivo = localStorage.getItem("contexto_activo");
+    if (contextoActivo) {
+      cargarDatos();
+      return;
+    }
+    const contextos = JSON.parse(localStorage.getItem("contextos") || "[]");
 
-  if (contextos.length === 1) {
-    seleccionarContexto(contextos[0]);
-  } else if (contextos.length > 1) {
-    setOpenSeleccionContexto(true);
-  }
-}, []);
+    if (contextos.length === 1) {
+      seleccionarContexto(contextos[0]);
+    } else if (contextos.length > 1) {
+      setOpenSeleccionContexto(true);
+    }
+  }, []);
 
 
   const cargarDatos = async () => {
@@ -89,11 +90,11 @@ useEffect(() => {
       // ==========================
       const storage = {
         idNegocio: localStorage.getItem("id_negocio") || "SISTEMA",
-        nombreNegocio:localStorage.getItem("nombre_negocio") ||"Administración del Sistema",
-        imagenNegocio:localStorage.getItem("imagen_negocio") || "",
+        nombreNegocio: localStorage.getItem("nombre_negocio") || "Administración del Sistema",
+        imagenNegocio: localStorage.getItem("imagen_negocio") || "",
         nombre: localStorage.getItem("nombre") || "",
         rol: localStorage.getItem("rol") || "",
-        imagen:localStorage.getItem("imagen") || DEFAULT_AVATAR,
+        imagen: localStorage.getItem("imagen") || DEFAULT_AVATAR,
         idUsuario: Number(localStorage.getItem("id_usuario") || 0),
       };
       // ==========================
@@ -131,11 +132,11 @@ useEffect(() => {
   };
 
   const seleccionarContexto = async (ctx: any) => {
-    localStorage.setItem("contexto_activo",JSON.stringify(ctx));
+    localStorage.setItem("contexto_activo", JSON.stringify(ctx));
     localStorage.setItem("tipo_contexto", ctx.tipo);
 
     if (ctx.tipo === "NEGOCIO") {
-      localStorage.setItem("id_negocio",String(ctx.id_negocio));
+      localStorage.setItem("id_negocio", String(ctx.id_negocio));
       localStorage.setItem(
         "nombre_negocio",
         ctx.nombre
@@ -177,46 +178,46 @@ useEffect(() => {
     };
   }, [navigate]);
 
-useEffect(() => {
-  const ws = new WebSocket(import.meta.env.VITE_WS_URL);
+  useEffect(() => {
+    const ws = new WebSocket(import.meta.env.VITE_WS_URL);
 
-  ws.onopen = () => {
-    console.log("WS conectado");
+    ws.onopen = () => {
+      console.log("WS conectado");
 
-    ws.send(
-      JSON.stringify({
-        tipo: "register_frontend",
-      })
-    );
-  };
-
-  ws.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-
-    if (msg.tipo === "printer_status") {
-      console.log("Estado impresora:", msg.payload);
-
-      setPrinterStatus(msg.payload);
-
-      setPrinterConnected(
-        msg.payload?.ok === true &&
-        msg.payload?.connected === true
+      ws.send(
+        JSON.stringify({
+          tipo: "register_frontend",
+        })
       );
-    }
-  };
+    };
 
-  ws.onclose = () => {
-    console.log("WS cerrado");
-    setPrinterConnected(false);
-  };
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
 
-  ws.onerror = (err) => {
-    console.error("WS error", err);
-    setPrinterConnected(false);
-  };
+      if (msg.tipo === "printer_status") {
+        console.log("Estado impresora:", msg.payload);
 
-  return () => ws.close();
-}, []);
+        setPrinterStatus(msg.payload);
+
+        setPrinterConnected(
+          msg.payload?.ok === true &&
+          msg.payload?.connected === true
+        );
+      }
+    };
+
+    ws.onclose = () => {
+      console.log("WS cerrado");
+      setPrinterConnected(false);
+    };
+
+    ws.onerror = (err) => {
+      console.error("WS error", err);
+      setPrinterConnected(false);
+    };
+
+    return () => ws.close();
+  }, []);
 
   const cerrarSesion = () => {
     localStorage.clear();
@@ -420,7 +421,7 @@ useEffect(() => {
 
                 {/* TEXTO */}
                 {!collapsed && (
-                  
+
                   <ListItemText
                     primary={menu.nombre}
                     primaryTypographyProps={{
@@ -448,7 +449,7 @@ useEffect(() => {
   }
   return (
     <>
-    <Box display="flex" height="100vh" width="100%">
+
 
       {/* DESKTOP */}
       {!isSmallScreen && sidebar}
@@ -467,413 +468,415 @@ useEffect(() => {
       )}
 
       {/* CONTENIDO */}
-      <Box flex={1} display="flex" flexDirection="column" bgcolor="#f3f4f6">
 
-        <AppBar position="static" sx={{ bgcolor: "#25313F" }}>
-          <Toolbar>
-            {isSmallScreen && (
-              <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#fff" }}>
-                <MenuIcon />
-              </IconButton>
-            )}
 
-            <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
-            
-              <Box
-                sx={{
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center",
-                  overflow: "hidden",
-                  transition: "all .35s ease",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    pointerEvents: "none",
+      <AppBar position="static" sx={{ bgcolor: "#25313F" }}>
+        <Toolbar>
+          {isSmallScreen && (
+            <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#fff" }}>
+              <MenuIcon />
+            </IconButton>
+          )}
+
+          <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
+
+            <Box
+              sx={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                overflow: "hidden",
+                transition: "all .35s ease",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  pointerEvents: "none",
+                },
+              }}
+            >
+              <Tooltip
+                arrow
+                placement="bottom-end"
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      background: "#0f172a",
+                      borderRadius: "18px",
+                      p: 0,
+                      minWidth: 320,
+                      boxShadow:
+                        "0 20px 50px rgba(0,0,0,.35)",
+                      border:
+                        "1px solid rgba(255,255,255,.08)",
+                    },
+                  },
+                  arrow: {
+                    sx: {
+                      color: "#0f172a",
+                    },
                   },
                 }}
-              >
-                <Tooltip
-                  arrow
-                  placement="bottom-end"
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        background: "#0f172a",
-                        borderRadius: "18px",
-                        p: 0,
-                        minWidth: 320,
-                        boxShadow:
-                          "0 20px 50px rgba(0,0,0,.35)",
-                        border:
-                          "1px solid rgba(255,255,255,.08)",
-                      },
-                    },
-                    arrow: {
-                      sx: {
-                        color: "#0f172a",
-                      },
-                    },
-                  }}
-                  title={
-                    <Box>
-                      {/* HEADER */}
-                      <Box
-                        sx={{
-                          px: 2,
-                          py: 1.5,
-                          borderBottom:
-                            "1px solid rgba(255,255,255,.06)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Box>
-                          <Typography
-                            sx={{
-                              color: "#fff",
-                              fontWeight: 700,
-                              fontSize: 14,
-                            }}
-                          >
-                           {printerStatus?.printer?.name?.join(", ") || "-"}
-                          </Typography>
+                title={
+                  <Box>
+                    {/* HEADER */}
+                    <Box
+                      sx={{
+                        px: 2,
+                        py: 1.5,
+                        borderBottom:
+                          "1px solid rgba(255,255,255,.06)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Box>
+                        <Typography
+                          sx={{
+                            color: "#fff",
+                            fontWeight: 700,
+                            fontSize: 14,
+                          }}
+                        >
+                          {printerStatus?.printer?.name?.join(", ") || "-"}
+                        </Typography>
 
+                        <Typography
+                          sx={{
+                            color: "#94a3b8",
+                            fontSize: 12,
+                          }}
+                        >
+                          Impresora térmica principal
+                        </Typography>
+                      </Box>
+
+                      <Chip
+                        label={printerStatus?.status || "OFFLINE"}
+                        size="small"
+                        sx={{
+                          bgcolor: printerConnected
+                            ? "rgba(34,197,94,.18)"
+                            : "rgba(239,68,68,.18)",
+
+                          color: printerConnected
+                            ? "#4ade80"
+                            : "#f87171",
+
+                          fontWeight: 700,
+                          fontSize: 11,
+                        }}
+                      />
+                    </Box>
+
+                    {/* BODY */}
+                    <Box sx={{ p: 2 }}>
+                      <Stack spacing={1.2}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent:
+                              "space-between",
+                          }}
+                        >
                           <Typography
                             sx={{
                               color: "#94a3b8",
-                              fontSize: 12,
+                              fontSize: 13,
                             }}
                           >
-                            Impresora térmica principal
+                            Estado
+                          </Typography>
+
+                          <Typography
+                            sx={{
+                              color: printerConnected
+                                ? "#4ade80"
+                                : "#f87171",
+
+                              fontSize: 13,
+                              fontWeight: 700,
+                            }}
+                          >
+                            {
+                              printerConnected
+                                ? "CONNECTED"
+                                : "DISCONNECTED"
+                            }
                           </Typography>
                         </Box>
 
-                        <Chip
-                          label={printerStatus?.status || "OFFLINE"}
-                          size="small"
+                        {printerConnected && (
+                          <>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent:
+                                  "space-between",
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  color: "#94a3b8",
+                                  fontSize: 13,
+                                }}
+                              >
+                                Puerto
+                              </Typography>
+
+                              <Typography
+                                sx={{
+                                  color: "#fff",
+                                  fontSize: 13,
+                                }}
+                              >
+                                {printerStatus?.printer?.port || "-"}
+                              </Typography>
+                            </Box>
+
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent:
+                                  "space-between",
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  color: "#94a3b8",
+                                  fontSize: 13,
+                                }}
+                              >
+                                Papel
+                              </Typography>
+
+                              <Typography
+                                sx={{
+                                  color: "#fff",
+                                  fontSize: 13,
+                                }}
+                              >
+                                {printerStatus?.printer?.paper?.join(", ") || "-"}
+                              </Typography>
+                            </Box>
+
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent:
+                                  "space-between",
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  color: "#94a3b8",
+                                  fontSize: 13,
+                                }}
+                              >
+                                Última conexión
+                              </Typography>
+
+                              <Typography
+                                sx={{
+                                  color: "#94a3b8",
+                                  fontSize: 13,
+                                }}
+                              >
+                                Hace 2 min
+                              </Typography>
+
+                            </Box>
+                          </>
+                        )}
+
+                        <Typography
                           sx={{
-                            bgcolor: printerConnected
-                              ? "rgba(34,197,94,.18)"
-                              : "rgba(239,68,68,.18)",
-
-                            color: printerConnected
-                              ? "#4ade80"
-                              : "#f87171",
-
-                            fontWeight: 700,
-                            fontSize: 11,
+                            color: "#94a3b8",
+                            fontSize: 10,
                           }}
-                        />
-                      </Box>
-
-                      {/* BODY */}
-                      <Box sx={{ p: 2 }}>
-                        <Stack spacing={1.2}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent:
-                                "space-between",
-                            }}
-                          >
-                            <Typography
-                              sx={{
-                                color: "#94a3b8",
-                                fontSize: 13,
-                              }}
-                            >
-                              Estado
-                            </Typography>
-
-                            <Typography
-                              sx={{
-                                   color: printerConnected
-                              ? "#4ade80"
-                              : "#f87171",
-
-                                fontSize: 13,
-                                fontWeight: 700,
-                              }}
-                            >
-                               {
-                            printerConnected
-                              ? "CONNECTED"
-                              : "DISCONNECTED"
-                          }
-                            </Typography>
-                          </Box>
-
-                              {printerConnected && (
-                                <>
-                                <Box
-                                    sx={{
-                                      display: "flex",
-                                      justifyContent:
-                                        "space-between",
-                                    }}
-                                  >
-                                    <Typography
-                                      sx={{
-                                        color: "#94a3b8",
-                                        fontSize: 13,
-                                      }}
-                                    >
-                                      Puerto
-                                    </Typography>
-
-                                    <Typography
-                                      sx={{
-                                        color: "#fff",
-                                        fontSize: 13,
-                                      }}
-                                    >
-                                      {printerStatus?.printer?.port || "-"}
-                                    </Typography>
-                                  </Box>
-
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      justifyContent:
-                                        "space-between",
-                                    }}
-                                  >
-                                    <Typography
-                                      sx={{
-                                        color: "#94a3b8",
-                                        fontSize: 13,
-                                      }}
-                                    >
-                                      Papel
-                                    </Typography>
-
-                                    <Typography
-                                      sx={{
-                                        color: "#fff",
-                                        fontSize: 13,
-                                      }}
-                                    >
-                                      {printerStatus?.printer?.paper?.join(", ") || "-"}
-                                    </Typography>
-                                  </Box>
-
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      justifyContent:
-                                        "space-between",
-                                    }}
-                                  >
-                                    <Typography
-                                      sx={{
-                                        color: "#94a3b8",
-                                        fontSize: 13,
-                                      }}
-                                    >
-                                      Última conexión
-                                    </Typography>
-
-                                    <Typography
-                                      sx={{
-                                        color: "#94a3b8",
-                                        fontSize: 13,
-                                      }}
-                                    >
-                                      Hace 2 min
-                                    </Typography>
-
-                                  </Box>
-                              </>
-                            )}
-                                                    
-                           <Typography
-                              sx={{
-                                color: "#94a3b8",
-                                fontSize: 10,
-                              }}
-                            >
-                              Mensaje: {printerStatus?.message || " "}
-                            </Typography>
-                        </Stack>
-
-                        <Divider
-                          sx={{
-                            my: 2,
-                            borderColor:
-                              "rgba(255,255,255,.08)",
-                          }}
-                        />
-
-                        {/* ACTIONS */}
-                        <Stack
-                          direction="row"
-                          spacing={1}
                         >
-                          <Button
-                            fullWidth
-                            variant="contained"
-                            startIcon={<SyncIcon />}
-                            onClick={reconnectPrinter}
-                            sx={{
-                              borderRadius: "12px",
-                              textTransform: "none",
-                              fontWeight: 700,
-                              bgcolor: "#16a34a",
-                              "&:hover": {
-                                bgcolor: "#15803d",
-                              },
-                            }}
-                          >
-                            Reconectar
-                          </Button>
-                        </Stack>
-                      </Box>
-                    </Box>
-                  }
-                >
-                  <Button
-                    startIcon={
-                      <PrintIcon
+                          Mensaje: {printerStatus?.message || " "}
+                        </Typography>
+                      </Stack>
+
+                      <Divider
                         sx={{
-                          fontSize: 22,
-                          color: printerConnected
-                            ? "#4ade80"
-                            : "#ef4444",
+                          my: 2,
+                          borderColor:
+                            "rgba(255,255,255,.08)",
                         }}
                       />
-                    }
-                    sx={{
-                      px: 2,
-                      py: 1.2,
-                      color: "#fff",
-                      fontWeight: 700,
-                      fontSize: 14,
-                      borderRadius: "18px",
-                      textTransform: "none",
-                      letterSpacing: ".3px",
-                    }}
-                  >
-                  </Button>
-                </Tooltip>
-              </Box>
-              <Tooltip
-                title="Notificaciones"
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      bgcolor: "#fff",
-                      color: "#333",
-                      fontSize: "0.85rem",
-                      fontWeight: 600,
-                      boxShadow: 3,
-                      border: "1px solid #e0e0e0",
-                    },
-                  },
-                  arrow: {sx: {color: "#fff",},},}}
-              >
-                <IconButton sx={{ color: "#fff" }}>
-                  <NotificationsIcon />
-                </IconButton>
-              </Tooltip>
 
-
-              <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-                <Avatar src={imagen} />
-               <ArrowDropDownIcon sx={{ color: "white" }} />
-              </IconButton>
-
-              <Menu
-                anchorEl={anchorEl}
-                open={openMenu}
-                onClose={() => setAnchorEl(null)}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-                PaperProps={{
-                  sx: {
-                    borderRadius: 2,
-                    minWidth: 180,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                    px: 1,
-                    py: 0.5,
-                  },
-                }}
+                      {/* ACTIONS */}
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                      >
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          startIcon={<SyncIcon />}
+                          onClick={reconnectPrinter}
+                          sx={{
+                            borderRadius: "12px",
+                            textTransform: "none",
+                            fontWeight: 700,
+                            bgcolor: "#16a34a",
+                            "&:hover": {
+                              bgcolor: "#15803d",
+                            },
+                          }}
+                        >
+                          Reconectar
+                        </Button>
+                      </Stack>
+                    </Box>
+                  </Box>
+                }
               >
-                {/* Menu Items al salir */}
-                  {contextos.length > 1 && (
-                <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  setOpenSeleccionContexto(true);
-                }}
-                sx={{
-                  borderRadius: 1,
-                  px: 2,
-                  py: 1,
-                  mb: 0.5,
-                  transition: "all .2s",
-                  "&:hover": {
-                    bgcolor: "#E8F5E9",
-                  },
-                }}
-              >
-                <SwapHorizIcon
+                <Button
+                  startIcon={
+                    <PrintIcon
+                      sx={{
+                        fontSize: 22,
+                        color: printerConnected
+                          ? "#4ade80"
+                          : "#ef4444",
+                      }}
+                    />
+                  }
                   sx={{
-                    mr: 1,
-                    color: "#16a34a",
+                    px: 2,
+                    py: 1.2,
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: 14,
+                    borderRadius: "18px",
+                    textTransform: "none",
+                    letterSpacing: ".3px",
                   }}
-                />
-                Cambiar entorno
-                </MenuItem>
-                  )}
-                <MenuItem
-                  sx={{ borderRadius: 1, px: 2, py: 1, mb: 0.5, transition: "all 0.2s", "&:hover": { bgcolor: "#E3F2FD" }, }}>
-                  <PersonIcon sx={{ mr: 1, color: "#1976d2" }} /> Perfil
-                </MenuItem>
-
-                <MenuItem
-                  onClick={() => setOpenPasswordModal(true)}
-                  sx={{ borderRadius: 1, px: 2, py: 1, transition: "all 0.2s", "&:hover": { bgcolor: "#fffceb" }, }}>
-                  <LockResetIcon sx={{ mr: 1, color: "#f59e0b" }} /> Cambiar contraseña
-                </MenuItem>
-
-                <MenuItem
-                  onClick={() => cerrarSesion()}
-                  sx={{ borderRadius: 1, px: 2, py: 1, transition: "all 0.2s", "&:hover": { bgcolor: "#FFEBEE" }, }}>
-                  <LogoutIcon sx={{ mr: 1, color: "#D32F2F" }} /> Salir
-                </MenuItem>
-              </Menu>
+                >
+                </Button>
+              </Tooltip>
             </Box>
-          </Toolbar>
-        </AppBar>
+            <Tooltip
+              title="Notificaciones"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    bgcolor: "#fff",
+                    color: "#333",
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    boxShadow: 3,
+                    border: "1px solid #e0e0e0",
+                  },
+                },
+                arrow: { sx: { color: "#fff", }, },
+              }}
+            >
+              <IconButton sx={{ color: "#fff" }}>
+                <NotificationsIcon />
+              </IconButton>
+            </Tooltip>
 
-        <Box flex={1} p={0.5}
-          sx={{
-            ...(isSmallScreen
-              ? {}
-              : {
-                ml: `${collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH}px`,
-              }),
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Paper sx={{ p: 1 }}>
-            {sinModulos ? (
-              <Typography>Sin acceso</Typography>
-            ) : ActiveComponent ? (
-              <ActiveComponent /> //aqui van los modulos principales
-            ) : (
-              <Typography>Módulo no encontrado</Typography>
-            )}
-          </Paper>
-        </Box>
+
+            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+              <Avatar src={imagen} />
+              <ArrowDropDownIcon sx={{ color: "white" }} />
+            </IconButton>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={openMenu}
+              onClose={() => setAnchorEl(null)}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+              PaperProps={{
+                sx: {
+                  borderRadius: 2,
+                  minWidth: 180,
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  px: 1,
+                  py: 0.5,
+                },
+              }}
+            >
+              {/* Menu Items al salir */}
+              {contextos.length > 1 && (
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    setOpenSeleccionContexto(true);
+                  }}
+                  sx={{
+                    borderRadius: 1,
+                    px: 2,
+                    py: 1,
+                    mb: 0.5,
+                    transition: "all .2s",
+                    "&:hover": {
+                      bgcolor: "#E8F5E9",
+                    },
+                  }}
+                >
+                  <SwapHorizIcon
+                    sx={{
+                      mr: 1,
+                      color: "#16a34a",
+                    }}
+                  />
+                  Cambiar entorno
+                </MenuItem>
+              )}
+              <MenuItem
+                sx={{ borderRadius: 1, px: 2, py: 1, mb: 0.5, transition: "all 0.2s", "&:hover": { bgcolor: "#E3F2FD" }, }}>
+                <PersonIcon sx={{ mr: 1, color: "#1976d2" }} /> Perfil
+              </MenuItem>
+
+              <MenuItem
+                onClick={() => setOpenPasswordModal(true)}
+                sx={{ borderRadius: 1, px: 2, py: 1, transition: "all 0.2s", "&:hover": { bgcolor: "#fffceb" }, }}>
+                <LockResetIcon sx={{ mr: 1, color: "#f59e0b" }} /> Cambiar contraseña
+              </MenuItem>
+
+              <MenuItem
+                onClick={() => cerrarSesion()}
+                sx={{ borderRadius: 1, px: 2, py: 1, transition: "all 0.2s", "&:hover": { bgcolor: "#FFEBEE" }, }}>
+                <LogoutIcon sx={{ mr: 1, color: "#D32F2F" }} /> Salir
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      <Box flex={1} p={0.5}
+        sx={{
+          ...(isSmallScreen
+            ? {}
+            : {
+              ml: `${collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH}px`,
+            }),
+          minHeight: "90vh",
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: "#f3f4f6"
+        }}
+      >
+        <Paper sx={{ p: 1 }}>
+          {sinModulos ? (
+            <Typography>Sin acceso</Typography>
+          ) : ActiveComponent ? (
+            <ActiveComponent /> //aqui van los modulos principales
+          ) : (
+            <Typography>Módulo no encontrado</Typography>
+          )}
+        </Paper>
       </Box>
 
-      
+
+
       {/*Modal cambio de contraseña */}
       <CambiarPasswordModal
         open={openPasswordModal}
@@ -888,127 +891,146 @@ useEffect(() => {
         }}
       />
 
-    </Box>
 
 
-    <Dialog
-      open={openSeleccionContexto}
-      maxWidth="sm"
-      fullWidth
-      disableEscapeKeyDown
-    >
-      <DialogTitle
-        sx={{
-          fontWeight: 700,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          borderBottom: "1px solid #e5e7eb",
+      <Dialog
+        open={openSeleccionContexto}
+        fullWidth
+        maxWidth="md"
+        fullScreen={isMobile}
+        disableEscapeKeyDown
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, sm: 4 },
+            overflow: "hidden",
+          },
         }}
       >
-        🏢 Seleccionar entorno de trabajo
-      </DialogTitle>
-
-      <DialogContent sx={{ pt: 3 }}>
-        <Typography color="text.secondary" mb={3}>
-          Seleccione el entorno en el que desea trabajar.
-        </Typography>
-
-        <Stack spacing={2}>
-          {contextos.map((ctx: any, index: number) => (
-            <Paper
-              key={index}
-              elevation={0}
-              onClick={() => seleccionarContexto(ctx)}
-              sx={{
-                p: 2,
-                cursor: "pointer",
-                borderRadius: 3,
-                border: "1px solid #e5e7eb",
-                transition: ".25s",
-                "&:hover": {
-                  borderColor: "#1976d2",
-                  boxShadow: "0 12px 30px rgba(25,118,210,.15)",
-                  transform: "translateY(-2px)",
-                },
-              }}
-            >
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  alignItems="center"
-                >
-                  <Avatar
-                    src={ctx.imagen}
-                    sx={{
-                      width: 58,
-                      height: 58,
-                    }}
-                  >
-                    {ctx.nombre?.charAt(0)}
-                  </Avatar>
-
-                  <Box>
-                    <Typography
-                      fontWeight={700}
-                      fontSize={16}
-                    >
-                      {ctx.nombre}
-                    </Typography>
-
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                    >
-                      {ctx.tipo === "SISTEMA"
-                        ? "Administración General del Sistema"
-                        : "Administración del Negocio"}
-                    </Typography>
-
-                    {ctx.roles && (
-                      <Chip
-                        size="small"
-                        label={ctx.roles.join(", ")}
-                        color="primary"
-                        sx={{ mt: 1 }}
-                      />
-                    )}
-                  </Box>
-                </Stack>
-
-                <Button
-                  variant="contained"
-                  size="small"
-                >
-                  Ingresar
-                </Button>
-              </Stack>
-            </Paper>
-          ))}
-        </Stack>
-      </DialogContent>
-
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button
-          color="error"
-          onClick={() => {
-            localStorage.clear();
-            window.location.href = "/";
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            borderBottom: "1px solid #e5e7eb",
           }}
         >
-          Cerrar sesión
-        </Button>
-      </DialogActions>
-    </Dialog>
+          🏢 Seleccionar entorno de trabajo
+        </DialogTitle>
 
-     
-     <ChatBot />
-</>
+        <DialogContent sx={{ pt: 3 }}>
+          <Typography color="text.secondary" mb={3}>
+            Seleccione el entorno en el que desea trabajar.
+          </Typography>
+
+          <Stack spacing={2}>
+            {contextos.map((ctx: any) => (
+              <Paper
+                elevation={0}
+                onClick={() => seleccionarContexto(ctx)}
+                sx={{
+                  p: { xs: 2, sm: 2.5 },
+                  borderRadius: 3,
+                  border: "1px solid #E2E8F0",
+                  bgcolor: "#fff",
+                  cursor: "pointer",
+                  transition: ".25s",
+
+                  "&:hover": {
+                    borderColor: "#2563EB",
+                    boxShadow: "0 10px 30px rgba(37,99,235,.12)",
+                    transform: "translateY(-3px)",
+                  },
+                }}
+              >
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={2}
+                  alignItems={{ xs: "flex-start", sm: "center" }}
+                  justifyContent="space-between"
+                >
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
+                    width="100%"
+                  >
+                    <Avatar
+                      src={ctx.imagen}
+                      sx={{
+                        width: { xs: 52, sm: 60 },
+                        height: { xs: 52, sm: 60 },
+                      }}
+                    >
+                      {ctx.nombre?.charAt(0)}
+                    </Avatar>
+
+                    <Box>
+                      <Typography
+                        fontWeight={700}
+                        fontSize={16}
+                      >
+                        {ctx.nombre}
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                      >
+                        {ctx.tipo === "SISTEMA"
+                          ? "Administración General del Sistema"
+                          : "Administración del Negocio"}
+                      </Typography>
+
+                      {ctx.roles && (
+                        <Chip
+                          size="small"
+                          label={ctx.roles.join(", ")}
+                          color="primary"
+                          sx={{ mt: 1 }}
+                        />
+                      )}
+                    </Box>
+                  </Stack>
+
+                  <Button
+                    variant="contained"
+                    size="small"
+                    fullWidth={isMobile}
+                    sx={{
+                      minWidth: { xs: "100%", sm: 120 },
+                      height: 42,
+                      borderRadius: 2,
+                      textTransform: "none",
+                      fontWeight: 600,
+                      mt: { xs: 1, sm: 0 },
+                    }}
+                  >
+                    Ingresar
+                  </Button>
+                </Stack>
+              </Paper>
+            ))}
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            color="error"
+            onClick={() => {
+              localStorage.clear();
+              window.location.href = "/";
+            }}
+          >
+            Cerrar sesión
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Caht bot descomentar para prod*
+      <ChatBot />
+      */}
+    </>
 
   );
 };

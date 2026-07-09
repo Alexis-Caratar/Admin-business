@@ -144,18 +144,17 @@ const CambiarPasswordModal: React.FC<Props> = ({
     sx={{
       px: 3,
       py: 2.5,
-      background:
-        "linear-gradient(135deg,#0f172a,#1e293b)",
-      color: "#fff",
+     bgcolor: "#DBEAFE",
       position: "relative",
     }}
   >
     <Stack direction="row" spacing={2} alignItems="center">
       <Avatar
         sx={{
-          bgcolor: "rgba(255,255,255,.12)",
+          bgcolor: "rgba(255, 255, 255, 0.12)",
           width: 52,
           height: 52,
+          color:"#0fd053"
         }}
       >
         <LockResetIcon />
@@ -198,7 +197,6 @@ const CambiarPasswordModal: React.FC<Props> = ({
         onChange={(e) =>
           setCurrentPassword(e.target.value)
         }
-        error={!!errors.currentPassword}
         helperText={errors.currentPassword}
         fullWidth
         InputProps={{
@@ -242,7 +240,6 @@ const CambiarPasswordModal: React.FC<Props> = ({
         onChange={(e) =>
           setNewPassword(e.target.value)
         }
-        error={!!errors.newPassword}
         helperText={errors.newPassword}
         fullWidth
         InputProps={{
@@ -417,23 +414,15 @@ const CambiarPasswordModal: React.FC<Props> = ({
       Cancelar
     </Button>
 
+
     <Button
       variant="contained"
+      color="primary"
       onClick={handleSubmit}
       disabled={Object.keys(errors).length > 0}
-      sx={{
-        borderRadius: "14px",
-        px: 4,
-        py: 1.1,
-        fontWeight: 800,
-        textTransform: "none",
-        background:
-          "linear-gradient(135deg,#0ea5e9,#2563eb)",
-        boxShadow:
-          "0 10px 25px rgba(37,99,235,.35)",
-      }}
+      sx={{ textTransform: "none", px: 3, borderRadius: 2 }}
     >
-      Guardar cambios
+      Guardar
     </Button>
   </DialogActions>
 </Dialog>

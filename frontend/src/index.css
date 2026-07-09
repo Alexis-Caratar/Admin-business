@@ -72,3 +72,7 @@ select:-webkit-autofill {
   -webkit-text-fill-color: #000000 !important; /* color texto */
   transition: background-color 5000s ease-in-out 0s;
 }
+
+.swal2-container {
+  z-index: 20000 !important;
+}

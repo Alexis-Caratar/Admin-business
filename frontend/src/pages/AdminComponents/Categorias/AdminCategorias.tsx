@@ -14,6 +14,7 @@ import {
   IconButton,
   Pagination,
   Stack,
+  Paper,
 } from "@mui/material";
 
 import CategoryIcon from "@mui/icons-material/Category";
@@ -22,7 +23,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTheme, useMediaQuery } from "@mui/material";
-
+import SearchOffOutlinedIcon from "@mui/icons-material/SearchOffOutlined";
 import {
   getCategorias,
   crearCategoria,
@@ -31,7 +32,7 @@ import {
 } from "../../../api/categorias";
 
 import Swal from "sweetalert2";
-import AdminProductos from "../Productos/AdminProductos"; 
+import AdminProductos from "../Productos/AdminProductos";
 import type { Categoria } from "../../../types/categorias";
 
 const AdminCategorias = () => {
@@ -93,7 +94,7 @@ const AdminCategorias = () => {
     if (editingId) {
       await actualizarCategoria(editingId, form);
     } else {
-      await crearCategoria({ ...form, id_negocio: Number(id_negocio)  });
+      await crearCategoria({ ...form, id_negocio: Number(id_negocio) });
     }
 
     cleanForm();
@@ -126,7 +127,7 @@ const AdminCategorias = () => {
     setSelectedCategoriaId(null);
   };
 
-      const totalPaginas = Math.ceil(categorias.length / itemsPerPage);
+  const totalPaginas = Math.ceil(categorias.length / itemsPerPage);
 
 
   return (
@@ -137,154 +138,347 @@ const AdminCategorias = () => {
       ) : (
         <>
           {/* HEADER */}
-          <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <CategoryIcon fontSize="large" sx={{ color: "#1976d2" }} />
-              <Typography variant="h5" fontWeight={700}>
-                Administrar Categorías
-              </Typography>
-            </Box>
-
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => {
-                cleanForm();
-                setEditingId(null);
-                setOpenModal(true);
-              }}
-              sx={{ borderRadius: 3 }}
-            >
-              Crear Categoría
-            </Button>
-          </Box>
-
-          {/* BUSCADOR */}
-          <Box mb={3}>
             <Box
               sx={{
+                mb: 3,
                 display: "flex",
-                alignItems: "center",
-                background: "#f1f3f4",
-                px: 2,
-                borderRadius: 5,
-                width: 450,
-                height: 38,
+                flexDirection: {
+                  xs: "column",
+                  sm: "row",
+                },
+                justifyContent: "space-between",
+                alignItems: {
+                  xs: "stretch",
+                  sm: "center",
+                },
+                gap: 2,
               }}
             >
-              <SearchIcon sx={{ opacity: 0.6, mr: 1 }} />
-              <TextField
-                variant="standard"
-                placeholder="Buscar..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                InputProps={{ disableUnderline: true }}
-                fullWidth
-              />
+              {/* TÍTULO */}
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1.5}
+              >
+                <CategoryIcon
+                  sx={{
+                    fontSize: {
+                      xs: 30,
+                      md: 34,
+                    },
+                    color: "#2563EB",
+                  }}
+                />
+
+                <Box>
+                  <Typography
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: {
+                        xs: 22,
+                        md: 28,
+                      },
+                      color: "#0F172A",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Administrar Categorías
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 0.3,
+                      fontSize: 13,
+                      color: "#64748B",
+                    }}
+                  >
+                    Gestione las categorías disponibles para organizar los productos.
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* BOTÓN */}
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  cleanForm();
+                  setEditingId(null);
+                  setOpenModal(true);
+                }}
+                sx={{
+                  width: {
+                    xs: "100%",
+                    sm: "auto",
+                  },
+                  minWidth: {
+                    sm: 200,
+                  },
+                  height: 46,
+                  borderRadius: 3,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  background: "linear-gradient(135deg,#2563EB,#3B82F6)",
+                  boxShadow: "0 8px 18px rgba(37,99,235,.20)",
+
+                  "&:hover": {
+                    background: "linear-gradient(135deg,#1D4ED8,#2563EB)",
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 12px 24px rgba(37,99,235,.28)",
+                  },
+                }}
+              >
+                Crear Categoría
+              </Button>
             </Box>
+
+        {/* BUSCADOR */}
+        <Box
+          sx={{
+            mb: 3,
+            display: "flex",
+            justifyContent: "flex-start",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              maxWidth: { xs: "100%", sm: 420, md: 450 },
+              height: 44,
+              px: 2,
+              borderRadius: 3,
+              bgcolor: "#F8FAFC",
+              border: "1px solid #E2E8F0",
+              transition: ".25s",
+
+              "&:hover": {
+                borderColor: "#CBD5E1",
+              },
+
+              "&:focus-within": {
+                borderColor: "#2563EB",
+                boxShadow: "0 0 0 3px rgba(37,99,235,.10)",
+              },
+            }}
+          >
+            <SearchIcon
+              sx={{
+                color: "#64748B",
+                mr: 1.5,
+                fontSize: 20,
+              }}
+            />
+
+            <TextField
+              variant="standard"
+              placeholder="Buscar usuario..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              fullWidth
+              InputProps={{
+                disableUnderline: true,
+              }}
+              sx={{
+                "& .MuiInputBase-input": {
+                  fontSize: 14,
+                  color: "#0F172A",
+                },
+              }}
+            />
           </Box>
+        </Box>
 
-     {/* GRID CATEGORIAS */}
-<Box display="flex" flexWrap="wrap" gap={3}>
-  {paginated.map((c: any) => (
-<Box
-  key={c.id}
-  sx={{
-    flex: {
-      xs: "  0 100%",
-      sm: "0 0 calc(50% - 24px)",
-      md: "0 0 calc(33.33% - 24px)",
-      lg: "0 0 calc(25% - 24px)",
-      xl: "0 0 calc(20% - 24px)",
-    },
-    minWidth: 0,
-  }}
->
-  <Card
-    sx={{
-      width: "100%",
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      transition: "transform .2s, box-shadow .2s",
-      cursor: "pointer",
-
-      "&:hover": {
-        transform: "translateY(-6px)",
-        boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
-      },
-       
-    }}
-    
-  >
-        <div onClick={() => handleOpenProductos(c.id)}>
-          <CardMedia
-            component="img"
-            height="150"
-            image={c.imagen || "https://via.placeholder.com/150"}
-            sx={{ objectFit: "cover" }}
-          />
-        </div>
-
-        <CardContent>
-          <Typography variant="body2" fontWeight={700}>
-            {c.nombre}
-          </Typography>  
-         <Typography variant="caption">{c.descripcion}</Typography>
-
-          <Box mt={1} display="flex" gap={1}>
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditingId(c.id);
-
-                setForm({
-                  nombre: c.nombre || "",
-                  descripcion: c.descripcion || "",
-                  imagen: c.imagen || "",
-                  activo: c.activo ?? 1,
-                });
-
-                setOpenModal(true);
+          {/* GRID CATEGORIAS */}
+          {paginated.length === 0 ? (
+            <Paper
+              elevation={0}
+              sx={{
+                mt: 3,
+                p: 6,
+                borderRadius: 4,
+                border: "1px dashed #CBD5E1",
+                bgcolor: "#F8FAFC",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
               }}
             >
-              <EditIcon />
-            </IconButton>
+              <Box
+                sx={{
+                  width: 90,
+                  height: 90,
+                  borderRadius: "50%",
+                  bgcolor: "#EFF6FF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mb: 3,
+                }}
+              >
+                <SearchOffOutlinedIcon
+                  sx={{
+                    fontSize: 46,
+                    color: "#3B82F6",
+                  }}
+                />
+              </Box>
 
-            <IconButton
-              color="error"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(c.id);
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
-  ))}
-</Box>
+              <Typography
+                sx={{
+                  fontSize: 22,
+                  fontWeight: 700,
+                  color: "#0F172A",
+                  mb: 1,
+                }}
+              >
+                No se encontraron registros
+              </Typography>
+
+              <Typography
+                sx={{
+                  maxWidth: 520,
+                  fontSize: 14,
+                  lineHeight: 1.8,
+                  color: "#64748B",
+                  mb: 3,
+                }}
+              >
+                No se encontraron categorías registradas. En este momento no hay información disponible para mostrar.
+                Crea tu primera categoría para empezar a clasificar los productos y facilitar la administración del
+                inventario y del catálogo de tu negocio.
+              </Typography>
+
+              <Button
+
+
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  cleanForm();
+                  setEditingId(null);
+                  setOpenModal(true);
+                }}
+                sx={{
+                  px: 4,
+                  py: 1.2,
+                  borderRadius: 30,
+                  textTransform: "none",
+                  fontWeight: 600,
+                }}
+              >
+                Crear categoria
+              </Button>
+            </Paper>
+          ) : (
+             <Box display="flex" flexWrap="wrap" gap={3}>
+           { paginated.map((c: any) => (
+             
+                <Box
+                  key={c.id}
+                  sx={{
+                    flex: {
+                      xs: "  0 100%",
+                      sm: "0 0 calc(50% - 24px)",
+                      md: "0 0 calc(33.33% - 24px)",
+                      lg: "0 0 calc(25% - 24px)",
+                      xl: "0 0 calc(20% - 24px)",
+                    },
+                    minWidth: 0,
+                  }}
+                >
+                  <Card
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      transition: "transform .2s, box-shadow .2s",
+                      cursor: "pointer",
+
+                      "&:hover": {
+                        transform: "translateY(-6px)",
+                        boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
+                      },
+
+                    }}
+
+                  >
+                    <div onClick={() => handleOpenProductos(c.id)}>
+                      <CardMedia
+                        component="img"
+                        height="150"
+                        image={c.imagen || "https://via.placeholder.com/150"}
+                        sx={{ objectFit: "cover" }}
+                      />
+                    </div>
+
+                    <CardContent>
+                      <Typography variant="body2" fontWeight={700}>
+                        {c.nombre}
+                      </Typography>
+                      <Typography variant="caption">{c.descripcion}</Typography>
+
+                      <Box mt={1} display="flex" gap={1}>
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingId(c.id);
+
+                            setForm({
+                              nombre: c.nombre || "",
+                              descripcion: c.descripcion || "",
+                              imagen: c.imagen || "",
+                              activo: c.activo ?? 1,
+                            });
+
+                            setOpenModal(true);
+                          }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+
+                        <IconButton
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(c.id);
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Box>
+           
+
+            ))}
+   </Box>
+
+          )}
 
           {/* PAGINACIÓN */}
-      {totalPaginas > 1 && (
-              <Stack alignItems="center" mt={3}>
-                <Pagination
-                  count={totalPaginas}
-                  page={page}
-                  onChange={(_, v) => setPage(v)}
-                  color="primary"
-                  shape="rounded"
-                  size={isMobile ? "small" : "medium"}  
-                  siblingCount={isMobile ? 0 : 1}        
-                  boundaryCount={isMobile ? 1 : 2}
-                  showFirstButton={!isMobile}           
-                  showLastButton={!isMobile}
+          {totalPaginas > 1 && (
+            <Stack alignItems="center" mt={3}>
+              <Pagination
+                count={totalPaginas}
+                page={page}
+                onChange={(_, v) => setPage(v)}
+                color="primary"
+                shape="rounded"
+                size={isMobile ? "small" : "medium"}
+                siblingCount={isMobile ? 0 : 1}
+                boundaryCount={isMobile ? 1 : 2}
+                showFirstButton={!isMobile}
+                showLastButton={!isMobile}
 
-                />
-              </Stack>
-            )}
+              />
+            </Stack>
+          )}
           {/* MODAL */}
           <Dialog
             open={openModal}

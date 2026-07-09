@@ -227,6 +227,8 @@ const clearMesa = () => {
 
   //Finalizar venta
   const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
+    setLoadingCategorias(true);
+
     if (carrito.length === 0) return;
     const subtotal = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
     const descuento = 0;
@@ -278,7 +280,9 @@ const clearMesa = () => {
       }
     } catch (err) {
       console.error("Error finalizando venta:", err);
-    }
+    }finally {
+    setLoadingCategorias(false);
+  }
   };
   //aperturar la caja 
 const abrirCajaReal = async (payload: any) => {
@@ -382,7 +386,7 @@ if (loadingCategorias ) {
 }
   return (
     
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", p: 0, ml: 0 }}>
+    <Box >
 
     <Box
   onClick={() => setShowStats(prev => !prev)}
@@ -464,30 +468,37 @@ if (loadingCategorias ) {
              modo="dashboard"
           />
         </Box>
-        {/* === MESAS === */}
-        <Box
-          sx={{
-            width: { xs: "100%", sm: "100%", md: "80%" }, // 🔥 MÓVIL 100% - ESCRITORIO 50%
-            px: 1,
-            display: "flex",
-            flexDirection: "column",
-            overflowY: "auto",
-            maxHeight: "100%",
-          }}
-        >
-          {/* MESAS */}
-          <Box sx={{ flex: 1 }}>
-            <Mesas
-              idUsuario={Number(idUsuario) || 0}
-             id_negocio={Number(id_negocio) || 0}
-              mesas={mesas}
-              mesaSeleccionada={mesaSeleccionada}
-              onSelect={(m) =>
-                setMesaSeleccionada((prev) => (prev?.id === m?.id ? null : m))
-              }
-            />
-          </Box>
-        </Box>
+        {/* === MESAS ESTABLECIMIENTO === */}
+      <Box
+        sx={{
+          width: { xs: "100%", md: "80%" },
+          px: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflowY: "auto",
+        }}
+      >
+        {mesas.length > 0 ? (
+          <Mesas
+            idUsuario={Number(idUsuario) || 0}
+            id_negocio={Number(id_negocio) || 0}
+            mesas={mesas}
+            mesaSeleccionada={mesaSeleccionada}
+            onSelect={(m) =>
+              setMesaSeleccionada((prev) =>
+                prev?.id === m?.id ? null : m
+              )
+            }
+          />
+        ) : (
+          <Categorias
+                  categorias={categorias}
+                  loading={loadingCategorias}
+                  onOpen={openCategoria}
+                  modo="dashboard"
+                />
+        )}
+      </Box>
 
         {/* === BOTÓN ABRIR CARRITO EN DESKTOP === */}
         {!openCarrito && !isMobile && (
@@ -568,7 +579,7 @@ if (loadingCategorias ) {
           clienteSeleccionado={clienteSeleccionado}
           setClienteSeleccionado={setClienteSeleccionado}
         />
-</Drawer>
+      </Drawer>
 
         {/* === CARRITO MÓVIL === */}
         <Box sx={{ display: { xs: "block", md: "none" } }}>

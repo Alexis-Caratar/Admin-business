@@ -18,6 +18,8 @@ import {
   Stack,
   Checkbox,
   CircularProgress,
+  Chip,
+  Paper,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import EditIcon from "@mui/icons-material/Edit";
@@ -37,6 +39,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import InputAdornment from "@mui/material/InputAdornment";
 import Swal from "sweetalert2";
 import { useTheme, useMediaQuery } from "@mui/material";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 
 import {
   getUsuarios,
@@ -50,8 +53,13 @@ import {
 
 import type { User } from "../../../types";
 
-const AdminUsuarios: React.FC = () => {
-  const idNegocioLS = localStorage.getItem("id_negocio") || "";
+interface AdminUsuariosProps {
+  idNegocio?: number | string;
+}
+
+const AdminUsuarios: React.FC<AdminUsuariosProps> = ({ idNegocio }) => {
+
+  const idNegocioFinal = idNegocio ?? localStorage.getItem("id_negocio") ?? "";
 
   const [usuarios, setUsuarios] = useState<User[]>([]);
   const [search, setSearch] = useState("");
@@ -87,7 +95,7 @@ const AdminUsuarios: React.FC = () => {
    * TRAER USUARIOS
    ============================ */
   const fetchUsuarios = async () => {
-    const data = await getUsuarios();
+    const data = await getUsuarios(idNegocioFinal);
     setUsuarios(data);
   };
 
@@ -138,18 +146,18 @@ const AdminUsuarios: React.FC = () => {
    ============================ */
   const handleSubmit = async () => {
     try {
-       let email;
-        if(form.email==''){
-             const ultimos4 = form.identificacion.slice(-4);
+      let email;
+      if (form.email == '') {
+        const ultimos4 = form.identificacion.slice(-4);
         const nombresUsuario = `${form.nombres.split(" ")[0]}${ultimos4}`
           .replace(/ /g, "")
           .toLowerCase();
 
-          email = `${nombresUsuario}@gmail.com`;
-        }else{
-           email=form.email
-        }
-         const password = `${form.identificacion}*`;
+        email = `${nombresUsuario}@gmail.com`;
+      } else {
+        email = form.email
+      }
+      const password = `${form.identificacion}*`;
 
       /** === SI ES CREAR === */
       if (form.id_usuario === 0) {
@@ -166,29 +174,29 @@ const AdminUsuarios: React.FC = () => {
             apellidos: form.apellidos,
             telefono: form.telefono || null,
             direccion: form.direccion || null,
-            email:email,
+            email: email,
           },
           usuario: {
             email,
             password,
             rol: form.rol,
-            id_negocio: idNegocioLS,
+            id_negocio: idNegocioFinal,
             imagen: form.imagen || null,
           },
         };
 
         await createUsuarioCompleto(payload);
-    Swal.fire({
-      icon: "success",
-      title: "Éxito",
-      html: `
+        Swal.fire({
+          icon: "success",
+          title: "Éxito",
+          html: `
           Usuario creado correctamente.<br>
             Ten en cuenta que  al crear el usuario, para el ingreso de la plataforma el usuario es el correo <br>
             en caso de no tener el sistema le genera uno automatico<br>
             la contraseña se genera con la identificación- Termina en '*' <br>
             (ejemplo: 112345678*)
       `,
-    });
+        });
       } else {
         /** === SI ES EDITAR === */
 
@@ -294,8 +302,8 @@ const AdminUsuarios: React.FC = () => {
 
     try {
       const [allMenus, userMenus] = await Promise.all([
-        getMenusNegocio(Number(idNegocioLS)),    // tu API que trae todos los menús del negocio
-        getMenusUsuario(u.id_usuario, Number(idNegocioLS)), // tu API que trae los menús que tiene el usuario
+        getMenusNegocio(Number(idNegocioFinal)),    // tu API que trae todos los menús del negocio
+        getMenusUsuario(u.id_usuario, Number(idNegocioFinal)), // tu API que trae los menús que tiene el usuario
       ]);
 
       setMenusNegocio(allMenus);
@@ -331,38 +339,111 @@ const AdminUsuarios: React.FC = () => {
 
   return (
     <>
-      <Box p={1}>
+      <Box p={2}>
         {/* HEADER */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h5" fontWeight={600} display="flex" gap={1}>
-            <PeopleIcon /> Administrar Usuarios
-          </Typography>
+      <Box
+  sx={{
+    mb: 3,
+    display: "flex",
+    flexDirection: {
+      xs: "column",
+      sm: "row",
+    },
+    justifyContent: "space-between",
+    alignItems: {
+      xs: "stretch",
+      sm: "center",
+    },
+    gap: 2,
+  }}
+>
+  {/* TÍTULO + DESCRIPCIÓN */}
+  <Box>
+    <Typography
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1.2,
+        fontWeight: 700,
+        fontSize: {
+          xs: 22,
+          md: 28,
+        },
+        color: "#0F172A",
+      }}
+    >
+      <PeopleIcon
+        sx={{
+          fontSize: {
+            xs: 28,
+            md: 32,
+          },
+          color: "#2563EB",
+        }}
+      />
+      Administrar Usuarios
+    </Typography>
 
-          <Button
-            variant="contained"
-            startIcon={<PeopleIcon />}
-            onClick={() => {
-              setForm({
-                id_usuario: 0,
-                id_persona: 0,
-                tipo_identificacion: "",
-                identificacion: "",
-                nombres: "",
-                apellidos: "",
-                telefono: "",
-                direccion: "",
-                email: "",
-                rol: "empleado",
-                imagen: "",
-              });
-              setOpenModal(true);
-            }}
-            component={motion.button}
-            whileHover={{ scale: 1.05 }}
-          >
-            Adicionar Usuario
-          </Button>
-        </Box>
+    <Typography
+      sx={{
+        mt: 0.5,
+        ml: { xs: 0, sm: 5.5 },
+        fontSize: 13,
+        color: "#64748B",
+      }}
+    >
+      Gestione y administre los usuarios registrados en el sistema.
+    </Typography>
+  </Box>
+
+  {/* BOTÓN */}
+  <Button
+    variant="contained"
+    startIcon={<PeopleIcon />}
+    onClick={() => {
+      setForm({
+        id_usuario: 0,
+        id_persona: 0,
+        tipo_identificacion: "",
+        identificacion: "",
+        nombres: "",
+        apellidos: "",
+        telefono: "",
+        direccion: "",
+        email: "",
+        rol: "empleado",
+        imagen: "",
+      });
+
+      setOpenModal(true);
+    }}
+    component={motion.button}
+    whileHover={{ scale: 1.03 }}
+    sx={{
+      width: {
+        xs: "100%",
+        sm: "auto",
+      },
+      minWidth: {
+        sm: 220,
+      },
+      height: 46,
+      borderRadius: 3,
+      textTransform: "none",
+      fontWeight: 700,
+      background: "linear-gradient(135deg,#2563EB,#3B82F6)",
+      boxShadow: "0 8px 18px rgba(37,99,235,.20)",
+
+      "&:hover": {
+        background: "linear-gradient(135deg,#1D4ED8,#2563EB)",
+        transform: "translateY(-1px)",
+        boxShadow: "0 12px 24px rgba(37,99,235,.28)",
+      },
+    }}
+  >
+    Adicionar Usuario
+  </Button>
+</Box>
 
         {/* BUSCADOR */}
         <Box mb={3}>
@@ -370,464 +451,647 @@ const AdminUsuarios: React.FC = () => {
             sx={{
               display: "flex",
               alignItems: "center",
-              background: "#f1f3f4",
+
+              width: {
+                xs: "90%",
+                sm: 350,
+                md: 450,
+              },
+
+              height: 44,
+
               px: 2,
-              borderRadius: 5,
-              width: 450,
-              height: 38,
-            }}
-          >
-            <SearchIcon sx={{ opacity: 0.6, mr: 1 }} />
-            <TextField
-              variant="standard"
-              placeholder="Buscar..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              InputProps={{ disableUnderline: true }}
-              fullWidth
-            />
-          </Box>
-        </Box>
+              borderRadius: 3,
 
-        {/* ORDENAMIENTO */}
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<SortIcon />}
-          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          sx={{ mb: 2 }}
-        >
-          Ordenar
-        </Button>
+              bgcolor: "#F8FAFC",
+              border: "1px solid #E2E8F0",
 
-        <Typography mb={2}>
-          Total: <strong>{filtered.length}</strong> usuarios encontrados.
-        </Typography>
+              transition: ".2s",
 
-      <Box display="flex" flexWrap="wrap" gap={2}>
-  <AnimatePresence>
-    {paginated.map((u) => (
-      <Box
-        key={u.id_usuario}
-        sx={{
-          flex: {
-            xs: "1 1 100%",
-            sm: "1 1 calc(50% - 16px)",
-            md: "1 1 calc(25% - 16px)",
-            lg: "1 1 calc(20% - 16px)",
-          },
-        }}
-      >
-        <motion.div
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          whileHover={{
-            scale: 1.03,
-            transition: { duration: 0.2 },
-          }}
-        >
-          <Box
-            sx={{
-              position: "relative",
-              textAlign: "center",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 1,
-              px: 2.5,
-              py: 3,
-              borderRadius: "24px",
-              bgcolor: "#ffffff",
-              border: "1px solid rgba(15,23,42,0.06)",
-              boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
-              transition: "0.3s",
-              overflow: "hidden",
-
-              "&:hover": {
-                boxShadow: "0 16px 45px rgba(15,23,42,0.12)",
+              "&:focus-within": {
+                borderColor: "#3B82F6",
+                boxShadow: "0 0 0 4px rgba(59,130,246,.10)",
               },
             }}
           >
-            {/* DECORACIÓN */}
-            <Box
+            <SearchIcon
               sx={{
-                position: "absolute",
-                top: -50,
-                right: -50,
-                width: 140,
-                height: 140,
-                borderRadius: "50%",
-                background:
-                  "linear-gradient(135deg, rgba(37,99,235,0.12), rgba(96,165,250,0.03))",
+                color: "#64748B",
+                mr: 1,
+                fontSize: 20,
               }}
             />
 
-            {/* AVATAR */}
-            <Avatar
-              src={u.imagen || ""}
-              sx={{
-                width: 64,
-                height: 64,
-                bgcolor: "#eff6ff",
-                color: "#2563eb",
-                fontWeight: 900,
-                boxShadow: "0 10px 25px rgba(37,99,235,0.15)",
-                zIndex: 2,
+            <TextField
+              variant="standard"
+              placeholder="Buscar usuarios..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              fullWidth
+              InputProps={{
+                disableUnderline: true,
               }}
-            >
-              {!u.imagen && u.nombres?.charAt(0)}
-            </Avatar>
-
-            {/* NOMBRE */}
-            <Typography
               sx={{
-                fontSize: 15,
-                fontWeight: 900,
-                color: "#0f172a",
-                lineHeight: 1.2,
-                zIndex: 2,
+                "& input": {
+                  fontSize: 14,
+                  color: "#0F172A",
+                },
               }}
-            >
-              {u.nombres} {u.apellidos}
-            </Typography>
-
-            {/* DOCUMENTO */}
-            <Typography
-              sx={{
-                fontSize: 13,
-                color: "#64748b",
-                zIndex: 2,
-              }}
-            >
-              {u.tipo_identificacion}-{u.identificacion}
-            </Typography>
-
-            {/* EMAIL */}
-            <Typography
-              sx={{
-                fontSize: 12.5,
-                color: "#64748b",
-                wordBreak: "break-word",
-                px: 1,
-                zIndex: 2,
-              }}
-            >
-              {u.email}
-            </Typography>
-
-            {/* ROL */}
-            <Box
-              sx={{
-                mt: 1,
-                px: 2,
-                py: 0.6,
-                borderRadius: 999,
-                bgcolor: "#f1f5f9",
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#0f172a",
-                zIndex: 2,
-              }}
-            >
-              {u.rol}
-            </Box>
-
-            {/* BOTONES */}
-            <Stack
-              direction="row"
-              spacing={1}
-              justifyContent="center"
-              mt={2}
-              zIndex={2}
-            >
-              <IconButton
-                sx={{
-                  bgcolor: "#eff6ff",
-                  "&:hover": { bgcolor: "#dbeafe" },
-                }}
-                onClick={() => handleEdit(u)}
-              >
-                <EditIcon fontSize="small" color="primary" />
-              </IconButton>
-
-              <IconButton
-                sx={{
-                  bgcolor: "#fef2f2",
-                  "&:hover": { bgcolor: "#fee2e2" },
-                }}
-                onClick={() => handleDeleteUser(u.id_usuario)}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-
-              <IconButton
-                sx={{
-                  bgcolor: "#f5f3ff",
-                  "&:hover": { bgcolor: "#ede9fe" },
-                }}
-                onClick={() => handlePermisos(u)}
-              >
-                <MenuBookIcon fontSize="small" color="success" />
-              </IconButton>
-            </Stack>
+            />
           </Box>
-        </motion.div>
-      </Box>
-    ))}
-  </AnimatePresence>
-</Box>
+        </Box>
+
+        <Box
+          sx={{
+            mb: 3,
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: 2,
+          }}
+        >
+          {/* Información */}
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={1}
+            flexWrap="wrap"
+          >
+            <Typography
+              sx={{
+                fontSize: { xs: 14, sm: 15 },
+                color: "#475569",
+                fontWeight: 500,
+              }}
+            >
+              usuarios registrados.
+            </Typography>
+
+            <Chip
+              size="small"
+              color="primary"
+              variant="outlined"
+              label={`Total: ${filtered.length}`}
+              sx={{
+                fontWeight: 700,
+                borderRadius: 2,
+              }}
+            />
+          </Box>
+
+          {/* Acciones */}
+          <Button
+            variant="outlined"
+            startIcon={<SortIcon />}
+            onClick={() =>
+              setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+            }
+            sx={{
+              minWidth: { xs: "100%", sm: 170 },
+              height: 42,
+              borderRadius: 2.5,
+              textTransform: "none",
+              fontWeight: 600,
+              borderColor: "#CBD5E1",
+              color: "#334155",
+
+              "&:hover": {
+                borderColor: "#2563EB",
+                bgcolor: "#F8FAFC",
+              },
+            }}
+          >
+            Orden {sortOrder === "asc" ? "Ascendente" : "Descendente"}
+          </Button>
+        </Box>
+
+        <Box display="flex" flexWrap="wrap" gap={2}>
+          <AnimatePresence>
+            {paginated.map((u) => (
+              <Box
+                key={u.id_usuario}
+                sx={{
+                  flex: {
+                    xs: "1 1 100%",
+                    sm: "1 1 calc(50% - 16px)",
+                    md: "1 1 calc(25% - 16px)",
+                    lg: "1 1 calc(20% - 16px)",
+                  },
+                }}
+              >
+                <motion.div
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  whileHover={{
+                    scale: 1.03,
+                    transition: { duration: 0.2 },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: "relative",
+                      textAlign: "center",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 1,
+                      px: 2.5,
+                      py: 3,
+                      borderRadius: "24px",
+                      bgcolor: "#ffffff",
+                      border: "1px solid rgba(15,23,42,0.06)",
+                      boxShadow: "0 10px 30px rgba(15,23,42,0.05)",
+                      transition: "0.3s",
+                      overflow: "hidden",
+
+                      "&:hover": {
+                        boxShadow: "0 16px 45px rgba(15,23,42,0.12)",
+                      },
+                    }}
+                  >
+                    {/* DECORACIÓN */}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: -50,
+                        right: -30,
+                        width: 140,
+                        height: 140,
+                        borderRadius: "50%",
+                        background:
+                          "linear-gradient(135deg, rgba(37,99,235,0.12), rgba(96,165,250,0.03))",
+                      }}
+                    >
+                    </Box>
+
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 16,
+                        right: 16,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.8,
+                        px: 1.8,
+                        py: 0.6,
+                        borderRadius: 999,
+                        background: "rgba(37,99,235,.10)",
+                        backdropFilter: "blur(10px)",
+                        border: "1px solid rgba(37,99,235,.20)",
+                        color: "#1D4ED8",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        boxShadow: "0 8px 20px rgba(15,23,42,.08)",
+                        zIndex: 10,
+                      }}
+                    >
+                      <VerifiedUserIcon sx={{ fontSize: 15 }} />
+                      {u.rol}
+                    </Box>
+
+                    {/* AVATAR */}
+                    <Avatar
+                      src={u.imagen || ""}
+                      sx={{
+                        width: 64,
+                        height: 64,
+                        bgcolor: "#eff6ff",
+                        color: "#2563eb",
+                        fontWeight: 900,
+                        boxShadow: "0 10px 25px rgba(37,99,235,0.15)",
+                        zIndex: 2,
+                      }}
+                    >
+                      {!u.imagen && u.nombres?.charAt(0)}
+                    </Avatar>
+
+                    {/* NOMBRE */}
+                    <Typography
+                      sx={{
+                        fontSize: 15,
+                        fontWeight: 900,
+                        color: "#0f172a",
+                        lineHeight: 1.2,
+                        zIndex: 2,
+                      }}
+                    >
+                      {u.nombres} {u.apellidos}
+                    </Typography>
+
+                    {/* DOCUMENTO */}
+                    <Typography
+                      sx={{
+                        fontSize: 13,
+                        color: "#64748b",
+                        zIndex: 2,
+                      }}
+                    >
+                      {u.tipo_identificacion}-{u.identificacion}
+                    </Typography>
+
+                    {/* EMAIL */}
+                    <Typography
+                      sx={{
+                        fontSize: 12.5,
+                        color: "#64748b",
+                        wordBreak: "break-word",
+                        px: 1,
+                        zIndex: 2,
+                      }}
+                    >
+                      {u.email}
+                    </Typography>
+
+
+
+                    {/* BOTONES */}
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      justifyContent="center"
+                      mt={2}
+                      zIndex={2}
+                    >
+                      <IconButton
+                        sx={{
+                          bgcolor: "#eff6ff",
+                          "&:hover": { bgcolor: "#dbeafe" },
+                        }}
+                        onClick={() => handleEdit(u)}
+                      >
+                        <EditIcon fontSize="small" color="primary" />
+                      </IconButton>
+
+                      <IconButton
+                        sx={{
+                          bgcolor: "#fef2f2",
+                          "&:hover": { bgcolor: "#fee2e2" },
+                        }}
+                        onClick={() => handleDeleteUser(u.id_usuario)}
+                      >
+                        <DeleteIcon fontSize="small" color="error" />
+                      </IconButton>
+
+                      <IconButton
+                        sx={{
+                          bgcolor: "#f5f3ff",
+                          "&:hover": { bgcolor: "#ede9fe" },
+                        }}
+                        onClick={() => handlePermisos(u)}
+                      >
+                        <MenuBookIcon fontSize="small" color="success" />
+                      </IconButton>
+                    </Stack>
+                  </Box>
+                </motion.div>
+              </Box>
+            ))}
+          </AnimatePresence>
+        </Box>
 
         {/* PAGINACIÓN */}
 
-          {totalPages > 1 && (
-                <Stack alignItems="center" mt={3}>
-                  <Pagination
-                    count={totalPages}
-                    page={page}
-                    onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPage(value)} 
-                    color="primary"
-                    shape="rounded"
-                    size={isMobile ? "small" : "medium"}   
-                    siblingCount={isMobile ? 0 : 1}       
-                    boundaryCount={isMobile ? 1 : 2}
-                    showFirstButton={!isMobile}            
-                    showLastButton={!isMobile}
-        
-                  />
-                </Stack>
-              )}
+        {totalPages > 1 && (
+          <Stack alignItems="center" mt={3}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_event: React.ChangeEvent<unknown>, value: number) => setPage(value)}
+              color="primary"
+              shape="rounded"
+              size={isMobile ? "small" : "medium"}
+              siblingCount={isMobile ? 0 : 1}
+              boundaryCount={isMobile ? 1 : 2}
+              showFirstButton={!isMobile}
+              showLastButton={!isMobile}
 
+            />
+          </Stack>
+        )}
+      </Box>
+
+
+      {/* MODAL PARA editar o adicionar un usuario*/}
 
       <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="md">
-  {/* HEADER */}
-  <DialogTitle sx={{ p: 0 }}>
-    <Box
-      px={3}
-      py={2}
-      sx={{
-        bgcolor: "#f9fafb",
-        borderBottom: "1px solid #e5e7eb",
-      }}
-    >
-      <Typography fontWeight={600} fontSize={18}>
-        {form.id_usuario === 0 ? "Nuevo Usuario" : "Editar Usuario"}
-      </Typography>
-      <Typography fontSize={13} color="text.secondary">
-        Completa la información del usuario
-      </Typography>
-    </Box>
-  </DialogTitle>
-
-  {/* CONTENIDO DEL FORMULARIO*/}
-<Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="md">
-  
-  {/* HEADER */}
-  <DialogTitle sx={{ p: 0 }}>
-    <Box px={3} py={2} sx={{ bgcolor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
-      <Typography fontWeight={600} fontSize={18}>
-        {form.id_usuario === 0 ? "Nuevo Usuario" : "Editar Usuario"}
-      </Typography>
-      <Typography fontSize={13} color="text.secondary">
-        Completa la información del usuario
-      </Typography>
-    </Box>
-  </DialogTitle>
-
-  <DialogContent sx={{ py: 3 }}>
-    <Box display="flex" flexDirection="column" gap={3}>
-
-      {/* PERFIL */}
-      <Box display="flex" alignItems="center" gap={2}>
-        <Avatar src={form.imagen || ""} sx={{ width: 60, height: 60 }}>
-          {form.nombres?.charAt(0)}
-        </Avatar>
-
-        <TextField
-          fullWidth
-          label="Imagen"
-          name="imagen"
-          value={form.imagen}
-          onChange={handleChange}
-          size="small"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <ImageIcon color="primary"/>
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
-
-      {/* ========================= */}
-      {/* INFO PERSONAL */}
-      {/* ========================= */}
-      <Box>
-        <Typography fontWeight={600} mb={1} display="flex" alignItems="center" gap={1}>
-          <PersonIcon fontSize="small"  color="primary"/> Información personal
-        </Typography>
-
-        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
-          
-          <FormControl fullWidth size="small">
-            <InputLabel>Tipo ID</InputLabel>
-            <Select name="tipo_identificacion" value={form.tipo_identificacion} label="Tipo ID" onChange={handleChange}>
-              <MenuItem value="CC">Cédula</MenuItem>
-              <MenuItem value="CE">Extranjería</MenuItem>
-              <MenuItem value="VISA">VISA</MenuItem>
-            </Select>
-          </FormControl>
-
-          <TextField
-            label="Identificación"
-            name="identificacion"
-            value={form.identificacion}
-            onChange={handleChange}
-            size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start" >
-                  <BadgeIcon  color="primary"/>
-                </InputAdornment>
-              ),
+        {/* HEADER */}
+        <DialogTitle sx={{ p: 0 }}>
+          <Box
+            px={3}
+            py={2}
+            sx={{
+              bgcolor: "#f9fafb",
+              borderBottom: "1px solid #e5e7eb",
             }}
-          />
+          >
+            <Typography fontWeight={600} fontSize={18}>
+              {form.id_usuario === 0 ? "Nuevo Usuario" : "Editar Usuario"}
+            </Typography>
+            <Typography fontSize={13} color="text.secondary">
+              Completa la información del usuario
+            </Typography>
+          </Box>
+        </DialogTitle>
 
-          <TextField
-            label="Nombres"
-            name="nombres"
-            value={form.nombres}
-            onChange={handleChange}
-            size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon color="primary"/>
-                </InputAdornment>
-              ),
-            }}
-          />
+        {/* CONTENIDO DEL FORMULARIO*/}
+        <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="md">
 
-          <TextField
-            label="Apellidos"
-            name="apellidos"
-            value={form.apellidos}
-            onChange={handleChange}
-            size="small"
-          />
+          {/* HEADER */}
+          <DialogTitle sx={{ p: 0 }}>
+            <Box px={3} py={2} sx={{ bgcolor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
+              <Typography fontWeight={600} fontSize={18}>
+                {form.id_usuario === 0 ? "Nuevo Usuario" : "Editar Usuario"}
+              </Typography>
+              <Typography fontSize={13} color="text.secondary">
+                Completa la información del usuario
+              </Typography>
+            </Box>
+          </DialogTitle>
 
-          <TextField
-            label="Teléfono"
-            name="telefono"
-            value={form.telefono}
-            onChange={handleChange}
-            size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PhoneIcon color="primary"/>
-                </InputAdornment>
-              ),
-            }}
-          />
+          <DialogContent sx={{ py: 3 }}>
+            <Box display="flex" flexDirection="column" gap={3}>
 
-          <TextField
-            label="Dirección"
-            name="direccion"
-            value={form.direccion}
-            onChange={handleChange}
-            size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <HomeIcon color="primary" />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
-      </Box>
 
-      {/* ========================= */}
-      {/* CUENTA */}
-      {/* ========================= */}
-      <Box>
-        <Typography fontWeight={600} mb={1} display="flex" alignItems="center" gap={1}>
-          <WorkIcon fontSize="small" color="primary" /> Cuenta de acceso
-        </Typography>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  border: "1px solid #E2E8F0",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3
+                }}
+              >
 
-        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={2}>
-          
-          <FormControl fullWidth size="small">
-            <InputLabel>Rol</InputLabel>
-            <Select name="rol" value={form.rol} label="Rol" onChange={handleChange}>
-              <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="cliente">Cliente</MenuItem>
-              <MenuItem value="cajero">Cajero</MenuItem>
-              <MenuItem value="mesero">Mesero</MenuItem>
-              <MenuItem value="cocina">Cocina</MenuItem>
-            </Select>
-          </FormControl>
+                <Avatar
+                  src={form.imagen}
+                  sx={{
+                    width: 90,
+                    height: 90,
+                    fontSize: 32
+                  }}
+                >
+                  {form.nombres?.charAt(0)}
+                </Avatar>
 
-          <TextField
-            label="Email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <EmailIcon color="primary" />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
-      </Box>
+                <Box flex={1}>
 
-    </Box>
-  </DialogContent>
+                  <Typography
+                    fontSize={15}
+                    fontWeight={700}
+                  >
+                    Imagen del perfil
+                  </Typography>
 
-  {/* FOOTER */}
-  <DialogActions sx={{ px: 3, py: 2 }}>
-    <Button onClick={() => setOpenModal(false)} color="inherit">
-      Cancelar
-    </Button>
+                  <Typography
+                    fontSize={12}
+                    color="text.secondary"
+                    mb={2}
+                  >
+                    Puede ingresar una URL para personalizar el avatar del usuario.
+                  </Typography>
+                </Box>
 
-    <Button
-      variant="contained"
-      onClick={handleSubmit}
-      sx={{ textTransform: "none", px: 3, borderRadius: 2 }}
-    >
-      Guardar
-    </Button>
-  </DialogActions>
-</Dialog>
+              </Paper>
+              <TextField
+                fullWidth
+                label="Imagen"
+                name="imagen"
+                value={form.imagen}
+                onChange={handleChange}
+                size="small"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <ImageIcon color="primary" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
 
-  {/* FOOTER */}
-  <DialogActions sx={{ px: 3, py: 2 }}>
-    <Button onClick={() => setOpenModal(false)} color="inherit">
-      Cancelar
-    </Button>
+              {/* ========================= */}
+              {/* INFO PERSONAL */}
+              {/* ========================= */}
+              <Box>
+                <Typography fontWeight={600} mb={1} display="flex" alignItems="center" gap={1}>
+                  <PersonIcon fontSize="small" color="primary" /> Información personal
+                </Typography>
 
-    <Button
-      variant="contained"
-      onClick={handleSubmit}
-      sx={{
-        textTransform: "none",
-        px: 3,
-        borderRadius: 2,
-      }}
-    >
-      Guardar
-    </Button>
-  </DialogActions>
-</Dialog>
-      </Box>
-   {/* MODAL PARA PERMISOS DE LA PERSONA O MODULOS*/}
+                <Box display="grid"
+                  gridTemplateColumns={{
+                  xs:"1fr",
+                  md:"repeat(2,1fr)"
+                  }}
+                  gap={2}>
+
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Tipo ID</InputLabel>
+                    <Select name="tipo_identificacion" value={form.tipo_identificacion} label="Tipo ID" onChange={handleChange}>
+                      <MenuItem value="CC">Cédula</MenuItem>
+                      <MenuItem value="CE">Extranjería</MenuItem>
+                      <MenuItem value="VISA">VISA</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <TextField
+                    label="Identificación"
+                    name="identificacion"
+                    value={form.identificacion}
+                    onChange={handleChange}
+                    size="small"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start" >
+                          <BadgeIcon color="primary" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        background: "#fff",
+                        height: 48,
+                        "& fieldset": { borderColor: "#E2E8F0" },
+                        "&:hover fieldset": { borderColor: "#93C5FD" },
+                        "&.Mui-focused fieldset": { borderColor: "#2563EB" }
+                      }
+                    }}
+                  />
+
+                  <TextField
+                    label="Nombres"
+                    name="nombres"
+                    value={form.nombres}
+                    onChange={handleChange}
+                    size="small"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonIcon color="primary" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        background: "#fff",
+                        height: 48,
+                        "& fieldset": { borderColor: "#E2E8F0" },
+                        "&:hover fieldset": { borderColor: "#93C5FD" },
+                        "&.Mui-focused fieldset": { borderColor: "#2563EB" }
+                      }
+                    }}
+                  />
+
+                  <TextField
+                    label="Apellidos"
+                    name="apellidos"
+                    value={form.apellidos}
+                    onChange={handleChange}
+                    size="small"
+                         sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        background: "#fff",
+                        height: 48,
+                        "& fieldset": { borderColor: "#E2E8F0" },
+                        "&:hover fieldset": { borderColor: "#93C5FD" },
+                        "&.Mui-focused fieldset": { borderColor: "#2563EB" }
+                      }
+                    }}
+                  />
+
+                  <TextField
+                    label="Teléfono"
+                    name="telefono"
+                    value={form.telefono}
+                    onChange={handleChange}
+                    size="small"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PhoneIcon color="primary" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        background: "#fff",
+                        height: 48,
+                        "& fieldset": { borderColor: "#E2E8F0" },
+                        "&:hover fieldset": { borderColor: "#93C5FD" },
+                        "&.Mui-focused fieldset": { borderColor: "#2563EB" }
+                      }
+                    }}
+                  />
+
+                  <TextField
+                    label="Dirección"
+                    name="direccion"
+                    value={form.direccion}
+                    onChange={handleChange}
+                    size="small"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <HomeIcon color="primary" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        background: "#fff",
+                        height: 48,
+                        "& fieldset": { borderColor: "#E2E8F0" },
+                        "&:hover fieldset": { borderColor: "#93C5FD" },
+                        "&.Mui-focused fieldset": { borderColor: "#2563EB" }
+                      }
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              {/* ========================= */}
+              {/* CUENTA */}
+              {/* ========================= */}
+              <Box>
+                <Typography fontWeight={600} mb={1} display="flex" alignItems="center" gap={1}>
+                  <WorkIcon fontSize="small" color="primary" /> Cuenta de acceso
+                </Typography>
+
+                <Box display="grid"
+                  gridTemplateColumns={{
+                  xs:"1fr",
+                  md:"repeat(2,1fr)"
+                  }}
+                  gap={2}>
+
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Rol</InputLabel>
+                    <Select name="rol" value={form.rol} label="Rol" onChange={handleChange}>
+                      <MenuItem value="admin">Admin</MenuItem>
+                      <MenuItem value="cliente">Cliente</MenuItem>
+                      <MenuItem value="cajero">Cajero</MenuItem>
+                      <MenuItem value="mesero">Mesero</MenuItem>
+                      <MenuItem value="cocina">Cocina</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <TextField
+                    label="Email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    size="small"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <EmailIcon color="primary" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        background: "#fff",
+                        height: 48,
+                        "& fieldset": { borderColor: "#E2E8F0" },
+                        "&:hover fieldset": { borderColor: "#93C5FD" },
+                        "&.Mui-focused fieldset": { borderColor: "#2563EB" }
+                      }
+                    }}
+                  />
+                </Box>
+              </Box>
+
+            </Box>
+          </DialogContent>
+
+          {/* FOOTER */}
+          <DialogActions sx={{ px: 3, py: 2 }}>
+            <Button onClick={() => setOpenModal(false)} color="inherit">
+              Cancelar
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              sx={{ textTransform: "none", px: 3, borderRadius: 2 }}
+            >
+              Guardar
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Dialog>
+
+
+      {/* MODAL PARA PERMISOS DE LA PERSONA O MODULOS*/}
       <Dialog
         open={openPermisos}
         onClose={() => setOpenPermisos(false)}
@@ -836,56 +1100,120 @@ const AdminUsuarios: React.FC = () => {
       >
         {/* HEADER */}
         <DialogTitle sx={{ p: 0 }}>
-          <Box
-            display="flex"
-            alignItems="center"
-            gap={2}
-            px={3}
-            py={2}
-            sx={{
-              bgcolor: "#f9fafb",
-              borderBottom: "1px solid #e5e7eb",
-            }}
-          >
-            {/* AVATAR */}
-            <Avatar
-              src={selectedUsuario?.imagen || ""}
-              sx={{ width: 50, height: 50, fontSize: 20 }}
-            >
-              {selectedUsuario?.nombres?.charAt(0)}
-            </Avatar>
+         <Box
+  sx={{
+    display: "flex",
+    flexDirection: {
+      xs: "column",
+      sm: "row",
+    },
+    alignItems: {
+      xs: "center",
+      sm: "center",
+    },
+    justifyContent: "space-between",
+    gap: 2,
+    px: { xs: 2, sm: 3 },
+    py: 2.5,
+    background: "linear-gradient(180deg,#F8FAFC,#FFFFFF)",
+    borderBottom: "1px solid #E2E8F0",
+  }}
+>
+  {/* INFORMACIÓN DEL USUARIO */}
+  <Box
+    display="flex"
+    alignItems="center"
+    gap={2}
+    width="100%"
+    minWidth={0}
+  >
+    <Avatar
+      src={selectedUsuario?.imagen || ""}
+      sx={{
+        width: { xs: 60, sm: 68 },
+        height: { xs: 60, sm: 68 },
+        fontSize: 24,
+        fontWeight: 700,
+        bgcolor: "#DBEAFE",
+        color: "#2563EB",
+        boxShadow: "0 8px 20px rgba(37,99,235,.15)",
+      }}
+    >
+      {selectedUsuario?.nombres?.charAt(0)}
+    </Avatar>
 
-            {/* INFO */}
-            <Box flex={1}>
-              <Typography fontWeight={600} fontSize={16}>
-                {selectedUsuario?.nombres} {selectedUsuario?.apellidos}
-              </Typography>
+    <Box minWidth={0} flex={1}>
+      <Typography
+        sx={{
+          fontWeight: 700,
+          fontSize: {
+            xs: 14,
+            md: 18,
+          },
+          color: "#0F172A",
+        }}
+      >
+        {selectedUsuario?.nombres} {selectedUsuario?.apellidos}
+      </Typography>
 
-              <Typography fontSize={13} color="text.secondary">
-                {selectedUsuario?.email}
-              </Typography>
+      <Typography
+        sx={{
+          mt: .4,
+          fontSize: 13,
+          color: "#64748B",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {selectedUsuario?.email}
+      </Typography>
 
-              <Typography fontSize={12} color="text.secondary">
-                {selectedUsuario?.tipo_identificacion} -{" "}
-                {selectedUsuario?.identificacion}
-              </Typography>
-            </Box>
+      <Typography
+        sx={{
+          mt: .3,
+          fontSize: 12,
+          color: "#94A3B8",
+        }}
+      >
+        {selectedUsuario?.tipo_identificacion} • {selectedUsuario?.identificacion}
+      </Typography>
+    </Box>
+  </Box>
 
-            {/* ROL */}
-            <Box
-              sx={{
-                bgcolor: "primary.main",
-                color: "#fff",
-                px: 2,
-                py: 0.5,
-                borderRadius: 2,
-                fontSize: 12,
-                fontWeight: 500,
-              }}
-            >
-              {selectedUsuario?.rol}
-            </Box>
-          </Box>
+  {/* ROL */}
+  <Box
+    sx={{
+      flexShrink: 0,
+      alignSelf: {
+        xs: "stretch",
+        sm: "center",
+      },
+    }}
+  >
+    <Chip
+      icon={<VerifiedUserIcon />}
+      label={String(selectedUsuario?.rol || "").toUpperCase()}
+      sx={{
+        width: {
+          xs: "100%",
+          sm: "auto",
+        },
+        height: 38,
+        px: 1,
+        borderRadius: 3,
+        bgcolor: "#EFF6FF",
+        color: "#1D4ED8",
+        border: "1px solid #BFDBFE",
+        fontWeight: 700,
+        fontSize: 12,
+
+        "& .MuiChip-icon": {
+          color: "#2563EB",
+        },
+      }}
+    />
+  </Box>
+</Box>
 
           {/* SUBTÍTULO */}
           <Box px={3} py={1}>

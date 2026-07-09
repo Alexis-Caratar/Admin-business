@@ -63,7 +63,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
   const [categoriaActiva, setCategoriaActiva] =
     useState<CategoriaCajero | null>(null);
   const [productos, setProductos] = useState<ProductoCajero[]>([]);
-  const [animItem, setAnimItem] = useState<{ img: string; start: DOMRect; } | null>(null);
+  const [animItem, ] = useState<{ img: string; start: DOMRect; } | null>(null);
   const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoCajero | null>(null);
   const [openExtras, setOpenExtras] = useState(false);
   const [, setExtrasSeleccionados] = useState<ProductoCajero[]>([]);
@@ -84,35 +84,6 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
   const filtered = productos.filter((p) =>
     p.nombre?.toLowerCase().includes(search.toLowerCase())
   );
-
-  const animarAlCarrito = (img: string, rect: DOMRect) => {
-    setAnimItem({ img, start: rect });
-
-    setTimeout(() => {
-      setAnimItem(null);
-    }, 700);
-  };
-
-
-  const handleAgregar = (
-    prod: ProductoCajero,
-    event?: React.MouseEvent<HTMLButtonElement | HTMLDivElement>
-  ) => {
-
-    if (event) {
-      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-      animarAlCarrito(
-        prod.imagen_plato ?? "https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
-        rect
-      );
-    }
-
-    onAgregar({
-      ...prod,
-      precio_venta: Number(prod.precio_venta ?? 0),
-    });
-
-  };
 
 
   return (
@@ -377,7 +348,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                             position: "absolute",
                             top: 8,
                             right: 8,
-                            fontSize: 12,
+                            fontSize: {xs:9,md:11},
                             fontWeight: 700,
                             height: 24,
                             px: 0.5,
@@ -408,7 +379,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                       >
                         <RestaurantIcon
                           sx={{
-                            fontSize: { xs: 20, sm: 24, md: 32 },
+                            fontSize: { xs: 18, sm: 24, md: 32 },
                             color: "#1196b7",
                           }}
                         />
@@ -467,10 +438,30 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                         size="small"
                         variant="contained"
                         startIcon={<AddShoppingCartIcon />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAgregar(prod, e);
-                        }}
+                       onClick={() => {
+                        const tieneComplementos =
+                          prod.productos_complementos &&
+                          prod.productos_complementos.length > 0;
+                        if (!tieneComplementos) {
+                          const plato = {
+                            id: prod.id,
+                            codigo_barra: prod.codigo_barra,
+                            nombre: prod.nombre,
+                            imagen: prod.imagen_plato ?? null,
+                            precio_venta: prod.precio_venta,
+                            stock_actual:prod.stock_actual,
+                            cantidad: 1,
+                            tipo: "plato",
+                          };
+
+                          onAgregar(plato as any);
+                          return;
+                        }
+
+                        setProductoSeleccionado(prod);
+                        setExtrasSeleccionados([]);
+                        setOpenExtras(true);
+                      }}
                         sx={{
                           mt: 1,
                           py: 0.8,
@@ -706,7 +697,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                     >
                       <RestaurantIcon
                         sx={{
-                          fontSize: { xs: 20, sm: 24, md: 32 },
+                          fontSize: { xs: 18, sm: 24, md: 32 },
                           color: "#1196b7",
                         }}
                       />

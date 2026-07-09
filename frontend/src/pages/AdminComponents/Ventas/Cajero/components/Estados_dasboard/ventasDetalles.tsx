@@ -1,7 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Box, Card, Typography, Stack, Avatar, Chip, Dialog, DialogTitle, DialogContent, TextField, Pagination, IconButton, Paper, DialogActions, InputAdornment, Button, MenuItem, CircularProgress,
-  Tooltip
+  Tooltip,
+  Divider
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import PrintIcon from "@mui/icons-material/Print";
@@ -13,17 +14,18 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import ScheduleIcon from "@mui/icons-material/Schedule";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import { facturaPorCaja, productosPorVenta, cancelarFactura, actualiza_venta, imprimircomanda, imprimirfactura, apibuscar_cliente } from "../../../../../../api/cajero";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { CrearClienteModal } from "../CrearClienteModal";
-
+import PersonIcon from "@mui/icons-material/Person";
+import BadgeIcon from "@mui/icons-material/Badge";
+import BlockIcon from "@mui/icons-material/Block";
 
 
 type Cliente = {
@@ -55,7 +57,7 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
   const cambioaux = montoRecibido - ventaSeleccionada?.venta_total || 0;
   const cambioSeguro = Math.max(cambioaux, 0);
   const [ventaPayload, setVentaPayload] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [openCancel, setOpenCancel] = useState(false);
   const [motivo, setMotivo] = useState("");
   const theme = useTheme();
@@ -361,7 +363,7 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
                   Ventas de Caja
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Gestión de facturación · {new Date().toLocaleDateString("es-CO")}
+                 {new Date().toLocaleDateString("es-CO")}
                 </Typography>
               </Box>
             </Stack>
@@ -391,14 +393,25 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
           />
 
           {/* Métricas */}
-          <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "repeat(2, minmax(0,1fr))", // 📱 2 por fila
+                    sm: "repeat(4, minmax(0,1fr))", // Tablet
+                    md: "repeat(4, minmax(0,1fr))", // Desktop
+                  },
+                  gap: 2,
+                  mb: 3,
+                  alignItems: "stretch",
+                }}
+              >
             {/* TODAS */}
-            <Box flex="1 1 200px">
+            <Box >
               <Card
                 onClick={() => setFiltro("todas")}
                 sx={{
-                  p: 2,
+                 p: 1.5,
                   borderRadius: 3,
                   cursor: "pointer",
                   transition: "all .2s ease",
@@ -426,11 +439,11 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
             </Box>
 
             {/* PAGADAS */}
-            <Box flex="1 1 200px">
+            <Box >
               <Card
                 onClick={() => setFiltro("pagadas")}
                 sx={{
-                  p: 2,
+                  p: 1.5,
                   borderRadius: 3,
                   cursor: "pointer",
                   transition: "all .2s ease",
@@ -458,11 +471,11 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
             </Box>
 
             {/* PENDIENTES */}
-            <Box flex="1 1 200px">
+            <Box >
               <Card
                 onClick={() => setFiltro("pendientes")}
                 sx={{
-                  p: 2,
+                  p: 1.5,
                   borderRadius: 3,
                   cursor: "pointer",
                   transition: "all .2s ease",
@@ -490,11 +503,11 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
             </Box>
 
             {/* FACTURAS CANCELADAS */}
-            <Box flex="1 1 200px">
+            <Box >
               <Card
                 onClick={() => setFiltro("cancelado")}
                 sx={{
-                  p: 2,
+                   p: 1.5,
                   borderRadius: 3,
                   cursor: "pointer",
                   transition: "all .2s ease",
@@ -519,46 +532,27 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
                   </Box>
                 </Stack>
               </Card>
-            </Box>
-
-
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Tooltip title="Refrescar ventas" arrow>
-                <IconButton
-                  onClick={cargarVentas}
-                  sx={{
-                    borderRadius: 2,
-                    bgcolor: "#f5f5f5",
-                    border: "1px solid #e0e0e0",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      bgcolor: "#e3f2fd",
-                      transform: "rotate(90deg)",
-                    },
-                  }}
-                >
-                  {loading ? (
-                    <CircularProgress size={18} />
-                  ) : (
-                    <RefreshIcon sx={{ fontSize: 20 }} />
-                  )}
-                </IconButton>
-              </Tooltip>
-            </Stack>
+            </Box>          
           </Box>
+
 
           {/* Facturas */}
           <Box
             sx={{
               display: "grid",
               gridTemplateColumns: {
-                xs: "repeat(2, 1fr)",
-                sm: "repeat(3, 1fr)",
-                md: "repeat(4, 1fr)",
-                lg: "repeat(6, 1fr)",
-                xl: "repeat(8, 1fr)",
+                xs: "repeat(2, minmax(0, 1fr))", // 📱 2 tarjetas
+                sm: "repeat(3, minmax(0, 1fr))", // Tablet
+                md: "repeat(4, minmax(0, 1fr))", // Desktop
+                lg: "repeat(5, minmax(0, 1fr))",
+                xl: "repeat(6, minmax(0, 1fr))",
               },
-              gap: { xs: 1.2, md: 1.8 },
+              gap: {
+                xs: 1,
+                sm: 1.5,
+                md: 2,
+              },
+              width: "100%",
             }}
           >
             {ventasPagina.map((venta) => {
@@ -609,108 +603,292 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
 
                       <Stack spacing={1.2}>
 
-                        {/* HEADER */}
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <Avatar
-                              sx={{
-                                width: 30,
-                                height: 30,
-                                bgcolor: isPagado ? "#c8e6c9" : "#ffe0b2"
-                              }}
-                            >
-                              <ReceiptLongIcon
-                                sx={{
-                                  fontSize: 18,
-                                  color: "#0d4993"
-                                }}
-                              />
-                            </Avatar>
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="flex-start"
+                          spacing={1}
+                        >
+                          {/* IZQUIERDA */}
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            alignItems="center"
+                            flex={1}
+                            minWidth={0}
+                          >
+                        
 
-                            <Box>
-                              <Typography fontWeight={700} fontSize={10}>
-                                {venta.numero_factura}
-                              </Typography>
-                              <Typography fontSize={10} color="text.secondary">
-                                {venta.fecha}
-                              </Typography>
+                            <Box minWidth={0}>
+                              <Stack direction="row" spacing={0.5} alignItems="center">
+                                <ReceiptLongIcon
+                                  sx={{
+                                    fontSize: {
+                                      xs: 10,
+                                      md: 13,
+                                    },
+                                    color: "#25b3eb",
+                                  }}
+                                />
+
+                                <Typography
+                                  noWrap
+                                  sx={{
+                                    fontWeight: 700,
+                                    fontSize: {
+                                      xs: 7.5,
+                                      md: 12,
+                                    },
+                                    color: "#0F172A",
+                                  }}
+                                >
+                                  {venta.numero_factura}
+                                </Typography>
+                              </Stack>
+
+                              <Stack
+                                direction="row"
+                                spacing={0.5}
+                                alignItems="center"
+                                mt={0.2}
+                              >
+                                <ScheduleIcon
+                                  sx={{
+                                    fontSize: {
+                                      xs: 9,
+                                      md: 12,
+                                    },
+                                    color: "#64748B",
+                                  }}
+                                />
+
+                                <Typography
+                                  noWrap
+                                  sx={{
+                                    fontSize: {
+                                      xs: 8,
+                                      md: 10,
+                                    },
+                                    color: "#64748B",
+                                  }}
+                                >
+                                  {venta.fecha}
+                                </Typography>
+                              </Stack>
                             </Box>
                           </Stack>
+
+                          {/* CHIP */}
                           <Chip
                             label={`${estado.icon} ${estado.label}`}
                             size="small"
                             sx={{
-                              fontSize: 10,
-                              fontWeight: 700,
+                              flexShrink: 0,
+                              alignSelf: "flex-start",
+
+                              height: {
+                                xs: 15,
+                                md: 25,
+                              },
+
+                              "& .MuiChip-label": {
+                                px: {
+                                  xs: 0.8,
+                                  md: 1.2,
+                                },
+                                fontSize: {
+                                  xs: 5,
+                                  md: 10,
+                                },
+                                fontWeight: 700,
+                              },
+
                               bgcolor: estado.color,
                               color: "#fff",
                               borderRadius: 2,
-                              px: 0.5,
-                              letterSpacing: 0.3,
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+                              boxShadow: "0 2px 6px rgba(0,0,0,.12)",
                             }}
                           />
-
                         </Stack>
+                        <Divider sx={{ my: 1, borderColor: "#0a8dff31" }} />
 
                         {/* CLIENTE */}
-                        <Box>
-                          <Typography fontSize={11} fontWeight={600} noWrap>
-                            {venta.nombre_completo}
-                          </Typography>
-                          <Typography fontSize={10} color="text.secondary" noWrap>
-                            {venta.identificacion_cliente}
-                          </Typography>
+                        <Box minWidth={0}>
+                          <Stack
+                            direction="row"
+                            spacing={0.5}
+                            alignItems="center"
+                          >
+                            <PersonIcon
+                              sx={{
+                                fontSize: {
+                                  xs: 10,
+                                  md: 13,
+                                },
+                                color: "#258beb",
+                              }}
+                            />
+
+                            <Typography
+                              noWrap
+                              sx={{
+                                fontWeight: 600,
+                                fontSize: {
+                                  xs: 8,
+                                  sm: 9,
+                                  md: 11,
+                                },
+                                color: "#0F172A",
+                              }}
+                            >
+                              {venta.nombre_completo}
+                            </Typography>
+                          </Stack>
+
+                          <Stack
+                            direction="row"
+                            spacing={0.5}
+                            alignItems="center"
+                            mt={0.2}
+                          >
+                            <BadgeIcon
+                              sx={{
+                                fontSize: {
+                                  xs: 9,
+                                  md: 12,
+                                },
+                                color: "#64748B",
+                              }}
+                            />
+
+                            <Typography
+                              noWrap
+                              sx={{
+                                fontSize: {
+                                  xs: 7,
+                                  sm: 8,
+                                  md: 10,
+                                },
+                                color: "#64748B",
+                              }}
+                            >
+                              {venta.identificacion_cliente}
+                            </Typography>
+                          </Stack>
                         </Box>
 
                         {/* TOTAL DESTACADO */}
-                        <Box
-                          sx={{
-                            borderRadius: 2,
-                            p: 1,
-                            textAlign: "center",
-                            background:
-                              venta.estado_venta === "cancelado"
-                                ? "linear-gradient(135deg,#ed0202,#f85b5b)"
-                                : isPagado
-                                  ? "linear-gradient(135deg,#2e7d32,#66bb6a)"
-                                  : "linear-gradient(135deg,#ed6c02,#ff9800)",
-                            color: "#fff"
-                          }}
-                        >
-                          <Typography fontSize={10}>Total</Typography>
-                          <Typography fontWeight={700} fontSize={14}>
-                            {formatCOP(venta.venta_total)}
-                          </Typography>
-                        </Box>
+                       <Box
+                        sx={{
+                            mt:1.5,
+                            borderRadius:3,
+                            bgcolor:"#F8FAFC",
+                            border:"1px solid #E2E8F0",
+                            py:1.2,
+                            textAlign:"center"
+                        }}
+                    ><Typography
+                        fontSize={10}
+                        color="text.secondary"
+                    >
+                    Total venta
+                    </Typography>
+
+                    <Typography
+                        fontWeight={800}
+                        sx={{
+                            fontSize:{xs:14,md:18},
+                            color:"#0F172A"
+                        }}
+                    >
+                        {formatCOP(venta.venta_total)}
+                    </Typography>
+                    </Box>
 
                         {/* INFO EXTRA */}
                         <Stack
                           direction="row"
                           justifyContent="space-between"
+                          alignItems="center"
                           sx={{
-                            bgcolor: "#f9f9f9",
+                            bgcolor: "#F8FAFC",
+                            border: "1px solid #E2E8F0",
                             borderRadius: 2,
-                            px: 1,
-                            py: 0.5
+                            px: {
+                              xs: 0.8,
+                              md: 1,
+                            },
+                            py: {
+                              xs: 0.4,
+                              md: 0.7,
+                            },
                           }}
                         >
-                          <Stack direction="row" alignItems="center" spacing={0.5}>
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={{
+                              xs: 0.3,
+                              md: 0.6,
+                            }}
+                            minWidth={0}
+                          >
                             {getMetodoPagoIcon(venta.metodo_pago)}
-                            <Typography fontSize={10} color="text.secondary">
+
+                            <Typography
+                              noWrap
+                              sx={{
+                                fontSize: {
+                                  xs: 7,
+                                  sm: 8,
+                                  md: 10,
+                                },
+                                color: "#64748B",
+                                fontWeight: 500,
+                              }}
+                            >
                               {venta.metodo_pago}
                             </Typography>
                           </Stack>
 
-                          <Typography fontSize={10}>
-                            🍽 {venta.mesa || "Sin mesa"}
+                          <Typography
+                            noWrap
+                            sx={{
+                              fontSize: {
+                                xs: 7,
+                                sm: 8,
+                                md: 10,
+                              },
+                              color: "#475569",
+                              fontWeight: 600,
+                            }}
+                          >
+                            🍽 {venta.mesa || "-"}
                           </Typography>
                         </Stack>
 
                         {/* FOOTER */}
-                        <Typography fontSize={9.5} color="text.secondary" noWrap>
-                          👤 {venta.nombre_vendedor}
-                        </Typography>
+                       <Box
+                          sx={{pt:1,
+                              borderTop:"1px dashed #E2E8F0"
+                          }}
+                      >
+
+                      <Typography
+                          noWrap
+                          sx={{
+                              color:"#64748B",
+                              fontSize:{
+                                  xs:8,
+                                  sm:9,
+                                  md:10
+                              }
+                          }}
+                      >
+                      Vendedor: {venta.nombre_vendedor}
+                      </Typography>
+
+                      </Box>
 
                       </Stack>
                     </Card>
@@ -748,25 +926,123 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
         </DialogContent>
         <DialogActions
           sx={{
-            borderTop: "1px solid #eee",
-            justifyContent: "center"
+            px: { xs: 1, sm: 2, md: 3 },
+            py: 2,
+            borderTop: "1px solid #E2E8F0",
+            bgcolor: "#F8FAFC",
           }}
         >
-          <Stack direction="row" spacing={2}>
-            <Paper sx={{ px: 3, py: 1, bgcolor: "#ffebee" }}>
-              <Typography color="error.main" fontWeight={700}>
-                Facturas canceladas: {formatCOP(metrics.facturas_canceladas)}
+          <Stack
+            direction="row"
+            spacing={{ xs: 1, sm: 2 }}
+            width="100%"
+            justifyContent="space-between"
+          >
+            {/* CANCELADAS */}
+            <Paper
+              elevation={0}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                p: { xs: 1, sm: 2 },
+                borderRadius: 3,
+                border: "1px solid #FECACA",
+                bgcolor: "#FEF2F2",
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: { xs: 9, sm: 11, md: 12 },
+                  fontWeight: 600,
+                  color: "#991B1B",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Canceladas
               </Typography>
-            </Paper>
-            <Paper sx={{ px: 3, py: 1, bgcolor: "#ffffeb" }}>
-              <Typography color="warning" fontWeight={700}>
-                Por cobrar: {formatCOP(metrics.pendiente_pago)}
+
+              <Typography
+                sx={{
+                  mt: 0.4,
+                  fontSize: { xs: 11, sm: 15, md: 18 },
+                  fontWeight: 700,
+                  color: "#DC2626",
+                }}
+              >
+                {formatCOP(metrics.facturas_canceladas)}
               </Typography>
             </Paper>
 
-            <Paper sx={{ px: 3, py: 1, bgcolor: "#e8f5e9" }}>
-              <Typography color="success.main" fontWeight={700}>
-                Vendido: {formatCOP(metrics.totalVentas)}
+            {/* POR COBRAR */}
+            <Paper
+              elevation={0}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                p: { xs: 1, sm: 2 },
+                borderRadius: 3,
+                border: "1px solid #FDE68A",
+                bgcolor: "#FFFBEB",
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: { xs: 9, sm: 11, md: 12 },
+                  fontWeight: 600,
+                  color: "#92400E",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Por cobrar
+              </Typography>
+
+              <Typography
+                sx={{
+                  mt: 0.4,
+                  fontSize: { xs: 11, sm: 15, md: 18 },
+                  fontWeight: 700,
+                  color: "#D97706",
+                }}
+              >
+                {formatCOP(metrics.pendiente_pago)}
+              </Typography>
+            </Paper>
+
+            {/* VENDIDO */}
+            <Paper
+              elevation={0}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                p: { xs: 1, sm: 2 },
+                borderRadius: 3,
+                border: "1px solid #BFDBFE",
+                bgcolor: "#EFF6FF",
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: { xs: 9, sm: 11, md: 12 },
+                  fontWeight: 600,
+                  color: "#1E40AF",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Vendido
+              </Typography>
+
+              <Typography
+                sx={{
+                  mt: 0.4,
+                  fontSize: { xs: 11, sm: 15, md: 18 },
+                  fontWeight: 700,
+                  color: "#2563EB",
+                }}
+              >
+                {formatCOP(metrics.totalVentas)}
               </Typography>
             </Paper>
           </Stack>
@@ -816,11 +1092,11 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
               </Avatar>
 
               <Box>
-                <Typography fontWeight={800} fontSize={16}>
+                <Typography fontWeight={800} sx={{ opacity: 0.9,fontSize:{xs:14,md:18} }}>
                   Factura
                 </Typography>
 
-                <Typography fontSize={12} sx={{ opacity: 0.9 }}>
+                <Typography  sx={{ opacity: 0.9,fontSize:{xs:9,md:14} }}>
                   #{ventaSeleccionada?.numero_factura}
                 </Typography>
               </Box>
@@ -839,7 +1115,8 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
                   fontWeight: 700,
                   borderRadius: 2,
                   px: 1,
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                  fontSize:{xs:8,md:14} 
                 }}
               />
 
@@ -854,16 +1131,17 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
                       setOpenCancel(true);
                     }}
                     sx={{
-                      color: "#fff",
-                      bgcolor: "rgba(255,82,82,0.2)",
+                      color: "#ede0e0",
+                      bgcolor: "rgba(237, 237, 237, 0.2)",
                       transition: "all .2s ease",
                       "&:hover": {
-                        bgcolor: "#d32f2f",
+                        bgcolor: "#ffffff",
                         transform: "scale(1.1)"
                       }
                     }}
                   >
-                    <CancelOutlinedIcon fontSize="small" />
+                    <BlockIcon sx={{color: "#DC2626",fontSize: 20}}
+                  />
                   </IconButton>
                 </Tooltip>
 

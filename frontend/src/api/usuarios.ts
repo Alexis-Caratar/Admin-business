@@ -1,9 +1,8 @@
 import axios from "./axios";
 import type { User } from "../types";
 
-export const getUsuarios = async () => {
+export const getUsuarios = async (id_negocio:any) => {
   try {
-    const id_negocio=localStorage.getItem("id_negocio") ?? "";
      const { data } = await axios.get<User[]>("/usuarios", {
       params: { id_negocio }
     });

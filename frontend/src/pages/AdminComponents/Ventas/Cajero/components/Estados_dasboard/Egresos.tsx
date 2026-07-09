@@ -11,7 +11,8 @@ import {
   CardContent,
   Divider,
   MenuItem,
-  Chip
+  Chip,
+  Avatar
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -30,13 +31,13 @@ import {
 
 type Props = {
   idUsuario: number | null;
-  id_negocio: number | null; 
+  id_negocio: number | null;
   id_caja: number | null;
   open: boolean;
   onClose: () => void;
 };
 
-export default function Egresos({ idUsuario,id_negocio, id_caja, open, onClose }: Props) {
+export default function Egresos({ idUsuario, id_negocio, id_caja, open, onClose }: Props) {
   const [descripcion, setDescripcion] = useState("");
   const [metodo_pago, setMetodoPago] = useState("EFECTIVO");
   const [monto, setMonto] = useState<number | "">("");
@@ -47,20 +48,20 @@ export default function Egresos({ idUsuario,id_negocio, id_caja, open, onClose }
   // Estados para dialogo de confirmación
   const [openConfirm, setOpenConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-    const rol = localStorage.getItem("rol");
+  const rol = localStorage.getItem("rol");
 
   useEffect(() => {
     if (!open) return;
     cargarEgresos();
   }, [open, id_negocio, id_caja]);
 
-const cargarEgresos = async () => {
-  // Si cualquiera es null, no hacemos la llamada
-  if (id_negocio === null || id_caja === null) return;
+  const cargarEgresos = async () => {
+    // Si cualquiera es null, no hacemos la llamada
+    if (id_negocio === null || id_caja === null) return;
 
-  const data = await egresosListar(id_negocio, id_caja);
-  setEgresos(data);
-};
+    const data = await egresosListar(id_negocio, id_caja);
+    setEgresos(data);
+  };
 
   const total = useMemo(() => {
     return egresos.reduce((acc, e) => acc + Number(e.monto), 0);
@@ -86,7 +87,7 @@ const cargarEgresos = async () => {
   const handleGuardar = async () => {
     if (!descripcion || !monto) return;
 
-    const payload = {idUsuario, id_negocio, id_caja, descripcion, metodo_pago, monto, observacion };
+    const payload = { idUsuario, id_negocio, id_caja, descripcion, metodo_pago, monto, observacion };
     if (editId) await egresoActualizar(editId, payload);
     else await egresoCrear(payload);
 
@@ -97,7 +98,7 @@ const cargarEgresos = async () => {
 
   const handleConfirmDelete = async () => {
     if (!deleteId) return;
-    await egresoEliminar(deleteId,Number(idUsuario));
+    await egresoEliminar(deleteId, Number(idUsuario));
     await cargarEgresos();
     setOpenConfirm(false);
   };
@@ -112,59 +113,136 @@ const cargarEgresos = async () => {
 
 
           {/* HEADER */}
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={3}
+          <Box
             sx={{
-              pb: 2,
-              borderBottom: "1px solid #f1f5f9"
+              mb: 3,
+              pb: 2.5,
+              borderBottom: "1px solid #E2E8F0",
+              display: "flex",
+              flexDirection: {
+                xs: "column",
+                sm: "row",
+              },
+              justifyContent: "space-between",
+              alignItems: {
+                xs: "stretch",
+                sm: "center",
+              },
+              gap: 2,
             }}
           >
-
-            {/* TITULO */}
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Box
+            {/* TÍTULO */}
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+            >
+              <Avatar
                 sx={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 2,
-                  bgcolor: "#fee2e2",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
+                  width: {
+                    xs: 50,
+                    md: 58,
+                  },
+                  height: {
+                    xs: 50,
+                    md: 58,
+                  },
+                  borderRadius: 3,
+                  background:
+                    "linear-gradient(135deg,#FEE2E2,#FECACA)",
+                  border: "1px solid #FCA5A5",
+                  boxShadow: "0 8px 20px rgba(220,38,38,.12)",
                 }}
               >
-                <PaymentsOutlinedIcon sx={{ color: "#dc2626" }} />
-              </Box>
+                <PaymentsOutlinedIcon
+                  sx={{
+                    color: "#DC2626",
+                    fontSize: {
+                      xs: 24,
+                      md: 28,
+                    },
+                  }}
+                />
+              </Avatar>
 
               <Box>
-                <Typography fontWeight={700} fontSize={18}>
+                <Typography
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: {
+                      xs: 16,
+                      md: 24,
+                    },
+                    color: "#0F172A",
+                    lineHeight: 1.1,
+                  }}
+                >
                   Egresos de Caja
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Registro y control de salidas de dinero
+
+                <Typography
+                  sx={{
+                    mt: 0.4,
+                    fontSize: {
+                      xs: 12,
+                      md: 14,
+                    },
+                    color: "#64748B",
+                  }}
+                >
+                  Registro y control de salidas de dinero.
                 </Typography>
               </Box>
             </Stack>
 
-            {/* BOTON */}
+            {/* BOTÓN */}
             <Button
               variant="contained"
-              startIcon={showForm ? <CloseIcon /> : <AddCircleOutlineIcon />}
+              startIcon={
+                showForm
+                  ? <CloseIcon />
+                  : <AddCircleOutlineIcon />
+              }
+              onClick={() => setShowForm(!showForm)}
               sx={{
+                width: {
+                  xs: "100%",
+                  sm: "auto",
+                },
+                minWidth: {
+                  sm: 210,
+                },
+                height: 48,
                 borderRadius: 3,
                 textTransform: "none",
-                fontWeight: 600,
-                px: 3
-              }}
-              onClick={() => setShowForm(!showForm)}
-            >
-              {showForm ? "" : "Ingresar egreso"}
-            </Button>
+                fontWeight: 700,
+                background:
+                  showForm
+                    ? "linear-gradient(135deg,#DC2626,#EF4444)"
+                    : "linear-gradient(135deg,#2563EB,#3B82F6)",
 
-          </Stack>
+                boxShadow:
+                  showForm
+                    ? "0 8px 20px rgba(220,38,38,.20)"
+                    : "0 8px 20px rgba(37,99,235,.20)",
+
+                "&:hover": {
+                  background:
+                    showForm
+                      ? "linear-gradient(135deg,#B91C1C,#DC2626)"
+                      : "linear-gradient(135deg,#1D4ED8,#2563EB)",
+
+                  transform: "translateY(-2px)",
+                  boxShadow:
+                    showForm
+                      ? "0 12px 28px rgba(220,38,38,.28)"
+                      : "0 12px 28px rgba(37,99,235,.28)",
+                },
+              }}
+            >
+              {showForm ? "Cerrar formulario" : "Nuevo egreso"}
+            </Button>
+          </Box>
 
 
           <Collapse in={showForm} timeout={300} unmountOnExit>
@@ -317,36 +395,36 @@ const cargarEgresos = async () => {
 
                   <Divider orientation="vertical" flexItem />
 
-            {rol==='admin'&&(
-              <>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setEditId(e.id);
-                      setDescripcion(e.descripcion);
-                      setMetodoPago(e.metodo_pago);
-                      setMonto(e.monto);
-                      setObservacion(e.observacion);
+                  {rol === 'admin' && (
+                    <>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setEditId(e.id);
+                          setDescripcion(e.descripcion);
+                          setMetodoPago(e.metodo_pago);
+                          setMonto(e.monto);
+                          setObservacion(e.observacion);
 
-                      // Abrir el formulario automáticamente
-                      setShowForm(true);
-                    }}
-                  >
-                    <EditOutlinedIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
+                          // Abrir el formulario automáticamente
+                          setShowForm(true);
+                        }}
+                      >
+                        <EditOutlinedIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
 
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => {
-                      setDeleteId(e.id);
-                      setOpenConfirm(true);
-                    }}
-                  >
-                    <DeleteOutlineIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                   </>
-                   )}
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          setDeleteId(e.id);
+                          setOpenConfirm(true);
+                        }}
+                      >
+                        <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
+                    </>
+                  )}
 
                 </Stack>
               </Box>
@@ -371,7 +449,7 @@ const cargarEgresos = async () => {
           >
             <Stack direction="row" spacing={1} alignItems="center">
               <PaymentsOutlinedIcon sx={{ color: "#ffffff", fontSize: 20 }} />
-              <Typography fontWeight={600}>
+              <Typography fontWeight={600} fontSize={14}>
                 Total egresos registrados
               </Typography>
             </Stack>
