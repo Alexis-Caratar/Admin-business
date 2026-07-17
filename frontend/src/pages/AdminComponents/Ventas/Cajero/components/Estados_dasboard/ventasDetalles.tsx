@@ -9,7 +9,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import SearchIcon from "@mui/icons-material/Search";
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { motion } from "framer-motion";
@@ -26,6 +26,7 @@ import { CrearClienteModal } from "../CrearClienteModal";
 import PersonIcon from "@mui/icons-material/Person";
 import BadgeIcon from "@mui/icons-material/Badge";
 import BlockIcon from "@mui/icons-material/Block";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 
 
 type Cliente = {
@@ -333,6 +334,41 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
     }
   };
 
+
+    const cards = [
+      {
+        id: "todas",
+        title: "Facturas",
+        value: ventas.length,
+        icon: <ReceiptLongIcon />,
+        color: "#2563EB",
+        bg: "#EFF6FF",
+      },
+      {
+        id: "pagadas",
+        title: "Pagadas",
+        value: metrics.totalPagadas,
+        icon: <PaymentsIcon />,
+        color: "#16A34A",
+        bg: "#F0FDF4",
+      },
+      {
+        id: "pendientes",
+        title: "Pendientes",
+        value: metrics.totalPendientes,
+        // icon: <AccessTimeRoundedIcon />,
+        color: "#D97706",
+        bg: "#FFF7ED",
+      },
+      {
+        id: "cancelado",
+        title: "Canceladas",
+        value: metrics.totalCancelado,
+        //icon: <CancelRoundedIcon />,
+        color: "#DC2626",
+        bg: "#FEF2F2",
+      },
+    ];
   return (
     <>
       {/* ================= LISTADO VENTAS ================= */}
@@ -344,35 +380,80 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
         zIndex: 1200,
       }}>
         <DialogTitle sx={{ pb: 1 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-
-            <Stack direction="row" spacing={2} alignItems="center">
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+              flexWrap: "wrap",
+              gap: 2,
+            }}
+          >
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+            >
               <Avatar
                 sx={{
-                  bgcolor: "primary.main",
-                  width: 50,
-                  height: 50,
-                  boxShadow: 2
+                  width: 54,
+                  height: 54,
+                  borderRadius: 3,
+                  background: "linear-gradient(135deg,#2563EB,#60A5FA)",
+                  boxShadow: "0 10px 20px rgba(37,99,235,.25)",
+
+                  "& svg": {
+                    fontSize: 28,
+                  },
                 }}
               >
                 <PointOfSaleIcon />
               </Avatar>
 
               <Box>
-                <Typography fontWeight={800} fontSize={18}>
-                  Ventas de Caja
+                <Typography
+                  sx={{
+                    fontSize: { xs: 20, md: 28 },
+                    fontWeight: 800,
+                    color: "#0F172A",
+                    lineHeight: 1.1,
+                  }}
+                >
+                  Ventas
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
-                 {new Date().toLocaleDateString("es-CO")}
+
+                <Typography
+                  sx={{
+                    mt: 0.4,
+                    fontSize: { xs: 12, md: 13 },
+                    color: "#64748B",
+                    fontWeight: 500,
+                  }}
+                >
+                  Gestión y seguimiento de las ventas
                 </Typography>
               </Box>
             </Stack>
+            <Button
+              variant="contained"
+              startIcon={<RefreshRoundedIcon />}
+              onClick={cargarVentas}
+              sx={{
+                borderRadius: 3,
+                px: 2.5,
+                textTransform: "none",
+                fontWeight: 700,
+                background: "linear-gradient(135deg,#2563EB,#3B82F6)",
 
-            <IconButton onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-
-          </Stack>
+                "&:hover": {
+                  background: "linear-gradient(135deg,#1D4ED8,#2563EB)",
+                },
+              }}
+            >
+              Actualizar ventas
+            </Button>
+          </Box>
         </DialogTitle>
         <DialogContent>
           {/* Búsqueda */}
@@ -392,147 +473,121 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
             }}
           />
 
-          {/* Métricas */}
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "repeat(2, minmax(0,1fr))", // 📱 2 por fila
-                    sm: "repeat(4, minmax(0,1fr))", // Tablet
-                    md: "repeat(4, minmax(0,1fr))", // Desktop
-                  },
-                  gap: 2,
-                  mb: 3,
-                  alignItems: "stretch",
-                }}
-              >
-            {/* TODAS */}
-            <Box >
-              <Card
-                onClick={() => setFiltro("todas")}
-                sx={{
-                 p: 1.5,
-                  borderRadius: 3,
-                  cursor: "pointer",
-                  transition: "all .2s ease",
-                  border: filtro === "todas" ? "2px solid #1976d2" : "1px solid #eee",
-                  background:
-                    filtro === "todas"
-                      ? "linear-gradient(135deg,#e3f2fd,#f1f8ff)"
-                      : "#fff",
-                  transform: filtro === "todas" ? "scale(1.03)" : "scale(1)",
-                  boxShadow: filtro === "todas" ? 4 : 1,
-                }}
-              >
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <ReceiptLongIcon color="primary" />
-                  <Box>
-                    <Typography fontSize={12} color="text.secondary">
-                      Facturas
-                    </Typography>
-                    <Typography fontWeight={800} fontSize={18}>
-                      {ventas.length}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Card>
-            </Box>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "repeat(2,1fr)",
+                sm: "repeat(2,1fr)",
+                md: "repeat(4,1fr)",
+              },
+              gap: 2,
+              mb: 3,
+            }}
+          >
+            {cards.map((card) => {
+              const active = filtro === card.id;
 
-            {/* PAGADAS */}
-            <Box >
-              <Card
-                onClick={() => setFiltro("pagadas")}
-                sx={{
-                  p: 1.5,
-                  borderRadius: 3,
-                  cursor: "pointer",
-                  transition: "all .2s ease",
-                  border: filtro === "pagadas" ? "2px solid #2e7d32" : "1px solid #eee",
-                  background:
-                    filtro === "pagadas"
-                      ? "linear-gradient(135deg,#e8f5e9,#f1fff5)"
-                      : "#fff",
-                  transform: filtro === "pagadas" ? "scale(1.03)" : "scale(1)",
-                  boxShadow: filtro === "pagadas" ? 4 : 1,
-                }}
-              >
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <PaymentsIcon color="success" />
-                  <Box>
-                    <Typography fontSize={12} color="text.secondary">
-                      Pagadas
-                    </Typography>
-                    <Typography fontWeight={800} fontSize={18} color="success.main">
-                      {metrics.totalPagadas}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Card>
-            </Box>
+              return (
+                <Card
+                  key={card.id}
+                  onClick={() => setFiltro(card.id)}
+                  sx={{
+                    position: "relative",
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    borderRadius: "20px",
+                    p: 2,
+                    bgcolor: "#FFFFFF",
+                    border: active
+                      ? "1px solid #93C5FD"
+                      : "1px solid rgba(15,23,42,.06)",
 
-            {/* PENDIENTES */}
-            <Box >
-              <Card
-                onClick={() => setFiltro("pendientes")}
-                sx={{
-                  p: 1.5,
-                  borderRadius: 3,
-                  cursor: "pointer",
-                  transition: "all .2s ease",
-                  border: filtro === "pendientes" ? "2px solid #d32f2f" : "1px solid #eee",
-                  background:
-                    filtro === "pendientes"
-                      ? "linear-gradient(135deg,#ffebee,#fff5f5)"
-                      : "#fff",
-                  transform: filtro === "pendientes" ? "scale(1.03)" : "scale(1)",
-                  boxShadow: filtro === "pendientes" ? 4 : 1,
-                }}
-              >
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <PaymentsIcon color="warning" />
-                  <Box>
-                    <Typography fontSize={12} color="text.secondary">
-                      Pendientes
-                    </Typography>
-                    <Typography fontWeight={800} fontSize={18} color="#ed6c02">
-                      {metrics.totalPendientes}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Card>
-            </Box>
+                    boxShadow: active
+                      ? "0 10px 24px rgba(37,99,235,.12)"
+                      : "0 4px 18px rgba(15,23,42,.05)",
 
-            {/* FACTURAS CANCELADAS */}
-            <Box >
-              <Card
-                onClick={() => setFiltro("cancelado")}
-                sx={{
-                   p: 1.5,
-                  borderRadius: 3,
-                  cursor: "pointer",
-                  transition: "all .2s ease",
-                  border: filtro === "cancelado" ? "2px solid #d32f2f" : "1px solid #eee",
-                  background:
-                    filtro === "cancelado"
-                      ? "linear-gradient(135deg,#ffebee,#fff5f5)"
-                      : "#fff",
-                  transform: filtro === "cancelado" ? "scale(1.03)" : "scale(1)",
-                  boxShadow: filtro === "cancelado" ? 4 : 1,
-                }}
-              >
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <PaymentsIcon color="error" />
-                  <Box>
-                    <Typography fontSize={12} color="text.secondary">
-                      canceladas
-                    </Typography>
-                    <Typography fontWeight={800} fontSize={18} color="#ed0202">
-                      {metrics.totalCancelado}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Card>
-            </Box>          
+                    transition: ".25s",
+
+                    "&:hover": {
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 14px 30px rgba(15,23,42,.10)",
+                    },
+                  }}
+                >
+                  {/* Decoración */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: -30,
+                      right: -30,
+                      width: 90,
+                      height: 90,
+                      borderRadius: "50%",
+                      background: card.color,
+                      opacity: .08,
+                    }}
+                  />
+
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    sx={{ position: "relative", zIndex: 2 }}
+                  >
+                    <Box>
+                      <Typography
+                        sx={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: "#64748B",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {card.title}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          mt: .4,
+                          fontSize: {
+                            xs: 20,
+                            md: 24,
+                          },
+                          fontWeight: 800,
+                          color: "#0F172A",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {card.value}
+                      </Typography>
+                    </Box>
+
+                    <Avatar
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        bgcolor: card.bg,
+                        color: card.color,
+                      }}
+                    >
+                      {card.icon}
+                    </Avatar>
+                  </Stack>
+
+                  {active && (
+                    <Box
+                      sx={{
+                        mt: 1.5,
+                        height: 4,
+                        borderRadius: 10,
+                        bgcolor: card.color,
+                      }}
+                    />
+                  )}
+                </Card>
+              );
+            })}
           </Box>
 
 
@@ -868,27 +923,31 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
                         </Stack>
 
                         {/* FOOTER */}
-                       <Box
-                          sx={{pt:1,
-                              borderTop:"1px dashed #E2E8F0"
-                          }}
-                      >
-
-                      <Typography
-                          noWrap
+                        <Box
                           sx={{
-                              color:"#64748B",
-                              fontSize:{
-                                  xs:8,
-                                  sm:9,
-                                  md:10
-                              }
+                            mt: 1.5,
+                            pt: 1,
+                            borderTop: "1px dashed #E2E8F0",
                           }}
-                      >
-                      Vendedor: {venta.nombre_vendedor}
-                      </Typography>
+                        >
 
-                      </Box>
+                          <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+
+                            <Typography
+                              fontSize={11}
+                              color="#64748B"
+                              noWrap
+                            >
+                              👤 {venta.nombre_vendedor}
+                            </Typography>
+
+                          </Stack>
+
+                        </Box>
 
                       </Stack>
                     </Card>

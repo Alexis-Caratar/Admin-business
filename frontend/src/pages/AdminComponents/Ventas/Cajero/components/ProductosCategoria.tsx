@@ -22,7 +22,6 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-import CategoryIcon from "@mui/icons-material/Category";
 import SearchIcon from "@mui/icons-material/Search";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
@@ -42,7 +41,8 @@ import type { CategoriaCajero, ProductoCajero } from "../../../../../types/cajer
 
 type Props = {
   open: boolean;
-  onClose: () => void;
+  onClose?: () => void;
+  modo?: "dialog" | "page";
   categoria?: CategoriaCajero | null;
   categorias: CategoriaCajero[];
   onAgregar: (p: ProductoCajero) => void;
@@ -51,8 +51,9 @@ type Props = {
 
 
 export const ProductosCategoriaModal: React.FC<Props> = ({
-  open,
+  open = false,
   onClose,
+  modo = "dialog",
   categoria,
   categorias,
   onAgregar
@@ -86,53 +87,71 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
   );
 
 
-  return (
-    <>
-      <Dialog
-        open={open}
-        onClose={onClose}
-        fullScreen={isMobile}
-        maxWidth="lg"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: isMobile ? 0 : 4,
-            height: isMobile ? "100%" : "90vh",
-            zIndex: 1200,
-          },
-        }} sx={{
-          zIndex: 1200,
+  const contenido = (
+  <>
+   {/* ================= HEADER ================= */}
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          px: 3,
+          py: .5,
+          bgcolor: "#FFFFFF",
+          borderBottom: "1px solid #E2E8F0",
         }}
       >
-        {/* ================= HEADER ================= */}
-        <DialogTitle
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            px: { xs: 1, md: 2 },
-            py: { xs: 0.5, md: 1.5 }, // 👈 menos alto en móvil
-            borderBottom: "1px solid #eee",
-          }}
-        >
-          <Box display="flex" alignItems="center" gap={{ xs: 0.5, md: 1 }}>
-            <AddShoppingCartIcon sx={{ fontSize: { xs: 18, md: 24 } }} />
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Avatar
+            sx={{
+              width: 46,
+              height: 46,
+              bgcolor: "#EFF6FF",
+              color: "#2563EB",
+            }}
+          >
+            <AddShoppingCartIcon />
+          </Avatar>
+
+          <Box>
+            <Typography
+              sx={{
+                fontWeight: 800,
+                fontSize: 18,
+                color: "#0F172A",
+              }}
+            >
+              Seleccionar productos
+            </Typography>
 
             <Typography
-              fontWeight={800}
-              sx={{ fontSize: { xs: 14, md: 18 } }} // 👈 texto más pequeño en móvil
+              sx={{
+                fontSize: 12,
+                color: "#64748B",
+              }}
             >
-              Seleccionar Productos
+              Elija los productos para agregar al carrito.
             </Typography>
           </Box>
+        </Stack>
 
+        {modo === "dialog" && (
           <IconButton
             onClick={onClose}
-            sx={{ p: { xs: 0.5, md: 1 } }} // 👈 botón más compacto
+            sx={{
+              bgcolor: "#F8FAFC",
+              border: "1px solid #E2E8F0",
+
+              "&:hover": {
+                bgcolor: "#EEF2FF",
+              },
+            }}
           >
-            <CloseIcon sx={{ fontSize: { xs: 25, md: 24 } }} />
+            <CloseIcon />
           </IconButton>
-        </DialogTitle>
+        )}
+
+      </DialogTitle>
 
         {/* ================= BODY ================= */}
         <DialogContent
@@ -143,100 +162,134 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
           }}
         >
           {/* ================= CATEGORÍAS ================= */}
-          <Box
+     <Box
+  sx={{
+    width: { xs: "100%", md: 290 },
+    bgcolor: "#FFFFFF",
+    borderRight: { xs: "none", md: "1px solid #E2E8F0" },
+    borderBottom: { xs: "1px solid #E2E8F0", md: "none" },
+    p: 2,
+  }}
+>
+  {/* Título */}
+  <Typography
+    sx={{
+      fontSize: 13,
+      fontWeight: 800,
+      color: "#64748B",
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      mb: 2,
+    }}
+  >
+    Categorías
+  </Typography>
+
+  <List
+    disablePadding
+    sx={{
+      display: "flex",
+      flexDirection: { xs: "row", md: "column" },
+      gap: 1,
+      overflowX: { xs: "auto", md: "visible" },
+      overflowY: "hidden",
+      "&::-webkit-scrollbar": {
+        height: 6,
+      },
+      "&::-webkit-scrollbar-thumb": {
+        bgcolor: "#CBD5E1",
+        borderRadius: 10,
+      },
+    }}
+  >
+    {categorias.map((cat) => {
+      const active = categoriaActiva?.id === cat.id;
+
+      return (
+        <ListItemButton
+          key={cat.id}
+          onClick={() => {
+            setCategoriaActiva(cat);
+            setProductos(cat.platos);
+            setSearch("");
+          }}
+          selected={active}
+          sx={{
+            minWidth: { xs: 170, md: "100%" },
+            borderRadius: 4,
+            p: 0.5,
+            bgcolor: active ? "#EFF6FF" : "#FFFFFF",
+            border: "1px solid",
+            borderColor: active ? "#3B82F6" : "#E2E8F0",
+
+            boxShadow: active
+              ? "0 8px 22px rgba(37,99,235,.12)"
+              : "0 2px 8px rgba(15,23,42,.04)",
+
+            transition: ".25s",
+
+            "&:hover": {
+              bgcolor: "#F8FAFC",
+              transform: "translateY(-2px)",
+              boxShadow: "0 10px 20px rgba(15,23,42,.08)",
+            },
+          }}
+        >
+          <Avatar
+            src={cat.imagen || undefined}
             sx={{
-              width: isMobile ? "100%" : 260,
-              borderRight: isMobile ? "none" : "1px solid #eee",
-              borderBottom: isMobile ? "1px solid #eee" : "none",
-              overflowX: isMobile ? "auto" : "hidden",
-              p: 1,
+              width: 46,
+              height: 46,
+              mr: 1.5,
+              bgcolor: active ? "#2563EB" : "#EFF6FF",
+              color: active ? "#fff" : "#2563EB",
+              fontWeight: 800,
+              border: "1px solid #DBEAFE",
             }}
           >
-            <Typography
-              fontWeight={600}
-              display="flex"
-              alignItems="center"
-              gap={1}
-              mb={1}
-            >
-              <CategoryIcon fontSize="small" />
-              Categorías
-            </Typography>
+            {!cat.imagen &&
+              cat.categoria?.charAt(0).toUpperCase()}
+          </Avatar>
 
-            <List
-              dense
+          <Box flex={1} minWidth={0}>
+            <Typography
+              noWrap
               sx={{
-                display: isMobile ? "flex" : "block",
-                gap: 0,
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#0F172A",
               }}
             >
-              {categorias.map((cat) => {
-                const active = categoriaActiva?.id === cat.id;
+              {cat.categoria}
+            </Typography>
 
-                return (
-                  <ListItemButton
-                    key={cat.id}
-                    onClick={() => {
-                      setCategoriaActiva(cat);
-                      setProductos(cat.platos);
-                      setSearch("");
-                    }}
-                    selected={active}
-                    sx={{
-                      borderRadius: 2,
-                      minWidth: isMobile ? 150 : "auto",
-                      mb: isMobile ? 0 : 0.5,
-                      "&.Mui-selected": {
-                        backgroundColor: "primary.main",
-                        color: "black",
-                      },
-                      bgcolor: active ? "primary.main" : "primary.secondary",
-                    }}
-                  >
-                    <Box sx={{ width: "100%" }}>
-
-                      {/* 🔹 FILA SUPERIOR: imagen + nombre */}
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Avatar
-                          src={cat.imagen || undefined}
-                          alt={cat.categoria}
-                          sx={{
-                            width: 28,
-                            height: 28,
-                            bgcolor: active ? "black" : "primary.main",
-                            color: active ? "primary.main" : "black",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {!cat.imagen && cat.categoria?.[0]}
-                        </Avatar>
-
-                        <Typography
-                          fontWeight={700}
-                          noWrap
-                          sx={{
-                            fontSize: { xs: 10, sm: 11, md: 12, lg: 13 },
-                          }}
-                        >
-                          {cat.categoria}
-                        </Typography>
-                      </Box>
-
-                      {/* 🔹 ABAJO: cantidad */}
-                      <Typography
-                        fontSize={10}
-                        mt={0.5}
-                        color={active ? "black" : "text.secondary"}
-                      >
-                        {cat.platos.length} platos
-                      </Typography>
-
-                    </Box>
-                  </ListItemButton>
-                );
-              })}
-            </List>
+            <Typography
+              sx={{
+                mt: .2,
+                fontSize: 11,
+                color: "#64748B",
+              }}
+            >
+              {cat.platos.length} productos
+            </Typography>
           </Box>
+
+          {active && (
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                bgcolor: "#2563EB",
+                ml: 1,
+              }}
+            />
+          )}
+        </ListItemButton>
+      );
+    })}
+  </List>
+</Box>
 
           {/* ================= PRODUCTOS ================= */}
           <Box sx={{ flex: 1, p: 2, overflowY: "auto" }}>
@@ -266,7 +319,16 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                   </InputAdornment>
                 ),
               }}
-              sx={{ mb: 2 }}
+            sx={{
+              mb: 3,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                background: "#fff",
+                "& fieldset": {
+                  borderColor: "#E2E8F0"
+                }
+              }
+            }}
             />
 
             {/* PRODUCTOS EN FLEXBOX */}
@@ -315,14 +377,13 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                       height: { xs: 160, sm: 220, md: 260 }, // altura fija para todas
                       display: "flex",
                       flexDirection: "column",
-                      borderRadius: 3,
-                      overflow: "hidden",
-                      transition: "0.2s",
-                      boxShadow: 2,
-                      "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: 5,
-                      },
+                     borderRadius:"22px",
+                       border: "1px solid rgba(15,23,42,.06)",
+                       boxShadow: "0 8px 24px rgba(15,23,42,.05)",
+                       "&:hover": {
+                         transform: "translateY(-4px)",
+                         boxShadow: "0 14px 30px rgba(15,23,42,.09)"
+                       }
                     }}
                   >
                     {/* ICONO */}
@@ -426,8 +487,11 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                         </Typography>
                         <Typography
                           fontSize={{ xs: 12, sm: 13 }}
-                          color="success.main"
                           fontWeight={800}
+                          sx={{fontSize: 16,
+                            fontWeight: 800,
+                            color: "#16A34A"
+                          }}
                         >
                           ${Number(prod.precio_venta).toLocaleString()}
                         </Typography>
@@ -550,10 +614,50 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
             }}
           />
         )}
+  </>
+  );
+
+
+
+  
+  return (
+  <>
+    {modo === "dialog" ? (
+      <Dialog
+        open={open}
+        onClose={onClose}
+        fullScreen={isMobile}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: isMobile ? 0 : 4,
+            height: isMobile ? "100%" : "90vh",
+            zIndex: 1200,
+          },
+        }}
+        sx={{ zIndex: 1200 }}
+      >
+        {contenido}
       </Dialog>
+    ) : (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: "#fff",
+          borderRadius: 3,
+          overflow: "hidden",
+        }}
+      >
+        {contenido}
+      </Box>
+    )}
 
-
-
+    {/* MODAL DE COMPLEMENTOS */}
+   
       {/* ================= MODAL ADICIONALES ================= */}
 
       <Dialog open={openExtras} onClose={() => setOpenExtras(false)}>
@@ -682,9 +786,11 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                         fontWeight: 700,
                         height: 24,
                         px: 0.5,
-                        bgcolor: "#0b3d2e",
-                        color: "#fff",
-                        borderRadius: "8px",
+                       bgcolor:"#ECFDF5",
+
+color:"#166534",
+
+border:"1px solid #BBF7D0",
                       }}
                     />
 
@@ -692,7 +798,11 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                       sx={{
                         width: { xs: 36, sm: 40, md: 60 },
                         height: { xs: 36, sm: 40, md: 60 },
-                        bgcolor: "#e0e0e0",
+                       bgcolor:"#EFF6FF",
+
+color:"#2563EB",
+
+boxShadow:"0 8px 18px rgba(37,99,235,.15)"
                       }}
                     >
                       <RestaurantIcon
@@ -726,8 +836,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
         </DialogContent>
 
       </Dialog>
-    </>
+  </>
+);
 
-
-  );
 };

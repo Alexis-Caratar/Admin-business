@@ -114,7 +114,7 @@ export const obtener = async (id) => {
   };
 };
 
-export const obtener_inventario = async (datos) => {
+export const obtener_inventario = async (datos,id_negocio) => {
   const { id, tipo } = datos;
 
   const [inventario] = await db.query(
@@ -127,9 +127,10 @@ export const obtener_inventario = async (datos) => {
     FROM inventario
     WHERE tipo = $1
     AND estado = true
+    and id_negocio=$2
     ORDER BY nombre;
     `,
-    [ tipo]
+    [ tipo,id_negocio]
   );
  
 

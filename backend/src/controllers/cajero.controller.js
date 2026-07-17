@@ -44,7 +44,7 @@ export const cerrarCaja = async (req, res) => {
 
 export const arqueo = async (req, res) => {
   try {
-    const result = await CajeroService.arqueo(req.body);
+    const result = await CajeroService.arqueo(req.body,req.user.id_negocio);
     return res.json({ ok: true, result });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });

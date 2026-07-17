@@ -18,98 +18,118 @@ export const Categorias: React.FC<Props> = ({
   const esCarrito = modo === "carrito";
 
   return (
-    <Box>
-      <Typography
-        variant="h6"
-        fontWeight="bold"
-        mb={2}
-        sx={{
-          fontSize: { xs: 16, md: 20 },
-        }}
-      >
-        Categorías
-      </Typography>
+  <Box>
+  {/* Título */}
+  <Typography
+    sx={{
+      fontSize: { xs: 14, md: 18 },
+      fontWeight: 800,
+      color: "#0F172A",
+      mb: 1.5,
+    }}
+  >
+    Categorías
+  </Typography>
 
-      {loading ? (
-        <Typography color="text.secondary">
-          Cargando categorías...
-        </Typography>
-      ) : (
-        <Box
+  {loading ? (
+    <Typography
+      sx={{
+        color: "#64748B",
+        fontSize: 13,
+      }}
+    >
+      Cargando categorías...
+    </Typography>
+  ) : (
+    <Box
+      sx={{
+        display: "grid",
+        gap: .5,
+        gridTemplateColumns: esCarrito
+          ? {
+              xs: "repeat(4,1fr)",
+              sm: "repeat(5,1fr)",
+              md: "repeat(4,1fr)",
+            }
+          : "1fr",
+      }}
+    >
+      {categorias.map((cat) => (
+        <Card
+          key={cat.id}
+          onClick={() => onOpen(cat)}
           sx={{
-            display: "grid",
-            gap: 1.2,
+            position: "relative",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: esCarrito
+              ? "column"
+              : { xs: "column", md: "row" },
 
-            // 👇 AQUÍ ESTA LA MAGIA
-            gridTemplateColumns: esCarrito
-              ? { xs: "repeat(4, 1fr)", md: "4" } // 📱 3 por fila en carrito
-              : "1fr", // Dashboard normal
+            alignItems: "center",
+            gap: esCarrito ? 0.8 : 1.5,
+            p: esCarrito ? 0.8 : 0.4,
+            borderRadius: "18px",
+            cursor: "pointer",
+            bgcolor: "#FFFFFF",
+            border: "1px solid rgba(15,23,42,.06)",
+            boxShadow: "0 4px 18px rgba(15,23,42,.05)",
+            transition: ".25s ease",
+
+            "&:hover": {
+              transform: "translateY(-3px)",
+              boxShadow: "0 12px 30px rgba(15,23,42,.10)",
+              borderColor: "#BFDBFE",
+            },
           }}
         >
-          {categorias.map((cat) => (
-            <Card
-              key={cat.id}
-              onClick={() => onOpen(cat)}
-              sx={{
-                display: "flex",
+          {/* Decoración */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: -20,
+              right: -20,
+              width: 60,
+              height: 60,
+              borderRadius: "50%",
+              background:
+                "linear-gradient(135deg,#2563EB,#60A5FA)",
+              opacity: 0.08,
+            }}
+          />
 
-                flexDirection: esCarrito
-                  ? "column"
-                  : { xs: "column", md: "row" },
+          {/* Imagen */}
+          <Avatar
+            src={cat.imagen ?? undefined}
+            sx={{
+              width: esCarrito ? 42 : 48,
+              height: esCarrito ? 42 : 48,
+              bgcolor: "#F8FAFC",
+              borderRadius: 3,
+              border: "1px solid #E2E8F0",
+              boxShadow: "0 4px 10px rgba(0,0,0,.05)",
+            }}
+          />
 
-                alignItems: "left",
-                justifyContent: "left",
-
-                p: esCarrito ? 0.8 : 1,
-                borderRadius: 3,
-                cursor: "pointer",
-                transition: "0.25s",
-                boxShadow: 2,
-                border: "1px solid #e5e5e5",
-
-                "&:hover": {
-                  boxShadow: 5,
-                  transform: "translateY(-3px)",
-                },
-              }}
-            >
-              <Avatar
-                src={cat.imagen ?? undefined}
-                sx={{
-                  width: esCarrito
-                    ? 38
-                    : { xs: 50, md: 40 },
-
-                  height: esCarrito
-                    ? 38
-                    : { xs: 50, md: 40 },
-
-                  mb: esCarrito ? 0.5 : { xs: 1, md: 0 },
-
-                  mr: esCarrito
-                    ? 0
-                    : { xs: 0, md: 2 },
-
-                  borderRadius: 2,
-                  bgcolor: "#f5f5f5",
-                }}
-              />
-
-              <Typography
-                fontSize={
-                  esCarrito
-                    ? 10
-                    : { xs: 8, md: 12 }
-                }
-                fontWeight={600}
-                textAlign="center"
-              >
-                {cat.categoria}
-              </Typography>
-            </Card>
-          ))}
-        </Box>
-      )}
+          {/* Nombre */}
+          <Typography
+            sx={{
+              flex: 1,
+              textAlign: esCarrito
+                ? "center"
+                : { xs: "center", md: "left" },
+              fontWeight: 700,
+              color: "#0F172A",
+              fontSize: esCarrito? 10: { xs: 11, md: 13 },
+              lineHeight: 1.2,
+            }}
+          >
+            {cat.categoria}
+          </Typography>
+        </Card>
+      ))}
     </Box>
+  )}
+</Box>
   );
 };

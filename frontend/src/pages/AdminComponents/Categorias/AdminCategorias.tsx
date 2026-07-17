@@ -15,6 +15,7 @@ import {
   Pagination,
   Stack,
   Paper,
+  Avatar,
 } from "@mui/material";
 
 import CategoryIcon from "@mui/icons-material/Category";
@@ -377,84 +378,191 @@ const AdminCategorias = () => {
              <Box display="flex" flexWrap="wrap" gap={3}>
            { paginated.map((c: any) => (
              
-                <Box
-                  key={c.id}
-                  sx={{
-                    flex: {
-                      xs: "  0 100%",
-                      sm: "0 0 calc(50% - 24px)",
-                      md: "0 0 calc(33.33% - 24px)",
-                      lg: "0 0 calc(25% - 24px)",
-                      xl: "0 0 calc(20% - 24px)",
-                    },
-                    minWidth: 0,
-                  }}
-                >
-                  <Card
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      transition: "transform .2s, box-shadow .2s",
-                      cursor: "pointer",
+             <Box
+               key={c.id}
+               sx={{
+                 flex: {
+                   xs: "0 0 100%",
+                   sm: "0 0 calc(50% - 16px)",
+                   md: "0 0 calc(33.33% - 16px)",
+                   lg: "0 0 calc(20% - 16px)",
+                   xl: "0 0 calc(18% - 16px)",
+                 },
+                 minWidth: 0,
+               }}
+             >
+               <Card
+                 sx={{
+                   position: "relative",
+                   overflow: "hidden",
+                   height: "100%",
+                   borderRadius: "18px",
+                   bgcolor: "#fff",
+                   border: "1px solid rgba(15,23,42,.06)",
+                   boxShadow: "0 4px 18px rgba(15,23,42,.05)",
+                   transition: "all .25s ease",
+                   cursor: "pointer",
 
-                      "&:hover": {
-                        transform: "translateY(-6px)",
-                        boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
-                      },
+                   "&:hover": {
+                     transform: "translateY(-3px)",
+                     boxShadow: "0 12px 30px rgba(15,23,42,.10)",
+                     borderColor: "#BFDBFE",
+                   },
+                 }}
+               >
+                 {/* Decoración */}
+                 <Box
+                   sx={{
+                     position: "absolute",
+                     top: -25,
+                     right: -25,
+                     width: 80,
+                     height: 80,
+                     borderRadius: "50%",
+                     background:
+                       "linear-gradient(135deg,#2563EB,#60A5FA)",
+                     opacity: 0.06,
+                   }}
+                 />
 
-                    }}
+                 {/* Imagen */}
+                 <Box
+                   onClick={() => handleOpenProductos(c.id)}
+                   sx={{
+                     pt: 2,
+                     display: "flex",
+                     justifyContent: "center",
+                   }}
+                 >
+                   {c.imagen ? (
+                     <CardMedia
+                       component="img"
+                       image={c.imagen}
+                       sx={{
+                         width: 70,
+                         height: 70,
+                         borderRadius: 3,
+                         objectFit: "cover",
+                         border: "1px solid #E2E8F0",
+                         boxShadow: "0 4px 12px rgba(0,0,0,.08)",
+                       }}
+                     />
+                   ) : (
+                     <Avatar
+                       sx={{
+                         width: 70,
+                         height: 70,
+                         bgcolor: "#EFF6FF",
+                         color: "#2563EB",
+                         fontSize: 28,
+                         fontWeight: 800,
+                         border: "1px solid #DBEAFE",
+                       }}
+                     >
+                       {c.nombre?.charAt(0).toUpperCase()}
+                     </Avatar>
+                   )}
+                 </Box>
 
-                  >
-                    <div onClick={() => handleOpenProductos(c.id)}>
-                      <CardMedia
-                        component="img"
-                        height="150"
-                        image={c.imagen || "https://via.placeholder.com/150"}
-                        sx={{ objectFit: "cover" }}
-                      />
-                    </div>
+                 <CardContent
+                   sx={{
+                     pt: 1,
+                     pb: "12px !important",
+                     px: 1.5,
+                   }}
+                 >
+                   <Typography
+                     sx={{
+                       fontSize: 14,
+                       fontWeight: 800,
+                       color: "#0F172A",
+                       textAlign: "center",
+                       mb: 0.5,
+                     }}
+                   >
+                     {c.nombre}
+                   </Typography>
 
-                    <CardContent>
-                      <Typography variant="body2" fontWeight={700}>
-                        {c.nombre}
-                      </Typography>
-                      <Typography variant="caption">{c.descripcion}</Typography>
+                   <Typography
+                     sx={{
+                       fontSize: 11,
+                       color: "#64748B",
+                       textAlign: "center",
+                       minHeight: 32,
+                       overflow: "hidden",
+                       display: "-webkit-box",
+                       WebkitLineClamp: 2,
+                       WebkitBoxOrient: "vertical",
+                     }}
+                   >
+                     {c.descripcion || "Sin descripción"}
+                   </Typography>
 
-                      <Box mt={1} display="flex" gap={1}>
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingId(c.id);
+                   {/* Botones */}
+                   <Box
+                     sx={{
+                       mt: 1.5,
+                       display: "flex",
+                       justifyContent: "center",
+                       gap: 1,
+                     }}
+                   >
+                     <IconButton
+                       size="small"
+                       onClick={(e) => {
+                         e.stopPropagation();
 
-                            setForm({
-                              nombre: c.nombre || "",
-                              descripcion: c.descripcion || "",
-                              imagen: c.imagen || "",
-                              activo: c.activo ?? 1,
-                            });
+                         setEditingId(c.id);
 
-                            setOpenModal(true);
-                          }}
-                        >
-                          <EditIcon />
-                        </IconButton>
+                         setForm({
+                           nombre: c.nombre || "",
+                           descripcion: c.descripcion || "",
+                           imagen: c.imagen || "",
+                           activo: c.activo ?? 1,
+                         });
 
-                        <IconButton
-                          color="error"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(c.id);
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Box>
-           
+                         setOpenModal(true);
+                       }}
+                       sx={{
+                         width: 34,
+                         height: 34,
+                         bgcolor: "#EFF6FF",
+                         color: "#2563EB",
+                         border: "1px solid #DBEAFE",
+
+                         "&:hover": {
+                           bgcolor: "#DBEAFE",
+                         },
+                       }}
+                     >
+                       <EditIcon sx={{ fontSize: 18 }} />
+                     </IconButton>
+
+                     <IconButton
+                       size="small"
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         handleDelete(c.id);
+                       }}
+                       sx={{
+                         width: 34,
+                         height: 34,
+                         bgcolor: "#FEF2F2",
+                         color: "#DC2626",
+                         border: "1px solid #FECACA",
+
+                         "&:hover": {
+                           bgcolor: "#FEE2E2",
+                         },
+                       }}
+                     >
+                       <DeleteIcon sx={{ fontSize: 18 }} />
+                     </IconButton>
+                   </Box>
+                 </CardContent>
+               </Card>
+             </Box>
+
 
             ))}
    </Box>

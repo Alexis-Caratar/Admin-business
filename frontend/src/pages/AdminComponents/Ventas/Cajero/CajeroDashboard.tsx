@@ -1,6 +1,6 @@
 /* ---------- /src/pages/CajeroDashboard.tsx ---------- */
 import React, { useEffect, useState } from "react";
-import {  Box, Typography, Stack, Chip, Button, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog, DialogContent, Paper, DialogActions } from "@mui/material";
+import { Box, Typography, Stack, Chip, Button, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog, DialogContent, Paper, DialogActions, Avatar, Divider } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import type { ProductoCajero, CategoriaCajero, Caja, Mesa } from "../../../../types/cajero";
 import { apiListarProductos, apiAbrirCaja, apiArqueoCaja, apiCerrarCaja, estado_caja, finalizar_venta } from "../../../../api/cajero";
@@ -52,12 +52,12 @@ export const CajeroDashboard: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [openVentaRegistrada, setOpenVentaRegistrada] = useState(false);
   const [ventaPayload, setVentaPayload] = useState<any>(null);
-  const [showStats, setShowStats] = useState(false); // por defecto oculto
+  const [showStats, setShowStats] = useState(true); // por defecto muestra
   const idUsuario = localStorage.getItem("id_usuario");
   const id_negocio = localStorage.getItem("id_negocio");
   const nombreuser = localStorage.getItem("nombre");
   const [openVentasDetalles, setOpenVentasDetalles] = useState(false);
-  const [animItem, setAnimItem] = useState<AnimItem | null>(null);
+  const [animItem, ] = useState<AnimItem | null>(null);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
   const abrirCarrito = () => {
     setOpenCarrito(true);
@@ -65,39 +65,39 @@ export const CajeroDashboard: React.FC = () => {
   const cerrarCarrito = () => setOpenCarrito(false);
 
   useEffect(() => {
-  const ws = new WebSocket(import.meta.env.VITE_WS_URL);
-  ws.onopen = () => {
-    ws.send(JSON.stringify({tipo: "suscribirse_mesas",id_negocio }));
-    ws.send(JSON.stringify({tipo: "suscribirse_caja",id_usuario: idUsuario}));
-  };
-  ws.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-    // MESAS
-    if (msg.tipo === "mesas") {setMesas(msg.mesas);}
-    // CAJA
-    if (msg.tipo === "actualizar_caja") {
-      const c = msg.caja;
-      if (!c) return;
-      setCaja(c);
-      setCajaAbierta(c.estado === "ABIERTA");
-      setIdCaja(c.id);
+    const ws = new WebSocket(import.meta.env.VITE_WS_URL);
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ tipo: "suscribirse_mesas", id_negocio }));
+      ws.send(JSON.stringify({ tipo: "suscribirse_caja", id_usuario: idUsuario }));
+    };
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      // MESAS
+      if (msg.tipo === "mesas") { setMesas(msg.mesas); }
+      // CAJA
       if (msg.tipo === "actualizar_caja") {
         const c = msg.caja;
         if (!c) return;
         setCaja(c);
         setCajaAbierta(c.estado === "ABIERTA");
         setIdCaja(c.id);
-        if (c.estado === "ABIERTA") {
-          setMontoApertura(String(c.monto_inicial));
-        } else {
-          setMontoApertura("");
+        if (msg.tipo === "actualizar_caja") {
+          const c = msg.caja;
+          if (!c) return;
+          setCaja(c);
+          setCajaAbierta(c.estado === "ABIERTA");
+          setIdCaja(c.id);
+          if (c.estado === "ABIERTA") {
+            setMontoApertura(String(c.monto_inicial));
+          } else {
+            setMontoApertura("");
+          }
         }
       }
-    }
-  };
-  ws.onclose = () => console.log("WS cerrado");
-  return () => ws.close();
-}, [id_negocio, idUsuario]);
+    };
+    ws.onclose = () => console.log("WS cerrado");
+    return () => ws.close();
+  }, [id_negocio, idUsuario]);
 
   const checkCaja = async () => {
     try {
@@ -125,91 +125,91 @@ export const CajeroDashboard: React.FC = () => {
 
 
   useEffect(() => {
-  let mounted = true;
-  const load = async () => {
-    if (!mounted) return;
-    await cargarCategorias();
-  };
-  load();
-  return () => {
-    mounted = false;
-  };
-}, []);
+    let mounted = true;
+    const load = async () => {
+      if (!mounted) return;
+      await cargarCategorias();
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-const cargarCategorias = async () => {
-  try {
-    setLoadingCategorias(true);
-    const res = await apiListarProductos(id_negocio);
-    let data: any[] = [];
+  const cargarCategorias = async () => {
+    try {
+      setLoadingCategorias(true);
+      const res = await apiListarProductos(id_negocio);
+      let data: any[] = [];
 
-    if (res && res.data) {
-      if (Array.isArray(res.data)) data = res.data;
-      else if (res.data.ok && res.data.productos) data = res.data.productos;
-      else if (res.data.productos) data = res.data.productos;
+      if (res && res.data) {
+        if (Array.isArray(res.data)) data = res.data;
+        else if (res.data.ok && res.data.productos) data = res.data.productos;
+        else if (res.data.productos) data = res.data.productos;
+      }
+      setCategorias(data || []);
+    } catch (err) {
+      console.error("Error cargando categorías y productos:", err);
+    } finally {
+      setLoadingCategorias(false);
     }
-    setCategorias(data || []);
-  } catch (err) {
-    console.error("Error cargando categorías y productos:", err);
-  } finally {
-    setLoadingCategorias(false);
-  }
-};
+  };
 
 
- const addCart = (p: ProductoCajero) => {
-  setCarrito((prev) => {
-    const item = prev.find((x) => x.id === p.id);
-    const stock = Number(p.stock_actual ?? 999);
-    const cantidadActual = item?.cantidad ?? 0;
+  const addCart = (p: ProductoCajero) => {
+    setCarrito((prev) => {
+      const item = prev.find((x) => x.id === p.id);
+      const stock = Number(p.stock_actual ?? 999);
+      const cantidadActual = item?.cantidad ?? 0;
 
-    if (cantidadActual >= stock) {
-      toastr.error(`No hay más unidades disponibles de "${p.nombre}".`);      return prev;
-    }else{
-         toastr.success(`${p.nombre} agregado`);
+      if (cantidadActual >= stock) {
+        toastr.error(`No hay más unidades disponibles de "${p.nombre}".`); return prev;
+      } else {
+        toastr.success(`${p.nombre} agregado`);
 
-    }
+      }
 
-    if (item) {
+      if (item) {
+        return prev.map((x) =>
+          x.id === p.id
+            ? { ...x, cantidad: x.cantidad + 1 }
+            : x
+        );
+      }
+      return [...prev, { ...p, cantidad: 1 }];
+    });
+  };
+  const sumarCantidad = (id: number) => {
+    setCarrito((prev) => {
+      const item = prev.find((x) => x.id === id);
+      if (!item) return prev;
+
+      const stock = Number(item.stock_actual ?? 0);
+
+      if (item.cantidad >= stock) {
+        toastr.error(`No hay más unidades disponibles de "${item.nombre}".`);
+        return prev;
+      }
+
       return prev.map((x) =>
-        x.id === p.id
+        x.id === id
           ? { ...x, cantidad: x.cantidad + 1 }
           : x
       );
-    }
-    return [...prev, { ...p, cantidad: 1 }];
-  });
-};
-const sumarCantidad = (id: number) => {
-  setCarrito((prev) => {
-    const item = prev.find((x) => x.id === id);
-    if (!item) return prev;
+    });
+  };
 
-    const stock = Number(item.stock_actual ?? 0);
-
-    if (item.cantidad >= stock) {
-    toastr.error(`No hay más unidades disponibles de "${item.nombre}".`);
-      return prev;
-    }
-
-    return prev.map((x) =>
-      x.id === id
-        ? { ...x, cantidad: x.cantidad + 1 }
-        : x
+  const restarCantidad = (id: number) => {
+    setCarrito((prev) =>
+      prev
+        .map((item) =>
+          item.id === id
+            ? { ...item, cantidad: item.cantidad - 1 }
+            : item
+        )
+        .filter((item) => item.cantidad > 0)
     );
-  });
-};
-
-const restarCantidad = (id: number) => {
-  setCarrito((prev) =>
-    prev
-      .map((item) =>
-        item.id === id
-          ? { ...item, cantidad: item.cantidad - 1 }
-          : item
-      )
-      .filter((item) => item.cantidad > 0)
-  );
-};
+  };
 
 
   const removeItem = (id: number) => {
@@ -218,12 +218,12 @@ const restarCantidad = (id: number) => {
     );
   };
 
-const clearCarrito = () => {
-  setCarrito([]);
-};
-const clearMesa = () => {
-  setMesaSeleccionada(null);
-};
+  const clearCarrito = () => {
+    setCarrito([]);
+  };
+  const clearMesa = () => {
+    setMesaSeleccionada(null);
+  };
 
   //Finalizar venta
   const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
@@ -236,19 +236,19 @@ const clearMesa = () => {
     const total = subtotal - descuento + impuesto;
 
     const payload = {
-      idUsuario:idUsuario,
-      nombre_vendedor:nombreuser,
+      idUsuario: idUsuario,
+      nombre_vendedor: nombreuser,
       id_negocio: id_negocio,
       id_cliente: cliente ? cliente : 25,
       id_caja: idCaja,
       id_mesa: mesaSeleccionada?.id,
-      mesa:mesaSeleccionada?.nombre,
+      mesa: mesaSeleccionada?.nombre,
       subtotal,
       descuento,
       descuento_porcentaje: 0,
       impuesto,
       total,
-      estado: "activa", 
+      estado: "activa",
       nota: datos_adicionales.nota,
       metodo_pago: datos_adicionales.metodo_pago,
       monto_pagado: total,
@@ -280,29 +280,29 @@ const clearMesa = () => {
       }
     } catch (err) {
       console.error("Error finalizando venta:", err);
-    }finally {
-    setLoadingCategorias(false);
-  }
+    } finally {
+      setLoadingCategorias(false);
+    }
   };
   //aperturar la caja 
-const abrirCajaReal = async (payload: any) => {
-  try {
-    const { data } = await apiAbrirCaja({
-      id_usuario: idUsuario,
-      monto_inicial: payload.monto_inicial,
-      inventario: payload.inventario 
-    });
+  const abrirCajaReal = async (payload: any) => {
+    try {
+      const { data } = await apiAbrirCaja({
+        id_usuario: idUsuario,
+        monto_inicial: payload.monto_inicial,
+        inventario: payload.inventario
+      });
 
-    if (data?.ok) {
-      setCajaAbierta(true);      
-      setCaja(data.result);
-      setIdCaja(data.result.id);
+      if (data?.ok) {
+        setCajaAbierta(true);
+        setCaja(data.result);
+        setIdCaja(data.result.id);
+      }
+
+    } catch (err) {
+      console.error("Error abrirCajaReal:", err);
     }
-
-  } catch (err) {
-    console.error("Error abrirCajaReal:", err);
-  }
-};
+  };
 
 
 
@@ -316,41 +316,41 @@ const abrirCajaReal = async (payload: any) => {
     }
   };
 
-const cerrarCajaReal = async (cierreData: any) => {
-  if (!idCaja) {
-    console.error("No hay una caja abierta para cerrar.");
-    return;
-  }
-
-  try {
-    const { dinero_esperado, dinero_contado, diferencia, base_caja,venta_libre, observacion } = cierreData;
-
-    const { data } = await apiCerrarCaja({
-      id_caja: idCaja,
-      monto_final: dinero_contado,
-      dinero_esperado,
-      base_caja,
-      venta_libre,
-      diferencia,
-      nota: observacion,
-      estado: "CERRADA"
-    });
-
-    if (data?.ok) {
-      // Limpiar estados locales
-      setCajaAbierta(false);
-      setVentas([]);
-      setCarrito([]);
-      setMontoApertura("");
-      setIdCaja(null);
-      setModalCierre(false);
-      checkCaja(); // refresca la información
+  const cerrarCajaReal = async (cierreData: any) => {
+    if (!idCaja) {
+      console.error("No hay una caja abierta para cerrar.");
+      return;
     }
 
-  } catch (err) {
-    console.error("Error cerrarCajaReal:", err);
-  }
-};
+    try {
+      const { dinero_esperado, dinero_contado, diferencia, base_caja, venta_libre, observacion } = cierreData;
+
+      const { data } = await apiCerrarCaja({
+        id_caja: idCaja,
+        monto_final: dinero_contado,
+        dinero_esperado,
+        base_caja,
+        venta_libre,
+        diferencia,
+        nota: observacion,
+        estado: "CERRADA"
+      });
+
+      if (data?.ok) {
+        // Limpiar estados locales
+        setCajaAbierta(false);
+        setVentas([]);
+        setCarrito([]);
+        setMontoApertura("");
+        setIdCaja(null);
+        setModalCierre(false);
+        checkCaja(); // refresca la información
+      }
+
+    } catch (err) {
+      console.error("Error cerrarCajaReal:", err);
+    }
+  };
   const openCategoria = (categoria: CategoriaCajero) => {
     setCategoriaSeleccionada(categoria);
     setModalProductosOpen(true);
@@ -361,144 +361,251 @@ const cerrarCajaReal = async (cierreData: any) => {
   };
 
 
-    // utils/format.ts
-    const formatCOP = (value: number) =>
-      new Intl.NumberFormat("es-CO", {
-        style: "currency",
-        currency: "COP",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(value);
+  // utils/format.ts
+  const formatCOP = (value: number) =>
+    new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
 
-      
-      const animarAlCarrito = (img: string, rect: DOMRect) => {
-  setAnimItem({ img, start: rect });
-
-  setTimeout(() => {
-    setAnimItem(null);
-  }, 700);
-};
-
-
-
-if (loadingCategorias ) {
-  return <Loader text="Cargando ..." />;
-}
+  if (loadingCategorias) {
+    return <Loader text="Cargando ..." />;
+  }
   return (
-    
+
     <Box >
 
-    <Box
-  onClick={() => setShowStats(prev => !prev)}
-  sx={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 4,
-    boxShadow: "0px 4px 20px rgba(0,0,0,0.12)",
-    p: 1.5,
-    backgroundColor: cajaAbierta ? "success.main" : "error.main",
-    color: "white",
-    cursor: "pointer",
-    userSelect: "none",
-    transition: "all 0.25s ease",
-
-    "&:hover": {
-      transform: "translateY(-2px)",
-      boxShadow: "0px 8px 25px rgba(0,0,0,0.2)"
-    }
-  }}
->
-  {/* Lado izquierdo */}
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center"
-    }}
-  >
-    <PersonIcon sx={{ mr: 1 }} />
-    <Typography variant="h6" fontWeight="bold">
-      Perfil del Cajero
-    </Typography>
-  </Box>
-
-  {/* Lado derecho */}
-  {showStats ? <VisibilityOffIcon /> : <VisibilityIcon />}
-</Box>
-
-{/* === PANEL SUPERIOR DE CAJA === */}
- {cajaAbierta && (
-      <CajaPanel
-        showStats={showStats}
-        cajaAbierta={cajaAbierta}
-        caja={caja}
-        formatCOP={formatCOP}
-        onVentas={() => setOpenVentasDetalles(true)}
-        onEgresos={() => setOpenEgresos(true)}
-        onArqueo={() => {
-          setModalArqueo(true);
-          cargarArqueo();
-        }}
-        onCerrar={() =>{ setModalCierre(true)
-             cargarArqueo();
-        }
-        }
-      />
- )}
-
-      {/* === CONTENIDO PRINCIPAL === */}
-      <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
-        {/* === Categorías === */}
-        <Box
-          sx={{
-            width: { xs: "35%", sm: "35%", md: "30%" },
-            borderRight: { xs: "none", md: "1px solid #e0e0e0" },
-            pr: { xs: 0, md: 1 },
-            mb: { xs: 2, md: 0 }, // margen inferior en móvil
-            display: "flex",
-            flexDirection: "column",
-            overflowY: "auto",
-            maxHeight: "100%",
-          }}
-        >
-          <Categorias
-            categorias={categorias}
-            loading={loadingCategorias}
-            onOpen={openCategoria}
-             modo="dashboard"
-          />
-        </Box>
-        {/* === MESAS ESTABLECIMIENTO === */}
       <Box
+        onClick={() => setShowStats((prev) => !prev)}
         sx={{
-          width: { xs: "100%", md: "80%" },
-          px: 1,
+          position: "relative",
+          overflow: "hidden",
           display: "flex",
-          flexDirection: "column",
-          overflowY: "auto",
+          alignItems: "center",
+          justifyContent: "space-between",
+          p: 0.5,
+          mb:1,
+          borderRadius: "22px",
+          bgcolor: "#fff",
+          border: "1px solid rgba(15,23,42,.06)",
+          boxShadow: "0 8px 24px rgba(15,23,42,.05)",
+          cursor: "pointer",
+          transition: ".25s",
+
+          "&:hover": {
+            transform: "translateY(-3px)",
+            boxShadow: "0 14px 35px rgba(15,23,42,.09)",
+          },
         }}
       >
-        {mesas.length > 0 ? (
-          <Mesas
-            idUsuario={Number(idUsuario) || 0}
-            id_negocio={Number(id_negocio) || 0}
-            mesas={mesas}
-            mesaSeleccionada={mesaSeleccionada}
-            onSelect={(m) =>
-              setMesaSeleccionada((prev) =>
-                prev?.id === m?.id ? null : m
-              )
-            }
+        {/* Decoración */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: -45,
+            right: -45,
+            width: 120,
+            height: 120,
+            borderRadius: "50%",
+            background: cajaAbierta
+              ? "linear-gradient(135deg,#16A34A,#4ADE80)"
+              : "linear-gradient(135deg,#DC2626,#F87171)",
+            opacity: .08,
+          }}
+        />
+
+        {/* Información */}
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          sx={{ zIndex: 2 }}
+        >
+          <Avatar
+            sx={{
+              width: 52,
+              height: 52,
+              background: cajaAbierta
+                ? "linear-gradient(135deg,#16A34A,#4ADE80)"
+                : "linear-gradient(135deg,#DC2626,#F87171)",
+              boxShadow: "0 10px 20px rgba(0,0,0,.10)",
+            }}
+          >
+            <PersonIcon />
+          </Avatar>
+
+          <Box>
+            <Typography
+              sx={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#64748B",
+                textTransform: "uppercase",
+                letterSpacing: .6,
+              }}
+            >
+              Cajero
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: "#0F172A",
+                lineHeight: 1.2,
+              }}
+            >
+              Perfil del Cajero
+            </Typography>
+
+
+            <Typography
+              sx={{
+                mt: .4,
+                fontSize: 12,
+                color: "#text.secondary",
+              }}
+            >
+              {cajaAbierta
+                ? "Caja activa • Click para ver información"
+                : "Caja cerrada • Click para ver información"}
+            </Typography>
+          </Box>
+        </Stack>
+
+        {/* Estado + Acción */}
+        <Stack
+          spacing={1}
+          alignItems="flex-end"
+          sx={{ zIndex: 2 }}
+        >
+          <Chip
+            size="small"
+            label={cajaAbierta ? "CAJA ABIERTA" : "CAJA CERRADA"}
+            sx={{
+              fontWeight: 700,
+              borderRadius: "8px",
+              bgcolor: cajaAbierta ? "#DCFCE7" : "#FEE2E2",
+              color: cajaAbierta ? "#166534" : "#991B1B",
+            }}
           />
-        ) : (
-          <Categorias
-                  categorias={categorias}
-                  loading={loadingCategorias}
-                  onOpen={openCategoria}
-                  modo="dashboard"
-                />
-        )}
+
+          <Avatar
+            sx={{
+              width: 38,
+              height: 38,
+              bgcolor: "#F8FAFC",
+              color: "#64748B",
+              transition: ".2s",
+
+              "&:hover": {
+                bgcolor: "#EFF6FF",
+                color: "#2563EB",
+              },
+            }}
+          >
+            {showStats ? <VisibilityOffIcon /> : <VisibilityIcon />}
+          </Avatar>
+        </Stack>
       </Box>
+
+      {/* === PANEL SUPERIOR DE CAJA === */}
+      {cajaAbierta && (
+        <CajaPanel
+          showStats={showStats}
+          cajaAbierta={cajaAbierta}
+          caja={caja}
+          formatCOP={formatCOP}
+          onVentas={() => setOpenVentasDetalles(true)}
+          onEgresos={() => setOpenEgresos(true)}
+          onArqueo={() => {
+            setModalArqueo(true);
+            cargarArqueo();
+          }}
+          onCerrar={() => {
+            setModalCierre(true)
+            cargarArqueo();
+          }
+          }
+        />
+      )}
+      <Divider
+        sx={{
+          my: 2,
+          color: "#94A3B8",
+          fontSize: 11,
+          fontWeight: 700,
+          textTransform: "uppercase",
+
+          "&::before, &::after": {
+            borderColor: "rgba(15,23,42,.08)",
+          },
+        }}
+      >
+        Panel de ventas
+      </Divider>
+      {/* === CONTENIDO PRINCIPAL === */}
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0}}>
+        {mesas.length > 0 ? (
+          <>
+            {/* === Categorías === */}
+            <Box
+              sx={{
+                width: { xs: "35%", sm: "35%", md: "30%" },
+                borderRight: { xs: "none", md: "1px solid #e0e0e0" },
+                pr: { xs: 0, md: 1 },
+                mb: { xs: 2, md: 2 },
+                display: "flex",
+                flexDirection: "column",
+                overflowY: "auto",
+                maxHeight: "100%",
+              }}
+            >
+              <Categorias
+                categorias={categorias}
+                loading={loadingCategorias}
+                onOpen={openCategoria}
+                modo="dashboard"
+              />
+            </Box>
+
+            {/* === Mesas === */}
+            <Box
+              sx={{
+                width: { xs: "100%", md: "80%" },
+                px: 1,
+                display: "flex",
+                flexDirection: "column",
+                overflowY: "auto",
+              }}
+            >
+              <Mesas
+                idUsuario={Number(idUsuario) || 0}
+                id_negocio={Number(id_negocio) || 0}
+                mesas={mesas}
+                mesaSeleccionada={mesaSeleccionada}
+                onSelect={(m) =>
+                  setMesaSeleccionada((prev) =>
+                    prev?.id === m?.id ? null : m
+                  )
+                }
+              />
+            </Box>
+          </>
+        ) : (
+
+          <ProductosCategoriaModal
+            modo="page"
+            open={modalProductosOpen}
+            onClose={closeCategoria}
+            categoria={categoriaSeleccionada}
+            categorias={categorias}
+            onAgregar={addCart}
+          />
+
+        )}
 
         {/* === BOTÓN ABRIR CARRITO EN DESKTOP === */}
         {!openCarrito && !isMobile && (
@@ -520,17 +627,17 @@ if (loadingCategorias ) {
               onClick={abrirCarrito}
               sx={{ position: "relative" }}
             >
-             <Badge
-            badgeContent={carrito.reduce((total, item) => total + item.cantidad, 0)}
-            color="error"
-            sx={{
-              "& .MuiBadge-badge": {
-                fontWeight: "bold",
-              },
-            }}
-          >
-            <ShoppingCartIcon sx={{ mr: 1 }} />
-          </Badge>
+              <Badge
+                badgeContent={carrito.reduce((total, item) => total + item.cantidad, 0)}
+                color="error"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    fontWeight: "bold",
+                  },
+                }}
+              >
+                <ShoppingCartIcon sx={{ mr: 1 }} />
+              </Badge>
               Ver Carrito
             </Fab>
 
@@ -547,7 +654,7 @@ if (loadingCategorias ) {
             }}
           >
             <Badge badgeContent={carrito.reduce((total, item) => total + item.cantidad, 0)}
-               color="error">
+              color="error">
               <Fab color="primary" onClick={abrirCarrito}>
                 <ShoppingCartIcon />
               </Fab>
@@ -556,184 +663,184 @@ if (loadingCategorias ) {
         )}
 
         {/* === DRAWER / CARRITO ESCRITORIO === */}
-      <Drawer
-  anchor="right"
-  open={openCarrito && !isMobile}
-  onClose={() => setOpenCarrito(false)}
-  sx={{
-    "& .MuiDrawer-paper": { width: 400, p: 2, boxSizing: "border-box" },
-  }}
->
-        <Carrito
-          carrito={carrito}
-          onRemove={removeItem}
-          onClear={clearCarrito}
-          onAdd={sumarCantidad}
-          onSub={restarCantidad}
-          onFinalizar={(c, p) => {finalizarVenta(c, p);setOpenCarrito(false);}}
-          mesaSeleccionada={mesaSeleccionada}
-          onClearMesa={clearMesa} 
-          categorias={categorias}
-          onOpenCategoria={(categoria) => {setOpenCarrito(false);openCategoria(categoria);}}
-          loadingCategorias={loadingCategorias}
-          clienteSeleccionado={clienteSeleccionado}
-          setClienteSeleccionado={setClienteSeleccionado}
-        />
-      </Drawer>
+        <Drawer
+          anchor="right"
+          open={openCarrito && !isMobile}
+          onClose={() => setOpenCarrito(false)}
+          sx={{
+            "& .MuiDrawer-paper": { width: 400, p: 2, boxSizing: "border-box" },
+          }}
+        >
+          <Carrito
+            carrito={carrito}
+            onRemove={removeItem}
+            onClear={clearCarrito}
+            onAdd={sumarCantidad}
+            onSub={restarCantidad}
+            onFinalizar={(c, p) => { finalizarVenta(c, p); setOpenCarrito(false); }}
+            mesaSeleccionada={mesaSeleccionada}
+            onClearMesa={clearMesa}
+            categorias={categorias}
+            onOpenCategoria={(categoria) => { setOpenCarrito(false); openCategoria(categoria); }}
+            loadingCategorias={loadingCategorias}
+            clienteSeleccionado={clienteSeleccionado}
+            setClienteSeleccionado={setClienteSeleccionado}
+          />
+        </Drawer>
 
         {/* === CARRITO MÓVIL === */}
         <Box sx={{ display: { xs: "block", md: "none" } }}>
           {isMobile && (
-        <CarritoMobile
-          open={openCarrito}
-          onClose={cerrarCarrito}
-          carrito={carrito}
-          onRemove={removeItem}
-          onClear={clearCarrito}
-          onAdd={sumarCantidad}
-          onSub={restarCantidad}
-          onFinalizar={(c, p) => {finalizarVenta(c, p);setOpenCarrito(false);}}
-          mesaSeleccionada={mesaSeleccionada}
-          onClearMesa={clearMesa} 
-          categorias={categorias}
-          onOpenCategoria={(categoria) => {setOpenCarrito(false);openCategoria(categoria);}}
-          loadingCategorias={loadingCategorias}
-          clienteSeleccionado={clienteSeleccionado}
-          setClienteSeleccionado={setClienteSeleccionado}
-           />
+            <CarritoMobile
+              open={openCarrito}
+              onClose={cerrarCarrito}
+              carrito={carrito}
+              onRemove={removeItem}
+              onClear={clearCarrito}
+              onAdd={sumarCantidad}
+              onSub={restarCantidad}
+              onFinalizar={(c, p) => { finalizarVenta(c, p); setOpenCarrito(false); }}
+              mesaSeleccionada={mesaSeleccionada}
+              onClearMesa={clearMesa}
+              categorias={categorias}
+              onOpenCategoria={(categoria) => { setOpenCarrito(false); openCategoria(categoria); }}
+              loadingCategorias={loadingCategorias}
+              clienteSeleccionado={clienteSeleccionado}
+              setClienteSeleccionado={setClienteSeleccionado}
+            />
           )}
         </Box>
       </Box>
 
       {/* === MODALES === */}
-      <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} id_negocio={Number(id_negocio)}   />
+      <AperturaCajaModal open={modalApertura} onClose={() => setModalApertura(false)} monto={montoApertura} setMonto={setMontoApertura} onAbrir={abrirCajaReal} id_negocio={Number(id_negocio)} />
       <ArqueoCajaModal open={modalArqueo} onClose={() => setModalArqueo(false)} arqueoInfo={arqueoInfo} />
-      <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} arqueoInfo={arqueoInfo} formatCOP={formatCOP} onCerrar={cerrarCajaReal}/>
-      <ProductosCategoriaModal open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada} categorias={categorias} onAgregar={addCart} animarAlCarrito={animarAlCarrito}/>
-      <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)}  idUsuario={idUsuario != null ? Number(idUsuario) : null} id_negocio={id_negocio != null ? Number(id_negocio) : null}  id_caja={idCaja} />
-      <VentasDetalles open={openVentasDetalles} onClose={() => setOpenVentasDetalles(false)} id_caja={idCaja}/>
+      <CierreCajaModal open={modalCierre} onClose={() => setModalCierre(false)} arqueoInfo={arqueoInfo} formatCOP={formatCOP} onCerrar={cerrarCajaReal} />
+      <ProductosCategoriaModal modo="dialog" open={modalProductosOpen} onClose={closeCategoria} categoria={categoriaSeleccionada} categorias={categorias} onAgregar={addCart} />
+      <Egresos open={openEgresos} onClose={() => setOpenEgresos(false)} idUsuario={idUsuario != null ? Number(idUsuario) : null} id_negocio={id_negocio != null ? Number(id_negocio) : null} id_caja={idCaja} />
+      <VentasDetalles open={openVentasDetalles} onClose={() => setOpenVentasDetalles(false)} id_caja={idCaja} />
       {/* === DIALOG VENTA REGISTRADA === */}
-     <Dialog
-  open={openVentaRegistrada}
-  onClose={() => setOpenVentaRegistrada(false)}
-  PaperProps={{
-    sx: {
-      borderRadius: 4,
-      overflow: "hidden",
-      minWidth: 380,
-      maxWidth: 420,
-      boxShadow: "0 15px 40px rgba(0,0,0,0.12)"
-    }
-  }}
->
-  {/* HEADER */}
-  <Box
-    sx={{
-      background: "linear-gradient(135deg,#16a34a,#22c55e)",
-      color: "white",
-      py: 3,
-      px: 2,
-      textAlign: "center"
-    }}
-  >
-    <CheckCircleIcon sx={{ fontSize: 48 }} />
-    <Typography variant="h6" fontWeight="bold">
-      Venta registrada con éxito
-    </Typography>
-  </Box>
-
-
-  {/* CONTENIDO */}
-  <DialogContent sx={{ textAlign: "center", py: 3 }}>
-    {ventaPayload && (
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2,
-          borderRadius: 3,
-          background: "#f8fafc",
-          border: "1px solid #e2e8f0"
+      <Dialog
+        open={openVentaRegistrada}
+        onClose={() => setOpenVentaRegistrada(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            overflow: "hidden",
+            minWidth: 380,
+            maxWidth: 420,
+            boxShadow: "0 15px 40px rgba(0,0,0,0.12)"
+          }
         }}
       >
-        <Stack spacing={1} alignItems="center">
-
-          <Typography fontSize={13} color="text.secondary">
-            Total de la venta
+        {/* HEADER */}
+        <Box
+          sx={{
+            background: "linear-gradient(135deg,#16a34a,#22c55e)",
+            color: "white",
+            py: 3,
+            px: 2,
+            textAlign: "center"
+          }}
+        >
+          <CheckCircleIcon sx={{ fontSize: 48 }} />
+          <Typography variant="h6" fontWeight="bold">
+            Venta registrada con éxito
           </Typography>
+        </Box>
 
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            color="success.main"
+
+        {/* CONTENIDO */}
+        <DialogContent sx={{ textAlign: "center", py: 3 }}>
+          {ventaPayload && (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0"
+              }}
+            >
+              <Stack spacing={1} alignItems="center">
+
+                <Typography fontSize={13} color="text.secondary">
+                  Total de la venta
+                </Typography>
+
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                  color="success.main"
+                >
+                  ${ventaPayload.total.toLocaleString()}
+                </Typography>
+
+                <Chip
+                  label={`Pago: ${ventaPayload.metodo_pago}`}
+                  color="success"
+                  size="small"
+                  sx={{ fontWeight: 500 }}
+                />
+
+              </Stack>
+            </Paper>
+          )}
+        </DialogContent>
+
+        {/* FOOTER */}
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 3
+          }}
+        >
+          <Button
+            variant="contained"
+            onClick={() => setOpenVentaRegistrada(false)}
+            sx={{
+              borderRadius: 3,
+              px: 5,
+              py: 1,
+              textTransform: "none",
+              fontWeight: "bold",
+              background: "linear-gradient(90deg,#16a34a,#22c55e)",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.15)"
+            }}
           >
-            ${ventaPayload.total.toLocaleString()}
-          </Typography>
+            Continuar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-          <Chip
-            label={`Pago: ${ventaPayload.metodo_pago}`}
-            color="success"
-            size="small"
-            sx={{ fontWeight: 500 }}
-          />
-
-        </Stack>
-      </Paper>
-    )}
-  </DialogContent>
-
-  {/* FOOTER */}
-  <DialogActions
-    sx={{
-      justifyContent: "center",
-      pb: 3
-    }}
-  >
-    <Button
-      variant="contained"
-      onClick={() => setOpenVentaRegistrada(false)}
-      sx={{
-        borderRadius: 3,
-        px: 5,
-        py: 1,
-        textTransform: "none",
-        fontWeight: "bold",
-        background: "linear-gradient(90deg,#16a34a,#22c55e)",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.15)"
-      }}
-    >
-      Continuar
-    </Button>
-  </DialogActions>
-    </Dialog>
-
- {/* 👇 AQUÍ VA LA ANIMACIÓN */}
-  {animItem && (
-    <Box
-      component="img"
-      src={animItem.img}
-      sx={{
-        position: "fixed",
-        left: animItem.start.left,
-        top: animItem.start.top,
-        width: 60,
-        height: 60,
-        borderRadius: "50%",
-        pointerEvents: "none",
-        zIndex: 2000,
-        animation: "flyToCart 0.7s ease-in-out forwards",
-        "@keyframes flyToCart": {
-          "0%": {
-            transform: "scale(1)",
-            opacity: 1,
-          },
-          "100%": {
-            transform: "translate(-600px, 500px) scale(0.2)",
-            opacity: 0,
-          },
-        },
-      }}
-    />
-  )}
+      {/* 👇 AQUÍ VA LA ANIMACIÓN */}
+      {animItem && (
+        <Box
+          component="img"
+          src={animItem.img}
+          sx={{
+            position: "fixed",
+            left: animItem.start.left,
+            top: animItem.start.top,
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            pointerEvents: "none",
+            zIndex: 2000,
+            animation: "flyToCart 0.7s ease-in-out forwards",
+            "@keyframes flyToCart": {
+              "0%": {
+                transform: "scale(1)",
+                opacity: 1,
+              },
+              "100%": {
+                transform: "translate(-600px, 500px) scale(0.2)",
+                opacity: 0,
+              },
+            },
+          }}
+        />
+      )}
     </Box>
   );
 };

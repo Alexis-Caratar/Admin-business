@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import {Card,Typography,Box,Chip,Dialog,DialogTitle,DialogContent,IconButton,TextField,
-  MenuItem,useTheme,useMediaQuery,
+  MenuItem,
   Button,
-  Stack,} from "@mui/material";
+  Stack,
+  Avatar,} from "@mui/material";
   import PrintIcon from "@mui/icons-material/Print";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
@@ -39,11 +40,9 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
   const [metodoPago, setMetodoPago] = useState("EFECTIVO");
   const [montoRecibido, setMontoRecibido] = useState<number | "">("");
   const [, setHabilitarPago] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [clienteBuscado, setClienteBuscado] = useState("");
-const [resultados, setResultados] = useState<Cliente[]>([]);
-const [clienteSeleccionado, setClienteSeleccionado] =
+  const [resultados, setResultados] = useState<Cliente[]>([]);
+  const [clienteSeleccionado, setClienteSeleccionado] =
   useState<Cliente | null>(null);
 const [modoEditarCliente, setModoEditarCliente] = useState(false);
 const [openCrearModal, setOpenCrearModal] = useState(false);
@@ -70,18 +69,49 @@ const seleccionarCliente = (cli: Cliente) => {
   setClienteBuscado("");
 };
 
-  const getEstadoConfig = (estado: Mesa["estado"]) => {
-    switch (estado) {
-      case "Disponible":
-        return { chipColor: "linear-gradient(135deg, #079150, #006837)" as const, iconBg: "#1196b7", icon: <ChairIcon /> };
-      case "Ocupada":
-        return { chipColor: "linear-gradient(135deg, #fe3e00, #cd3706)" as const, iconBg: "#221d1d", icon: <RestaurantIcon /> };
-      case "Reservada":
-        return { chipColor: "linear-gradient(135deg, #f7971e, #ffd200)" as const, iconBg: "#ef6c00", icon: <EventSeatIcon /> };
-      default:
-        return { chipColor: "#616161" as const, iconBg: "#616161", icon: <EventSeatIcon /> };
-    }
-  };
+const getEstadoConfig = (estado: Mesa["estado"]) => {
+  switch (estado) {
+    case "Disponible":
+      return {
+        chipBg: "#DCFCE7",
+        chipColor: "#166534",
+        chipBorder: "#BBF7D0",
+        gradient: "linear-gradient(135deg, #079150, #006837)",
+        iconBg: "#1196b7",
+        icon: <ChairIcon />,
+      };
+
+    case "Ocupada":
+      return {
+        chipBg: "#FEE2E2",
+        chipColor: "#991B1B",
+        chipBorder: "#FECACA",
+        gradient: "linear-gradient(135deg, #fe3e00, #cd3706)",
+        iconBg: "#221d1d",
+        icon: <RestaurantIcon />,
+      };
+
+    case "Reservada":
+      return {
+        chipBg: "#FEF3C7",
+        chipColor: "#92400E",
+        chipBorder: "#FDE68A",
+        gradient: "linear-gradient(135deg, #f7971e, #ffd200)",
+        iconBg: "#ef6c00",
+        icon: <EventSeatIcon />,
+      };
+
+    default:
+      return {
+        chipBg: "#F1F5F9",
+        chipColor: "#475569",
+        chipBorder: "#CBD5E1",
+        gradient: "linear-gradient(135deg,#94A3B8,#64748B)",
+        iconBg: "#64748B",
+        icon: <EventSeatIcon />,
+      };
+  }
+};
 
   const formatCOP = (value: number) =>
     new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(value);
@@ -269,8 +299,8 @@ const seleccionarCliente = (cli: Cliente) => {
 
   return (
   <Box width="100%">
-  <Typography fontWeight={700} mb={1} sx={{ fontSize: { xs: 16, md: 22 } }}>
-    Mesas del Restaurante
+  <Typography fontWeight={700} mb={1} sx={{ fontSize: { xs: 12, md: 18 } }}>
+    Mesas Disponibles
   </Typography>
 
   {/* MESAS EN FLEXBOX */}
@@ -297,78 +327,128 @@ const seleccionarCliente = (cli: Cliente) => {
             onClick={() => handleClickMesa(mesa)}
             sx={{
               position: "relative",
-              p: { xs: 2, sm: 5 },
-              borderRadius: 3,
-              minHeight: { xs: 130, sm: 160 },
+              overflow: "hidden",
+              p: 2.2,
+              borderRadius: "22px",
+              minHeight: { xs: 145, sm: 175 },
               cursor: "pointer",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              background: isSelected
-                ? "linear-gradient(135deg, rgba(25,118,210,.08), rgba(25,118,210,.02))"
-                : "#fff",
-              border: isSelected ? "2px solid" : "1px solid rgba(0,0,0,0.08)",
-              borderColor: isSelected ? "primary.main" : "rgba(0,0,0,0.08)",
+
+              bgcolor: "#fff",
+
+              border: isSelected
+                ? "2px solid #2563EB"
+                : "1px solid rgba(15,23,42,.06)",
+
               boxShadow: isSelected
-                ? "0 0 0 3px rgba(25,118,210,.25)"
-                : { xs: "0 4px 12px rgba(0,0,0,0.08)", md: "0 10px 25px rgba(0,0,0,0.08)" },
-              transition: "all .25s ease",
+                ? "0 0 0 3px rgba(37,99,235,.12)"
+                : "0 8px 24px rgba(15,23,42,.05)",
+
+              transition: ".25s ease",
+
               "&:hover": {
-                transform: { xs: "none", md: "translateY(-6px)" },
+                transform: "translateY(-4px)",
+                boxShadow: "0 14px 35px rgba(15,23,42,.09)",
               },
             }}
           >
+            {/* Decoración */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: -35,
+                right: -35,
+                width: 90,
+                height: 90,
+                borderRadius: "50%",
+                background: `linear-gradient(135deg, ${config.iconBg})`,
+                opacity: .08,
+              }}
+            />
+
+            {/* Estado */}
             <Chip
               label={mesa.estado}
               size="small"
               sx={{
-                textAlign:"center",
                 position: "absolute",
-                top: 11,
-                right: 20,
+                top: 14,
+                right: 14,
+
+                height: 28,
+                px: 1.2,
+
+                bgcolor: config.chipBg,
+                color: config.chipColor,
+                border: `1px solid ${config.chipBorder}`,
+
+                borderRadius: "10px",
                 fontWeight: 700,
-                height: 24,
-                px: {xs:2,sm:5},
-                borderRadius: 2,
-                background: config.chipColor,
-                color: "#fff",
+                fontSize: 11,
+
+                boxShadow: "0 2px 8px rgba(15,23,42,.06)",
               }}
             />
 
-            <Box
+            {/* Icono */}
+            <Avatar
               sx={{
-                mt: { xs: 3, sm: 4 },
-                width: { xs: 38, sm: 48 },
-                height: { xs: 38, sm: 48 },
-                borderRadius: "50%",
+                mt: 3,
+                mb: 1.5,
+                width: 56,
+                height: 56,
                 background: `linear-gradient(135deg, ${config.iconBg})`,
-                color: "#fff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                mb: 1,
+                boxShadow: "0 10px 20px rgba(0,0,0,.10)",
+
+                "& svg": {
+                  fontSize: 28,
+                },
               }}
             >
               {config.icon}
-            </Box>
+            </Avatar>
 
-            <Box textAlign="center">
-              <Typography fontWeight={800} sx={{ fontSize: { xs: 12, sm: 18 } }} noWrap>
-                {mesa.nombre}
-              </Typography>
-              <Typography sx={{ fontSize: { xs: 12, sm: 15 } }} color="text.secondary">
-                Cap: {mesa.capacidad} pers
-              </Typography>
-            </Box>
+            {/* Nombre */}
+            <Typography
+              sx={{
+                fontSize: { xs: 15, sm: 18 },
+                fontWeight: 800,
+                color: "#0F172A",
+                textAlign: "center",
+              }}
+              noWrap
+            >
+              {mesa.nombre}
+            </Typography>
 
-            <Box flexGrow={0} />
+            {/* Capacidad */}
+            <Typography
+              sx={{
+                mt: .5,
+                fontSize: 12,
+                color: "#64748B",
+              }}
+            >
+              Capacidad: {mesa.capacidad} personas
+            </Typography>
 
+            <Box flexGrow={1} />
+
+            {/* Seleccionada */}
             {isSelected && (
               <Chip
-                label={isMobile ? "select.." : "Seleccionada"}
-                color="primary"
+                label="Seleccionada"
                 size="small"
-                sx={{ fontWeight: 700, borderRadius: 2, mb: 0.1 }}
+                sx={{
+                  mt: 2,
+                  bgcolor: "#EFF6FF",
+                  color: "#2563EB",
+                  border: "1px solid #BFDBFE",
+                  fontWeight: 700,
+                  borderRadius: "8px",
+                }}
               />
             )}
           </Card>

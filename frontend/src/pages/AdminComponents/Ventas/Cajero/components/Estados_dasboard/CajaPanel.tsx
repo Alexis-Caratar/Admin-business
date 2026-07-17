@@ -1,10 +1,8 @@
 import { Stack, Collapse, Box } from "@mui/material";
-import CajaEstado from "./CajaEstado";
 import CajaMetricas from "./CajaMetricas";
 
 export default function CajaPanel({
   showStats,
-  cajaAbierta,
   caja,
   formatCOP,
   onVentas,
@@ -17,11 +15,6 @@ export default function CajaPanel({
   <Collapse in={showStats} timeout="auto" unmountOnExit>
     <Box display="flex" flexWrap="wrap" gap={2}>
       
-      {/* Estado caja */}
-      <Box flex="1 1 10px">
-        <CajaEstado cajaAbierta={cajaAbierta} />
-      </Box>
-
       {/* Métricas */}
       <Box flex="1 1 900px">
         <CajaMetricas

@@ -317,7 +317,7 @@ abrirCaja: async ({ id_usuario, monto_inicial, inventario }) => {
   return rows[0];
 },
 
-arqueo: async ({ id_caja }) => {
+arqueo: async ({ id_caja },id_negocio) => {
 
   /* ===============================
      1️⃣ RESUMEN DE CAJA
@@ -585,21 +585,20 @@ COALESCE(
 )::int AS cierre_sistema
 
 FROM inventario i
+  LEFT JOIN inventario_caja a 
+    ON a.id_producto = i.id
+    AND a.id_caja = $1
+    AND a.estado = 'APERTURA CAJA'
 
-LEFT JOIN inventario_caja a 
-  ON a.id_producto = i.id
-  AND a.id_caja = $1
-  AND a.estado = 'APERTURA CAJA'
-
-LEFT JOIN inventario_movimientos m
-  ON m.inventario_id = i.id
-  AND m.created_at BETWEEN (
-    SELECT fecha_inicio FROM rango
-  )
-  AND (
-    SELECT fecha_fin FROM rango
-  )
-
+  LEFT JOIN inventario_movimientos m
+    ON m.inventario_id = i.id
+    AND m.created_at BETWEEN (
+      SELECT fecha_inicio FROM rango
+    )
+    AND (
+      SELECT fecha_fin FROM rango
+    )
+ WHERE i.id_negocio=$2
 GROUP BY 
   i.id,
   i.nombre,
@@ -618,7 +617,7 @@ ORDER BY i.nombre;
   const [egresosRows] = await db.query(egresosQuery, [id_caja]);
   const [mesasRows] = await db.query(mesas_estadoQuery, [id_caja]);
   const [facturasRows] = await db.query(facturas_pendientesQuery, [id_caja]);
-  const [inventarioRows] = await db.query(inventarioQuery, [id_caja]);
+  const [inventarioRows] = await db.query(inventarioQuery, [id_caja,id_negocio]);
 
   const pagos = pagosRows[0] || {};
 

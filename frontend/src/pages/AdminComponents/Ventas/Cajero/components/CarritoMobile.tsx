@@ -601,7 +601,7 @@ useEffect(() => {
                     <TextField
                       fullWidth
                       size="small"
-                      placeholder="Ej: sin cebolla, término medio..."
+                      placeholder="Ej: observaciones, indicaciones o solicitudes especiales..."
                       onChange={(e) => setNota(e.target.value)}
                       sx={{
                         

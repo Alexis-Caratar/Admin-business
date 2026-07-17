@@ -1,4 +1,4 @@
-import { Card, CardContent, Stack, Avatar, Typography, Box } from "@mui/material";
+import { Stack, Avatar, Typography, Box, Paper } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -14,91 +14,183 @@ export default function CajaMetricas({
   onCerrar
 }: any) {
 
-  const items = [
-    {
-      label: "Monto inicial",
-      value: caja?.monto_inicial,
-      icon: <MonetizationOnIcon />,
-      color: "primary.light"
-    },
-      {
-      label: "Ventas / Recaudado",
-      value: caja?.total_ventas,
-      extra: caja?.dinero_recaudado,
-      icon: <ShoppingCartIcon />,
-      color: "#7c4dff",
-      click: onVentas
-    },
-    {
-      label: "Egresos",
-      value: caja?.total_egresos,
-      icon: <PaymentsIcon />,
-      color: "error.light",
-      click: onEgresos
-    },
-    {
-      label: "Arqueo",
-      value: null,
-      icon: <ReceiptLongIcon />,
-      color: "warning.light",
-      click: onArqueo
-    },
-    {
-      label: "Cerrar Caja",
-      value: null,
-      icon: <SavingsIcon />,
-      color: "error.light",
-      click: onCerrar
-    }
-  ];
+const CardStat = ({
+  title,
+  value,
+  subtitle,
+  icon,
+  gradient,
+  onClick,
+}: any) => (
+  <Paper
+    elevation={0}
+    onClick={onClick}
+    sx={{
+      position: "relative",
+      overflow: "hidden",
+      p: 2,
+      borderRadius: "22px",
+      background: "#fff",
+      cursor: onClick ? "pointer" : "default",
+      border: "1px solid rgba(15,23,42,0.06)",
+      boxShadow: "0 8px 24px rgba(15,23,42,.05)",
+      transition: ".25s",
 
-  return (
-  <Box display="flex" flexWrap="wrap" gap={2}>
-  {items.map((item, i) => (
+      "&:hover": onClick && {
+        transform: "translateY(-4px)",
+        boxShadow: "0 15px 35px rgba(15,23,42,.10)",
+      },
+    }}
+  >
+    {/* Decoración */}
     <Box
-      key={i}
-      flex="1 1 calc(100% - 16px)"        // xs: full width
       sx={{
-        '@media (min-width:600px)': { flex: '1 1 calc(40% - 10px)' },   // sm: 2 por fila
-        '@media (min-width:900px)': { flex: '1 1 calc(15% - 8px)' },   // md: 4 por fila
+        position: "absolute",
+        top: -40,
+        right: -40,
+        width: 110,
+        height: 110,
+        borderRadius: "50%",
+        background: gradient,
+        opacity: .12,
       }}
+    />
+
+    <Stack
+      direction="row"
+      justifyContent="space-between"
+      alignItems="flex-start"
     >
-      <Card
-        onClick={item.click}
+      <Box flex={1}>
+        <Typography
+          sx={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: "#64748B",
+            textTransform: "uppercase",
+          }}
+        >
+          {title}
+        </Typography>
+
+        <Typography
+          sx={{
+            mt: .5,
+            fontWeight: 900,
+            fontSize: 18,
+            color: "#0F172A",
+          }}
+        >
+          {value}
+        </Typography>
+
+        {subtitle && (
+          <Typography
+            sx={{
+              mt: .5,
+              fontSize: 11,
+              color: "#94A3B8",
+            }}
+          >
+            {subtitle}
+          </Typography>
+        )}
+      </Box>
+
+      <Avatar
         sx={{
-          borderRadius: 3,
-          cursor: item.click ? "pointer" : "default",
-          boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
-          transition: "all .2s ease",
-          "&:hover": item.click && {
-            transform: "translateY(-3px)",
-            boxShadow: "0 10px 20px rgba(0,0,0,0.12)"
-          }
+          width: 46,
+          height: 46,
+          background: gradient,
+          boxShadow: "0 10px 20px rgba(0,0,0,.10)",
+
+          "& svg": {
+            fontSize: 22,
+          },
         }}
       >
-        <CardContent>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar sx={{ bgcolor: item.color, width: 44, height: 44 }}>
-              {item.icon}
-            </Avatar>
+        {icon}
+      </Avatar>
+    </Stack>
+  </Paper>
+);
 
-            <Box>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                {item.label}
-              </Typography>
-              <Typography fontWeight={700} fontSize={16}>
-                {item.extra != null && item.value != null
-                  ? `${formatCOP(item.value)} - ${formatCOP(item.extra)}`
-                  : item.value != null
-                  ? formatCOP(item.value)
-                  : ""}
-              </Typography>
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
+const cards = [
+  {
+    title: "Monto Inicial",
+    value: formatCOP(caja?.monto_inicial),
+    subtitle: "Base de apertura",
+    icon: <MonetizationOnIcon />,
+    gradient: "linear-gradient(135deg,#2563eb,#60a5fa)",
+  },
+
+  {
+    title: "Recaudado",
+    value: formatCOP(caja?.dinero_recaudado),
+    subtitle: `Ventas ${formatCOP(caja?.total_ventas)}`,
+    icon: <ShoppingCartIcon />,
+    gradient: "linear-gradient(135deg,#16a34a,#4ade80)",
+    click: onVentas,
+  },
+
+  {
+    title: "Egresos",
+    value: formatCOP(caja?.total_egresos),
+    subtitle: "Dinero retirado",
+    icon: <PaymentsIcon />,
+    gradient: "linear-gradient(135deg,#dc2626,#f87171)",
+    click: onEgresos,
+  },
+
+  {
+    title: "Arqueo",
+    value: "Ver detalle",
+    subtitle: "Inventario y cierre",
+    icon: <ReceiptLongIcon />,
+    gradient: "linear-gradient(135deg,#d97706,#fbbf24)",
+    click: onArqueo,
+  },
+
+  {
+    title: "Cerrar Caja",
+    value: "Finalizar",
+    subtitle: "Cerrar jornada",
+    icon: <SavingsIcon />,
+    gradient: "linear-gradient(135deg,#7c3aed,#a78bfa)",
+    click: onCerrar,
+  },
+];
+
+return (
+  <Box
+  sx={{
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 1,
+  }}
+>
+  {cards.map((card, index) => (
+    <Box
+      key={index}
+      sx={{
+        flex: {
+          xs: "1 1 100%",
+          sm: "1 1 calc(50% - 8px)",
+          md: "1 1 calc(33.33% - 12px)",
+          lg: "1 1 calc(20% - 10px)",
+        },
+      }}
+    >
+      <CardStat
+        title={card.title}
+        value={card.value}
+        subtitle={card.subtitle}
+        icon={card.icon}
+        gradient={card.gradient}
+        onClick={card.click}
+      />
     </Box>
   ))}
 </Box>
-  );
+);
 }

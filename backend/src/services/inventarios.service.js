@@ -4,7 +4,7 @@ const TABLE = "inventario";
 const TABLE_MOV = "inventario_movimientos";
 
 // LISTAR
-export const listar = async () => {
+export const listar = async (id_negocio) => {
   const { rows } = await pool.query(`
     SELECT  id,
     nombre,
@@ -18,8 +18,9 @@ export const listar = async () => {
     stock_maximo,
     id_negocio
     FROM ${TABLE}
+    where id_negocio=$1
     ORDER BY id DESC
-  `);
+  `,[id_negocio]);
 
   return rows;
 };

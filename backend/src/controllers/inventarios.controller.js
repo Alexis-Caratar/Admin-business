@@ -3,7 +3,8 @@ import * as service from "../services/inventarios.service.js";
 // LISTAR
 export const listar = async (req, res) => {
   try {
-    const data = await service.listar();
+    
+    const data = await service.listar(req.user.id_negocio);
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
