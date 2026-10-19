@@ -1013,7 +1013,7 @@ LIMIT 1;
   },
 
 
-  actualizarEgreso: async (id, data) => {
+  actualizarEgreso: async (id, data, id_negocio) => {
 
     const sql = `
     UPDATE egresos
@@ -1023,19 +1023,19 @@ LIMIT 1;
       monto = $3,
       observacion = $4,
       updated_at = NOW()
-    WHERE id = $5
+    WHERE id = $5 AND id_negocio = $6
   `;
 
-    await db.query(sql, [data.descripcion,data.metodo_pago,data.monto,data.observacion,id
+    await db.query(sql, [data.descripcion,data.metodo_pago,data.monto,data.observacion,id,id_negocio
     ]);
 
      await notificarCaja(data.idUsuario); 
   },
 
-  eliminarEgreso: async (id,idUsuario) => {
+  eliminarEgreso: async (id, idUsuario, id_negocio) => {
 
-    const sql = `DELETE FROM egresos WHERE id = $1`;
-    await db.query(sql, [id]);
+    const sql = `DELETE FROM egresos WHERE id = $1 AND id_negocio = $2`;
+    await db.query(sql, [id, id_negocio]);
      await notificarCaja(idUsuario);
   },
 
@@ -1108,8 +1108,8 @@ liberar_mesa: async (id_mesa, id_negocio) => {
 
   try {
     const result = await conn.query(
-      `UPDATE mesas SET estado = 'Disponible' WHERE id = $1 RETURNING *`,
-      [id_mesa]
+      `UPDATE mesas SET estado = 'Disponible' WHERE id = $1 AND id_negocio = $2 RETURNING *`,
+      [id_mesa, id_negocio]
     );
 
     await notificarMesas(id_negocio);

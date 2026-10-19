@@ -1,6 +1,9 @@
 import { Router } from "express";
 import * as controller from "../controllers/negocios.controller.js";
+import { soloAdminSistema } from "../middlewares/auth.middleware.js";
 const router = Router();
+// Gestión de negocios: solo administración del sistema
+router.use(soloAdminSistema);
 router.get("/", controller.listar);
 router.get("/:id", controller.obtener);
 router.post("/", controller.crear);

@@ -28,6 +28,8 @@ import {
   Stack,
   Avatar,
   Paper,
+  Alert,
+  createFilterOptions,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -58,6 +60,12 @@ interface Props {
   onBack: () => void;
 }
 
+type InventarioItem = { id: number; nombre: string; stock_actual: number; unidad: string };
+type OpcionInventario = InventarioItem | { crear: true; nombre: string };
+
+const filtroInventario = createFilterOptions<OpcionInventario>();
+const normalizarNombre = (t = "") => t.trim().replace(/\s+/g, " ").toLowerCase();
+
 const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
   const [productos, setProductos] = useState<(Producto & { showDesc?: boolean })[]>([]);
   const [form, setForm] = useState<Producto>({
@@ -82,7 +90,11 @@ const AdminProductos: React.FC<Props> = ({ id, onBack }) => {
   const [imgIndices, setImgIndices] = useState<{ [key: number]: number }>({});
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [inventarios, setInventarios] = useState([]);
+  const [inventarios, setInventarios] = useState<InventarioItem[]>([]);
+  // Inventario del PRODUCTO FINAL: nombre si se crea nuevo, unidades a cargar y stock mínimo
+  const [invNombreNuevo, setInvNombreNuevo] = useState("");
+  const [invCantidad, setInvCantidad] = useState("");
+  const [invStockMinimo, setInvStockMinimo] = useState("");
   const defaultImage =ProductosImg
    const [receta, setReceta] = useState([
   {
@@ -156,6 +168,20 @@ useEffect(() => {
 }, [form.usa_receta, openModal]);
 
 
+const resetInventarioForm = () => {
+  setInvNombreNuevo("");
+  setInvCantidad("");
+  setInvStockMinimo("");
+};
+
+// Si no se eligió un inventario, se usa el nombre del producto; si ya existe uno igual se toma ese
+const nombreInventarioNuevo = invNombreNuevo || form.nombre || "";
+const inventarioCoincidente = !form.inventario_id
+  ? inventarios.find((i) => normalizarNombre(i.nombre) === normalizarNombre(nombreInventarioNuevo))
+  : undefined;
+const inventarioSeleccionado =
+  inventarios.find((i) => i.id === form.inventario_id) || inventarioCoincidente || null;
+
 const handleChangeTipoControl = (value: string) => {
   setForm({
     ...form,
@@ -195,6 +221,7 @@ const handleOpenModal = (producto?: Producto) => {
     setEditingId(null);
      setReceta([]);
   }
+  resetInventarioForm();
   setOpenModal(true);
 };
 
@@ -225,6 +252,17 @@ const payload = {
   productos_imagenes: form.imagenes
     ? [...form.imagenes]
     : [],
+  // El backend crea el inventario si no existe y registra la entrada de stock
+  inventario:
+    form.tipo_control === "producto"
+      ? {
+          inventario_id: form.inventario_id ?? inventarioCoincidente?.id ?? null,
+          nombre: nombreInventarioNuevo,
+          unidad: "UND",
+          stock_minimo: Number(invStockMinimo) || 0,
+          cantidad: Number(invCantidad) || 0,
+        }
+      : undefined,
   receta:
     form.tipo_control === "receta"
       ? receta.map((r) => ({
@@ -244,17 +282,24 @@ const payload = {
     }
 
     setOpenModal(false);
+    resetInventarioForm();
 
     const data = await getProductos(id);
     setProductos(data);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error al guardar producto:", error);
+    Swal.fire({
+      icon: "error",
+      title: "No se pudo guardar",
+      text: error?.response?.data?.error || "Error al guardar el producto",
+    });
   }
 };
 
 const handleEdit = (producto: any) => {
   setForm(producto);
   setEditingId(producto.id!);
+  resetInventarioForm();
 
   if (producto.productos_complementos) {
   setproductos_complementos(
@@ -924,34 +969,106 @@ if (producto.tipo_control === "receta" && producto.receta) {
             gap: 1
           }}
         >
-            {form.tipo_control === "producto" ? (      
-                    <>
+            {form.tipo_control === "producto" ? (
+              <>
               <Typography fontWeight={600} fontSize={15}>
-                Inventario asociado
+                Inventario del producto
               </Typography>
 
-           <Autocomplete
-            options={inventarios}
-            value={
-              inventarios.find((i: any) => i.id === form.inventario_id) || null
-            }
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            getOptionLabel={(option: any) =>
-              `${option.nombre} • ${option.stock_actual} ${option.unidad}`
-            }
-            onChange={(_, value) =>
-              setForm({ ...form, inventario_id: value?.id || null })
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Seleccionar inventario"
-                size="small"
-                fullWidth
+              <Autocomplete<OpcionInventario>
+                options={inventarios}
+                value={
+                  inventarioSeleccionado ??
+                  (invNombreNuevo ? { crear: true as const, nombre: invNombreNuevo } : null)
+                }
+                isOptionEqualToValue={(option, value) =>
+                  "id" in option && "id" in value
+                    ? option.id === value.id
+                    : "crear" in option && "crear" in value
+                }
+                filterOptions={(options, params) => {
+                  const filtrados = filtroInventario(options, params);
+                  const texto = params.inputValue.trim();
+                  const existe = options.some(
+                    (o) => normalizarNombre(o.nombre) === normalizarNombre(texto)
+                  );
+                  if (texto && !existe) filtrados.push({ crear: true, nombre: texto });
+                  return filtrados;
+                }}
+                getOptionLabel={(option) =>
+                  "crear" in option ? option.nombre : `${option.nombre} • ${option.stock_actual} ${option.unidad}`
+                }
+                renderOption={(props, option) => (
+                  <li {...props} key={"crear" in option ? "crear" : option.id}>
+                    {"crear" in option
+                      ? `➕ Crear "${option.nombre}" en inventario`
+                      : `${option.nombre} • ${option.stock_actual} ${option.unidad}`}
+                  </li>
+                )}
+                onChange={(_, value) => {
+                  if (value && "crear" in value) {
+                    setInvNombreNuevo(value.nombre);
+                    setForm({ ...form, inventario_id: null });
+                  } else {
+                    setInvNombreNuevo("");
+                    setForm({ ...form, inventario_id: value?.id || null });
+                  }
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Buscar o crear inventario"
+                    placeholder={form.nombre || "Ej: Coca-Cola 1.5"}
+                    size="small"
+                    fullWidth
+                  />
+                )}
               />
-            )}
-          />
 
+              {inventarioSeleccionado ? (
+                <Alert severity="success" sx={{ py: 0 }}>
+                  {form.inventario_id ? "Vinculado a" : "Ya existe en inventario, se usará"}{" "}
+                  <b>{inventarioSeleccionado.nombre}</b> — stock actual{" "}
+                  {inventarioSeleccionado.stock_actual} {inventarioSeleccionado.unidad}
+                </Alert>
+              ) : nombreInventarioNuevo.trim() ? (
+                <Alert severity="info" sx={{ py: 0 }}>
+                  Se creará <b>{nombreInventarioNuevo.trim()}</b> en inventario al guardar
+                </Alert>
+              ) : (
+                <Typography fontSize={12} color="text.secondary">
+                  Escribe el nombre del producto o elige un inventario existente.
+                </Typography>
+              )}
+
+              <Stack direction="row" spacing={1}>
+                <TextField
+                  label={inventarioSeleccionado ? "Agregar unidades" : "Stock inicial"}
+                  type="number"
+                  size="small"
+                  fullWidth
+                  value={invCantidad}
+                  onChange={(e) => setInvCantidad(e.target.value)}
+                  inputProps={{ min: 0 }}
+                  helperText={
+                    inventarioSeleccionado && Number(invCantidad) > 0
+                      ? `Quedará en ${Number(inventarioSeleccionado.stock_actual) + Number(invCantidad)}`
+                      : "Opcional"
+                  }
+                />
+                {!inventarioSeleccionado && (
+                  <TextField
+                    label="Stock mínimo"
+                    type="number"
+                    size="small"
+                    fullWidth
+                    value={invStockMinimo}
+                    onChange={(e) => setInvStockMinimo(e.target.value)}
+                    inputProps={{ min: 0 }}
+                    helperText="Para alertas"
+                  />
+                )}
+              </Stack>
             </>
           ) : (
             <>

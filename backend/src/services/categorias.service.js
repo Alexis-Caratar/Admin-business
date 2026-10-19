@@ -38,7 +38,7 @@ export const crearCategoriaService = async (data) => {
   return rows[0];
 };
 
-export const actualizarCategoriaService = async (id, data) => {
+export const actualizarCategoriaService = async (id, data, id_negocio = null) => {
 
   if (!id) {
     throw new Error("El id es obligatorio");
@@ -49,8 +49,11 @@ export const actualizarCategoriaService = async (id, data) => {
   }
 
   // 🧹 LIMPIEZA
+  // solo columnas editables
   const cleanData = {
-    ...data,
+    ...Object.fromEntries(
+      ["nombre", "activo"].filter((k) => data[k] !== undefined).map((k) => [k, data[k]])
+    ),
     descripcion: data.descripcion?.trim() || null,
     imagen: data.imagen?.trim() || "https://www.partoo.co/wp-content/uploads/2024/09/article_categories_GMB.png",
   };
@@ -68,9 +71,10 @@ export const actualizarCategoriaService = async (id, data) => {
     UPDATE categorias
     SET ${setClause}
     WHERE id = $${keys.length + 1}
+      AND ($${keys.length + 2}::int IS NULL OR id_negocio = $${keys.length + 2})
     RETURNING *
     `,
-    [...values, id]
+    [...values, id, id_negocio]
   );
 
   if (rows.length === 0) {
@@ -80,7 +84,10 @@ export const actualizarCategoriaService = async (id, data) => {
   return rows[0];
 };
 
-export const eliminarCategoriaService = async (id) => {
-  await db.query("DELETE FROM categorias WHERE id = $1", [id]);
+export const eliminarCategoriaService = async (id, id_negocio = null) => {
+  await db.query(
+    "DELETE FROM categorias WHERE id = $1 AND ($2::int IS NULL OR id_negocio = $2)",
+    [id, id_negocio]
+  );
   return true;
 };

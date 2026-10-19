@@ -21,18 +21,21 @@ export const tools = {
         titulo: "Ventas de hoy",
         useAI: false,
 
-        execute: async () => {
+        execute: async (params, { id_negocio }) => {
 
             const sql = `
             SELECT
                 COUNT(*)::int AS cantidad,
-                COALESCE(SUM(total), 0) AS total
-            FROM ventas
-            WHERE estado = 'activa'
-            AND DATE(fecha) = CURRENT_DATE
+                COALESCE(SUM(v.total), 0) AS total
+            FROM ventas v
+            INNER JOIN caja c ON v.id_caja = c.id
+            INNER JOIN usuarios u ON c.id_usuario = u.id
+            WHERE v.estado = 'activa'
+            AND DATE(v.fecha) = CURRENT_DATE
+            AND u.id_negocio = $1
         `;
 
-            const { rows } = await pool.query(sql);
+            const { rows } = await pool.query(sql, [id_negocio]);
 
             return {
                 resumen: {
@@ -72,7 +75,7 @@ export const tools = {
         titulo: "Inventario",
         useAI: false,
 
-        execute: async (params = {}) => {
+        execute: async (params = {}, { id_negocio }) => {
 
             const { nombre = "" } = params;
 
@@ -82,12 +85,13 @@ export const tools = {
                 nombre,
                 stock_actual
             FROM inventario
+            WHERE id_negocio = $1
         `;
 
-            const values = [];
+            const values = [id_negocio];
 
             if (nombre) {
-                sql += ` WHERE nombre ILIKE $1`;
+                sql += ` AND nombre ILIKE $2`;
                 values.push(`%${nombre}%`);
             }
 
@@ -124,7 +128,7 @@ export const tools = {
         tipo: "texto",
         titulo: "Estado de las mesas",
         useAI: false,
-        execute: async () => {
+        execute: async (params, { id_negocio }) => {
 
             const sql = `
             SELECT
@@ -132,10 +136,11 @@ export const tools = {
                 nombre,
                 estado
             FROM mesas
+            WHERE id_negocio = $1
             ORDER BY nombre
         `;
 
-            const { rows } = await pool.query(sql);
+            const { rows } = await pool.query(sql, [id_negocio]);
 
             return {
                 total: rows.length,

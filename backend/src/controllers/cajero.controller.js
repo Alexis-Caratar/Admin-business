@@ -2,13 +2,13 @@ import CajeroService from "../services/cajero.service.js";
 import * as serviceNegocios from "../services/negocios.service.js";
 import dotenv from "dotenv";
 
-import { wss } from "../websockets.js"; 
+import { enviarAAgentes } from "../websockets.js";
 
 
 export const estadoCaja = async (req, res) => {
   try {
     
-    const estado = await CajeroService.estadoCaja(req.body);
+    const estado = await CajeroService.estadoCaja({ id_usuario: req.user.id });
     return res.json({ ok: true, estado });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
@@ -17,7 +17,7 @@ export const estadoCaja = async (req, res) => {
 
 export const listarProductos = async (req, res) => {
   try {
-    const productos = await CajeroService.listarProductos(req.params.id);
+    const productos = await CajeroService.listarProductos(req.user.id_negocio);
     return res.json({ ok: true, productos });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
@@ -26,7 +26,7 @@ export const listarProductos = async (req, res) => {
 
 export const abrirCaja = async (req, res) => {
   try {    
-    const result = await CajeroService.abrirCaja(req.body);
+    const result = await CajeroService.abrirCaja({ ...req.body, id_usuario: req.user.id });
     return res.json({ ok: true, result });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
@@ -54,7 +54,7 @@ export const arqueo = async (req, res) => {
 
 export const finalizarVenta = async (req, res) => {
   try {
-   const payload = req.body;
+   const payload = { ...req.body, id_negocio: req.user.id_negocio, idUsuario: req.user.id };
       const resultado = await CajeroService.finalizarVenta(payload);
 
       await imprimircomanda_fisica(payload);
@@ -68,7 +68,7 @@ export const finalizarVenta = async (req, res) => {
 
 export const imprimir_comanda = async (req, res) => {
   try {
-   const payload = req.body;
+   const payload = { ...req.body, id_negocio: req.user.id_negocio };
       await imprimircomanda_fisica(payload);
       return res.json({ ok: true });
   } catch (e) {
@@ -103,16 +103,7 @@ const payloadComanda = {
   productos: payload.productos
 };
     
-    if (wss) {
-      wss.clients.forEach(client => {
-        if (client.readyState === 1 && client.isPrintAgent) { // marcamos los agentes locales con isPrintAgent
-          client.send(JSON.stringify({
-            tipo: "imprimir_comanda",
-            payload: payloadComanda
-          }));
-        }
-      });
-    }
+    enviarAAgentes(payload.id_negocio, { tipo: "imprimir_comanda", payload: payloadComanda });
 
       return ({ ok: true });
   } catch (e) {
@@ -152,8 +143,7 @@ export const crearcliente = async (req, res) => {
 
 export const mesas = async (req, res) => {
   try {
-   const {id_negocio} = req.body;   
-      const resultado = await CajeroService.mesas(id_negocio);
+      const resultado = await CajeroService.mesas(req.user.id_negocio);
     return res.json({ ok: true,result: resultado });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
@@ -163,8 +153,8 @@ export const mesas = async (req, res) => {
 
 export const detallesMesa = async (req, res) => {
   try {
-   const {id_negocio,mesaId} = req.body;   
-      const resultado = await CajeroService.detallesMesa(id_negocio,mesaId);
+   const { mesaId } = req.body;
+      const resultado = await CajeroService.detallesMesa(req.user.id_negocio, mesaId);
     return res.json({ ok: true,result: resultado });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
@@ -174,9 +164,9 @@ export const detallesMesa = async (req, res) => {
 
 export const listarEgresos = async (req, res) => {
   try {
-    const { id_negocio, id_caja } = req.params;    
+    const { id_caja } = req.params;
     const egresos = await CajeroService.listarEgresos(
-      id_negocio,
+      req.user.id_negocio,
       id_caja
     );
 
@@ -189,7 +179,9 @@ export const listarEgresos = async (req, res) => {
 
 export const crearEgreso = async (req, res) => {
   try {    
-    const {idUsuario,id_negocio,id_caja,descripcion,metodo_pago,monto,observacion} = req.body;
+    const {id_caja,descripcion,metodo_pago,monto,observacion} = req.body;
+    const idUsuario = req.user.id;
+    const id_negocio = req.user.id_negocio;
 
     // 🔐 Validación obligatoria
     if (!id_negocio || !descripcion || !monto) {
@@ -226,7 +218,7 @@ export const actualizarEgreso = async (req, res) => {
       });
     }
 
-    await CajeroService.actualizarEgreso(Number(id), req.body);
+    await CajeroService.actualizarEgreso(Number(id), { ...req.body, idUsuario: req.user.id }, req.user.id_negocio);
 
     return res.json({
       ok: true,
@@ -244,7 +236,7 @@ export const actualizarEgreso = async (req, res) => {
 
 export const eliminarEgreso = async (req, res) => {
   try {
-    const { id,idUsuario} = req.params;
+    const { id } = req.params;
 
     if (!id) {
       return res.status(400).json({
@@ -253,7 +245,7 @@ export const eliminarEgreso = async (req, res) => {
       });
     }
 
-    await CajeroService.eliminarEgreso(Number(id),Number(idUsuario));
+    await CajeroService.eliminarEgreso(Number(id), req.user.id, req.user.id_negocio);
 
     return res.json({
       ok: true,
@@ -283,9 +275,9 @@ export const actualizaventa = async (req, res) => {
 
 export const liberar_mesa = async (req, res) => {
   try {
-    const { id_mesa,id_negocio } = req.params;
-    
-    const respuesta = await CajeroService.liberar_mesa(id_mesa,id_negocio);
+    const { id_mesa } = req.params;
+
+    const respuesta = await CajeroService.liberar_mesa(id_mesa, req.user.id_negocio);
     res.json(respuesta);
   } catch (error) {
     console.error(error);
@@ -324,8 +316,8 @@ export const facturaPordetalle = async (req, res) => {
 
 export const imprimirfactura = async (req, res) => {
   try {
-    const data = req.body; 
-    const datos_negocio = await serviceNegocios.obtener(data.id_negocio);
+    const data = req.body;
+    const datos_negocio = await serviceNegocios.obtener(req.user.id_negocio);
 
     const payloadfactura=
     {  printerName: process.env.IMPRESORAPRINCIPAL_CAJA,          // nombre de la impresora de comandas
@@ -340,16 +332,7 @@ export const imprimirfactura = async (req, res) => {
             productos: data.productos
     }
     
-    if (wss) {
-      wss.clients.forEach(client => {
-        if (client.readyState === 1 && client.isPrintAgent) { // marcamos los agentes locales con isPrintAgent
-          client.send(JSON.stringify({
-            tipo: "imprimir_venta",
-            payload: payloadfactura
-          }));
-        }
-      });
-    }
+    enviarAAgentes(req.user.id_negocio, { tipo: "imprimir_venta", payload: payloadfactura });
 
     res.json({
       ok: true,

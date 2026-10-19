@@ -6,7 +6,8 @@ import { tools } from "./tools.service.js";
 
 dotenv.config();
 
-export const preguntarIA = async (mensaje) => {
+// ctx.id_negocio viene del token: las herramientas solo consultan ese negocio
+export const preguntarIA = async (mensaje, ctx) => {
 
     const intent = detectarIntent(mensaje);
 
@@ -24,7 +25,7 @@ export const preguntarIA = async (mensaje) => {
 
     const tool = tools[intent.tool];
 
-    if (!tool) {
+    if (!tool || typeof tool.execute !== "function") {
 
         return {
             ok: false,
@@ -35,7 +36,7 @@ export const preguntarIA = async (mensaje) => {
 
     }
 
-    const resultado = await tool.execute(intent.params);
+    const resultado = await tool.execute(intent.params, ctx);
 
     // Herramientas que responden directamente
     if (!tool.useAI) {

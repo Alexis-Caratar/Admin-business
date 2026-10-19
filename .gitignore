@@ -2,3 +2,11 @@ node_modules/
 dist/
 .env
 .DS_Store
+
+# Respaldos de base de datos (contienen datos de clientes)
+Bd/
+*.dump
+# Compilados y logs
+frontend/out-tsc/
+*.log
+*.pem

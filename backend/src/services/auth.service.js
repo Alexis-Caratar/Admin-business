@@ -108,7 +108,8 @@ export const authService = {
       id_negocio: user.id_negocio,
       nombre_negocio: user.nombre_negocio || "Mi Negocio",
       imagen_negocio:user.imagen_negocio,
-      imagen: user.imagen || null
+      imagen: user.imagen || null,
+      roles_sistema: rolesSistema.map(r => r.nombre)
     };
 
     // Generar token

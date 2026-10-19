@@ -4,11 +4,14 @@ import {
   actualizarCategoriaService,
   eliminarCategoriaService,
 } from "../services/categorias.service.js";
+import { esAdminSistema, negocioPermitido } from "../middlewares/auth.middleware.js";
+
+// null = sin restricción (admin del sistema)
+const negocioRestringido = (req) => (esAdminSistema(req.user) ? null : req.user.id_negocio);
 
 export const getCategorias = async (req, res) => {
   try {
-    const { id_negocio } = req.params;
-    const categorias = await obtenerCategorias(id_negocio);
+    const categorias = await obtenerCategorias(negocioPermitido(req, req.params.id_negocio));
 
     return res.json({
       ok: true,
@@ -22,7 +25,7 @@ export const getCategorias = async (req, res) => {
 
 export const crearCategoria = async (req, res) => {
   try {
-    const categoria = await crearCategoriaService(req.body);
+    const categoria = await crearCategoriaService({ ...req.body, id_negocio: negocioPermitido(req, req.body.id_negocio) });
 
     return res.json({
       ok: true,
@@ -37,7 +40,7 @@ export const crearCategoria = async (req, res) => {
 export const actualizarCategoria = async (req, res) => {
   try {
     const { id } = req.params;
-    const categoria = await actualizarCategoriaService(id, req.body);
+    const categoria = await actualizarCategoriaService(id, req.body, negocioRestringido(req));
 
     return res.json({
       ok: true,
@@ -52,7 +55,7 @@ export const actualizarCategoria = async (req, res) => {
 export const eliminarCategoria = async (req, res) => {
   try {
     const { id } = req.params;
-    await eliminarCategoriaService(id);
+    await eliminarCategoriaService(id, negocioRestringido(req));
 
     return res.json({
       ok: true,

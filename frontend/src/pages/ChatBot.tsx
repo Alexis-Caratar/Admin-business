@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import axios from "../api/axios";
 import {
   Fab,
   Paper,
@@ -71,20 +72,7 @@ export default function ChatBot() {
 
     try {
 
-      const response = await fetch(
-        "http://192.168.80.25:4000/api/ai/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            mensaje: texto
-          })
-        }
-      );
-
-      const data = await response.json();
+      const { data } = await axios.post("/ai/chat", { mensaje: texto });
 
       const ia = data.respuesta;
 

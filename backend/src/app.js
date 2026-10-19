@@ -35,14 +35,11 @@ app.use(express.json());
 // LOGIN Y REGISTRO
 app.use("/api/auth", authRoutes);
 
-// CRUD de usuarios (si quieres que estos SÍ requieran token, los mueves abajo)
-app.use("/api/usuarios", usuariosRoutes);
-//ruta ia
-app.use("/api/ai",   ai);
-
 // ---------------------------
 //  RUTAS PROTEGIDAS
 // ---------------------------
+app.use("/api/usuarios", authenticate, usuariosRoutes);
+app.use("/api/ai",  authenticate, ai);
 app.use("/api/menus_sistema",  authenticate, menus_sistema);
 app.use("/api/negocios",  authenticate, negociosRoutes);
 app.use("/api/categorias",  authenticate, categoriasRouter);

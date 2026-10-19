@@ -67,8 +67,9 @@ export const CajeroDashboard: React.FC = () => {
   useEffect(() => {
     const ws = new WebSocket(import.meta.env.VITE_WS_URL);
     ws.onopen = () => {
-      ws.send(JSON.stringify({ tipo: "suscribirse_mesas", id_negocio }));
-      ws.send(JSON.stringify({ tipo: "suscribirse_caja", id_usuario: idUsuario }));
+      const token = localStorage.getItem("token");
+      ws.send(JSON.stringify({ tipo: "suscribirse_mesas", id_negocio, token }));
+      ws.send(JSON.stringify({ tipo: "suscribirse_caja", id_usuario: idUsuario, token }));
     };
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);

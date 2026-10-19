@@ -187,6 +187,7 @@ const AdminDashboard: React.FC = () => {
       ws.send(
         JSON.stringify({
           tipo: "register_frontend",
+          token: localStorage.getItem("token"),
         })
       );
     };

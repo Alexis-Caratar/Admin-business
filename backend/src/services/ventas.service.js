@@ -8,6 +8,7 @@ export const VentasService = {
 
     
   let filtroFecha = "";
+  const params = [id_negocio];
 
   switch (tipoFiltro) {
 
@@ -83,8 +84,9 @@ export const VentasService = {
       if (fechaInicio && fechaFin) {
         filtroFecha = `
           AND (v.fecha AT TIME ZONE 'America/Bogota')::date
-              BETWEEN '${fechaInicio}' AND '${fechaFin}'
+              BETWEEN $2::date AND $3::date
         `;
+        params.push(fechaInicio, fechaFin);
       }
       break;
   }
@@ -117,12 +119,13 @@ export const VentasService = {
             (e.created_at AT TIME ZONE 'America/Bogota')::date AS fecha,
             SUM(e.monto) AS egresos
         FROM egresos e
+        WHERE e.id_negocio = $1
         GROUP BY (e.created_at AT TIME ZONE 'America/Bogota')::date
     ) e ON v.fecha = e.fecha
 
     ORDER BY v.fecha ASC
     `,
-    [id_negocio]
+    params
   );
 
   return rows;

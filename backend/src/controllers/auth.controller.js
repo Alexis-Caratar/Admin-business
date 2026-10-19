@@ -35,7 +35,12 @@ export const login = async (req, res) => {
 export const newpassword = async (req, res) => {
   try {
     
-    const data = await authService.newpassword(req.body);
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "currentPassword y newPassword son requeridos" });
+    }
+    // El usuario solo puede cambiar su propia contraseña
+    const data = await authService.newpassword({ id_usuario: req.user.id, currentPassword, newPassword });
     return res.json({ ok: true, ...data });
 
   } catch (err) {

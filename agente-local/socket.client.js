@@ -4,20 +4,24 @@ dotenv.config();
 const { imprimirFactura,imprimirComanda,getPrinterStatus } = require("./services/imprimir.service.js");
 
 let ws;
+let intervaloEstado;
 
 function initWS() {
   ws = new WebSocket(process.env.WS_BACKEND_URL);
  ws.on("open", () => {
   console.log("Conectado al backend WebSocket");
+  // AGENT_TOKEN se genera en el backend con: node scripts/token-agente.js <id_negocio>
   ws.send(JSON.stringify({
     tipo: "register_agent",
-    isPrintAgent: true
+    token: process.env.AGENT_TOKEN
   }));
 
- 
-  setInterval(async () => {  // estado impresora cada minuto
+  clearInterval(intervaloEstado); // evitar intervalos duplicados al reconectar
+  intervaloEstado = setInterval(async () => {  // estado impresora cada minuto
     const status = await getPrinterStatus();
-    ws.send(JSON.stringify({tipo: "estado_impresora",payload: status}));
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({tipo: "estado_impresora",payload: status}));
+    }
   }, 60000);
 });
 
@@ -57,6 +61,7 @@ function initWS() {
   });
 
   ws.on("close", () => {
+    clearInterval(intervaloEstado);
     console.log("Conexión cerrada, reintentando en 5s...");
     setTimeout(initWS, 5000);
   });

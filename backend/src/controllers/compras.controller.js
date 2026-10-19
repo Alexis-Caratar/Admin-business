@@ -1,11 +1,12 @@
 import { ComprasService } from "../services/compras.service.js";
+import { negocioPermitido } from "../middlewares/auth.middleware.js";
 
 export const ComprasController = {
 
   crearCompra: async (req, res) => {
     try {
 
-      const compra = await ComprasService.crearCompra(req.body);
+      const compra = await ComprasService.crearCompra({ ...req.body, id_negocio: negocioPermitido(req, req.body.id_negocio) });
 
       return res.json({
         ok: true,
@@ -24,7 +25,7 @@ export const ComprasController = {
     try {
 
       const compras = await ComprasService.listarCompras(
-        req.query.id_negocio
+        negocioPermitido(req, req.query.id_negocio)
       );
 
       return res.json({

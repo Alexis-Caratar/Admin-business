@@ -6,6 +6,68 @@ const TABLE_PRECIOS = "productos_precios";
 const TABLE_RECETA = "recetas";
 const TABLE_COMPLEMENTOS = "productos_complementos ";
 
+const normalizar = (texto = "") => texto.trim().replace(/\s+/g, " ");
+
+// Inventario de un PRODUCTO FINAL desde el formulario del producto:
+// - inventario.inventario_id → usa ese ítem (debe ser del negocio)
+// - sin id → busca uno con el mismo nombre; si no existe lo crea
+// - inventario.cantidad > 0 → registra una ENTRADA y suma al stock
+// Devuelve el id del inventario para guardarlo en productos.inventario_id
+const prepararInventario = async (client, inventario, producto, costo, { id_negocio, id_usuario }) => {
+  let inventarioId = null;
+  let nuevo = false;
+
+  if (inventario.inventario_id) {
+    const { rows } = await client.query(
+      `SELECT id FROM inventario WHERE id = $1 AND id_negocio = $2`,
+      [inventario.inventario_id, id_negocio]
+    );
+    if (!rows.length) throw Object.assign(new Error("El inventario seleccionado no existe"), { status: 400 });
+    inventarioId = rows[0].id;
+  } else {
+    const nombre = normalizar(inventario.nombre || producto.nombre);
+    if (!nombre) throw Object.assign(new Error("El producto necesita un nombre para crear su inventario"), { status: 400 });
+
+    const { rows: existentes } = await client.query(
+      `SELECT id FROM inventario
+       WHERE id_negocio = $1 AND tipo = 'PRODUCTO' AND LOWER(TRIM(nombre)) = LOWER($2)
+       ORDER BY id LIMIT 1`,
+      [id_negocio, nombre]
+    );
+
+    if (existentes.length) {
+      inventarioId = existentes[0].id;
+    } else {
+      const { rows } = await client.query(
+        `INSERT INTO inventario
+         (nombre, unidad, tipo, stock_actual, stock_minimo, stock_maximo, costo_unitario, estado, created_at, id_negocio)
+         VALUES ($1, $2, 'PRODUCTO', 0, $3, 0, $4, true, NOW(), $5)
+         RETURNING id`,
+        [nombre, inventario.unidad || "UND", Number(inventario.stock_minimo) || 0, Number(costo) || 0, id_negocio]
+      );
+      inventarioId = rows[0].id;
+      nuevo = true;
+    }
+  }
+
+  const cantidad = Number(inventario.cantidad) || 0;
+  if (cantidad < 0) throw Object.assign(new Error("La cantidad a cargar no puede ser negativa"), { status: 400 });
+
+  if (cantidad > 0) {
+    await client.query(
+      `INSERT INTO inventario_movimientos (inventario_id, tipo, cantidad, motivo, id_usuario)
+       VALUES ($1, 'ENTRADA', $2, $3, $4)`,
+      [inventarioId, cantidad, nuevo ? "Carga inicial desde producto" : "Entrada desde producto", id_usuario]
+    );
+    await client.query(
+      `UPDATE inventario SET stock_actual = COALESCE(stock_actual, 0) + $1 WHERE id = $2`,
+      [cantidad, inventarioId]
+    );
+  }
+
+  return inventarioId;
+};
+
 
 export const listar = async (id_categoria) => {
 
@@ -139,13 +201,20 @@ export const obtener_inventario = async (datos,id_negocio) => {
 
 
 // Crear producto completo
-export const crear = async (payload) => {
+export const crear = async (payload, ctx) => {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    const { producto, productos_imagenes, productos_precios, receta,productos_complementos } = payload;
+    const { producto, productos_imagenes, productos_precios, receta,productos_complementos, inventario } = payload;
+
+    // 0️⃣ INVENTARIO DEL PRODUCTO FINAL (crear / tomar existente / cargar stock)
+    if (inventario && !producto.usa_receta) {
+      producto.inventario_id = await prepararInventario(
+        client, inventario, producto, productos_precios?.[0]?.precio_costo, ctx
+      );
+    }
 
     // ============================
     // 1️⃣ INSERTAR PRODUCTO
@@ -282,13 +351,20 @@ if (productos_complementos?.length > 0) {
   }
 };
 // Actualizar producto completo
-export const actualizar = async (id, payload) => {
+export const actualizar = async (id, payload, ctx) => {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    const { producto, productos_imagenes, productos_precios,receta,productos_complementos } = payload;
+    const { producto, productos_imagenes, productos_precios,receta,productos_complementos, inventario } = payload;
+
+    // 0️⃣ INVENTARIO DEL PRODUCTO FINAL (crear / tomar existente / cargar stock)
+    if (inventario && producto && !producto.usa_receta) {
+      producto.inventario_id = await prepararInventario(
+        client, inventario, producto, productos_precios?.[0]?.precio_costo, ctx
+      );
+    }
 
     // ============================
     // 1️⃣ ACTUALIZAR PRODUCTO

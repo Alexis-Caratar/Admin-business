@@ -5,6 +5,24 @@ const TABLE = "usuarios";
 const TABLE_PERSONAS = "personas";
 const SALT_ROUNDS = 10;
 
+// Columnas que se pueden modificar desde el endpoint de actualizar
+const CAMPOS_PERSONA = ["tipo_identificacion", "identificacion", "nombres", "apellidos", "telefono", "direccion", "email"];
+const CAMPOS_USUARIO = ["email", "password", "rol", "imagen"];
+
+const filtrarCampos = (obj = {}, permitidos) =>
+  Object.fromEntries(
+    Object.entries(obj).filter(([k, v]) => permitidos.includes(k) && v !== undefined)
+  );
+
+// true si el usuario existe y pertenece al negocio
+export const perteneceANegocio = async (id_usuario, id_negocio) => {
+  const [rows] = await db.query(
+    `SELECT 1 FROM ${TABLE} WHERE id = $1 AND id_negocio = $2`,
+    [id_usuario, id_negocio]
+  );
+  return rows.length > 0;
+};
+
 // -----------------------------
 // LISTAR
 // -----------------------------
@@ -40,7 +58,9 @@ export const obtener = async (id) => {
   `,
     [id]
   );
-  return rows[0];
+  if (!rows[0]) return rows[0];
+  const { password, ...usuario } = rows[0];
+  return usuario;
 };
 
 // -----------------------------
@@ -143,7 +163,7 @@ export const crear = async (payload) => {
 
     return {
       persona: { id: id_persona, ...persona },
-      usuario: { id: usuarioRows[0].id, ...usuario },
+      usuario: { id: usuarioRows[0].id, ...usuario, password: undefined },
     };
 
   } catch (error) {
@@ -228,8 +248,8 @@ export const actualizar = async (payload) => {
     // ================================
     // 3️⃣ Actualizar PERSONA (dinámico PG)
     // ================================
-    if (persona && Object.keys(persona).length > 0) {
-      const { id, ...personaClean } = persona;
+    const personaClean = filtrarCampos(persona, CAMPOS_PERSONA);
+    if (Object.keys(personaClean).length > 0) {
 
       const keys = Object.keys(personaClean);
       const values = Object.values(personaClean);
@@ -251,9 +271,11 @@ export const actualizar = async (payload) => {
     // ================================
     // 4️⃣ Actualizar USUARIO
     // ================================
-    if (usuario && Object.keys(usuario).length > 0) {
-      const { id, ...usuarioClean } = usuario;
+    const usuarioClean = filtrarCampos(usuario, CAMPOS_USUARIO);
+    // una contraseña vacía no debe sobrescribir la actual
+    if (!usuarioClean.password) delete usuarioClean.password;
 
+    if (Object.keys(usuarioClean).length > 0) {
       // encriptar password si viene
       if (usuarioClean.password) {
         usuarioClean.password = await bcrypt.hash(
