@@ -1,5 +1,6 @@
 /* ---------- /src/pages/CajeroDashboard.tsx ---------- */
 import React, { useEffect, useState } from "react";
+import LectorCodigo from "./components/LectorCodigo";
 import { Box, Typography, Stack, Chip, Button, Drawer, Fab, useTheme, useMediaQuery, Badge, Dialog, DialogContent, Paper, DialogActions, Avatar, Divider } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import type { ProductoCajero, CategoriaCajero, Caja, Mesa } from "../../../../types/cajero";
@@ -20,6 +21,9 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VentasDetalles from "./components/Estados_dasboard/ventasDetalles";
 import CajaPanel from "./components/Estados_dasboard/CajaPanel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import PanelPedidosCaja from "../../../../components/pedidos/PanelPedidosCaja";
+import { usePedidosEnCurso } from "../../../../components/pedidos/pedidosUtil";
 import Loader from "../../../../components/Loader";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
@@ -46,6 +50,15 @@ export const CajeroDashboard: React.FC = () => {
   const [modalProductosOpen, setModalProductosOpen] = useState(false);
   const [openCarrito, setOpenCarrito] = useState(false);
   const [openEgresos, setOpenEgresos] = useState(false);
+  // Pedidos web: se gestionan desde la caja, con aviso en vivo
+  const [openPedidos, setOpenPedidos] = useState(false);
+  const pedidosWeb = usePedidosEnCurso();
+  const { aviso: avisoPedidos, cerrarAviso: cerrarAvisoPedidos } = pedidosWeb;
+  useEffect(() => {
+    if (!avisoPedidos) return;
+    toastr.info(avisoPedidos);
+    cerrarAvisoPedidos();
+  }, [avisoPedidos, cerrarAvisoPedidos]);
   const [mesas, setMesas] = useState<Mesa[]>([]);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
   const theme = useTheme();
@@ -157,27 +170,30 @@ export const CajeroDashboard: React.FC = () => {
   };
 
 
-  const addCart = (p: ProductoCajero) => {
+  // `unidades` > 1 llega desde el lector de códigos ("3*código"); por defecto suma 1
+  const addCart = (p: ProductoCajero, unidades = 1) => {
     setCarrito((prev) => {
       const item = prev.find((x) => x.id === p.id);
       const stock = Number(p.stock_actual ?? 999);
       const cantidadActual = item?.cantidad ?? 0;
+      const suma = Math.min(unidades, stock - cantidadActual);
 
-      if (cantidadActual >= stock) {
+      if (suma <= 0) {
         toastr.error(`No hay más unidades disponibles de "${p.nombre}".`); return prev;
+      } else if (suma < unidades) {
+        toastr.warning(`Solo había ${suma} unidad(es) de "${p.nombre}".`);
       } else {
-        toastr.success(`${p.nombre} agregado`);
-
+        toastr.success(`${unidades > 1 ? `${unidades} × ` : ""}${p.nombre} agregado`);
       }
 
       if (item) {
         return prev.map((x) =>
           x.id === p.id
-            ? { ...x, cantidad: x.cantidad + 1 }
+            ? { ...x, cantidad: x.cantidad + suma }
             : x
         );
       }
-      return [...prev, { ...p, cantidad: 1 }];
+      return [...prev, { ...p, cantidad: suma }];
     });
   };
   const sumarCantidad = (id: number) => {
@@ -269,6 +285,8 @@ export const CajeroDashboard: React.FC = () => {
 
     try {
       const { data } = await finalizar_venta(payload);
+      // La comanda sale sola; si el punto de venta no la imprimió, se avisa
+      if (data.ok && data.impresion && !data.impresion.ok) toastr.warning(`Comanda no impresa: ${data.impresion.mensaje}`);
       if (data.ok) {
         setVentas((prev) => [...prev, { ...payload }]);
         setCarrito([]);
@@ -512,6 +530,36 @@ export const CajeroDashboard: React.FC = () => {
         </Stack>
       </Box>
 
+      {/* === PEDIDOS WEB (solo si el negocio tiene activo el módulo Pedidos) === */}
+      {pedidosWeb.disponible && <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1.5 }}>
+        <Badge badgeContent={pedidosWeb.porConfirmar} color="error" overlap="rectangular">
+          <Button
+            variant="contained"
+            startIcon={<ReceiptLongIcon />}
+            onClick={() => setOpenPedidos(true)}
+            sx={{
+              borderRadius: 3,
+              fontWeight: 700,
+              textTransform: "none",
+              px: 2.5,
+              height: 44,
+              background: pedidosWeb.porConfirmar > 0 ? "linear-gradient(135deg,#d97706,#fbbf24)" : "linear-gradient(135deg,#2563EB,#3B82F6)",
+              boxShadow: pedidosWeb.porConfirmar > 0 ? "0 8px 20px rgba(217,119,6,.25)" : "0 8px 20px rgba(37,99,235,.20)",
+              "&:hover": { background: pedidosWeb.porConfirmar > 0 ? "linear-gradient(135deg,#b45309,#d97706)" : "linear-gradient(135deg,#1D4ED8,#2563EB)" },
+              ...(pedidosWeb.porConfirmar > 0 && {
+                animation: "pulsoPedidos 1.6s ease-in-out infinite",
+                "@keyframes pulsoPedidos": {
+                  "0%, 100%": { boxShadow: "0 0 0 0 rgba(217,119,6,.45)" },
+                  "50%": { boxShadow: "0 0 0 8px rgba(217,119,6,0)" },
+                },
+              }),
+            }}
+          >
+            {pedidosWeb.porConfirmar > 0 ? `${pedidosWeb.porConfirmar} pedido(s) por confirmar` : "Pedidos web"}{pedidosWeb.pedidos.length ? ` · ${pedidosWeb.pedidos.length} en curso` : ""}
+          </Button>
+        </Badge>
+      </Stack>}
+
       {/* === PANEL SUPERIOR DE CAJA === */}
       {cajaAbierta && (
         <CajaPanel
@@ -547,6 +595,10 @@ export const CajeroDashboard: React.FC = () => {
       >
         Panel de ventas
       </Divider>
+      {/* Lector de códigos de barras (minimarket, tiendas…): escanear = agregar al carrito */}
+      {cajaAbierta && categorias.length > 0 && (
+        <LectorCodigo categorias={categorias} onAgregar={addCart} onConOpciones={openCategoria} />
+      )}
       {/* === CONTENIDO PRINCIPAL === */}
       <Box sx={{ display: "flex", flex: 1, minHeight: 0}}>
         {mesas.length > 0 ? (
@@ -842,6 +894,14 @@ export const CajeroDashboard: React.FC = () => {
           }}
         />
       )}
+
+      {/* === PEDIDOS WEB (panel de caja) === */}
+      <Dialog open={openPedidos} onClose={() => setOpenPedidos(false)} fullScreen={isMobile} fullWidth maxWidth="xl"
+        PaperProps={{ sx: { borderRadius: isMobile ? 0 : 4, bgcolor: "#F8FAFC" } }}>
+        <DialogContent sx={{ p: { xs: 2, md: 4 } }}>
+          <PanelPedidosCaja datos={pedidosWeb} cajaAbierta={cajaAbierta} onAviso={(m) => toastr.success(m)} onCerrar={() => setOpenPedidos(false)} />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

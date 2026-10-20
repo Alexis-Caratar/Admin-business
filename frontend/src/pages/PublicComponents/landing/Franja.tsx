@@ -7,7 +7,7 @@ import {
 } from "framer-motion";
 import { Box, Button, Container, Typography } from "@mui/material";
 import { FOTO, T, btnPrimario } from "./tokens";
-import { SITE, irA } from "./siteConfig";
+import { irA, useSitio } from "./siteConfig";
 import { Reveal } from "./Comunes";
 
 /* Foto a todo el ancho con un desplazamiento suave al hacer scroll */
@@ -20,7 +20,9 @@ export default function Franja() {
   });
   const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
 
-  if (!SITE.franja) return null;
+  const sitio = useSitio();
+  const { franja } = sitio;
+  if (!franja) return null;
 
   return (
     <Box
@@ -34,8 +36,8 @@ export default function Franja() {
       }}
     >
       <motion.img
-        src={SITE.franja.src}
-        srcSet={SITE.franja.srcSet}
+        src={franja.src}
+        srcSet={franja.srcSet}
         sizes="100vw"
         alt=""
         loading="lazy"
@@ -85,14 +87,14 @@ export default function Franja() {
               color: FOTO.texto,
             }}
           >
-            Buen ambiente, buena música y el mejor sabor
+            {sitio.franjaTexto ?? sitio.eslogan ?? sitio.nombre}
             <Box component="span" sx={{ color: FOTO.acento }}>
               .
             </Box>
           </Typography>
 
           <Button onClick={() => irA("menu")} sx={{ ...btnPrimario, mt: 3 }}>
-            Ver el menú
+            {sitio.textos.ver_catalogo}
           </Button>
         </Reveal>
       </Container>

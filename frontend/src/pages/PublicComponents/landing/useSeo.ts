@@ -1,54 +1,37 @@
 import { useEffect } from "react";
-import { SITE } from "./siteConfig";
-
-/* Título y descripción: los mismos textos que ya tenía el sitio */
-const TITULO =
-  "Punto Urbano | Restaurante de Comidas Rápidas, Almuerzos y Cenas en Pasto";
-
-const DESCRIPCION =
-  "Punto Urbano en Pasto, Nariño. Restaurante de comidas rápidas, hamburguesas artesanales, almuerzos, cenas, fast food premium, domicilios y bebidas. Disfruta un ambiente moderno y el mejor sabor en Pasto.";
+import { useSitio } from "./siteConfig";
+import type { Sitio } from "./siteConfig";
 
 const FUENTES =
   "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Manrope:wght@400;500;600;700;800&display=swap";
 
-const hh = (h: number) => `${String(h).padStart(2, "0")}:00`;
+const DIAS_SCHEMA = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-/* Datos estructurados de restaurante, solo con información real */
-const JSON_LD = {
-  "@context": "https://schema.org",
-  "@type": "Restaurant",
-  name: SITE.nombre,
-  url: SITE.url,
-  telephone: "+573226665512",
-  hasMap: SITE.googleMaps,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Cra. 40 #16D-29",
-    addressLocality: "Pasto",
-    addressRegion: "Nariño",
-    addressCountry: "CO",
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: SITE.lat,
-    longitude: SITE.lng,
-  },
-  openingHoursSpecification: [
-    {
+/* Datos estructurados (schema.org), solo con lo que está registrado en la base */
+function jsonLd(sitio: Sitio) {
+  return {
+    "@context": "https://schema.org",
+    "@type": sitio.schemaTipo, // según el tipo de negocio: Restaurant, GroceryStore, ElectronicsStore…
+    name: sitio.nombre,
+    legalName: sitio.razonSocial,
+    taxID: sitio.nit ?? undefined,
+    url: sitio.url,
+    telephone: sitio.telefonoLink?.replace("tel:", "") ?? undefined,
+    email: sitio.correo ?? undefined,
+    hasMap: sitio.googleMaps ?? undefined,
+    image: sitio.logo ?? undefined,
+    address: sitio.direccion
+      ? { "@type": "PostalAddress", streetAddress: sitio.direccion, addressLocality: sitio.ciudad ?? undefined, addressCountry: "CO" }
+      : undefined,
+    geo: sitio.lat !== null && sitio.lng !== null ? { "@type": "GeoCoordinates", latitude: sitio.lat, longitude: sitio.lng } : undefined,
+    openingHoursSpecification: sitio.horarios.map((h) => ({
       "@type": "OpeningHoursSpecification",
-      dayOfWeek: [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ],
-      opens: hh(SITE.horario.abre),
-      closes: hh(SITE.horario.cierra),
-    },
-  ],
-};
+      dayOfWeek: DIAS_SCHEMA[h.dia_semana],
+      opens: h.hora_apertura,
+      closes: h.hora_cierre,
+    })),
+  };
+}
 
 function meta(atributo: "name" | "property", clave: string, contenido: string) {
   let el = document.head.querySelector<HTMLMetaElement>(
@@ -73,15 +56,16 @@ function enlace(rel: string, href: string, id: string, crossOrigin = false) {
 }
 
 export function useSeo(): void {
+  const sitio = useSitio();
   useEffect(() => {
-    document.title = TITULO;
+    document.title = sitio.seoTitulo;
     document.documentElement.lang = "es";
 
-    meta("name", "description", DESCRIPCION);
+    meta("name", "description", sitio.seoDescripcion);
     meta("property", "og:type", "website");
-    meta("property", "og:title", TITULO);
-    meta("property", "og:description", DESCRIPCION);
-    meta("property", "og:url", SITE.url);
+    meta("property", "og:title", sitio.seoTitulo);
+    meta("property", "og:description", sitio.seoDescripcion);
+    meta("property", "og:url", sitio.url);
     meta("property", "og:locale", "es_CO");
 
     // Tipografías (ver LEEME: es mejor moverlas a index.html)
@@ -92,10 +76,10 @@ export function useSeo(): void {
     const script = document.createElement("script");
     script.type = "application/ld+json";
     script.id = "pu-json-ld";
-    script.text = JSON.stringify(JSON_LD);
+    script.text = JSON.stringify(jsonLd(sitio));
     document.getElementById("pu-json-ld")?.remove();
     document.head.appendChild(script);
 
     return () => script.remove();
-  }, []);
+  }, [sitio]);
 }

@@ -1,9 +1,10 @@
 import { Box, Container, Fab } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { T } from "./tokens";
-import { SITE, waLink } from "./siteConfig";
+import { useSitio, waLink } from "./siteConfig";
 
 export function Pie({ onAcceso }: { onAcceso: () => void }) {
+  const sitio = useSitio();
   return (
     <Box
       component="footer"
@@ -25,7 +26,7 @@ export function Pie({ onAcceso }: { onAcceso: () => void }) {
         }}
       >
         <Box>
-          © {new Date().getFullYear()} {SITE.nombre} · Pasto, Colombia
+          © {new Date().getFullYear()} {sitio.nombre}{sitio.ciudad ? ` · ${sitio.ciudad}` : ""}{sitio.nit ? ` · NIT ${sitio.nit}` : ""}
           <br />
           Enterprise Software by Eng. Alexis Caratar
         </Box>
@@ -56,13 +57,15 @@ export function Pie({ onAcceso }: { onAcceso: () => void }) {
 }
 
 export function BotonWhatsApp() {
+  const sitio = useSitio();
+  if (!sitio.whatsapp) return null;
   return (
     <Fab
       component="a"
-      href={waLink("Hola Punto Urbano, quiero hacer un pedido.")}
+      href={waLink(sitio, sitio.mensajeWhatsapp)}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Escribir a Punto Urbano por WhatsApp"
+      aria-label={`Escribir a ${sitio.nombre} por WhatsApp`}
       sx={{
         position: "fixed",
         right: { xs: 16, md: 24 },

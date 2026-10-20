@@ -1,14 +1,15 @@
 import { Box, Container } from "@mui/material";
 import { T } from "./tokens";
-import { SITE } from "./siteConfig";
+import { useSitio } from "./siteConfig";
 import { Encabezado, Imagen, Reveal } from "./Comunes";
 
 /*
- * Mosaico de fotos (SITE.galeria). Mientras esté vacío,
+ * Mosaico de fotos (galería del sitio). Mientras esté vacío,
  * la sección no se muestra (y tampoco su enlace en la navegación).
  */
 export default function Galeria() {
-  if (SITE.galeria.length === 0) return null;
+  const { galeria, textos } = useSitio();
+  if (galeria.length === 0) return null;
 
   return (
     <Box
@@ -17,7 +18,7 @@ export default function Galeria() {
       sx={{ py: { xs: 10, md: 16 }, borderTop: `1px solid ${T.line}` }}
     >
       <Container maxWidth="lg">
-        <Encabezado etiqueta="Galería" titulo="Antojos" />
+        <Encabezado etiqueta="Galería" titulo={textos.galeria_titulo} />
 
         <Box
           sx={{
@@ -28,7 +29,7 @@ export default function Galeria() {
             gap: { xs: 1, md: 1.5 },
           }}
         >
-          {SITE.galeria.map((foto, i) => (
+          {galeria.map((foto, i) => (
             <Box
               key={foto.src}
               sx={{

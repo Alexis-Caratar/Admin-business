@@ -33,7 +33,16 @@ import {
   Chip,
 } from "@mui/material";
 
-import { asignarMenuEmpresa, getMenusempresaTotal, getMenusEmpresa } from "../../../api/negocios";
+import { aplicarSugeridos, asignarMenuEmpresa, getMenusempresaTotal, getMenusEmpresa, getSitioNegocio, getTiposNegocio, guardarSitioNegocio, sitioVacio } from "../../../api/negocios";
+import type { SitioNegocio, TipoNegocio } from "../../../api/negocios";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { SeccionHorarios, SeccionSitioWeb, SeccionTienda } from "./SeccionesSitio";
+import SeccionIntegraciones from "./SeccionIntegraciones";
+import SeccionImpresion from "./SeccionImpresion";
+import PrintIcon from "@mui/icons-material/Print";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -54,9 +63,20 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import AdminUsuarios from "../Usuarios/AdminUsuarios";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
+import LanguageIcon from "@mui/icons-material/Language";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+
+const ScheduleTabIcon = () => <ScheduleIcon fontSize="small" />;
 
 const AdminNegocios: React.FC = () => {
   const [negocios, setNegocios] = useState<Negocio[]>([]);
+  // Sitio web, horarios y tienda del negocio que se edita (mismo modal)
+  const [sitio, setSitio] = useState<SitioNegocio | null>(null);
+  const [tabModal, setTabModal] = useState(0);
+  const [erroresSitio, setErroresSitio] = useState<Record<string, string>>({});
+  const [guardando, setGuardando] = useState(false);
+  const setCampoSitio = <K extends keyof SitioNegocio>(k: K, v: SitioNegocio[K]) =>
+    setSitio((x) => (x ? { ...x, [k]: v } : x));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -72,17 +92,11 @@ const AdminNegocios: React.FC = () => {
   const [negocioSeleccionado, setNegocioSeleccionado] =
     useState<Negocio | null>(null);
 
-  const tiposNegocio = [
-    "Restaurante",
-    "Cafetería",
-    "Bar",
-    "Tienda",
-    "Supermercado",
-    "Panadería",
-    "Comida rápidas",
-    "Servicios",
-    "Otros",
-  ];
+  // Tipos de negocio desde la base (tipos_negocio): definen cómo se ve su página web
+  const [tipos, setTipos] = useState<TipoNegocio[]>([]);
+  useEffect(() => { getTiposNegocio().then(setTipos).catch(() => setTipos([])); }, []);
+  const tiposNegocio = tipos.map((t) => t.nombre);
+  const tipoActual = (nombre?: string) => tipos.find((t) => t.nombre === nombre || t.codigo === nombre);
 
   const [form, setForm] = useState<Negocio>({
     nit: "",
@@ -151,13 +165,22 @@ const AdminNegocios: React.FC = () => {
 
     });
     setEditingId(null);
+    setSitio(sitioVacio());
+    setTabModal(0);
+    setErroresSitio({});
     setIsModalOpen(true);
   };
 
-  const openEditModal = (negocio: Negocio) => {
+  const openEditModal = (negocio: Negocio, tab = 0) => {
     setForm(negocio);
     setEditingId(negocio.id!);
+    setSitio(null);
+    setTabModal(tab);
+    setErroresSitio({});
     setIsModalOpen(true);
+    getSitioNegocio(negocio.id!)
+      .then(setSitio)
+      .catch(() => Swal.fire("Error", "No se pudo cargar el sitio web del negocio.", "error"));
   };
 
   const closeModal = () => {
@@ -165,20 +188,48 @@ const AdminNegocios: React.FC = () => {
     setEditingId(null);
   };
 
+  // Pestaña donde está cada error del sitio, para llevar al usuario a corregirlo
+  const tabDeError = (campos: string[]) =>
+    campos.some((c) => c === "horarios") ? 2 : campos.some((c) => c.startsWith("tienda")) ? 3 : 1;
+
+  // Un solo Guardar: datos del negocio y luego sitio web, horarios y tienda
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setGuardando(true);
+    let id = editingId;
     try {
       if (editingId) {
         await actualizarNegocio(editingId, form);
-        Swal.fire("Actualizado", "El negocio ha sido actualizado.", "success");
       } else {
-        await crearNegocio(form);
-        Swal.fire("Creado", "El negocio ha sido creado.", "success");
+        const creado = await crearNegocio(form);
+        id = creado.id;
+        // Si el sitio falla, el siguiente Guardar actualiza este negocio en vez de crear otro
+        setEditingId(creado.id);
+        if (sitio && !sitio.url_negocio) setSitio({ ...sitio, url_negocio: creado.url_negocio });
+        if (sitio) sitio.url_negocio = sitio.url_negocio || creado.url_negocio;
       }
+    } catch (error) {
+      setGuardando(false);
+      const msg = (error as { response?: { data?: { error?: string } } }).response?.data?.error;
+      Swal.fire("Error", msg ?? "Hubo un problema al guardar el negocio.", "error");
+      return;
+    }
+
+    try {
+      if (sitio && id) setSitio(await guardarSitioNegocio(id, sitio));
+      setErroresSitio({});
+      Swal.fire(editingId ? "Actualizado" : "Creado", "El negocio, su sitio web y la tienda quedaron guardados.", "success");
       closeModal();
       fetchNegocios();
     } catch (error) {
-      Swal.fire("Error", "Hubo un problema al guardar el negocio.", "error");
+      const r = (error as { response?: { data?: { error?: string; errores?: Record<string, string> } } }).response?.data;
+      const errores = r?.errores ?? {};
+      setErroresSitio(errores);
+      if (Object.keys(errores).length) setTabModal(tabDeError(Object.keys(errores)));
+      fetchNegocios();
+      Swal.fire("Revisa el sitio web", r?.error ?? "Los datos del negocio se guardaron, pero no el sitio web.", "warning");
+    } finally {
+      setGuardando(false);
     }
   };
 
@@ -581,6 +632,30 @@ const AdminNegocios: React.FC = () => {
                       <PeopleAltOutlinedIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
+                  <Tooltip title="Sitio web y tienda en línea" arrow>
+                    <IconButton
+                      onClick={() => openEditModal(n, 1)}
+                      sx={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 3,
+                        bgcolor: "#FFFFFF",
+                        color: "#0F172A",
+                        border: "1px solid #E2E8F0",
+                        transition: "all .25s ease",
+
+                        "&:hover": {
+                          bgcolor: "#0F172A",
+                          color: "#FFF",
+                          borderColor: "#0F172A",
+                          boxShadow: "0 12px 24px rgba(15,23,42,.20)",
+                          transform: "translateY(-3px)",
+                        },
+                      }}
+                    >
+                      <LanguageIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
 
                 </Box>
               </Card>
@@ -700,7 +775,7 @@ const AdminNegocios: React.FC = () => {
                       },
                     }}
                   >
-                    Complete la información del establecimiento para continuar.
+                    {editingId ? "Datos del negocio, su página web, horarios, tienda en línea, pagos y WhatsApp." : "Complete la información del establecimiento para continuar."}
                   </Typography>
                 </Box>
               </Box>
@@ -730,12 +805,63 @@ const AdminNegocios: React.FC = () => {
             </Box>
           </DialogTitle>
 
+          {/* PESTAÑAS: mismo modal para el negocio, su web y su tienda */}
+          <Box sx={{ px: { xs: 1, md: 3 }, bgcolor: "#FFFFFF", borderBottom: "1px solid #E2E8F0", display: "flex", alignItems: "center" }}>
+            <Tabs
+              value={tabModal}
+              onChange={(_, v) => setTabModal(v)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                flex: 1,
+                "& .MuiTab-root": { textTransform: "none", fontWeight: 600, fontSize: 14, minHeight: 52 },
+                "& .Mui-selected": { color: "#2563EB" },
+                "& .MuiTabs-indicator": { height: 3, borderRadius: 3, bgcolor: "#2563EB" },
+              }}
+            >
+              <Tab icon={<BusinessIcon fontSize="small" />} iconPosition="start" label="Datos del negocio" />
+              <Tab icon={<LanguageIcon fontSize="small" />} iconPosition="start" label="Sitio web" />
+              <Tab icon={<ScheduleTabIcon />} iconPosition="start" label="Horarios" />
+              <Tab icon={<StorefrontIcon fontSize="small" />} iconPosition="start" label="Tienda en línea" />
+              <Tab icon={<CreditCardIcon fontSize="small" />} iconPosition="start" label="Pagos y WhatsApp" />
+              <Tab icon={<PrintIcon fontSize="small" />} iconPosition="start" label="Impresión" />
+            </Tabs>
+            {editingId && sitio?.publicado && (
+              <Button size="small" startIcon={<OpenInNewIcon />} href={`/${sitio.url_negocio}`} target="_blank" rel="noopener noreferrer"
+                sx={{ textTransform: "none", fontWeight: 600, display: { xs: "none", md: "inline-flex" } }}>
+                Ver sitio
+              </Button>
+            )}
+          </Box>
+
           <DialogContent
             sx={{
               bgcolor: "#F8FAFC",
               p: 4
             }}
           >
+            {tabModal > 0 && tabModal < 4 && !sitio && (
+              <Box sx={{ display: "grid", placeItems: "center", py: 8 }}><CircularProgress /></Box>
+            )}
+            {tabModal === 1 && sitio && (
+              <SeccionSitioWeb sitio={sitio} set={setCampoSitio} errores={erroresSitio}
+                tipoNombre={tipoActual(form.tipo)?.nombre ?? "Otros"}
+                onSugeridos={tipoActual(form.tipo) ? () => {
+                  const t = tipoActual(form.tipo)!;
+                  Swal.fire({
+                    title: `Textos sugeridos para ${t.nombre}`,
+                    text: "Se reemplazan frases, Nosotros, franja, servicios, mensaje de WhatsApp y SEO. Las fotos se conservan.",
+                    icon: "question", showCancelButton: true, confirmButtonText: "Usar sugeridos", cancelButtonText: "Cancelar",
+                  }).then((r) => { if (r.isConfirmed) setSitio(aplicarSugeridos(sitio, t, form.nombre || "tu negocio", form.ciudad ?? null)); });
+                } : undefined} />
+            )}
+            {tabModal === 2 && sitio && <SeccionHorarios sitio={sitio} set={setCampoSitio} errores={erroresSitio} />}
+            {tabModal === 3 && sitio && <SeccionTienda sitio={sitio} set={setCampoSitio} errores={erroresSitio} />}
+            {/* Tiene su propio botón Guardar: los secretos no viajan con el resto del formulario */}
+            {tabModal === 4 && <SeccionIntegraciones idNegocio={editingId} />}
+            {tabModal === 5 && <SeccionImpresion idNegocio={editingId} />}
+
+            {tabModal === 0 && (
 
             <Box
               display="grid"
@@ -1161,6 +1287,7 @@ const AdminNegocios: React.FC = () => {
                 />
               </Paper>
             </Box>
+            )}
           </DialogContent>
 
           <DialogActions
@@ -1297,9 +1424,10 @@ const AdminNegocios: React.FC = () => {
                 Cancelar
               </Button>
 
-              <Button
+              {tabModal < 4 && <Button
                 variant="contained"
                 onClick={handleSubmit}
+                disabled={guardando}
                 sx={{
                   flex: 1,
                   minWidth: 0,
@@ -1316,8 +1444,8 @@ const AdminNegocios: React.FC = () => {
                   },
                 }}
               >
-                {editingId ? "Guardar" : "Crear"}
-              </Button>
+                {guardando ? <CircularProgress size={22} color="inherit" /> : editingId ? "Guardar" : "Crear"}
+              </Button>}
             </Box>
           </DialogActions>
         </Dialog>
@@ -1600,6 +1728,7 @@ const AdminNegocios: React.FC = () => {
           />
         </DialogContent>
       </Dialog>
+
     </>
   );
 };

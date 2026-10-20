@@ -5,25 +5,22 @@ import { Box, Button, Container, Stack } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { T, btnPrimario, btnSecundario } from "./tokens";
-import { SITE, estadoHorario, irA, waLink } from "./siteConfig";
+import { estadoHorario, irA, useSitio, waLink } from "./siteConfig";
 import { Punto } from "./Comunes";
 
-/* Las mismas frases que ya usaba el sitio */
-const FRASES = [
-  "Restaurante en el corazón de Pasto",
-  "Hamburguesas artesanales, carnes y experiencias únicas",
-  "Buen ambiente, buena música y el mejor sabor",
-  "Donde cada comida se convierte en experiencia",
-];
-
-const coordenadas = `${SITE.lat.toFixed(4)}° N · ${Math.abs(SITE.lng).toFixed(
-  4
-)}° O`;
-
 export default function Hero({ logo }: { logo: string }) {
+  const sitio = useSitio();
   const reducido = useReducedMotion();
   const [frase, setFrase] = useState(0);
-  const horario = useMemo(() => estadoHorario(), []);
+  const horario = useMemo(() => estadoHorario(sitio.horarios), [sitio.horarios]);
+  // Frases rotativas del negocio; si no tiene, se usa el eslogan
+  const FRASES = sitio.frases.length ? sitio.frases : [sitio.eslogan ?? ""];
+  const coordenadas = sitio.lat !== null && sitio.lng !== null
+    ? `${Math.abs(sitio.lat).toFixed(4)}° ${sitio.lat >= 0 ? "N" : "S"} · ${Math.abs(sitio.lng).toFixed(4)}° ${sitio.lng >= 0 ? "E" : "O"}`
+    : "";
+  // El nombre va en una línea por palabra; con palabras largas se reduce la letra
+  const palabras = sitio.nombre.trim().split(/\s+/);
+  const larga = Math.max(...palabras.map((w) => w.length));
 
   useEffect(() => {
     if (reducido) return undefined;
@@ -32,7 +29,7 @@ export default function Hero({ logo }: { logo: string }) {
       3800
     );
     return () => window.clearInterval(t);
-  }, [reducido]);
+  }, [reducido, FRASES.length]);
 
   const entrada = (orden: number) =>
     reducido
@@ -62,12 +59,12 @@ export default function Hero({ logo }: { logo: string }) {
       }}
     >
       {/* FONDO: tu foto real si existe; si no, una trama de calles */}
-      {SITE.hero ? (
+      {sitio.hero ? (
         <>
           <Box
             component="img"
-            src={SITE.hero.src}
-            srcSet={SITE.hero.srcSet}
+            src={sitio.hero.src}
+            srcSet={sitio.hero.srcSet}
             sizes="100vw"
             alt=""
             sx={{
@@ -151,21 +148,26 @@ export default function Hero({ logo }: { logo: string }) {
                   }}
                 >
                   <Punto size={8} />
-                  Restaurante · {SITE.ciudad}
+                  {[sitio.tipo, sitio.ciudad].filter(Boolean).join(" · ")}
                 </Box>
 
                 <Box
                   component="span"
                   sx={{
                     display: "block",
-                    fontSize: "clamp(4.6rem, min(21vw, 30vh), 15rem)",
+                    fontSize: larga > 9
+                      ? "clamp(3rem, min(12vw, 20vh), 9rem)"
+                      : "clamp(4.6rem, min(21vw, 30vh), 15rem)",
                     lineHeight: 0.8,
                     letterSpacing: "-0.02em",
                   }}
                 >
-                  Punto
-                  <br />
-                  Urbano
+                  {palabras.map((w, i) => (
+                    <span key={i}>
+                      {i > 0 && <br />}
+                      {w}
+                    </span>
+                  ))}
                   <Box component="span" sx={{ color: T.accent }}>
                     .
                   </Box>
@@ -213,17 +215,17 @@ export default function Hero({ logo }: { logo: string }) {
                   endIcon={<ArrowDownwardIcon />}
                   sx={btnPrimario}
                 >
-                  Ver el menú
+                  {sitio.textos.ver_catalogo}
                 </Button>
 
                 <Button
-                  href={waLink("Hola Punto Urbano, quiero hacer un pedido.")}
+                  href={waLink(sitio, sitio.mensajeWhatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
                   startIcon={<WhatsAppIcon />}
                   sx={btnSecundario}
                 >
-                  Pedir por WhatsApp
+                  {sitio.textos.whatsapp_cta}
                 </Button>
               </Stack>
             </motion.div>
@@ -253,8 +255,8 @@ export default function Hero({ logo }: { logo: string }) {
               />
               <Box
                 component="img"
-                src={logo}
-                alt={`Logo de ${SITE.nombre}`}
+                src={sitio.logo || logo}
+                alt={`Logo de ${sitio.nombre}`}
                 sx={{
                   width: "100%",
                   height: "100%",
@@ -295,7 +297,7 @@ export default function Hero({ logo }: { logo: string }) {
               "&:hover": { color: T.accent },
             }}
           >
-            {SITE.direccion}
+            {sitio.direccion}
           </Box>
 
           <Box

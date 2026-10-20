@@ -7,7 +7,7 @@ export const listar = async (req, res) => {
     const data = await service.listar(req.user.id_negocio);
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 };
 
@@ -17,27 +17,27 @@ export const crear = async (req, res) => {
     const data = await service.crear(req.body,req.user.id_negocio);
     res.status(201).json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 };
 
 // ACTUALIZAR
 export const actualizar = async (req, res) => {
   try {
-    const data = await service.actualizar(req.params.id, req.body);
+    const data = await service.actualizar(req.params.id, req.body, req.user.id_negocio);
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 };
 
 // ELIMINAR
 export const eliminar = async (req, res) => {
   try {
-    await service.eliminar(req.params.id);
+    await service.eliminar(req.params.id, req.user.id_negocio);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 };
 
@@ -45,29 +45,29 @@ export const eliminar = async (req, res) => {
 // Crear movimiento
 export const crearMovimiento = async (req, res) => {
   try {
-    const data = await service.crearMovimiento(req.body,req.user.id);
+    const data = await service.crearMovimiento(req.body, req.user.id, req.user.id_negocio);
     res.status(201).json(data);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(error.status || 500).json({ error: error.message });
   }
 };
 
 // Listar movimientos
 export const listarMovimientos = async (req, res) => {
   try {
-    const data = await service.listarMovimientos(req.params.inventario_id);
+    const data = await service.listarMovimientos(req.params.inventario_id, req.user.id_negocio);
     res.json(data);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(error.status || 500).json({ error: error.message });
   }
 };
 
 // Eliminar movimiento
 export const eliminarMovimiento = async (req, res) => {
   try {
-    await service.eliminarMovimiento(req.params.id);
+    await service.eliminarMovimiento(req.params.id, req.user.id_negocio);
     res.json({ ok: true });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(error.status || 500).json({ error: error.message });
   }
 };

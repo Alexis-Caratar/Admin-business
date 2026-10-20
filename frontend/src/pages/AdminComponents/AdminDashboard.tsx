@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import VisorTicket from "../../components/impresion/VisorTicket";
 import {
   Box, List, ListItemButton, ListItemIcon, ListItemText, Paper,
   Typography, Divider, IconButton, Avatar, Tooltip,
@@ -874,6 +875,8 @@ const AdminDashboard: React.FC = () => {
             <Typography>Módulo no encontrado</Typography>
           )}
         </Paper>
+        {/* Comprobantes para imprimir desde este dispositivo (sin agente local) */}
+        <VisorTicket />
       </Box>
 
 

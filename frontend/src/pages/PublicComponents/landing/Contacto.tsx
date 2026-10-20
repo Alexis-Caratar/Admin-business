@@ -4,7 +4,7 @@ import { Box, Button, Container, Stack, Typography } from "@mui/material";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { T, btnPrimario, btnSecundario } from "./tokens";
-import { SITE, estadoHorario, waLink } from "./siteConfig";
+import { estadoHorario, useSitio, waLink } from "./siteConfig";
 import { Encabezado, Reveal } from "./Comunes";
 
 function Dato({ titulo, children }: { titulo: string; children: ReactNode }) {
@@ -32,7 +32,8 @@ function Dato({ titulo, children }: { titulo: string; children: ReactNode }) {
 }
 
 export default function Contacto() {
-  const horario = useMemo(() => estadoHorario(), []);
+  const sitio = useSitio();
+  const horario = useMemo(() => estadoHorario(sitio.horarios), [sitio.horarios]);
 
   return (
     <Box
@@ -54,29 +55,28 @@ export default function Contacto() {
           }}
         >
           <Box>
-            <Encabezado etiqueta="Contacto y pedidos" titulo="¿Pedimos?">
-              Haz tu pedido a domicilio o reserva tu mesa. Te respondemos por
-              WhatsApp o por teléfono.
+            <Encabezado etiqueta={sitio.textos.contacto_etiqueta} titulo={sitio.textos.contacto_titulo}>
+              {sitio.textos.contacto_texto}
             </Encabezado>
 
             <Reveal delay={0.1}>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
                 <Button
-                  href={waLink("Hola Punto Urbano, quiero hacer un pedido.")}
+                  href={waLink(sitio, sitio.mensajeWhatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
                   startIcon={<WhatsAppIcon />}
                   sx={btnPrimario}
                 >
-                  Pedir por WhatsApp
+                  {sitio.textos.whatsapp_cta}
                 </Button>
 
                 <Button
-                  href={SITE.telefonoLink}
+                  href={sitio.telefonoLink ?? undefined}
                   startIcon={<PhoneIcon />}
                   sx={btnSecundario}
                 >
-                  Llamar al {SITE.telefono}
+                  Llamar al {sitio.telefono}
                 </Button>
               </Stack>
             </Reveal>
@@ -85,7 +85,7 @@ export default function Contacto() {
           <Reveal delay={0.15}>
             <Box sx={{ borderBottom: `1px solid ${T.line}` }}>
               <Dato titulo="Horario">
-                {SITE.horario.texto}
+                {sitio.horarioTexto}
                 <Box
                   sx={{
                     display: "flex",
@@ -112,7 +112,7 @@ export default function Contacto() {
               <Dato titulo="Dirección">
                 <Box
                   component="a"
-                  href={SITE.googleMaps}
+                  href={sitio.googleMaps ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
@@ -122,18 +122,26 @@ export default function Contacto() {
                     "&:hover": { color: T.accent },
                   }}
                 >
-                  {SITE.direccion}
+                  {[sitio.direccion, sitio.ciudad].filter(Boolean).join(", ")}
                 </Box>
               </Dato>
 
-              <Dato titulo="Servicios">
-                Domicilios · Reservas por teléfono
-              </Dato>
+              {sitio.servicios && (
+                <Dato titulo="Servicios">
+                  {sitio.servicios}
+                </Dato>
+              )}
 
-              {SITE.redes.length > 0 && (
+              {(sitio.correo || sitio.nit) && (
+                <Dato titulo="Datos del negocio">
+                  {[sitio.razonSocial, sitio.nit && `NIT ${sitio.nit}`, sitio.correo].filter(Boolean).join(" · ")}
+                </Dato>
+              )}
+
+              {sitio.redes.length > 0 && (
                 <Dato titulo="Redes">
                   <Stack direction="row" spacing={2.5} flexWrap="wrap">
-                    {SITE.redes.map((r) => (
+                    {sitio.redes.map((r) => (
                       <Box
                         key={r.url}
                         component="a"

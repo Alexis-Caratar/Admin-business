@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const { getPrinterStatus } = require("../services/imprimir.service.js");
+const agente = require("../socket.client");
 
 router.get("/status", async (req, res) => {
   try {
-    const result = await getPrinterStatus();    
-    res.json(result);
+    res.json(agente.estado());
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

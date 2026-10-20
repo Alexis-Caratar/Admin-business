@@ -19,32 +19,78 @@ export const obtener = async (id) => {
   return rows[0];
 };
 
-// Crear un negocio
+// Columnas que se pueden enviar al crear un negocio
+const CAMPOS_CREAR = ["nit", "nombre", "direccion", "descripcion", "telefono", "imagen", "ciudad", "correo",
+  "horario", "hora_apertura", "hora_cierre", "tipo", "activo"];
+
+// "Restaurante Punto Urbano" → "restaurante-punto-urbano"
+const slug = (t) => String(t ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+  .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 70) || "negocio";
+
+// Crear un negocio (con su url_negocio única y su sitio web sin publicar)
 export const crear = async (payload) => {
-  
-  if (!payload || Object.keys(payload).length === 0) {
-    throw new Error("No hay datos para insertar");
+  if (!payload?.nombre?.trim()) {
+    throw Object.assign(new Error("El nombre es obligatorio"), { status: 400 });
   }
 
-  // 🧹 LIMPIEZA DE DATOS
-  const cleanPayload = {
-    ...payload,
-    imagen: payload.imagen?.trim() === "" ? null : payload.imagen,
-  };
+  const datos = Object.fromEntries(
+    CAMPOS_CREAR.filter((k) => payload[k] !== undefined).map((k) => [k, payload[k] === "" ? null : payload[k]])
+  );
 
-  const keys = Object.keys(cleanPayload);
-  const values = Object.values(cleanPayload);
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
 
-  const placeholders = keys.map((_, i) => `$${i + 1}`).join(", ");
+    // url_negocio libre: base, base-2, base-3…
+    const base = slug(payload.url_negocio || payload.nombre);
+    const { rows: usadas } = await client.query(
+      `SELECT url_negocio FROM ${TABLE} WHERE url_negocio = $1 OR url_negocio LIKE $1 || '-%'`,
+      [base]
+    );
+    const ocupadas = new Set(usadas.map((r) => r.url_negocio));
+    let url = base;
+    for (let n = 2; ocupadas.has(url) || ["admin", "login", "tienda", "api", "assets", "public", "static"].includes(url); n++) url = `${base}-${n}`;
+    datos.url_negocio = url;
 
-  const sql = `
-    INSERT INTO ${TABLE} (${keys.join(", ")})
-    VALUES (${placeholders})
-    RETURNING *
-  `;
+    // Tipo de negocio (por nombre o código); sin coincidencia → "Otros"
+    const { rows: [tipo] } = await client.query(
+      `SELECT codigo, nombre, perfil FROM tipos_negocio
+       WHERE nombre = $1 OR codigo = $1 UNION ALL SELECT codigo, nombre, perfil FROM tipos_negocio WHERE codigo = 'otros' LIMIT 1`,
+      [payload.tipo_negocio || payload.tipo || ""]
+    );
+    datos.tipo_negocio = tipo.codigo;
+    datos.tipo = tipo.nombre;
 
-  const { rows } = await pool.query(sql, values);  
-  return rows[0];
+    const keys = Object.keys(datos);
+    const { rows } = await client.query(
+      `INSERT INTO ${TABLE} (${keys.join(", ")}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(", ")}) RETURNING *`,
+      Object.values(datos)
+    );
+    // El sitio arranca con los textos sugeridos para su tipo (sin publicar)
+    const s = tipo.perfil?.sugeridos ?? {};
+    const llenar = (v) => (typeof v === "string"
+      ? v.replaceAll("{nombre}", rows[0].nombre).replaceAll("{ciudad}", rows[0].ciudad || "tu ciudad")
+      : v);
+    await client.query(
+      `INSERT INTO negocios_sitio (id_negocio, nombre_publico, frases, nosotros_titulo, nosotros_texto, nosotros_items,
+         franja_texto, servicios, mensaje_whatsapp, seo_titulo, seo_descripcion)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) ON CONFLICT (id_negocio) DO NOTHING`,
+      [rows[0].id, rows[0].nombre, JSON.stringify((s.frases ?? []).map(llenar)), llenar(s.nosotros_titulo) ?? null,
+        llenar(s.nosotros_texto) ?? null, JSON.stringify((s.nosotros_items ?? []).map((i) => ({ titulo: i.titulo, texto: i.texto, foto: null }))),
+        llenar(s.franja_texto) ?? null, llenar(s.servicios) ?? null, llenar(s.mensaje_whatsapp) ?? null,
+        llenar(s.seo_titulo) ?? null, llenar(s.seo_descripcion) ?? null]
+    );
+    await client.query("COMMIT");
+    return rows[0];
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    if (err.code === "23505" && String(err.constraint).includes("nit")) {
+      throw Object.assign(new Error("Ya existe un negocio con ese NIT"), { status: 409 });
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
 };
 
 // Actualizar negocio
@@ -69,12 +115,13 @@ export const actualizar = async (id, payload) => {
       horario=$9,
       hora_apertura=$10,
       hora_cierre=$11,
-      tipo=$12,
+      tipo = COALESCE((SELECT nombre FROM tipos_negocio WHERE nombre = $12 OR codigo = $12), 'Otros'),
+      tipo_negocio = COALESCE((SELECT codigo FROM tipos_negocio WHERE nombre = $12 OR codigo = $12), 'otros'),
       activo=$13
     WHERE id = $14
     RETURNING *
     `,
-    [nit,nombre, direccion, descripcion, telefono,imagen,ciudad,correo,horario,hora_apertura,hora_cierre,tipo,activo, id]
+    [nit,nombre, direccion, descripcion, telefono,imagen,ciudad,correo,horario,hora_apertura || null,hora_cierre || null,tipo,activo, id]
   );
 
   return rows[0];

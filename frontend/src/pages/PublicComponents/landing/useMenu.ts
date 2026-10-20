@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { SITE } from "./siteConfig";
+import { useSitio } from "./siteConfig";
 
 /*
  * Lee la carta real desde el backend:
@@ -57,13 +57,13 @@ export type Categoria = {
 export type EstadoMenu = "cargando" | "listo" | "error";
 
 /** "1. Desayunos" → { orden: 1, nombre: "Desayunos" } */
-function leerCategoria(texto: string): { orden: number; nombre: string } {
+export function leerCategoria(texto: string): { orden: number; nombre: string } {
   const m = /^\s*(\d+)\s*[.)-]\s*(.+)$/.exec(texto);
   if (!m) return { orden: Number.MAX_SAFE_INTEGER, nombre: texto.trim() };
   return { orden: Number(m[1]), nombre: m[2].trim() };
 }
 
-function capitalizar(texto: string): string {
+export function capitalizar(texto: string): string {
   const t = texto.trim();
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
@@ -113,13 +113,14 @@ function aCategorias(data: RespuestaApi): Categoria[] {
 }
 
 export function useMenu(): { estado: EstadoMenu; categorias: Categoria[] } {
+  const { menuUrl } = useSitio();
   const [estado, setEstado] = useState<EstadoMenu>("cargando");
   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   useEffect(() => {
     const ctrl = new AbortController();
 
-    fetch(SITE.menuUrl, {
+    fetch(menuUrl, {
       signal: ctrl.signal,
       headers: { Accept: "application/json" },
     })
@@ -138,7 +139,7 @@ export function useMenu(): { estado: EstadoMenu; categorias: Categoria[] } {
       });
 
     return () => ctrl.abort();
-  }, []);
+  }, [menuUrl]);
 
   return { estado, categorias };
 }

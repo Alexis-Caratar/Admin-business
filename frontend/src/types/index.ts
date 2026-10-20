@@ -54,6 +54,22 @@ export interface Producto {
   actualizacion?: string;
   tipo_producto?: string;
   publicacion_web?: boolean;
+
+  // Ficha de la tienda web (opcional)
+  marca?: string | null;
+  destacado?: boolean;
+  descripcion_detallada?: string | null;
+  caracteristicas?: string[];
+  atributos?: { nombre: string; valor: string }[];
+  modo_uso?: string | null;
+  ingredientes?: string | null;
+  cuidados?: string | null;
+  advertencias?: string | null;
+  fabricante?: string | null;
+  id_producto_base?: number | null;
+  variante_nombre?: string | null;
+  variante_color?: string | null;
+
   // Precios
   precios?: ProductoPrecio | null;
 

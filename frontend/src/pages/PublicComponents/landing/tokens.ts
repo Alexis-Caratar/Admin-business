@@ -92,6 +92,58 @@ export const themes: Record<ThemeMode, ThemeTokens> = {
   },
 };
 
+/*
+ * Estilo "tienda": limpio y minimalista (inspirado en tiendas premium):
+ * fondos gris muy claro / negro, superficies blancas, texto casi negro,
+ * un solo acento azul y tipografía del sistema.
+ */
+export const themesTienda: Record<ThemeMode, ThemeTokens> = {
+  light: {
+    bg: "#f5f5f7",
+    surface: "#ffffff",
+    surface2: "#fafafc",
+    line: "rgba(0,0,0,0.09)",
+    text: "#1d1d1f",
+    text2: "#424245",
+    muted: "#6e6e73",
+    accent: "#0071e3",
+    accentHover: "#0062c4",
+    accentInk: "#ffffff",
+    soft: "rgba(0,0,0,0.18)",
+    wash: "rgba(0,0,0,0.04)",
+    off: "#86868b",
+    navBg: "rgba(245,245,247,0.78)",
+    glass: "rgba(255,255,255,0.86)",
+    glassHover: "rgba(255,255,255,0.96)",
+    heroOverlay: "linear-gradient(180deg, rgba(245,245,247,0) 0%, rgba(245,245,247,0.9) 100%)",
+    pattern: "rgba(0,0,0,0.05)",
+    shadow: "rgba(0,0,0,0.10)",
+    warn: "#b64400",
+  },
+  dark: {
+    bg: "#000000",
+    surface: "#1c1c1e",
+    surface2: "#2c2c2e",
+    line: "rgba(255,255,255,0.12)",
+    text: "#f5f5f7",
+    text2: "#d2d2d7",
+    muted: "#a1a1a6",
+    accent: "#0a84ff",
+    accentHover: "#409cff",
+    accentInk: "#ffffff",
+    soft: "rgba(255,255,255,0.24)",
+    wash: "rgba(255,255,255,0.06)",
+    off: "#6e6e73",
+    navBg: "rgba(22,22,23,0.8)",
+    glass: "rgba(28,28,30,0.88)",
+    glassHover: "rgba(44,44,46,0.96)",
+    heroOverlay: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 100%)",
+    pattern: "rgba(255,255,255,0.05)",
+    shadow: "rgba(0,0,0,0.6)",
+    warn: "#ff9f0a",
+  },
+};
+
 export const THEME_STORAGE_KEY = "punto-urbano-theme";
 export const DEFAULT_THEME: ThemeMode = "dark";
 
@@ -102,19 +154,28 @@ export function getThemeTokens(mode: ThemeMode): ThemeTokens {
 const CLAVES = Object.keys(themes.dark) as (keyof ThemeTokens)[];
 
 /** { "--pu-bg": "#0a0a0a", … } para aplicar un tema como variables CSS */
-export function cssVars(mode: ThemeMode): Record<string, string> {
-  const tokens = themes[mode];
-  return CLAVES.reduce<Record<string, string>>((vars, clave) => {
-    vars[`--pu-${clave}`] = tokens[clave];
-    return vars;
+export function cssVars(mode: ThemeMode, paleta = themes, fuentes: Fuentes = fonts): Record<string, string> {
+  const tokens = paleta[mode];
+  const vars = CLAVES.reduce<Record<string, string>>((v, clave) => {
+    v[`--pu-${clave}`] = tokens[clave];
+    return v;
   }, {});
+  vars["--pu-font-display"] = fuentes.display;
+  vars["--pu-font-body"] = fuentes.body;
+  return vars;
 }
 
-/* Lo que no cambia con el tema */
-export const fonts = {
+export type Fuentes = { display: string; body: string };
+
+/* Tipografías de la página pública (la tienda usa `fontsTienda`) */
+export const fonts: Fuentes = {
   display: '"Barlow Condensed", "Arial Narrow", Impact, sans-serif',
   body: '"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif',
-} as const;
+};
+
+/* Tipografía del sistema: SF Pro en Apple, Inter / Segoe / Roboto en el resto */
+const SISTEMA = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+export const fontsTienda: Fuentes = { display: SISTEMA, body: SISTEMA };
 
 /* Texto sobre fotos con velo oscuro: igual en los dos temas */
 export const FOTO = {
@@ -124,12 +185,14 @@ export const FOTO = {
 } as const;
 
 /** Tokens activos: referencias a las variables CSS del tema elegido */
-export const T: Record<keyof ThemeTokens, string> & typeof fonts = {
+export const T: Record<keyof ThemeTokens, string> & Fuentes = {
   ...CLAVES.reduce((refs, clave) => {
     refs[clave] = `var(--pu-${clave})`;
     return refs;
   }, {} as Record<keyof ThemeTokens, string>),
-  ...fonts,
+  // Las tipografías también son variables: cada página elige las suyas
+  display: `var(--pu-font-display, ${fonts.display})`,
+  body: `var(--pu-font-body, ${fonts.body})`,
 };
 
 const btnBase = {
@@ -174,7 +237,8 @@ export const estilosRaiz = {
   color: T.text,
   fontFamily: T.body,
   minHeight: "100vh",
-  overflowX: "hidden",
+  // clip (no hidden): corta el desborde sin romper las barras position: sticky
+  overflowX: "clip",
   "& section": { scrollMarginTop: "72px" },
   "& a:focus-visible, & button:focus-visible": {
     outline: `2px solid ${T.accent}`,

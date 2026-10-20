@@ -17,9 +17,11 @@ import {
   cssVars,
   estilosRaiz,
   fonts,
-  getThemeTokens,
+  fontsTienda,
+  themes,
+  themesTienda,
 } from "./tokens";
-import type { ThemeMode, ThemeTokens } from "./tokens";
+import type { Fuentes, ThemeMode, ThemeTokens } from "./tokens";
 
 type ContextoTema = {
   mode: ThemeMode;
@@ -34,29 +36,38 @@ const Contexto = createContext<ContextoTema | null>(null);
 const useEfectoAntesDePintar =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-function leerTemaGuardado(): ThemeMode {
-  if (typeof window === "undefined") return DEFAULT_THEME;
+function leerTemaGuardado(porDefecto: ThemeMode = DEFAULT_THEME): ThemeMode {
+  if (typeof window === "undefined") return porDefecto;
   try {
     const guardado = window.localStorage.getItem(THEME_STORAGE_KEY);
     if (guardado === "dark" || guardado === "light") return guardado;
   } catch {
     // Almacenamiento bloqueado: se usa el tema por defecto.
   }
-  return DEFAULT_THEME;
+  return porDefecto;
 }
 
 /*
  * Envuelve la página pública: lee la preferencia guardada, aplica el tema
  * como variables CSS y lo entrega también a los componentes de MUI.
  */
-export function TemaPuntoUrbano({ children }: { children: ReactNode }) {
-  // Se lee de inmediato, así el primer pintado ya sale con el tema correcto
-  const [mode, setModeState] = useState<ThemeMode>(leerTemaGuardado);
+/** "sitio": la página pública del negocio · "tienda": estilo minimalista de la tienda en línea */
+export type Estilo = "sitio" | "tienda";
+const ESTILOS: Record<Estilo, { paleta: Record<ThemeMode, ThemeTokens>; fuentes: Fuentes }> = {
+  sitio: { paleta: themes, fuentes: fonts },
+  tienda: { paleta: themesTienda, fuentes: fontsTienda },
+};
+
+export function TemaPuntoUrbano({ children, temaInicial, estilo = "sitio" }: { children: ReactNode; temaInicial?: ThemeMode; estilo?: Estilo }) {
+  const { paleta, fuentes } = ESTILOS[estilo];
+  // Se lee de inmediato, así el primer pintado ya sale con el tema correcto.
+  // Sin preferencia guardada se usa el tema configurado para el negocio.
+  const [mode, setModeState] = useState<ThemeMode>(() => leerTemaGuardado(temaInicial));
   const [cambiando, setCambiando] = useState(false);
   const temporizador = useRef<number | null>(null);
 
-  const tokens = getThemeTokens(mode);
-  const vars = useMemo(() => cssVars(mode), [mode]);
+  const tokens = paleta[mode];
+  const vars = useMemo(() => cssVars(mode, paleta, fuentes), [mode, paleta, fuentes]);
 
   const modoActual = useRef(mode);
   modoActual.current = mode;
@@ -120,9 +131,9 @@ export function TemaPuntoUrbano({ children }: { children: ReactNode }) {
           text: { primary: tokens.text, secondary: tokens.muted },
           divider: tokens.line,
         },
-        typography: { fontFamily: fonts.body },
+        typography: { fontFamily: fuentes.body },
       }),
-    [mode, tokens]
+    [mode, tokens, fuentes]
   );
 
   const valor = useMemo(
@@ -136,6 +147,7 @@ export function TemaPuntoUrbano({ children }: { children: ReactNode }) {
         <Box
           className={cambiando ? "pu-cambiando" : undefined}
           data-tema={mode}
+          data-estilo={estilo}
           sx={{ ...estilosRaiz, ...vars }}
         >
           {children}

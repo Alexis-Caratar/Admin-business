@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { avisarImpresion } from "../../../../components/impresion/ticket";
 import {
   Box,
   Typography,
@@ -252,6 +253,7 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha,onCajaEliminada }) => {
     try {
       if (!ventaSeleccionada) return;
       const payload = {
+        id_venta: ventaSeleccionada.id_venta,
         id_negocio: id_negocio,
         id_mesa: ventaSeleccionada.id_mesa,
         mesa: ventaSeleccionada.mesa,
@@ -282,19 +284,9 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha,onCajaEliminada }) => {
         }))
       };
 
-      if (estado_impresion == 'comanda') {
-        await imprimircomanda(payload);
-      } else if (estado_impresion == 'factura') {
-        await imprimirfactura(payload);
-      }
-
-      Swal.fire({
-        icon: "success",
-        title: "Enviado a impresión",
-        text: " Espere un momento se está imprimiendo...",
-        timer: 1500,
-        showConfirmButton: false
-      });
+      // El servidor responde si el punto de venta imprimió; si no, se puede imprimir aquí
+      const { data } = estado_impresion == 'comanda' ? await imprimircomanda(payload) : await imprimirfactura(payload);
+      await avisarImpresion(data, estado_impresion == 'comanda' ? "La comanda" : "La factura");
 
     } catch (error) {
       console.error(error);

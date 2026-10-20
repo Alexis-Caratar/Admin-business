@@ -100,13 +100,16 @@ export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo, es
   const total_nequi = getTotalByMetodo("NEQUI");
   const total_daviplata = getTotalByMetodo("DAVIPLATA");
   const total_tiquteras = getTotalByMetodo("TIQUERERA");
+  // Pagos en línea de pedidos web: no entran al cajón
+  const total_wompi = getTotalByMetodo("WOMPI");
 
   const totalDigital =
     total_targeta +
     total_trasferencia +
     total_nequi +
     total_daviplata +
-    total_tiquteras;
+    total_tiquteras +
+    total_wompi;
 
   const totalEnCaja = arqueoInfo
     ? toNumber(arqueoInfo.monto_inicial) +

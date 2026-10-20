@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { avisarImpresion } from "../../../../../../components/impresion/ticket";
 import {
   Box, Card, Typography, Stack, Avatar, Chip, Dialog, DialogTitle, DialogContent, TextField, Pagination, IconButton, Paper, DialogActions, InputAdornment, Button, MenuItem, CircularProgress,
   Tooltip,
@@ -284,6 +285,7 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
     try {
       if (!ventaSeleccionada) return;
       const payload = {
+        id_venta: ventaSeleccionada.id_venta,
         id_negocio: id_negocio,
         id_mesa: ventaSeleccionada.id_mesa,
         mesa: ventaSeleccionada.mesa,
@@ -314,19 +316,9 @@ export default function VentasDetalles({ open, onClose, id_caja }: any) {
         }))
       };
 
-      if (estado_impresion == 'comanda') {
-        await imprimircomanda(payload);
-      } else if (estado_impresion == 'factura') {
-        await imprimirfactura(payload);
-      }
-
-      Swal.fire({
-        icon: "success",
-        title: "Enviado a impresión",
-        text: " Espere un momento se está imprimiendo...",
-        timer: 1500,
-        showConfirmButton: false
-      });
+      // El servidor responde si el punto de venta imprimió; si no, se puede imprimir aquí
+      const { data } = estado_impresion == 'comanda' ? await imprimircomanda(payload) : await imprimirfactura(payload);
+      await avisarImpresion(data, estado_impresion == 'comanda' ? "La comanda" : "La factura");
 
     } catch (error) {
       console.error(error);

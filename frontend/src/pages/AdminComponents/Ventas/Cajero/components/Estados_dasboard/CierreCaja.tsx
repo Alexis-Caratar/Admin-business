@@ -59,11 +59,13 @@ const total_trasferencia = getTotalByMetodo("TRANSFERENCIA");
 const total_nequi = getTotalByMetodo("NEQUI");
 const total_daviplata = getTotalByMetodo("DAVIPLATA");
 const total_tiqueteras = getTotalByMetodo("TIQUERERA");
+// Pagos en línea de pedidos web: no entran al cajón
+const total_wompi = getTotalByMetodo("WOMPI");
 const ventas = toNumber(arqueoInfo?.total_ventas);
 const egresos = toNumber(arqueoInfo?.total_egresos);
 const montoInicial = toNumber(arqueoInfo?.monto_inicial);
 
-const totalDigital =total_targeta +total_trasferencia +total_nequi +total_daviplata +total_tiqueteras;
+const totalDigital =total_targeta +total_trasferencia +total_nequi +total_daviplata +total_tiqueteras +total_wompi;
 
   const dineroEsperado = useMemo(() => {
   return montoInicial + ventas - egresos - totalDigital;
@@ -352,6 +354,7 @@ const camposValidos = () => {
         { label: "Nequi", value: total_nequi },
         { label: "DaviPlata", value: total_daviplata },
         { label: "Tiquetera", value: total_tiqueteras },
+        { label: "Wompi (en línea)", value: total_wompi },
       ].map((item, i) => (
         <Box
           key={i}

@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import type { MouseEvent } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { Box, Button, Container, Drawer, IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
+import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import { T, btnPrimario } from "./tokens";
-import { SITE, irA, waLink } from "./siteConfig";
+import { horarioDeHoy, irA, useSitio, waLink } from "./siteConfig";
 import ThemeSelector, { OpcionesDeTema } from "./ThemeSelector";
 
 export type Enlace = { id: string; label: string };
@@ -17,6 +22,7 @@ export default function NavBar({
   logo: string;
   enlaces: Enlace[];
 }) {
+  const sitio = useSitio();
   const [conFondo, setConFondo] = useState(false);
   const [activo, setActivo] = useState(enlaces[0]?.id ?? "");
   const [abierto, setAbierto] = useState(false);
@@ -71,6 +77,40 @@ export default function NavBar({
         borderColor: conFondo ? T.line : "transparent",
       }}
     >
+      {/* DATOS DEL NEGOCIO (desde la base de datos); se ocultan al bajar */}
+      <Box
+        sx={{
+          display: { xs: "none", md: conFondo ? "none" : "block" },
+          borderBottom: `1px solid ${T.line}`,
+          fontFamily: T.body,
+          fontSize: 12.5,
+          color: T.muted,
+        }}
+      >
+        <Container maxWidth="lg" sx={{ height: 34, display: "flex", alignItems: "center", gap: 3, overflow: "hidden", whiteSpace: "nowrap" }}>
+          {sitio.direccion && (
+            <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.6 }}>
+              <PlaceOutlinedIcon sx={{ fontSize: 15 }} />
+              {[sitio.direccion, sitio.ciudad].filter(Boolean).join(", ")}
+            </Box>
+          )}
+          {sitio.horarios.length > 0 && (
+            <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.6 }}>
+              <ScheduleOutlinedIcon sx={{ fontSize: 15 }} />
+              {horarioDeHoy(sitio.horarios)}
+            </Box>
+          )}
+          <Box sx={{ flex: 1 }} />
+          {sitio.telefono && (
+            <Box component="a" href={sitio.telefonoLink ?? undefined} sx={{ display: "inline-flex", alignItems: "center", gap: 0.6, color: "inherit", textDecoration: "none", "&:hover": { color: T.text } }}>
+              <PhoneOutlinedIcon sx={{ fontSize: 15 }} />
+              {sitio.telefono}
+            </Box>
+          )}
+          {sitio.nit && <Box component="span">{sitio.razonSocial} · NIT {sitio.nit}</Box>}
+        </Container>
+      </Box>
+
       <Container
         maxWidth="lg"
         sx={{
@@ -86,7 +126,7 @@ export default function NavBar({
           component="a"
           href="#inicio"
           onClick={(e: MouseEvent) => navegar(e, "inicio")}
-          aria-label={`${SITE.nombre}, ir al inicio`}
+          aria-label={`${sitio.nombre}, ir al inicio`}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -97,7 +137,7 @@ export default function NavBar({
         >
           <Box
             component="img"
-            src={logo}
+            src={sitio.logo || logo}
             alt=""
             width={40}
             height={40}
@@ -113,7 +153,7 @@ export default function NavBar({
               letterSpacing: "0.02em",
             }}
           >
-            {SITE.nombre}
+            {sitio.nombre}
           </Box>
         </Box>
 
@@ -163,10 +203,9 @@ export default function NavBar({
           <ThemeSelector />
 
           <Button
-            href={waLink("Hola Punto Urbano, quiero hacer un pedido.")}
-            target="_blank"
-            rel="noopener noreferrer"
-            startIcon={<WhatsAppIcon />}
+            {...(sitio.tiendaActiva
+              ? { component: RouterLink, to: `${sitio.base}/tienda`, startIcon: <ShoppingBagOutlinedIcon /> }
+              : { href: waLink(sitio, sitio.mensajeWhatsapp), target: "_blank", rel: "noopener noreferrer", startIcon: <WhatsAppIcon /> })}
             sx={{
               ...btnPrimario,
               display: { xs: "none", sm: "inline-flex" },
@@ -176,7 +215,7 @@ export default function NavBar({
               fontSize: 14,
             }}
           >
-            Pedir
+            {sitio.textos.pedir_corto}
           </Button>
 
           <IconButton
@@ -253,13 +292,13 @@ export default function NavBar({
         </Box>
 
         <Button
-          href={waLink("Hola Punto Urbano, quiero hacer un pedido.")}
+          href={waLink(sitio, sitio.mensajeWhatsapp)}
           target="_blank"
           rel="noopener noreferrer"
           startIcon={<WhatsAppIcon />}
           sx={{ ...btnPrimario, mt: 3, width: "100%" }}
         >
-          Pedir por WhatsApp
+          {sitio.textos.whatsapp_cta}
         </Button>
       </Drawer>
     </Box>

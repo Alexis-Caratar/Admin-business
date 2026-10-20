@@ -23,6 +23,7 @@ router.post("/factura-por-caja",CajeroController.facturaPorCaja);
 router.post("/factura-por-detalle",CajeroController.facturaPordetalle);
 router.post("/imprimirfactura",CajeroController.imprimirfactura);
 router.post("/imprimirComanda",CajeroController.imprimir_comanda);
+router.get("/ticket/:id_venta",CajeroController.ticketVenta);
 router.post("/cancelarFactura",CajeroController.cancelarFactura);
 router.post("/obtener-inventario",CajeroController.obtenerInventario);
 router.post("/guardar-inventario",CajeroController.guardarInventario);

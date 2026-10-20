@@ -1,8 +1,7 @@
 import CajeroService from "../services/cajero.service.js";
-import * as serviceNegocios from "../services/negocios.service.js";
 import dotenv from "dotenv";
 
-import { enviarAAgentes } from "../websockets.js";
+import { configImpresion, imprimirComanda, imprimirFactura, ticketFactura } from "../services/impresion/impresion.service.js";
 
 
 export const estadoCaja = async (req, res) => {
@@ -57,8 +56,16 @@ export const finalizarVenta = async (req, res) => {
    const payload = { ...req.body, id_negocio: req.user.id_negocio, idUsuario: req.user.id };
       const resultado = await CajeroService.finalizarVenta(payload);
 
-      await imprimircomanda_fisica(payload);
-      return res.json({ ok: true, result: resultado });
+      // La comanda sale sola si el negocio lo tiene activo (Admin > Negocios > Impresión).
+      // Un problema de impresión nunca deshace la venta.
+      let impresion = null;
+      try {
+        const cfg = await configImpresion(req.user.id_negocio);
+        if (cfg.imprimir_comanda_al_vender) impresion = await imprimircomanda_fisica(payload);
+      } catch (err) {
+        console.error("Comanda no impresa:", err.message);
+      }
+      return res.json({ ok: true, result: resultado, impresion });
   } catch (e) {
     return res.status(500).json({ ok: false, error: e.message });
   }
@@ -69,48 +76,22 @@ export const finalizarVenta = async (req, res) => {
 export const imprimir_comanda = async (req, res) => {
   try {
    const payload = { ...req.body, id_negocio: req.user.id_negocio };
-      await imprimircomanda_fisica(payload);
-      return res.json({ ok: true });
+      const r = await imprimircomanda_fisica(payload);
+      return res.json({ ok: true, impreso: r.ok, ...r });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return res.status(e.status || 500).json({ ok: false, error: e.message });
   }
   
 };
 
-export const imprimircomanda_fisica = async (payload) => {
-  try {
-      const datos_negocio = await serviceNegocios.obtener(payload.id_negocio);
-
-const payloadComanda = {
-  printerName: process.env.IMPRESORAPRINCIPAL_CAJA,          // nombre de la impresora de comandas
-  negocio: {
-    nombre: datos_negocio.nombre,
-    direccion: datos_negocio.direccion,
-    ciudad: datos_negocio.ciudad,
-    telefono: datos_negocio.telefono
-  },
-  mesa: {
-    id_mesa: payload.id_mesa||'N/A',
-    nombre: payload.mesa||'N/A'
-  },
-  usuario: {
-    id: payload.idUsuario,
-    nombre: payload.nombre_vendedor
-  },
-  fecha: datos_negocio.fecha_impresion,
-  nota: payload.nota,    
-  venta:payload.venta,                    
-  productos: payload.productos
-};
-    
-    enviarAAgentes(payload.id_negocio, { tipo: "imprimir_comanda", payload: payloadComanda });
-
-      return ({ ok: true });
-  } catch (e) {
-    return ({ ok: false, error: e.message });
-  }
-  
-};
+// Comanda con el formato del negocio; responde si se imprimió y devuelve el ticket
+export const imprimircomanda_fisica = (payload) => imprimirComanda(payload.id_negocio, {
+  numero: payload.venta?.numero_factura,
+  mesa: payload.mesa && payload.mesa !== "N/A" ? payload.mesa : null,
+  mesero: payload.nombre_vendedor,
+  productos: payload.productos ?? [],
+  nota: payload.nota,
+});
 
 
 export const buscarCliente = async (req, res) => {
@@ -314,37 +295,28 @@ export const facturaPordetalle = async (req, res) => {
   }
 }
 
+// Factura: se arma con la venta guardada en la base (del negocio de quien imprime).
+// Responde si el agente la imprimió y devuelve el ticket para imprimirlo desde el navegador.
 export const imprimirfactura = async (req, res) => {
   try {
-    const data = req.body;
-    const datos_negocio = await serviceNegocios.obtener(req.user.id_negocio);
-
-    const payloadfactura=
-    {  printerName: process.env.IMPRESORAPRINCIPAL_CAJA,          // nombre de la impresora de comandas
-          negocio: {
-            nit: datos_negocio.nit,
-            nombre: datos_negocio.nombre,
-            direccion: datos_negocio.direccion,
-            ciudad: datos_negocio.ciudad,
-            telefono: datos_negocio.telefono
-          },
-            venta: data.venta,
-            productos: data.productos
-    }
-    
-    enviarAAgentes(req.user.id_negocio, { tipo: "imprimir_venta", payload: payloadfactura });
-
-    res.json({
-      ok: true,
-      msg: "Enviado a impresión"
-    });
-
+    const id_venta = Number(req.body?.id_venta ?? req.body?.venta?.id_venta);
+    if (!id_venta) return res.status(400).json({ ok: false, error: "Falta la venta a imprimir" });
+    const r = await imprimirFactura(id_venta, req.user.id_negocio);
+    res.json({ ok: true, impreso: r.ok, ...r });
   } catch (error) {
+    if (error.status && error.status < 500) return res.status(error.status).json({ ok: false, error: error.message });
     console.error("Error al enviar a impresión:", error);
-    res.status(500).json({
-      ok: false,
-      msg: "Error al enviar a impresión"
-    });
+    res.status(500).json({ ok: false, msg: "Error al enviar a impresión" });
+  }
+};
+
+// Ticket de una venta para ver/compartir/imprimir desde el navegador
+export const ticketVenta = async (req, res) => {
+  try {
+    const r = await ticketFactura(Number(req.params.id_venta), req.user.id_negocio);
+    res.json({ ok: true, ...r });
+  } catch (error) {
+    res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : "No se pudo armar el ticket" });
   }
 };
 
@@ -387,10 +359,10 @@ export const guardarInventario = async (req, res) => {
 export const apiEliminarCaja = async (req, res) => {
   try {    
    const payload = req.body;
-     const result= await CajeroService.apiEliminarCaja(payload)
+     const result= await CajeroService.apiEliminarCaja(payload, req.user.id_negocio)
       res.json({ok: true, result});
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return res.status(e.status || 500).json({ ok: false, error: e.message });
   }
   
 };

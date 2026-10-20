@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Box } from "@mui/material";
 
 import logo from "./../../assets/img/img_puntourbano/logosinfondo.jpeg";
@@ -13,13 +13,24 @@ import Franja from "./landing/Franja";
 import Galeria from "./landing/Galeria";
 import Contacto from "./landing/Contacto";
 import { BotonWhatsApp, Pie } from "./landing/Pie";
-import { SITE } from "./landing/siteConfig";
-import { TemaPuntoUrbano } from "./landing/Tema";
+import { useSitio } from "./landing/siteConfig";
+import SitioProvider from "./landing/SitioProvider";
 import { useSeo } from "./landing/useSeo";
 import Ubicacion from "./Ubicacion";
 
+/* /:negocio → por url_negocio; / → por dominio (o el negocio por defecto en local) */
 export default function Home() {
+  const { negocio } = useParams();
+  return (
+    <SitioProvider negocio={negocio}>
+      <PaginaNegocio />
+    </SitioProvider>
+  );
+}
+
+function PaginaNegocio() {
   const navigate = useNavigate();
+  const sitio = useSitio();
 
   useSeo();
 
@@ -27,17 +38,17 @@ export default function Home() {
   const enlaces = useMemo<Enlace[]>(
     () => [
       { id: "inicio", label: "Inicio" },
-      { id: "nosotros", label: "Nuestro restaurante" },
-      { id: "menu", label: "Menú" },
-      ...(SITE.galeria.length > 0 ? [{ id: "galeria", label: "Galería" }] : []),
-      { id: "ubicacion", label: "Cómo llegar" },
+      ...(sitio.nosotrosItems.length > 0 || sitio.descripcion ? [{ id: "nosotros", label: sitio.textos.nosotros_etiqueta }] : []),
+      { id: "menu", label: sitio.textos.seccion_catalogo },
+      ...(sitio.galeria.length > 0 ? [{ id: "galeria", label: "Galería" }] : []),
+      ...(sitio.lat !== null && sitio.lng !== null ? [{ id: "ubicacion", label: "Cómo llegar" }] : []),
       { id: "contacto", label: "Contacto" },
     ],
-    []
+    [sitio]
   );
 
   return (
-    <TemaPuntoUrbano>
+    <>
       <NavBar logo={logo} enlaces={enlaces} />
 
       <Box component="main">
@@ -52,6 +63,6 @@ export default function Home() {
 
       <Pie onAcceso={() => navigate("/login")} />
       <BotonWhatsApp />
-    </TemaPuntoUrbano>
+    </>
   );
 }

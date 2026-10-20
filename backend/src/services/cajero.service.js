@@ -1,6 +1,90 @@
 import { db } from "../config/db.js";
 import  {pool} from "../config/db.js";
-import { notificarCaja, notificarMesas } from "../websockets.js"; // ajusta la ruta según tu proyecto
+import { notificarCaja, notificarMesas, notificarPedido } from "../websockets.js";
+import { sqlConStock, sqlStockDisponible } from "./disponibilidad.js"; // ajusta la ruta según tu proyecto
+
+
+// Siguiente número de factura. Usa la secuencia ventas_numero_seq (migración 001);
+// si aún no existe, conserva el cálculo anterior para no detener el POS.
+const siguienteConsecutivo = async (conn) => {
+  await conn.query("SAVEPOINT consecutivo");
+  try {
+    const { rows } = await conn.query("SELECT nextval('ventas_numero_seq') AS siguiente");
+    await conn.query("RELEASE SAVEPOINT consecutivo");
+    return Number(rows[0].siguiente);
+  } catch (err) {
+    if (err.code !== "42P01") throw err;
+    await conn.query("ROLLBACK TO SAVEPOINT consecutivo");
+    console.warn("ventas_numero_seq no existe: aplicar migración 001_tienda_pedidos");
+    const { rows } = await conn.query(
+      "SELECT COALESCE(MAX(numero_consecutivo), 0) + 1 AS siguiente FROM ventas"
+    );
+    return Number(rows[0].siguiente);
+  }
+};
+
+// Inserta venta, ítems y pago dentro de una transacción abierta (conn).
+// La usan el POS (finalizarVenta) y los pedidos web, así ambas ventas quedan iguales.
+// metodo_venta: columna ventas.metodo_pago (el POS siempre ha guardado 'EFECTIVO').
+export const insertarVenta = async (conn, {
+  id_cliente, id_caja, id_mesa = null,
+  subtotal, descuento = 0, descuento_porcentaje = 0, impuesto = 0, total, estado,
+  nota, productos, metodo_pago, metodo_venta = 'EFECTIVO',
+  monto_pagado, monto_recibido, cambio
+}) => {
+    // 1️⃣ consecutivo
+    const numeroConsecutivo = await siguienteConsecutivo(conn);
+    const numeroFactura = `POS-${numeroConsecutivo.toString().padStart(6, '0')}`;
+
+    // 2️⃣ venta
+    const ventaResult = await conn.query(`
+      INSERT INTO ventas (
+        numero_consecutivo, numero_factura, id_cliente, id_caja, id_mesa,
+        subtotal, descuento, descuento_porcentaje, impuesto, total,
+        estado, metodo_pago, nota
+      ) VALUES (
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
+      ) RETURNING id
+    `, [
+      numeroConsecutivo, numeroFactura, id_cliente, id_caja, id_mesa,
+      subtotal, descuento, descuento_porcentaje, impuesto, total,
+      estado, metodo_venta, nota
+    ]);
+
+    const id_venta = ventaResult.rows[0].id;
+
+    // 4️⃣ items
+    for (const p of productos) {
+      await conn.query(`
+        INSERT INTO ventas_items (
+          id_venta, id_producto, cantidad, precio_unitario,
+          descuento, descuento_porcentaje, impuesto, subtotal
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      `, [
+        id_venta, p.id_producto, p.cantidad, p.precio_unitario,
+        p.descuento, p.descuento_porcentaje, p.impuesto, p.subtotal
+      ]);
+    }
+
+    // 5️⃣ pago
+    const estado_pago_id = metodo_pago !== 'PENDIENTE' ? 1 : 0;
+
+    await conn.query(`
+      INSERT INTO pagos (
+        id_venta, estado_pago, metodo_pago,
+        monto_pagado, monto_recibido, cambio
+      ) VALUES ($1,$2,$3,$4,$5,$6)
+    `, [
+      id_venta,
+      estado_pago_id,
+      metodo_pago,
+      monto_pagado ? Number(monto_pagado) : null,
+      monto_recibido ? Number(monto_recibido) : null,
+      cambio ? Number(cambio) : null
+    ]);
+
+    return id_venta;
+};
 
 
 const CajeroService = {
@@ -72,11 +156,7 @@ SELECT
       'id', p.id,
       'codigo_barra', p.codigo_barra,
 
-      'stock_actual', 
-        CASE 
-          WHEN p.controla_inventario THEN i.stock_actual
-          ELSE NULL
-        END,
+      'stock_actual', ${sqlStockDisponible("p", "i")},
 
       'nombre', p.nombre,
       'precio_venta', pp.precio_venta,
@@ -95,11 +175,7 @@ SELECT
               'id_producto_complemento', p2.id,
               'codigo_barra', p2.codigo_barra,
 
-              'stock_actual',
-                CASE
-                  WHEN p2.controla_inventario THEN i2.stock_actual
-                  ELSE NULL
-                END,
+              'stock_actual', ${sqlStockDisponible("p2", "i2")},
 
               'nombre', p2.nombre,
               'precio_venta', pp2.precio_venta,
@@ -168,10 +244,7 @@ LEFT JOIN productos_precios pp
   ON pp.id_producto = p.id
 
 WHERE c.id_negocio = $1
-AND (
-  p.controla_inventario = FALSE
-  OR (p.controla_inventario = TRUE AND i.stock_actual >= 1)
-)
+AND ${sqlConStock("p", "i")}
 
 GROUP BY c.id, c.nombre, c.imagen
 ORDER BY c.nombre;
@@ -429,6 +502,11 @@ arqueo: async ({ id_caja },id_negocio) => {
         WHEN pa.metodo_pago = 'TIQUERERA' AND pa.estado_pago = true
         THEN pa.monto_pagado ELSE 0 END) AS tiquetera,
 
+    -- pagos en línea de pedidos web (no es dinero en el cajón)
+    SUM(CASE 
+        WHEN pa.metodo_pago = 'WOMPI' AND pa.estado_pago = true
+        THEN pa.monto_pagado ELSE 0 END) AS wompi,
+
     SUM(CASE 
         WHEN pa.estado_pago = false
         THEN pa.monto_pagado ELSE 0 END) AS pendiente,
@@ -526,8 +604,8 @@ SELECT
   i.id AS id_producto,
   i.nombre,
 
-  a.stock_sistema,
-  a.stock_apertura,
+  a.stock_sistema::float AS stock_sistema,
+  a.stock_apertura::float AS stock_apertura,
 
   -- 🔥 ENTRADAS (globales)
   COALESCE(SUM(
@@ -535,7 +613,7 @@ SELECT
       WHEN m.tipo = 'ENTRADA' THEN m.cantidad 
       ELSE 0 
     END
-  ),0)::int AS ingresos,
+  ),0)::float AS ingresos,
 
   -- 🔥 VENTAS (solo caja)
 COALESCE(
@@ -552,37 +630,32 @@ COALESCE(
             ELSE 0
         END
     ),0
-)::int AS ventas,
+  )::float AS ventas,
+
+  -- 🔥 VENTAS de otras cajas abiertas al mismo tiempo (también descuentan stock)
+  COALESCE(SUM(
+    CASE
+      WHEN m.tipo = 'VENTA' AND m.id_caja IS DISTINCT FROM $1 THEN m.cantidad
+      WHEN m.tipo = 'ANULACION' AND m.id_caja IS DISTINCT FROM $1 THEN -m.cantidad
+      ELSE 0
+    END
+  ),0)::float AS ventas_otras_cajas,
   -- 🔥 SALIDAS (globales)
   COALESCE(SUM(
     CASE 
       WHEN m.tipo = 'SALIDA' THEN m.cantidad 
       ELSE 0 
     END
-  ),0)::int AS salidas,
+  ),0)::float AS salidas,
 
   -- 🔥 CÁLCULO FINAL
   (
     a.stock_sistema
     + COALESCE(SUM(CASE WHEN m.tipo='ENTRADA' THEN m.cantidad ELSE 0 END),0)
 
-    - COALESCE(
-        SUM(
-            CASE
-                WHEN m.tipo='VENTA'
-                 AND m.id_caja=$1
-                THEN m.cantidad
-
-                WHEN m.tipo='ANULACION'
-                 AND m.id_caja=$1
-                THEN -m.cantidad
-
-                ELSE 0
-            END
-        ),0)
-
+    - COALESCE(SUM(CASE WHEN m.tipo='VENTA' THEN m.cantidad WHEN m.tipo='ANULACION' THEN -m.cantidad ELSE 0 END),0)
     - COALESCE(SUM(CASE WHEN m.tipo='SALIDA' THEN m.cantidad ELSE 0 END),0)
-)::int AS cierre_sistema
+)::float AS cierre_sistema
 
 FROM inventario i
   LEFT JOIN inventario_caja a 
@@ -628,6 +701,7 @@ ORDER BY i.nombre;
     { metodo_pago: "NEQUI", total: pagos.nequi || 0 },
     { metodo_pago: "DAVIPLATA", total: pagos.daviplata || 0 },
     { metodo_pago: "TIQUERERA", total: pagos.tiquetera || 0 },
+    { metodo_pago: "WOMPI", total: pagos.wompi || 0 },
     { metodo_pago: "PENDIENTE", total: pagos.pendiente || 0 }
   ];
 
@@ -655,71 +729,19 @@ finalizarVenta: async (payload) => {
       monto_pagado, monto_recibido, cambio, id_mesa
     } = payload;
 
-    // 1️⃣ consecutivo
-    const consecutivoRes = await conn.query(`
-      SELECT COALESCE(MAX(numero_consecutivo), 0) + 1 AS siguiente
-      FROM ventas
-    `);
-
-    const numeroConsecutivo = consecutivoRes.rows[0].siguiente;
-    const numeroFactura = `POS-${numeroConsecutivo.toString().padStart(6, '0')}`;
-
-    // 2️⃣ venta
-    const ventaResult = await conn.query(`
-      INSERT INTO ventas (
-        numero_consecutivo, numero_factura, id_cliente, id_caja, id_mesa,
-        subtotal, descuento, descuento_porcentaje, impuesto, total,
-        estado, metodo_pago, nota
-      ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
-      ) RETURNING id
-    `, [
-      numeroConsecutivo, numeroFactura, id_cliente, id_caja, id_mesa,
-      subtotal, descuento, descuento_porcentaje, impuesto, total,
-      estado, 'EFECTIVO', nota
-    ]);
-
-    const id_venta = ventaResult.rows[0].id;
+    // 1️⃣ venta + 4️⃣ items + 5️⃣ pago (misma lógica que usan los pedidos web)
+    const id_venta = await insertarVenta(conn, {
+      id_cliente, id_caja, id_mesa,
+      subtotal, descuento, descuento_porcentaje, impuesto, total, estado,
+      nota, productos, metodo_pago,
+      monto_pagado, monto_recibido, cambio
+    });
 
     // 3️⃣ mesa
     await conn.query(
       `UPDATE mesas SET estado='Ocupada' WHERE id=$1`,
       [id_mesa]
     );
-
-    
-
-    // 4️⃣ items
-    for (const p of productos) {
-      await conn.query(`
-        INSERT INTO ventas_items (
-          id_venta, id_producto, cantidad, precio_unitario,
-          descuento, descuento_porcentaje, impuesto, subtotal
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-      `, [
-        id_venta, p.id_producto, p.cantidad, p.precio_unitario,
-        p.descuento, p.descuento_porcentaje, p.impuesto, p.subtotal
-      ]);
-    }
-
-    // 5️⃣ pago
-    const estado_pago_id = metodo_pago !== 'PENDIENTE' ? 1 : 0;
-
-    await conn.query(`
-      INSERT INTO pagos (
-        id_venta, estado_pago, metodo_pago,
-        monto_pagado, monto_recibido, cambio
-      ) VALUES ($1,$2,$3,$4,$5,$6)
-    `, [
-      id_venta,
-      estado_pago_id,
-      metodo_pago,
-      monto_pagado ? Number(monto_pagado) : null,
-      monto_recibido ? Number(monto_recibido) : null,
-      cambio ? Number(cambio) : null
-    ]);
-
-  
 
     await conn.query('COMMIT');
     await notificarMesas(id_negocio);
@@ -1042,6 +1064,7 @@ LIMIT 1;
 
 actualizaventa: async (payload) => {
   const conn = await pool.connect();
+  let pedidoCobrado = null;
 
   try {
     await conn.query('BEGIN');
@@ -1077,6 +1100,23 @@ actualizaventa: async (payload) => {
       throw new Error("No se encontró el pago para la venta");
     }
 
+    // Si la venta viene de un pedido web, el pedido también queda pagado
+    const { rows: [tablaPedidos] } = await conn.query(`SELECT to_regclass('public.pedidos') AS t`);
+    if (estado_pago_id === 1 && tablaPedidos.t) {
+      const pedido = await conn.query(`
+        UPDATE pedidos SET estado_pago = 'APROBADO', version = version + 1, updated_at = NOW()
+        WHERE id_venta = $1 AND estado_pago = 'PENDIENTE'
+        RETURNING id, id_negocio
+      `, [id_venta]);
+      for (const pd of pedido.rows) {
+        await conn.query(`
+          INSERT INTO pedidos_historial (id_pedido, campo, valor_anterior, valor_nuevo, id_usuario, origen, nota)
+          VALUES ($1, 'estado_pago', 'PENDIENTE', 'APROBADO', $2, 'CAJA', $3)
+        `, [pd.id, idUsuario, `Cobrado en caja (${metodo_pago})`]);
+      }
+      pedidoCobrado = pedido.rows[0];
+    }
+
        // 2️⃣ actualizar cliente
     await conn.query(`
       UPDATE ventas SET id_cliente=$1 WHERE id=$2
@@ -1093,6 +1133,7 @@ actualizaventa: async (payload) => {
     await conn.query('COMMIT');
     await notificarCaja(idUsuario);
     await notificarMesas(id_negocio);
+    if (pedidoCobrado) notificarPedido(pedidoCobrado.id_negocio, "pago_confirmado", pedidoCobrado.id);
     return result.rows[0];
 
   } catch (err) {
@@ -1173,13 +1214,14 @@ SELECT
     vi.id_producto,
     pro.nombre,
     vi.cantidad,
-    pp.precio_venta as precio_unitario,
+    -- Precio con el que se vendió (no el precio actual del producto)
+    COALESCE(vi.precio_unitario, pp.precio_venta) as precio_unitario,
     vi.subtotal,
-    COALESCE(pi.url, '') AS url_imagen
+    -- Solo la primera foto: unir con todas las imágenes repetía el producto
+    COALESCE((SELECT pi.url FROM productos_imagenes pi WHERE pi.id_producto = pro.id ORDER BY pi.orden NULLS LAST, pi.id LIMIT 1), '') AS url_imagen
 FROM ventas_items vi
 INNER JOIN productos pro  ON pro.id = vi.id_producto
-INNER JOIN productos_precios pp on pro.id=pp.id_producto
-LEFT JOIN productos_imagenes pi ON pi.id_producto = pro.id
+LEFT JOIN productos_precios pp on pro.id=pp.id_producto
 
 WHERE vi.id_venta = $1
 order by vi.id asc
@@ -1218,10 +1260,10 @@ obtener_inventario: async (id_negocio) => {
       select 
         id AS id,
         nombre,
-        stock_actual::int AS stock_actual
+        unidad,
+        stock_actual::float AS stock_actual
       FROM inventario
       WHERE id_negocio = $1
-      and stock_actual>0
       AND estado = true
       ORDER BY nombre ASC;`,
       [id_negocio]
@@ -1294,7 +1336,7 @@ guardar_inventario: async (payload,id_usuario) => {
             item.id,
             tipo,
             cantidad,
-            `${item.observacion} INVENTARIO APERTURA (Caja ${id_caja})`,
+            `${item.observacion || ""} INVENTARIO CIERRE (Caja ${id_caja})`.trim(),
              id_usuario,
              id_caja
           ]
@@ -1327,13 +1369,36 @@ guardar_inventario: async (payload,id_usuario) => {
   }
 },
 
-apiEliminarCaja: async (payload) => {
+apiEliminarCaja: async (payload, id_negocio) => {
   const conn = await pool.connect();
 
   try {
     await conn.query("BEGIN");
 
     const { id_caja } = payload;
+
+    // Solo cajas del propio negocio
+    const { rows: [cajaNegocio] } = await conn.query(
+      `SELECT c.id FROM caja c JOIN usuarios u ON u.id = c.id_usuario WHERE c.id = $1 AND u.id_negocio = $2`,
+      [id_caja, id_negocio]
+    );
+    if (!cajaNegocio) throw Object.assign(new Error("Caja no encontrada"), { status: 404 });
+
+    // Una caja con pedidos web facturados no se elimina (perdería su trazabilidad)
+    const { rows: [tablaPedidos] } = await conn.query(`SELECT to_regclass('public.pedidos') AS t`);
+    if (tablaPedidos.t) {
+      const { rows: conPedidos } = await conn.query(
+        `SELECT codigo FROM pedidos WHERE id_caja = $1 OR id_venta IN (SELECT id FROM ventas WHERE id_caja = $1) LIMIT 3`,
+        [id_caja]
+      );
+      if (conPedidos.length) {
+        throw Object.assign(new Error(`La caja tiene pedidos web (${conPedidos.map((p) => p.codigo).join(", ")}). Cancélalos antes de eliminarla.`), { status: 409 });
+      }
+    }
+
+    // Devolver al inventario lo vendido: al pasar las ventas a 'cancelado'
+    // el trigger repone el stock y registra la ANULACION (borrarlas no lo hacía)
+    await conn.query(`UPDATE ventas SET estado = 'cancelado' WHERE id_caja = $1 AND estado = 'activa'`, [id_caja]);
 
     // Obtener ventas asociadas a la caja
     const ventasResult = await conn.query(

@@ -24,7 +24,8 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import ThreeDRotationIcon from "@mui/icons-material/ThreeDRotation";
 
 import { T, btnPrimario, btnSecundario } from "./landing/tokens";
-import { SITE } from "./landing/siteConfig";
+import { useSitio } from "./landing/siteConfig";
+import type { Sitio } from "./landing/siteConfig";
 import { useTema } from "./landing/Tema";
 import { Encabezado } from "./landing/Comunes";
 
@@ -33,18 +34,33 @@ import { Encabezado } from "./landing/Comunes";
  */
 
 /*
- * Información del establecimiento
+ * Información del establecimiento: se completa con el sitio del negocio
+ * (fijarLugar) antes de dibujar el mapa.
  */
 const LUGAR = {
-  nombre: SITE.nombre,
-  direccion: SITE.direccion,
-  lat: SITE.lat,
-  lng: SITE.lng,
-  horario: SITE.horario.texto,
-  telefono: SITE.telefono,
-  telefonoLink: SITE.telefonoLink,
-  googleMaps: SITE.googleMaps,
+  nombre: "",
+  direccion: "",
+  lat: NaN,
+  lng: NaN,
+  horario: "",
+  telefono: "",
+  telefonoLink: "",
+  googleMaps: "",
 };
+
+function fijarLugar(sitio: Sitio) {
+  Object.assign(LUGAR, {
+    nombre: sitio.nombre,
+    direccion: [sitio.direccion, sitio.ciudad].filter(Boolean).join(", "),
+    lat: sitio.lat ?? NaN,
+    lng: sitio.lng ?? NaN,
+    horario: sitio.horarioTexto,
+    telefono: sitio.telefono ?? "",
+    telefonoLink: sitio.telefonoLink ?? "",
+    googleMaps: sitio.googleMaps ?? "",
+  });
+  VISTA_LOCAL.center = [LUGAR.lng, LUGAR.lat];
+}
 
 type Coord = [number, number];
 
@@ -64,10 +80,10 @@ const VISTA_INICIO = {
 };
 
 /*
- * Vista final: Punto Urbano
+ * Vista final: el negocio
  */
 const VISTA_LOCAL = {
-  center: [LUGAR.lng, LUGAR.lat] as Coord,
+  center: [0, 0] as Coord,
   zoom: 17.4,
   pitch: 62,
   bearing: -25,
@@ -236,11 +252,11 @@ function coordValida(lng: number, lat: number): boolean {
   );
 }
 
-const DESTINO_VALIDO = coordValida(LUGAR.lng, LUGAR.lat);
+const destinoValido = () => coordValida(LUGAR.lng, LUGAR.lat);
 
 /* Indicaciones en Google Maps (formato oficial de Maps URLs) */
 function urlIndicaciones(origen: Coord | null): string | null {
-  if (!DESTINO_VALIDO) return null;
+  if (!destinoValido()) return null;
 
   const params = new URLSearchParams({
     api: "1",
@@ -341,7 +357,15 @@ function mensajeGeo(codigo: number): string {
   return "Tu dispositivo no pudo determinar dónde estás en este momento.";
 }
 
+/* Sin coordenadas registradas no se muestra la sección del mapa */
 export default function Ubicacion() {
+  const sitio = useSitio();
+  if (sitio.lat === null || sitio.lng === null) return null;
+  fijarLugar(sitio);
+  return <MapaUbicacion key={sitio.id} />;
+}
+
+function MapaUbicacion() {
   const seccionRef = useRef<HTMLDivElement | null>(null);
 
   const contenedorRef = useRef<HTMLDivElement | null>(null);
@@ -1178,7 +1202,7 @@ export default function Ubicacion() {
     rutaRef.current = null;
     quitarRutaDelMapa();
 
-    if (!DESTINO_VALIDO) {
+    if (!destinoValido()) {
       fallar(
         "La ubicación del restaurante no está bien configurada. Usa el enlace de Google Maps."
       );

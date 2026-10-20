@@ -125,6 +125,10 @@ const AdminInventario: React.FC = () => {
   }, []);
 
   // ✅ CREAR / EDITAR
+  // Mensaje del backend (stock insuficiente, ítem en uso, etc.)
+  const errorApi = (e: unknown, porDefecto: string) =>
+    (e as { response?: { data?: { error?: string } } })?.response?.data?.error ?? porDefecto;
+
   const handleSubmit = async () => {
     if (!form.nombre) {
       Swal.fire("Error", "El nombre es obligatorio", "warning");
@@ -152,7 +156,7 @@ const AdminInventario: React.FC = () => {
       resetForm();
       fetchData();
     } catch (error) {
-      Swal.fire("Error", "No se pudo guardar", "error");
+      Swal.fire("Error", errorApi(error, "No se pudo guardar"), "error");
     }
   };
 
@@ -185,8 +189,12 @@ const AdminInventario: React.FC = () => {
     });
 
     if (result.isConfirmed) {
-      await deleteInventario(id);
-      fetchData();
+      try {
+        await deleteInventario(id);
+        fetchData();
+      } catch (error) {
+        Swal.fire("No se pudo eliminar", errorApi(error, "Intenta de nuevo"), "error");
+      }
     }
   };
 
@@ -715,6 +723,9 @@ const AdminInventario: React.FC = () => {
                 <TextField
                   label="Actual"
                   type="number"
+                  // Al editar, el stock solo cambia con Entrada / Salida (queda registrado)
+                  disabled={Boolean(editingId)}
+                  helperText={editingId ? "Usa Entrada o Salida" : "Stock inicial"}
                   value={form.stock_actual === 0 ? "" : form.stock_actual}
                   onChange={(e) =>
                     setForm({
@@ -974,10 +985,12 @@ const AdminInventario: React.FC = () => {
             variant="contained"
             sx={{ borderRadius: 2, px: 3 }}
             onClick={async () => {
+              const hechos: number[] = [];
               try {
                 for (const item of itemsMovimiento) {
                   if (!item.inventario_id || item.cantidad <= 0) continue;
 
+                  hechos.push(item.inventario_id);
                   await crearMovimiento({
                     inventario_id: item.inventario_id,
                     tipo: tipoMovimiento,
@@ -992,7 +1005,9 @@ const AdminInventario: React.FC = () => {
                 fetchData();
 
               } catch (error) {
-                Swal.fire("Error", "No se pudo guardar", "error");
+                // Los anteriores al error sí quedaron registrados
+                Swal.fire("Error", `${errorApi(error, "No se pudo guardar")}${hechos.length > 1 ? `. Se registraron ${hechos.length - 1} movimiento(s) antes del error.` : ""}`, "error");
+                fetchData();
               }
             }}
           >

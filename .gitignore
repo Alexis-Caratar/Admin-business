@@ -10,3 +10,6 @@ Bd/
 frontend/out-tsc/
 *.log
 *.pem
+
+# Configuración local del agente (incluye el token)
+agente-local/config/agente.json

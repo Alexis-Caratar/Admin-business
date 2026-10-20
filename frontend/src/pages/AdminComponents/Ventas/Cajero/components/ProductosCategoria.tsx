@@ -82,8 +82,10 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
     setSearch("");
   }, [open, categoria, categorias]);
 
+  // Por nombre o por código de barras
   const filtered = productos.filter((p) =>
-    p.nombre?.toLowerCase().includes(search.toLowerCase())
+    p.nombre?.toLowerCase().includes(search.toLowerCase()) ||
+    (search.trim().length >= 3 && String(p.codigo_barra ?? "").toLowerCase().includes(search.trim().toLowerCase()))
   );
 
 
@@ -309,7 +311,7 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
             <TextField
               fullWidth
               size="small"
-              placeholder="Buscar producto..."
+              placeholder="Buscar producto o código..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               InputProps={{

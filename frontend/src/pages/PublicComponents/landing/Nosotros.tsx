@@ -2,30 +2,46 @@ import { Box, Container, Typography } from "@mui/material";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import DeliveryDiningIcon from "@mui/icons-material/DeliveryDining";
+import LocalCafeIcon from "@mui/icons-material/LocalCafe";
+import BakeryDiningIcon from "@mui/icons-material/BakeryDining";
+import LocalBarIcon from "@mui/icons-material/LocalBar";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import EventSeatIcon from "@mui/icons-material/EventSeat";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import DevicesIcon from "@mui/icons-material/Devices";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import CheckroomIcon from "@mui/icons-material/Checkroom";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import LocalPharmacyIcon from "@mui/icons-material/LocalPharmacy";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import SpaIcon from "@mui/icons-material/Spa";
+import HandshakeIcon from "@mui/icons-material/Handshake";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import type { ReactNode } from "react";
 import { T } from "./tokens";
-import { SITE } from "./siteConfig";
+import { useSitio } from "./siteConfig";
 import { Encabezado, Imagen, Reveal } from "./Comunes";
 
-/* Textos tomados del sitio actual, sin añadir datos nuevos */
-const PILARES = [
-  {
-    icono: <RestaurantIcon />,
-    titulo: "Comida urbana",
-    texto: "Sabores intensos con identidad local.",
-  },
-  {
-    icono: <LocalDiningIcon />,
-    titulo: "Ambiente moderno",
-    texto: "Diseño pensado para una experiencia única.",
-  },
-  {
-    icono: <DeliveryDiningIcon />,
-    titulo: "Domicilios rápidos",
-    texto: "Llevamos el sabor hasta tu puerta.",
-  },
-];
+// Íconos según el tipo de negocio (perfil.iconos en tipos_negocio)
+const ICONOS: Record<string, ReactNode> = {
+  restaurante: <RestaurantIcon />, comida: <LocalDiningIcon />, domicilio: <DeliveryDiningIcon />,
+  cafe: <LocalCafeIcon />, panaderia: <BakeryDiningIcon />, bar: <LocalBarIcon />, musica: <MusicNoteIcon />,
+  reserva: <EventSeatIcon />, tienda: <StorefrontIcon />, oferta: <LocalOfferIcon />, envio: <LocalShippingIcon />,
+  mercado: <ShoppingBasketIcon />, tecnologia: <DevicesIcon />, garantia: <VerifiedUserIcon />, ropa: <CheckroomIcon />,
+  calidad: <WorkspacePremiumIcon />, salud: <LocalPharmacyIcon />, herramienta: <HandymanIcon />,
+  belleza: <SpaIcon />, servicio: <HandshakeIcon />, agenda: <EventAvailableIcon />,
+};
+const POR_DEFECTO = ["tienda", "calidad", "envio"];
 
 export default function Nosotros() {
+  const sitio = useSitio();
+  const iconos = sitio.iconos.length ? sitio.iconos : POR_DEFECTO;
+  const PILARES = sitio.nosotrosItems.map((it, i) => ({ ...it, icono: ICONOS[iconos[i % iconos.length]] ?? ICONOS.tienda }));
+  const fotos = sitio.nosotrosItems.map((it) => it.foto).filter((f) => f !== null);
+  if (!PILARES.length && !sitio.descripcion) return null;
   return (
     <Box
       component="section"
@@ -41,9 +57,8 @@ export default function Nosotros() {
             alignItems: "end",
           }}
         >
-          <Encabezado etiqueta="Nuestro restaurante" titulo="Sabor de ciudad">
-            En Punto Urbano combinamos hamburguesas artesanales, comida rápida
-            premium y una experiencia moderna en el corazón de Pasto.
+          <Encabezado etiqueta={sitio.textos.nosotros_etiqueta} titulo={sitio.nosotrosTitulo ?? sitio.nombre}>
+            {sitio.nosotrosTexto ?? sitio.descripcion}
           </Encabezado>
 
           <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, mb: { md: 7 } }}>
@@ -106,7 +121,7 @@ export default function Nosotros() {
         </Box>
 
         {/* COLLAGE: una foto grande y dos escalonadas */}
-        {SITE.nosotros.length > 0 && (
+        {fotos.length > 0 && (
           <Box
             sx={{
               mt: { xs: 6, md: 10 },
@@ -115,7 +130,7 @@ export default function Nosotros() {
               gap: { xs: 1, md: 2 },
             }}
           >
-            {SITE.nosotros.slice(0, 3).map((foto, i) => (
+            {fotos.slice(0, 3).map((foto, i) => (
               <Box
                 key={foto.src}
                 sx={{

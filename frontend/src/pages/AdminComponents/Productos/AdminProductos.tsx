@@ -54,6 +54,7 @@ import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { useTheme, useMediaQuery } from "@mui/material";
 import SearchOffOutlinedIcon from "@mui/icons-material/SearchOffOutlined";
 import { inventario } from "./../../../api/productos";
+import FichaWebProducto from "./FichaWebProducto";
 
 interface Props {
   id: number;
@@ -243,7 +244,21 @@ const payload = {
     controla_inventario:form.tipo_control != "sin_inventario"? true: false,
     usa_receta:form.tipo_control === "receta",
     hora_inicio: form.hora_inicio,
-    hora_fin: form.hora_fin
+    hora_fin: form.hora_fin,
+    // Ficha web (el backend valida y limpia cada campo)
+    marca: form.marca ?? null,
+    destacado: Boolean(form.destacado),
+    descripcion_detallada: form.descripcion_detallada ?? null,
+    caracteristicas: form.caracteristicas ?? [],
+    atributos: (form.atributos ?? []).filter((a) => a.nombre.trim() && a.valor.trim()),
+    modo_uso: form.modo_uso ?? null,
+    ingredientes: form.ingredientes ?? null,
+    cuidados: form.cuidados ?? null,
+    advertencias: form.advertencias ?? null,
+    fabricante: form.fabricante ?? null,
+    id_producto_base: form.id_producto_base ?? null,
+    variante_nombre: form.variante_nombre ?? null,
+    variante_color: form.variante_color ?? null,
   },
   productos_precios: form.precios
     ? [{ ...form.precios }]
@@ -1209,7 +1224,7 @@ if (producto.tipo_control === "receta" && producto.receta) {
           Precios
         </Typography>
 
-        <Box display="grid" gridTemplateColumns="repeat(2,1fr)" gap={2}>
+        <Box display="grid" gridTemplateColumns="repeat(3,1fr)" gap={2}>
         <TextField
           label="Costo"
           type="number"
@@ -1236,6 +1251,26 @@ if (producto.tipo_control === "receta" && producto.receta) {
                 ...form,
                 precios: { ...form.precios!, precio_venta: Number(e.target.value) },
               })
+            }
+          />
+
+          {/* Precio antes de la promoción: solo se muestra tachado si es mayor al de venta */}
+          <TextField
+            label="Precio anterior"
+            type="number"
+            size="small"
+            value={form.precios?.precio_anterior ? form.precios.precio_anterior : ""}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                precios: { ...form.precios!, precio_anterior: e.target.value === "" ? 0 : Number(e.target.value) },
+              })
+            }
+            error={Boolean(form.precios?.precio_anterior) && Number(form.precios?.precio_anterior) <= Number(form.precios?.precio_venta)}
+            helperText={
+              form.precios?.precio_anterior && Number(form.precios.precio_anterior) > Number(form.precios?.precio_venta)
+                ? `Promoción: -${Math.round(((Number(form.precios.precio_anterior) - Number(form.precios.precio_venta)) / Number(form.precios.precio_anterior)) * 100)}%`
+                : form.precios?.precio_anterior ? "Debe ser mayor al de venta" : "Opcional (promoción)"
             }
           />
         </Box>
@@ -1283,6 +1318,13 @@ if (producto.tipo_control === "receta" && producto.receta) {
           Agregar imagen
         </Button>
       </Box>
+
+      {/* FICHA WEB */}
+      <FichaWebProducto
+        form={form}
+        setForm={setForm}
+        candidatosBase={productos.filter((p) => p.id !== editingId && !p.id_producto_base)}
+      />
    
 {/* PRODUCTOS COMPLEMENTARIOS*/}
 
