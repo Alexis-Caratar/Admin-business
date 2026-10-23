@@ -55,7 +55,14 @@ before(async () => {
   wsUrl = `ws://127.0.0.1:${port}`;
   await q(`DELETE FROM negocios_impresion`).catch(() => {});
   const [v] = await q(`SELECT v.id FROM ventas v JOIN caja c ON c.id = v.id_caja JOIN usuarios u ON u.id = c.id_usuario
-                       WHERE u.id_negocio = 1 AND EXISTS (SELECT 1 FROM ventas_items vi WHERE vi.id_venta = v.id) ORDER BY v.id DESC LIMIT 1`);
+                       WHERE u.id_negocio = 1 AND v.estado <> 'cancelado' AND EXISTS (SELECT 1 FROM pagos pg WHERE pg.id_venta = v.id AND pg.estado_pago)
+                         AND EXISTS (SELECT 1 FROM ventas_items vi WHERE vi.id_venta = v.id) ORDER BY v.id DESC LIMIT 1`);
+  // La factura solo sale con la cuenta pagada; una pendiente imprime la comanda
+  const [p] = await q(`SELECT v.id FROM ventas v JOIN pagos pg ON pg.id_venta = v.id JOIN caja c ON c.id = v.id_caja JOIN usuarios u ON u.id = c.id_usuario
+                       WHERE u.id_negocio = 1 AND v.estado = 'activa' AND NOT pg.estado_pago ORDER BY v.id DESC LIMIT 1`);
+  F.pendiente = p?.id;
+  const [a] = await q(`SELECT v.id FROM ventas v JOIN caja c ON c.id = v.id_caja JOIN usuarios u ON u.id = c.id_usuario WHERE u.id_negocio = 1 AND v.estado = 'cancelado' ORDER BY v.id DESC LIMIT 1`);
+  F.anulada = a?.id;
   F.venta = v?.id;
   F.cajero = tokenDe(10);
 });
@@ -78,8 +85,17 @@ test("factura sin agente: no se da por impresa y devuelve el ticket para el nave
   assert.ok(r.json.documento.lineas.every((l) => l.t !== "texto" || l.v.length <= r.json.documento.ancho));
 });
 
+test("la factura solo se imprime con la cuenta pagada (pendiente → comanda; anulada → nada)", async () => {
+  if (F.pendiente) {
+    const r = await api("POST", "/cajero/imprimirfactura", { token: F.cajero, body: { id_venta: F.pendiente } });
+    assert.equal(r.status, 409); assert.match(r.json.error, /pendiente/);
+  }
+  if (F.anulada) assert.equal((await api("POST", "/cajero/imprimirfactura", { token: F.cajero, body: { id_venta: F.anulada } })).status, 409);
+});
+
 test("factura de otro negocio o sin id → no se imprime", async () => {
-  assert.equal((await api("POST", "/cajero/imprimirfactura", { token: tokenDe(10, 9), body: { id_venta: F.venta } })).status, 404);
+  // Token con un negocio que no es el del usuario: ahora se rechaza antes (403, sin módulo en ese negocio); antes llegaba al 404
+  assert.ok([403, 404].includes((await api("POST", "/cajero/imprimirfactura", { token: tokenDe(10, 9), body: { id_venta: F.venta } })).status));
   assert.equal((await api("POST", "/cajero/imprimirfactura", { token: F.cajero, body: {} })).status, 400);
 });
 

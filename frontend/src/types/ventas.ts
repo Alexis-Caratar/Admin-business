@@ -16,6 +16,7 @@ export interface Venta {
   estado_pago: boolean;
   estado_venta:string;
   metodo_pago: string;
+  detalle_pago?: string | null;   // pago dividido: "NEQUI 10000 + EFECTIVO 14000"
   nota: string | null;
   nombre_vendedor: string;
   total: number;

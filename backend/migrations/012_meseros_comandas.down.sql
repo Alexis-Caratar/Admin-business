@@ -1,0 +1,22 @@
+-- Revierte 012_meseros_comandas (borra comandas, perfiles y la auditoría de permisos)
+DROP TRIGGER IF EXISTS trg_comandas_por_anulacion ON public.ventas;
+DROP TRIGGER IF EXISTS trg_comandas_por_pago ON public.pagos;
+DROP FUNCTION IF EXISTS public.comandas_por_anulacion();
+DROP FUNCTION IF EXISTS public.comandas_por_pago();
+DROP TABLE IF EXISTS public.comandas_idempotencia;
+DROP TABLE IF EXISTS public.comandas_historial;
+DROP TABLE IF EXISTS public.comandas_impresiones;
+DROP TABLE IF EXISTS public.comandas_items;
+DROP TABLE IF EXISTS public.comandas;
+ALTER TABLE public.mesas DROP COLUMN IF EXISTS activo;
+DROP TABLE IF EXISTS public.app_auditoria;
+ALTER TABLE public.usuarios DROP COLUMN IF EXISTS id_perfil;
+DROP TABLE IF EXISTS public.app_perfiles_permisos;
+DROP TABLE IF EXISTS public.app_perfiles;
+DROP TABLE IF EXISTS public.app_modulos_acciones;
+DELETE FROM public.app_usuario_modulos WHERE id_modulo_negocio_rol IN (SELECT id FROM public.app_modulos WHERE url IN ('meseros', 'mesas', 'permisos'));
+DELETE FROM public.app_modulos_negocio WHERE id_modulo IN (SELECT id FROM public.app_modulos WHERE url IN ('meseros', 'mesas', 'permisos'));
+DELETE FROM public.app_modulos WHERE url IN ('meseros', 'mesas', 'permisos');
+UPDATE public.app_modulos SET nombre = 'Usuarios', icono = 'PersonIcon' WHERE url = 'usuarios' AND nombre = 'Configuración usuarios';
+ALTER TABLE public.app_modulos DROP COLUMN IF EXISTS grupo;
+ALTER TABLE public.app_modulos DROP COLUMN IF EXISTS descripcion;

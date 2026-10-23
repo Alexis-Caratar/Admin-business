@@ -22,10 +22,19 @@ import VentasDetalles from "./components/Estados_dasboard/ventasDetalles";
 import CajaPanel from "./components/Estados_dasboard/CajaPanel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import PanelPedidosCaja from "../../../../components/pedidos/PanelPedidosCaja";
 import { usePedidosEnCurso } from "../../../../components/pedidos/pedidosUtil";
 import Loader from "../../../../components/Loader";
 import toastr from "toastr";
+import { PagoTiqueteraDialog } from "./components/Tiqueteras/PagoTiqueteraDialog";
+import { resumenConsumo } from "./components/Tiqueteras/tiqueterasUtil";
+import { imprimirFacturas, preferenciaFactura, ventaCobrada } from "../../../../components/impresion/factura";
+import { TiqueterasCajaDialog } from "./components/Tiqueteras/TiqueterasCajaDialog";
+import PanelComandasCaja from "../../../../components/comandas/PanelComandasCaja";
+import { useComandasPendientes } from "../../../../components/comandas/useComandas";
+import RoomServiceIcon from "@mui/icons-material/RoomService";
+import type { Consumo, VentaCarrito } from "../../../../api/tiqueteras";
 import "toastr/build/toastr.min.css";
 
 interface AnimItem {
@@ -72,6 +81,18 @@ export const CajeroDashboard: React.FC = () => {
   const [openVentasDetalles, setOpenVentasDetalles] = useState(false);
   const [animItem, ] = useState<AnimItem | null>(null);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<any>(null);
+  // Tiqueteras: venta/consulta desde la caja y pago de almuerzos con tiquetera
+  const [openTiqueteras, setOpenTiqueteras] = useState(false);
+  // Comandas de meseros: llegan en vivo y se cobran desde la mesa
+  const comandasMeseros = useComandasPendientes();
+  const [openComandas, setOpenComandas] = useState(false);
+  const [abrirMesaId, setAbrirMesaId] = useState<number | null>(null);
+  useEffect(() => {
+    if (!comandasMeseros.aviso) return;
+    toastr.info(comandasMeseros.aviso);
+    comandasMeseros.limpiarAviso();
+  }, [comandasMeseros]);
+  const [pagoTiquetera, setPagoTiquetera] = useState<{ venta: VentaCarrito; busqueda?: string } | null>(null);
   const abrirCarrito = () => {
     setOpenCarrito(true);
   };
@@ -244,9 +265,8 @@ export const CajeroDashboard: React.FC = () => {
 
   //Finalizar venta
   const finalizarVenta = async (cliente: any, datos_adicionales: any) => {
-    setLoadingCategorias(true);
-
     if (carrito.length === 0) return;
+    setLoadingCategorias(true);
     const subtotal = carrito.reduce((acc, v) => acc + v.precio_venta * v.cantidad, 0);
     const descuento = 0;
     const impuesto = 0;
@@ -271,6 +291,7 @@ export const CajeroDashboard: React.FC = () => {
       monto_pagado: total,
       monto_recibido: Number(datos_adicionales.monto_recibido || 0),
       cambio: datos_adicionales.cambio,
+      pagos: datos_adicionales.pagos,   // pago dividido (metodo_pago = "MIXTO")
       productos: carrito.map((p) => ({
         id_producto: p.id,
         nombre: p.nombre,
@@ -283,6 +304,17 @@ export const CajeroDashboard: React.FC = () => {
       })),
     };
 
+    // Tiquetera: se elige la del cliente y el servidor registra venta y consumo juntos
+    if (datos_adicionales.metodo_pago === "TIQUERERA") {
+      setLoadingCategorias(false);
+      const doc = clienteSeleccionado?.identificacion;
+      setPagoTiquetera({
+        venta: { ...payload, id_cliente: cliente || null } as VentaCarrito,
+        busqueda: doc && !String(doc).includes("22222222") ? String(doc) : undefined,
+      });
+      return;
+    }
+
     try {
       const { data } = await finalizar_venta(payload);
       // La comanda sale sola; si el punto de venta no la imprimió, se avisa
@@ -292,7 +324,11 @@ export const CajeroDashboard: React.FC = () => {
         setCarrito([]);
         setMesaSeleccionada(null);
         checkCaja();
-        setVentaPayload(payload);
+        // Factura (aparte de la comanda): solo si quedó pagada; según Configuración → Factura e impresión
+        const pagada = payload.metodo_pago !== "PENDIENTE";
+        const pref = pagada ? await preferenciaFactura() : "nunca";
+        setVentaPayload({ ...payload, id_venta: data.result?.id_venta, pagada, pref_factura: pref });
+        if (pagada && pref === "siempre" && data.result?.id_venta) imprimirFacturas([data.result.id_venta]);
         closeCategoria();
         cargarCategorias();
         setOpenVentaRegistrada(true);
@@ -303,6 +339,18 @@ export const CajeroDashboard: React.FC = () => {
       setLoadingCategorias(false);
     }
   };
+  const pagadoConTiquetera = (r: Consumo & { impresion?: { ok: boolean; mensaje?: string } }) => {
+    setPagoTiquetera(null);
+    if (r.impresion && !r.impresion.ok) toastr.warning(`Comanda no impresa: ${r.impresion.mensaje}`);
+    setCarrito([]);
+    setMesaSeleccionada(null);
+    setClienteSeleccionado(null);
+    closeCategoria();
+    cargarCategorias();
+    checkCaja();
+    ventaCobrada([r.venta.id_venta, ...(r.venta_resto && r.venta_resto.metodo_pago !== "PENDIENTE" ? [r.venta_resto.id_venta] : [])], { title: "Pagado con tiquetera", html: resumenConsumo(r) });
+  };
+
   //aperturar la caja 
   const abrirCajaReal = async (payload: any) => {
     try {
@@ -530,9 +578,51 @@ export const CajeroDashboard: React.FC = () => {
         </Stack>
       </Box>
 
-      {/* === PEDIDOS WEB (solo si el negocio tiene activo el módulo Pedidos) === */}
-      {pedidosWeb.disponible && <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1.5 }}>
-        <Badge badgeContent={pedidosWeb.porConfirmar} color="error" overlap="rectangular">
+      {/* === PANEL SUPERIOR DE CAJA === */}
+      {cajaAbierta && (
+        <CajaPanel
+          showStats={showStats}
+          cajaAbierta={cajaAbierta}
+          caja={caja}
+          formatCOP={formatCOP}
+          onVentas={() => setOpenVentasDetalles(true)}
+          onEgresos={() => setOpenEgresos(true)}
+          onArqueo={() => {
+            setModalArqueo(true);
+            cargarArqueo();
+          }}
+          onCerrar={() => {
+            setModalCierre(true)
+            cargarArqueo();
+          }
+          }
+        />
+      )}
+      {/* === TIQUETERAS (con la caja abierta) y PEDIDOS WEB (solo si el negocio tiene activo el módulo Pedidos) === */}
+      {(cajaAbierta || pedidosWeb.disponible) && <Stack direction="row" justifyContent="flex-end" spacing={1.5} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
+        {cajaAbierta && comandasMeseros.disponible && (
+          <Badge badgeContent={comandasMeseros.comandas.filter((c) => c.estado === "ABIERTA").length} color="error">
+            <Button
+              variant="contained"
+              startIcon={<RoomServiceIcon />}
+              onClick={() => setOpenComandas(true)}
+              sx={{ borderRadius: 3, fontWeight: 700, textTransform: "none", px: 2.5, height: 44 }}
+            >
+              Comandas{comandasMeseros.comandas.length ? ` · ${comandasMeseros.comandas.length}` : ""}
+            </Button>
+          </Badge>
+        )}
+        {cajaAbierta && (
+          <Button
+            variant="outlined"
+            startIcon={<ConfirmationNumberIcon />}
+            onClick={() => setOpenTiqueteras(true)}
+            sx={{ borderRadius: 3, fontWeight: 700, textTransform: "none", px: 2.5, height: 44 }}
+          >
+            Tiqueteras
+          </Button>
+        )}
+        {pedidosWeb.disponible && <Badge badgeContent={pedidosWeb.porConfirmar} color="error" overlap="rectangular">
           <Button
             variant="contained"
             startIcon={<ReceiptLongIcon />}
@@ -557,29 +647,9 @@ export const CajeroDashboard: React.FC = () => {
           >
             {pedidosWeb.porConfirmar > 0 ? `${pedidosWeb.porConfirmar} pedido(s) por confirmar` : "Pedidos web"}{pedidosWeb.pedidos.length ? ` · ${pedidosWeb.pedidos.length} en curso` : ""}
           </Button>
-        </Badge>
+        </Badge>}
       </Stack>}
 
-      {/* === PANEL SUPERIOR DE CAJA === */}
-      {cajaAbierta && (
-        <CajaPanel
-          showStats={showStats}
-          cajaAbierta={cajaAbierta}
-          caja={caja}
-          formatCOP={formatCOP}
-          onVentas={() => setOpenVentasDetalles(true)}
-          onEgresos={() => setOpenEgresos(true)}
-          onArqueo={() => {
-            setModalArqueo(true);
-            cargarArqueo();
-          }}
-          onCerrar={() => {
-            setModalCierre(true)
-            cargarArqueo();
-          }
-          }
-        />
-      )}
       <Divider
         sx={{
           my: 2,
@@ -635,6 +705,8 @@ export const CajeroDashboard: React.FC = () => {
               }}
             >
               <Mesas
+                abrirMesaId={abrirMesaId}
+                onAbierta={() => setAbrirMesaId(null)}
                 idUsuario={Number(idUsuario) || 0}
                 id_negocio={Number(id_negocio) || 0}
                 mesas={mesas}
@@ -845,9 +917,20 @@ export const CajeroDashboard: React.FC = () => {
         <DialogActions
           sx={{
             justifyContent: "center",
-            pb: 3
+            pb: 3,
+            gap: 1,
           }}
         >
+          {ventaPayload?.pagada && ventaPayload?.id_venta && ventaPayload?.pref_factura !== "nunca" && (
+            <Button
+              variant="outlined"
+              startIcon={<ReceiptLongIcon />}
+              onClick={() => { const id = ventaPayload.id_venta; setOpenVentaRegistrada(false); imprimirFacturas([id]); }}
+              sx={{ borderRadius: 3, px: 3, py: 1, textTransform: "none", fontWeight: "bold" }}
+            >
+              {ventaPayload.pref_factura === "siempre" ? "Reimprimir factura" : "Imprimir factura"}
+            </Button>
+          )}
           <Button
             variant="contained"
             onClick={() => setOpenVentaRegistrada(false)}
@@ -902,6 +985,23 @@ export const CajeroDashboard: React.FC = () => {
           <PanelPedidosCaja datos={pedidosWeb} cajaAbierta={cajaAbierta} onAviso={(m) => toastr.success(m)} onCerrar={() => setOpenPedidos(false)} />
         </DialogContent>
       </Dialog>
+
+      <Dialog open={openComandas} onClose={() => setOpenComandas(false)} fullScreen={isMobile} fullWidth maxWidth="md"
+        PaperProps={{ sx: { borderRadius: isMobile ? 0 : 4, bgcolor: "#F8FAFC" } }}>
+        <DialogContent sx={{ p: { xs: 2, md: 3 } }}>
+          <PanelComandasCaja comandas={comandasMeseros.comandas} error={comandasMeseros.error} recarga={comandasMeseros.recarga}
+            onCerrar={() => setOpenComandas(false)}
+            onCobrar={(c) => { setOpenComandas(false); setMesaSeleccionada(null); closeCategoria(); setAbrirMesaId(c.id_mesa); }} />
+        </DialogContent>
+      </Dialog>
+      <TiqueterasCajaDialog open={openTiqueteras} onClose={() => setOpenTiqueteras(false)} onVendida={checkCaja} />
+      <PagoTiqueteraDialog
+        open={!!pagoTiquetera}
+        venta={pagoTiquetera?.venta}
+        busquedaInicial={pagoTiquetera?.busqueda}
+        onClose={() => setPagoTiquetera(null)}
+        onExito={pagadoConTiquetera}
+      />
     </Box>
   );
 };

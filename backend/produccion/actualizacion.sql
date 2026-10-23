@@ -1,7 +1,7 @@
 -- =====================================================================
 -- ACTUALIZACIÓN DE LA BASE DE DATOS (producción)
--- Generado: 2026-10-20 con node scripts/armar-produccion.js (no editar a mano)
--- Migraciones: 001_tienda_pedidos, 002_sitio_negocios, 003_tipos_negocio, 004_inventario, 005_whatsapp, 006_ficha_producto, 007_integraciones, 008_impresion
+-- Generado: 2026-10-22 con node scripts/armar-produccion.js (no editar a mano)
+-- Migraciones: 001_tienda_pedidos, 002_sitio_negocios, 003_tipos_negocio, 004_inventario, 005_whatsapp, 006_ficha_producto, 007_integraciones, 008_impresion, 009_finanzas, 010_finanzas_en_ventas, 011_tiqueteras, 012_meseros_comandas, 013_pago_dividido, 014_configuracion, 015_factura_al_cobrar, 016_publicidad
 --
 -- Uso: sudo -u postgres psql -d adminbusiness -f actualizacion.sql
 --
@@ -712,6 +712,906 @@ COMMENT ON TABLE public.negocios_impresion IS 'Formato de tickets y control del 
 INSERT INTO public.schema_migraciones (nombre) VALUES ('008_impresion');
 \else
 \echo '-- 008_impresion: ya estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 009_finanzas (up)
+-- ######################################################################
+SELECT NOT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '009_finanzas') AS pendiente,
+       (to_regclass('public.fin_gastos') IS NOT NULL) AS existe \gset
+\if :pendiente
+\if :existe
+\echo '-- 009_finanzas: sus cambios ya están en la base (aplicada antes), solo se registra'
+\else
+\echo '>> Aplicando 009_finanzas'
+-- =====================================================================
+-- 009 · Gestión financiera: costos fijos y variables, servicios, recurrentes,
+--       pagos, presupuestos, alertas, auditoría y costo histórico.
+-- Aplicar:  node scripts/migrar.js up 009_finanzas
+-- Revertir: node scripts/migrar.js down 009_finanzas
+-- Solo agrega tablas y columnas. Las ventas existentes reciben un costo
+-- ESTIMADO (con los costos actuales) marcado como tal.
+-- Diseño: docs/GESTION_FINANCIERA_DISENO.md
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- Módulo del menú (se activa por negocio en Admin > Negocios > módulos)
+-- ---------------------------------------------------------------------
+INSERT INTO public.app_modulos (url, nombre, icono, orden, activo, modulo_sistema)
+SELECT 'finanzas', 'Finanzas', 'AccountBalanceIcon', 12, true, false
+WHERE NOT EXISTS (SELECT 1 FROM public.app_modulos WHERE url = 'finanzas');
+
+-- ---------------------------------------------------------------------
+-- Categorías de costos y gastos. id_negocio NULL = del sistema (para todos).
+-- grupo: FIJO · VARIABLE · SERVICIO · FUNCIONAMIENTO · NOMINA · NO_OPERATIVO
+-- NO_OPERATIVO (movimientos de base, retiros, préstamos) nunca cuenta como gasto.
+-- palabras: para sugerir la categoría de un egreso de caja por su descripción.
+-- ---------------------------------------------------------------------
+CREATE TABLE public.fin_categorias (
+    id serial PRIMARY KEY,
+    id_negocio integer REFERENCES public.negocios(id) ON DELETE CASCADE,
+    codigo character varying(40) NOT NULL,
+    nombre character varying(80) NOT NULL,
+    grupo character varying(20) NOT NULL CHECK (grupo IN ('FIJO', 'VARIABLE', 'SERVICIO', 'FUNCIONAMIENTO', 'NOMINA', 'NO_OPERATIVO')),
+    palabras text[] NOT NULL DEFAULT '{}',
+    orden smallint NOT NULL DEFAULT 100,
+    activo boolean NOT NULL DEFAULT true
+);
+CREATE UNIQUE INDEX uq_fin_categorias ON public.fin_categorias (COALESCE(id_negocio, 0), codigo);
+
+INSERT INTO public.fin_categorias (codigo, nombre, grupo, palabras, orden) VALUES
+  ('arriendo', 'Arriendo del local', 'FIJO', '{arriendo,alquiler,canon}', 10),
+  ('nomina', 'Nómina y salarios', 'NOMINA', '{nomina,nómina,salario,sueldo,quincena,pago de personal,personal}', 11),
+  ('seguridad_social', 'Seguridad social y prestaciones', 'NOMINA', '{seguridad social,eps,pension,pensión,arl,caja de compensacion,prima,cesantias,cesantías,vacaciones,liquidacion,liquidación}', 12),
+  ('software', 'Software, licencias y suscripciones', 'FIJO', '{software,licencia,suscripcion,suscripción,hosting,dominio,aws}', 13),
+  ('seguros', 'Seguros', 'FIJO', '{seguro,poliza,póliza}', 14),
+  ('servicios_contratados', 'Servicios contratados', 'FIJO', '{servicio contratado,outsourcing,vigilancia}', 15),
+  ('mantenimiento_periodico', 'Mantenimiento periódico', 'FIJO', '{mantenimiento mensual,mantenimiento periodico}', 16),
+  ('honorarios', 'Honorarios contables y profesionales', 'FIJO', '{contador,contadora,honorarios,asesoria,asesoría}', 17),
+  ('admin_otros', 'Otros gastos administrativos', 'FIJO', '{papeleria,papelería,administrativo}', 19),
+  ('materia_prima', 'Materias primas e ingredientes', 'VARIABLE', '{leche,huevo,huevos,arroz,harina,azucar,azúcar,queso,pan,cafe,café,mercado,fritos,arepa,arepas,frijol,lenteja,papa,platano,plátano,maiz,maíz,mantequilla,chocolate}', 30),
+  ('carnes', 'Carnes, pollo y pescado', 'VARIABLE', '{pollo,carne,res,cerdo,pescado,chorizo,salchicha,costilla,chicharron,chicharrón}', 31),
+  ('verduras', 'Verduras y frutas', 'VARIABLE', '{verdura,verduras,fruta,frutas,tomate,cebolla,cilantro,aguacate,limon,limón,naranja,lulo,mora}', 32),
+  ('aceites_condimentos', 'Aceites, condimentos y preparación', 'VARIABLE', '{aceite,sal,condimento,salsa,especias,vinagre,margarina}', 33),
+  ('empaques', 'Empaques y desechables', 'VARIABLE', '{empaque,icopor,bolsa,bolsas,servilleta,servilletas,desechable,desechables,vaso,vasos,domicilio caja,papel aluminio,vinipel}', 34),
+  ('bebidas', 'Bebidas para la venta', 'VARIABLE', '{gaseosa,gaseosas,coca,cocacola,agua en botella,jugo hit,cerveza,postobon,postobón}', 35),
+  ('comisiones', 'Comisiones de plataformas y medios de pago', 'VARIABLE', '{comision,comisión,datafono,datáfono,rappi,wompi}', 36),
+  ('transporte', 'Transporte y domicilios', 'VARIABLE', '{transporte,taxi,domiciliario,flete,gasolina,mototaxi}', 37),
+  ('mermas', 'Mermas y desperdicios', 'VARIABLE', '{merma,desperdicio,daño,dañado,vencido}', 38),
+  ('energia', 'Energía eléctrica', 'SERVICIO', '{luz,energia,energía,cedenar}', 50),
+  ('agua', 'Agua y alcantarillado', 'SERVICIO', '{agua,acueducto,alcantarillado,empopasto}', 51),
+  ('gas', 'Gas', 'SERVICIO', '{gas,pipeta,cilindro}', 52),
+  ('internet', 'Internet', 'SERVICIO', '{internet,wifi,fibra}', 53),
+  ('telefonia', 'Telefonía', 'SERVICIO', '{telefono,teléfono,celular,recarga,plan movil,plan móvil}', 54),
+  ('residuos', 'Recolección de residuos', 'SERVICIO', '{basura,aseo,residuos,emas}', 55),
+  ('mantenimiento_equipos', 'Mantenimiento de equipos', 'FUNCIONAMIENTO', '{mantenimiento,tecnico,técnico,nevera,estufa,horno,freidora}', 70),
+  ('reparaciones', 'Reparaciones', 'FUNCIONAMIENTO', '{reparacion,reparación,arreglo,repuesto}', 71),
+  ('limpieza', 'Limpieza y desinfección', 'FUNCIONAMIENTO', '{limpieza,jabon,jabón,cloro,detergente,desinfectante,escoba,trapero}', 72),
+  ('plagas', 'Control de plagas', 'FUNCIONAMIENTO', '{fumigacion,fumigación,plagas}', 73),
+  ('funcionamiento_otros', 'Otros gastos de funcionamiento', 'FUNCIONAMIENTO', '{}', 79),
+  ('base_caja', 'Movimiento de base o traslado entre cajas', 'NO_OPERATIVO', '{base,aumento de base,traslado,cambio,sencillo,consignacion,consignación}', 90),
+  ('retiro_socios', 'Retiros de los dueños', 'NO_OPERATIVO', '{retiro,socio,dueño,dueno}', 91),
+  ('prestamos', 'Préstamos y abonos a créditos', 'NO_OPERATIVO', '{prestamo,préstamo,credito,crédito,abono,cuota}', 92);
+
+-- ---------------------------------------------------------------------
+-- Gastos recurrentes (plantillas). Se proyectan sin crear registros;
+-- cada período se "causa" una sola vez (UNIQUE en fin_gastos).
+-- ---------------------------------------------------------------------
+CREATE TABLE public.fin_recurrentes (
+    id serial PRIMARY KEY,
+    id_negocio integer NOT NULL REFERENCES public.negocios(id) ON DELETE CASCADE,
+    id_categoria integer NOT NULL REFERENCES public.fin_categorias(id),
+    concepto character varying(120) NOT NULL,
+    valor_estimado numeric(14,2) NOT NULL CHECK (valor_estimado >= 0),
+    periodicidad character varying(12) NOT NULL CHECK (periodicidad IN ('MENSUAL', 'BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL')),
+    dia_vencimiento smallint NOT NULL DEFAULT 5 CHECK (dia_vencimiento BETWEEN 1 AND 28),
+    fecha_inicio date NOT NULL,
+    fecha_fin date CHECK (fecha_fin IS NULL OR fecha_fin >= fecha_inicio),
+    id_proveedor integer REFERENCES public.personas(id) ON DELETE SET NULL,
+    beneficiario character varying(120),
+    observacion text,
+    activo boolean NOT NULL DEFAULT true,
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    updated_at timestamp without time zone NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_fin_recurrentes_negocio ON public.fin_recurrentes (id_negocio) WHERE activo;
+
+-- ---------------------------------------------------------------------
+-- Gastos causados (obligaciones): fijos, servicios, variables y nómina.
+-- periodo = primer día del mes al que corresponde el gasto.
+-- ---------------------------------------------------------------------
+CREATE TABLE public.fin_gastos (
+    id serial PRIMARY KEY,
+    id_negocio integer NOT NULL REFERENCES public.negocios(id) ON DELETE CASCADE,
+    id_categoria integer NOT NULL REFERENCES public.fin_categorias(id),
+    id_recurrente integer REFERENCES public.fin_recurrentes(id) ON DELETE SET NULL,
+    concepto character varying(160) NOT NULL,
+    valor numeric(14,2) NOT NULL CHECK (valor >= 0),
+    saldo numeric(14,2) NOT NULL CHECK (saldo >= 0),
+    periodo date NOT NULL CHECK (periodo = date_trunc('month', periodo)::date),
+    fecha_emision date,
+    fecha_vencimiento date,
+    estado character varying(10) NOT NULL DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'PARCIAL', 'PAGADO', 'ANULADO')),
+    id_proveedor integer REFERENCES public.personas(id) ON DELETE SET NULL,
+    beneficiario character varying(120),
+    numero_documento character varying(60),
+    -- Servicios públicos (opcionales; sin ellos solo se compara el valor facturado)
+    consumo numeric(14,3),
+    unidad_consumo character varying(12),
+    lectura_anterior numeric(14,3),
+    lectura_actual numeric(14,3),
+    soporte_url character varying(500),
+    observacion text,
+    id_usuario integer,
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+    CHECK (saldo <= valor)
+);
+CREATE UNIQUE INDEX uq_fin_gastos_recurrente ON public.fin_gastos (id_recurrente, periodo) WHERE id_recurrente IS NOT NULL AND estado <> 'ANULADO';
+CREATE INDEX idx_fin_gastos_negocio_periodo ON public.fin_gastos (id_negocio, periodo);
+CREATE INDEX idx_fin_gastos_pendientes ON public.fin_gastos (id_negocio, fecha_vencimiento) WHERE estado IN ('PENDIENTE', 'PARCIAL');
+
+-- ---------------------------------------------------------------------
+-- Pagos de gastos. Si el dinero salió de la caja, se vincula al egreso
+-- (id_egreso) y el flujo de caja cuenta el egreso una sola vez.
+-- ---------------------------------------------------------------------
+CREATE TABLE public.fin_pagos (
+    id serial PRIMARY KEY,
+    id_negocio integer NOT NULL REFERENCES public.negocios(id) ON DELETE CASCADE,
+    id_gasto integer NOT NULL REFERENCES public.fin_gastos(id) ON DELETE CASCADE,
+    id_egreso integer REFERENCES public.egresos(id) ON DELETE SET NULL,
+    fecha date NOT NULL,
+    valor numeric(14,2) NOT NULL CHECK (valor > 0),
+    medio character varying(30) NOT NULL DEFAULT 'TRANSFERENCIA',
+    referencia character varying(80),
+    soporte_url character varying(500),
+    id_usuario integer,
+    anulado boolean NOT NULL DEFAULT false,
+    created_at timestamp without time zone NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_fin_pagos_negocio_fecha ON public.fin_pagos (id_negocio, fecha) WHERE NOT anulado;
+CREATE UNIQUE INDEX uq_fin_pagos_egreso ON public.fin_pagos (id_egreso) WHERE id_egreso IS NOT NULL AND NOT anulado;
+
+-- ---------------------------------------------------------------------
+-- Presupuestos y metas por mes (VENTAS = meta de ventas; GASTO = tope)
+-- ---------------------------------------------------------------------
+CREATE TABLE public.fin_presupuestos (
+    id serial PRIMARY KEY,
+    id_negocio integer NOT NULL REFERENCES public.negocios(id) ON DELETE CASCADE,
+    periodo date NOT NULL CHECK (periodo = date_trunc('month', periodo)::date),
+    tipo character varying(10) NOT NULL CHECK (tipo IN ('VENTAS', 'GASTO', 'MARGEN')),
+    id_categoria integer REFERENCES public.fin_categorias(id),
+    valor numeric(14,2) NOT NULL CHECK (valor >= 0),
+    updated_at timestamp without time zone NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX uq_fin_presupuestos ON public.fin_presupuestos (id_negocio, periodo, tipo, COALESCE(id_categoria, 0));
+
+-- Alertas configurables (umbral según el tipo)
+CREATE TABLE public.fin_alertas (
+    id_negocio integer NOT NULL REFERENCES public.negocios(id) ON DELETE CASCADE,
+    tipo character varying(20) NOT NULL CHECK (tipo IN ('VENCIMIENTO_DIAS', 'DESVIO_PRESUPUESTO_PCT', 'MARGEN_MINIMO_PCT', 'GASTO_ALTO_PCT')),
+    valor numeric(10,2) NOT NULL,
+    activo boolean NOT NULL DEFAULT true,
+    PRIMARY KEY (id_negocio, tipo)
+);
+
+-- Auditoría de cambios financieros
+CREATE TABLE public.fin_auditoria (
+    id bigserial PRIMARY KEY,
+    id_negocio integer NOT NULL,
+    tabla character varying(40) NOT NULL,
+    id_registro bigint,
+    accion character varying(20) NOT NULL,
+    antes jsonb,
+    despues jsonb,
+    id_usuario integer,
+    created_at timestamp without time zone NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_fin_auditoria ON public.fin_auditoria (id_negocio, tabla, id_registro);
+
+-- Historial de costo de cada insumo (las compras viejas no cambian)
+CREATE TABLE public.inventario_costos (
+    id bigserial PRIMARY KEY,
+    inventario_id integer NOT NULL REFERENCES public.inventario(id) ON DELETE CASCADE,
+    costo_anterior numeric(14,4),
+    costo_nuevo numeric(14,4) NOT NULL,
+    origen character varying(20) NOT NULL CHECK (origen IN ('COMPRA', 'AJUSTE', 'ANULACION')),
+    id_compra bigint,
+    id_usuario integer,
+    created_at timestamp without time zone NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_inventario_costos ON public.inventario_costos (inventario_id, created_at);
+
+-- ---------------------------------------------------------------------
+-- Columnas nuevas en tablas existentes
+-- ---------------------------------------------------------------------
+ALTER TABLE public.inventario_movimientos ADD COLUMN costo_unitario numeric(14,4);
+ALTER TABLE public.ventas_items
+    ADD COLUMN costo_unitario numeric(14,4),
+    ADD COLUMN costo_estimado boolean NOT NULL DEFAULT true;
+ALTER TABLE public.egresos
+    ADD COLUMN id_categoria integer REFERENCES public.fin_categorias(id),
+    ADD COLUMN categoria_confirmada boolean NOT NULL DEFAULT false;
+ALTER TABLE public.compras_items ADD COLUMN id_inventario integer REFERENCES public.inventario(id);
+ALTER TABLE public.compras_items ALTER COLUMN id_producto DROP NOT NULL;
+ALTER TABLE public.pagos_compras ADD COLUMN id_egreso integer REFERENCES public.egresos(id) ON DELETE SET NULL;
+CREATE INDEX idx_egresos_negocio_fecha ON public.egresos (id_negocio, fecha);
+CREATE INDEX idx_ventas_fecha ON public.ventas (fecha);
+
+-- ---------------------------------------------------------------------
+-- Costo de un producto hoy: receta completa (ingredientes × costo) →
+-- costo del insumo (producto final) → costo de referencia (estimado).
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.fin_costo_producto(p_id integer, OUT costo numeric, OUT estimado boolean)
+LANGUAGE plpgsql STABLE AS $$
+DECLARE
+  r record;
+  n_ing integer;
+  n_sin_costo integer;
+  c_receta numeric;
+BEGIN
+  costo := NULL;
+  estimado := true;
+  SELECT p.usa_receta, p.inventario_id, i.costo_unitario AS costo_insumo,
+         (SELECT pp.precio_costo FROM productos_precios pp WHERE pp.id_producto = p.id ORDER BY pp.id DESC LIMIT 1) AS precio_costo
+    INTO r
+  FROM productos p LEFT JOIN inventario i ON i.id = p.inventario_id
+  WHERE p.id = p_id;
+  IF NOT FOUND THEN RETURN; END IF;
+
+  IF r.usa_receta THEN
+    SELECT count(*), count(*) FILTER (WHERE COALESCE(i.costo_unitario, 0) <= 0), SUM(rc.cantidad * COALESCE(i.costo_unitario, 0))
+      INTO n_ing, n_sin_costo, c_receta
+    FROM recetas rc JOIN inventario i ON i.id = rc.inventario_id
+    WHERE rc.producto_id = p_id;
+    IF n_ing > 0 AND n_sin_costo = 0 THEN
+      costo := round(c_receta, 4); estimado := false; RETURN;
+    END IF;
+  ELSIF r.inventario_id IS NOT NULL AND COALESCE(r.costo_insumo, 0) > 0 THEN
+    costo := r.costo_insumo; estimado := false; RETURN;
+  END IF;
+
+  IF COALESCE(r.precio_costo, 0) > 0 THEN
+    costo := r.precio_costo; estimado := true;
+  END IF;
+END;
+$$;
+
+-- Al vender: se guarda el costo del momento (no cambia si luego cambian los costos)
+CREATE OR REPLACE FUNCTION public.fin_costo_venta_item() RETURNS trigger
+LANGUAGE plpgsql AS $$
+DECLARE c record;
+BEGIN
+  IF NEW.costo_unitario IS NULL THEN
+    SELECT * INTO c FROM public.fin_costo_producto(NEW.id_producto);
+    NEW.costo_unitario := c.costo;
+    NEW.costo_estimado := COALESCE(c.estimado, true);
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_fin_costo_venta_item BEFORE INSERT ON public.ventas_items
+  FOR EACH ROW EXECUTE FUNCTION public.fin_costo_venta_item();
+
+-- Movimientos de inventario con el costo del momento
+CREATE OR REPLACE FUNCTION public.fin_costo_movimiento() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.costo_unitario IS NULL THEN
+    SELECT costo_unitario INTO NEW.costo_unitario FROM public.inventario WHERE id = NEW.inventario_id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_fin_costo_movimiento BEFORE INSERT ON public.inventario_movimientos
+  FOR EACH ROW EXECUTE FUNCTION public.fin_costo_movimiento();
+
+-- Ventas anteriores: costo con los costos de hoy, marcado como ESTIMADO
+UPDATE public.ventas_items vi
+SET costo_unitario = c.costo, costo_estimado = true
+FROM (SELECT DISTINCT id_producto FROM public.ventas_items) d
+CROSS JOIN LATERAL public.fin_costo_producto(d.id_producto) c
+WHERE vi.id_producto = d.id_producto AND vi.costo_unitario IS NULL;
+
+\endif
+INSERT INTO public.schema_migraciones (nombre) VALUES ('009_finanzas');
+\else
+\echo '-- 009_finanzas: ya estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 010_finanzas_en_ventas (up)
+-- ######################################################################
+SELECT NOT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '010_finanzas_en_ventas') AS pendiente,
+       (NOT EXISTS (SELECT 1 FROM public.app_modulos WHERE url = 'finanzas' AND activo)) AS existe \gset
+\if :pendiente
+\if :existe
+\echo '-- 010_finanzas_en_ventas: sus cambios ya están en la base (aplicada antes), solo se registra'
+\else
+\echo '>> Aplicando 010_finanzas_en_ventas'
+-- =====================================================================
+-- 010 · Finanzas dentro del módulo Ventas
+-- Las pantallas de finanzas pasan a ser pestañas de Ventas: el menú aparte
+-- "Finanzas" se oculta. Los datos (gastos, pagos, metas…) no cambian.
+-- Aplicar:  node scripts/migrar.js up 010_finanzas_en_ventas
+-- Revertir: node scripts/migrar.js down 010_finanzas_en_ventas
+-- =====================================================================
+UPDATE public.app_modulos SET activo = false WHERE url = 'finanzas';
+
+\endif
+INSERT INTO public.schema_migraciones (nombre) VALUES ('010_finanzas_en_ventas');
+\else
+\echo '-- 010_finanzas_en_ventas: ya estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 011_tiqueteras (up)
+-- ######################################################################
+SELECT NOT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '011_tiqueteras') AS pendiente,
+       (to_regclass('public.tiqueteras') IS NOT NULL) AS existe \gset
+\if :pendiente
+\if :existe
+\echo '-- 011_tiqueteras: sus cambios ya están en la base (aplicada antes), solo se registra'
+\else
+\echo '>> Aplicando 011_tiqueteras'
+-- =====================================================================
+-- 011 · Tiqueteras de almuerzos (prepago) integradas con Ventas
+-- Aplicar:  node scripts/migrar.js up 011_tiqueteras
+-- Revertir: node scripts/migrar.js down 011_tiqueteras
+--
+-- Tratamiento financiero:
+--  · Vender una tiquetera = el cliente paga por adelantado: entra dinero a la
+--    caja (tiqueteras.metodo_pago, id_caja). NO es una venta de producto.
+--  · Consumir un almuerzo = venta normal cuyo pago es 'TIQUERERA' por el valor
+--    prepagado del almuerzo: es ingreso del período, pero NO dinero nuevo en caja.
+--  · Anular la venta reintegra el almuerzo (una sola vez, por trigger).
+-- =====================================================================
+
+-- Qué se puede pagar con tiquetera: por categoría (Almuerzos por defecto) con excepción por producto
+ALTER TABLE public.categorias ADD COLUMN tiquetera_elegible boolean NOT NULL DEFAULT false;
+ALTER TABLE public.productos ADD COLUMN tiquetera_elegible boolean;   -- NULL = lo que diga su categoría
+UPDATE public.categorias SET tiquetera_elegible = true WHERE nombre ILIKE '%almuerzo%';
+
+CREATE TABLE public.tiqueteras_tipos (
+    id serial PRIMARY KEY,
+    id_negocio integer NOT NULL REFERENCES public.negocios(id) ON DELETE CASCADE,
+    nombre character varying(60) NOT NULL,
+    almuerzos smallint NOT NULL CHECK (almuerzos > 0 AND almuerzos <= 200),
+    precio numeric(12,2) NOT NULL CHECK (precio > 0),
+    vigencia_dias smallint CHECK (vigencia_dias IS NULL OR vigencia_dias > 0),   -- NULL = sin vencimiento
+    activo boolean NOT NULL DEFAULT true,
+    created_at timestamp without time zone NOT NULL DEFAULT now()
+);
+
+CREATE TABLE public.tiqueteras (
+    id serial PRIMARY KEY,
+    id_negocio integer NOT NULL REFERENCES public.negocios(id) ON DELETE CASCADE,
+    codigo character varying(20) NOT NULL,
+    id_cliente integer NOT NULL REFERENCES public.personas(id),
+    id_tipo integer REFERENCES public.tiqueteras_tipos(id),
+    nombre_tipo character varying(60) NOT NULL,
+    almuerzos_total smallint NOT NULL CHECK (almuerzos_total > 0),
+    consumidos smallint NOT NULL DEFAULT 0,
+    valor_pagado numeric(12,2) NOT NULL CHECK (valor_pagado >= 0),
+    valor_almuerzo numeric(12,2) NOT NULL CHECK (valor_almuerzo >= 0),   -- valor_pagado / almuerzos_total
+    metodo_pago character varying(20) NOT NULL,
+    id_caja integer REFERENCES public.caja(id) ON DELETE SET NULL,      -- caja donde entró el dinero
+    fecha_compra timestamp with time zone NOT NULL DEFAULT now(),
+    fecha_vencimiento date,
+    estado character varying(10) NOT NULL DEFAULT 'ACTIVA' CHECK (estado IN ('ACTIVA', 'AGOTADA', 'ANULADA')),
+    token_portal character varying(40) NOT NULL UNIQUE,                  -- enlace del portal del cliente
+    id_usuario integer,
+    anulada_por integer,
+    anulada_en timestamp with time zone,
+    motivo_anulacion text,
+    CHECK (consumidos >= 0 AND consumidos <= almuerzos_total),
+    UNIQUE (id_negocio, codigo)
+);
+CREATE INDEX idx_tiqueteras_cliente ON public.tiqueteras (id_cliente);
+CREATE INDEX idx_tiqueteras_negocio_estado ON public.tiqueteras (id_negocio, estado);
+
+CREATE TABLE public.tiqueteras_consumos (
+    id serial PRIMARY KEY,
+    id_tiquetera integer NOT NULL REFERENCES public.tiqueteras(id),
+    id_venta bigint NOT NULL REFERENCES public.ventas(id),
+    id_venta_item bigint REFERENCES public.ventas_items(id) ON DELETE SET NULL,
+    id_producto integer NOT NULL REFERENCES public.productos(id),
+    cantidad smallint NOT NULL CHECK (cantidad > 0),
+    valor_almuerzo numeric(12,2) NOT NULL,
+    estado character varying(12) NOT NULL DEFAULT 'CONSUMIDO' CHECK (estado IN ('CONSUMIDO', 'REINTEGRADO')),
+    id_usuario integer,                         -- cajero que registró el consumo
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    reintegrado_en timestamp with time zone,
+    reintegrado_por integer,
+    motivo_reintegro text
+);
+CREATE INDEX idx_tiqueteras_consumos_tiq ON public.tiqueteras_consumos (id_tiquetera, created_at);
+CREATE INDEX idx_tiqueteras_consumos_venta ON public.tiqueteras_consumos (id_venta);
+
+-- Reintentos (doble clic, red): la misma clave devuelve el mismo resultado
+CREATE TABLE public.tiqueteras_idempotencia (
+    clave character varying(80) PRIMARY KEY,
+    id_negocio integer NOT NULL,
+    resultado jsonb,
+    created_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+-- Anular la venta reintegra sus almuerzos UNA vez; una venta anulada con
+-- consumos reintegrados no se puede reactivar (volvería a descontar).
+CREATE OR REPLACE FUNCTION public.tiqueteras_por_anulacion() RETURNS trigger
+LANGUAGE plpgsql AS $$
+DECLARE
+  r record;
+  quien integer := NULLIF(current_setting('app.id_usuario', true), '')::integer;
+BEGIN
+  IF NEW.estado = 'cancelado' AND OLD.estado IS DISTINCT FROM 'cancelado' THEN
+    FOR r IN
+      UPDATE tiqueteras_consumos SET estado = 'REINTEGRADO', reintegrado_en = now(), reintegrado_por = quien, motivo_reintegro = NEW.nota
+      WHERE id_venta = NEW.id AND estado = 'CONSUMIDO'
+      RETURNING id_tiquetera, cantidad
+    LOOP
+      UPDATE tiqueteras SET consumidos = consumidos - r.cantidad,
+             estado = CASE WHEN estado = 'AGOTADA' THEN 'ACTIVA' ELSE estado END
+      WHERE id = r.id_tiquetera;
+    END LOOP;
+  ELSIF OLD.estado = 'cancelado' AND NEW.estado IS DISTINCT FROM 'cancelado'
+        AND EXISTS (SELECT 1 FROM tiqueteras_consumos WHERE id_venta = NEW.id) THEN
+    RAISE EXCEPTION 'La venta % fue pagada con tiquetera y está anulada: no se puede reactivar', NEW.numero_factura;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_tiqueteras_anulacion AFTER UPDATE OF estado ON public.ventas
+  FOR EACH ROW EXECUTE FUNCTION public.tiqueteras_por_anulacion();
+
+\endif
+INSERT INTO public.schema_migraciones (nombre) VALUES ('011_tiqueteras');
+\else
+\echo '-- 011_tiqueteras: ya estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 012_meseros_comandas (up)
+-- ######################################################################
+SELECT NOT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '012_meseros_comandas') AS pendiente,
+       (to_regclass('public.comandas') IS NOT NULL) AS existe \gset
+\if :pendiente
+\if :existe
+\echo '-- 012_meseros_comandas: sus cambios ya están en la base (aplicada antes), solo se registra'
+\else
+\echo '>> Aplicando 012_meseros_comandas'
+-- =====================================================================
+-- 012 · Meseros, mesas, comandas y permisos por acción
+-- Aplicar:  node scripts/migrar.js up 012_meseros_comandas
+-- Revertir: node scripts/migrar.js down 012_meseros_comandas
+--
+-- Compatibilidad: no cambia el acceso de nadie. Los usuarios SIN perfil siguen
+-- como hoy (app_usuario_modulos: todo el módulo asignado). Con un perfil, solo
+-- las acciones que el perfil tenga. Los perfiles por defecto (Administrador,
+-- Cajero, Mesero) los crea el sistema al abrir "Módulos y permisos".
+-- =====================================================================
+
+-- ---------- Catálogo de módulos (se amplía la tabla existente) ----------
+ALTER TABLE public.app_modulos ADD COLUMN descripcion character varying(255);
+ALTER TABLE public.app_modulos ADD COLUMN grupo character varying(40);
+
+INSERT INTO public.app_modulos (url, nombre, icono, orden, activo, modulo_sistema)
+SELECT v.url, v.nombre, v.icono, v.orden, true, false
+FROM (VALUES
+  ('meseros',  'Meseros',            'RoomServiceIcon',        9),
+  ('mesas',    'Mesas',              'TableRestaurantIcon',    9),
+  ('permisos', 'Módulos y permisos', 'AdminPanelSettingsIcon', 2)
+) AS v(url, nombre, icono, orden)
+WHERE NOT EXISTS (SELECT 1 FROM public.app_modulos m WHERE m.url = v.url);
+
+UPDATE public.app_modulos m SET descripcion = v.d, grupo = v.g
+FROM (VALUES
+  ('home',       'Inicio del panel',                                         'General'),
+  ('negocios',   'Negocios, sitio web, integraciones e impresión (sistema)', 'Sistema'),
+  ('usuarios',   'Usuarios del negocio y sus módulos',                       'Administración'),
+  ('permisos',   'Perfiles, permisos por acción y auditoría',                'Administración'),
+  ('categorias', 'Categorías y productos (carta)',                            'Catálogo'),
+  ('ventas',     'Reportes de ventas, finanzas y tiqueteras',                'Ventas'),
+  ('cajero',     'Caja: cobro, mesas, egresos y cierre',                     'Ventas'),
+  ('pedidos',    'Pedidos de la tienda web',                                 'Ventas'),
+  ('meseros',    'Toma de pedidos en mesa (comandas)',                       'Restaurante'),
+  ('mesas',      'Gestión de las mesas del restaurante',                     'Restaurante'),
+  ('inventario', 'Inventario e insumos',                                     'Operación'),
+  ('compras',    'Compras a proveedores',                                    'Operación'),
+  ('activos',    'Activos del negocio',                                      'Operación'),
+  ('finanzas',   'Finanzas (integradas en Ventas)',                          'Ventas')
+) AS v(url, d, g)
+WHERE m.url = v.url AND m.descripcion IS NULL;
+
+-- "Usuarios" pasa a ser "Configuración usuarios" (incluye Módulos y permisos); se respeta si alguien lo renombró
+UPDATE public.app_modulos SET nombre = 'Configuración usuarios', icono = 'ManageAccountsIcon'
+WHERE url = 'usuarios' AND nombre = 'Usuarios';
+
+-- ---------- Acciones por módulo ----------
+CREATE TABLE public.app_modulos_acciones (
+    id serial PRIMARY KEY,
+    id_modulo integer NOT NULL REFERENCES public.app_modulos(id) ON DELETE CASCADE,
+    codigo character varying(30) NOT NULL,
+    nombre character varying(80) NOT NULL,
+    orden smallint NOT NULL DEFAULT 1,
+    UNIQUE (id_modulo, codigo)
+);
+
+INSERT INTO public.app_modulos_acciones (id_modulo, codigo, nombre, orden)
+SELECT m.id, v.codigo, v.nombre, v.orden
+FROM (VALUES
+  ('home',       'ver',          'Consultar', 1),
+  ('usuarios',   'ver',          'Consultar', 1),
+  ('usuarios',   'crear',        'Crear', 2),
+  ('usuarios',   'editar',       'Editar y asignar módulos', 3),
+  ('usuarios',   'eliminar',     'Eliminar', 4),
+  ('permisos',   'ver',          'Consultar', 1),
+  ('permisos',   'administrar',  'Administrar perfiles y permisos', 2),
+  ('categorias', 'ver',          'Gestionar carta', 1),
+  ('ventas',     'ver',          'Consultar reportes', 1),
+  ('cajero',     'ver',          'Consultar caja', 1),
+  ('cajero',     'abrir_caja',   'Abrir caja', 2),
+  ('cajero',     'cerrar_caja',  'Cerrar caja', 3),
+  ('cajero',     'cobrar',       'Vender y cobrar', 4),
+  ('cajero',     'anular',       'Anular facturas', 5),
+  ('cajero',     'egresos',      'Registrar egresos', 6),
+  ('pedidos',    'ver',          'Gestionar pedidos web', 1),
+  ('meseros',    'ver',          'Consultar mesas y comandas', 1),
+  ('meseros',    'crear',        'Crear comandas', 2),
+  ('meseros',    'adicionar',    'Agregar productos a una comanda', 3),
+  ('meseros',    'imprimir',     'Reimprimir comandas', 4),
+  ('meseros',    'anular',       'Anular comandas', 5),
+  ('meseros',    'todas',        'Atender comandas de otros meseros', 6),
+  ('mesas',      'ver',          'Consultar', 1),
+  ('mesas',      'crear',        'Crear', 2),
+  ('mesas',      'editar',       'Editar y liberar con motivo', 3),
+  ('mesas',      'desactivar',   'Activar / desactivar', 4),
+  ('inventario', 'ver',          'Gestionar inventario', 1),
+  ('compras',    'ver',          'Gestionar compras', 1),
+  ('activos',    'ver',          'Gestionar activos', 1),
+  ('finanzas',   'ver',          'Consultar finanzas', 1)
+) AS v(url, codigo, nombre, orden)
+JOIN public.app_modulos m ON m.url = v.url;
+
+-- ---------- Perfiles (roles del negocio) ----------
+CREATE TABLE public.app_perfiles (
+    id serial PRIMARY KEY,
+    id_negocio integer NOT NULL REFERENCES public.negocios(id) ON DELETE CASCADE,
+    nombre character varying(60) NOT NULL,
+    descripcion character varying(255),
+    es_admin boolean NOT NULL DEFAULT false,      -- máximo privilegio: todas las acciones, no se edita ni borra
+    activo boolean NOT NULL DEFAULT true,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    UNIQUE (id_negocio, nombre)
+);
+CREATE UNIQUE INDEX uq_app_perfiles_admin ON public.app_perfiles (id_negocio) WHERE es_admin;
+
+CREATE TABLE public.app_perfiles_permisos (
+    id_perfil integer NOT NULL REFERENCES public.app_perfiles(id) ON DELETE CASCADE,
+    id_accion integer NOT NULL REFERENCES public.app_modulos_acciones(id) ON DELETE CASCADE,
+    PRIMARY KEY (id_perfil, id_accion)
+);
+
+ALTER TABLE public.usuarios ADD COLUMN id_perfil integer REFERENCES public.app_perfiles(id) ON DELETE SET NULL;
+
+-- Auditoría de cambios administrativos (perfiles, permisos, módulos, mesas)
+CREATE TABLE public.app_auditoria (
+    id bigserial PRIMARY KEY,
+    id_negocio integer,
+    tabla character varying(40) NOT NULL,
+    id_registro bigint,
+    accion character varying(30) NOT NULL,
+    antes jsonb,
+    despues jsonb,
+    id_usuario integer,
+    created_at timestamp with time zone NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_app_auditoria ON public.app_auditoria (id_negocio, created_at DESC);
+
+-- ---------- Mesas: activar / desactivar ----------
+ALTER TABLE public.mesas ADD COLUMN activo boolean NOT NULL DEFAULT true;
+
+-- ---------- Comandas ----------
+CREATE TABLE public.comandas (
+    id serial PRIMARY KEY,
+    id_negocio integer NOT NULL REFERENCES public.negocios(id),
+    numero integer NOT NULL,                                  -- número legible por negocio
+    id_mesa integer REFERENCES public.mesas(id),
+    id_mesero integer NOT NULL REFERENCES public.usuarios(id),
+    nota text,
+    estado character varying(12) NOT NULL DEFAULT 'ABIERTA'
+      CHECK (estado IN ('ABIERTA', 'EN_COBRO', 'PAGADA', 'ANULADA')),
+    id_venta bigint UNIQUE REFERENCES public.ventas(id),     -- venta creada al pasar a cobro
+    id_cajero integer REFERENCES public.usuarios(id),         -- quien la pasó a cobro
+    en_cobro_en timestamp with time zone,
+    pagada_en timestamp with time zone,
+    anulada_en timestamp with time zone,
+    anulada_por integer REFERENCES public.usuarios(id),
+    motivo_anulacion text,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now(),
+    UNIQUE (id_negocio, numero)
+);
+-- Una sola comanda abierta (o en cobro) por mesa
+CREATE UNIQUE INDEX uq_comandas_mesa_abierta ON public.comandas (id_mesa) WHERE estado IN ('ABIERTA', 'EN_COBRO');
+CREATE INDEX idx_comandas_negocio_estado ON public.comandas (id_negocio, estado, created_at DESC);
+
+CREATE TABLE public.comandas_items (
+    id serial PRIMARY KEY,
+    id_comanda integer NOT NULL REFERENCES public.comandas(id) ON DELETE CASCADE,
+    tanda smallint NOT NULL DEFAULT 1,                        -- 1 = pedido inicial; 2, 3… = adiciones
+    id_producto integer NOT NULL REFERENCES public.productos(id),
+    nombre character varying(150) NOT NULL,                   -- como se pidió (por si cambia la carta)
+    cantidad smallint NOT NULL CHECK (cantidad > 0 AND cantidad <= 99),
+    precio_unitario numeric(12,2) NOT NULL CHECK (precio_unitario >= 0),   -- precio de la carta, lo pone el servidor
+    nota character varying(200),
+    id_usuario integer REFERENCES public.usuarios(id),
+    id_venta_item bigint REFERENCES public.ventas_items(id) ON DELETE SET NULL,
+    created_at timestamp with time zone NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_comandas_items ON public.comandas_items (id_comanda, tanda);
+
+-- Cada envío a la impresora: solo CONFIRMADA si el agente lo confirmó
+CREATE TABLE public.comandas_impresiones (
+    id serial PRIMARY KEY,
+    id_comanda integer NOT NULL REFERENCES public.comandas(id) ON DELETE CASCADE,
+    tanda smallint,                                           -- NULL = toda la comanda
+    tipo character varying(12) NOT NULL CHECK (tipo IN ('NUEVA', 'ADICION', 'REIMPRESION', 'REINTENTO', 'ANULACION')),
+    estado character varying(12) NOT NULL DEFAULT 'PENDIENTE' CHECK (estado IN ('PENDIENTE', 'ENVIADA', 'CONFIRMADA', 'ERROR')),
+    mensaje character varying(255),
+    id_usuario integer REFERENCES public.usuarios(id),
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    actualizado_en timestamp with time zone
+);
+CREATE INDEX idx_comandas_impresiones ON public.comandas_impresiones (id_comanda, created_at);
+
+CREATE TABLE public.comandas_historial (
+    id bigserial PRIMARY KEY,
+    id_comanda integer NOT NULL REFERENCES public.comandas(id) ON DELETE CASCADE,
+    evento character varying(30) NOT NULL,
+    detalle jsonb,
+    id_usuario integer,
+    created_at timestamp with time zone NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_comandas_historial ON public.comandas_historial (id_comanda, created_at);
+
+CREATE TABLE public.comandas_idempotencia (
+    clave character varying(80) PRIMARY KEY,
+    id_negocio integer NOT NULL,
+    resultado jsonb,
+    created_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+-- La comanda queda PAGADA solo cuando el pago de su venta se confirma (cualquier
+-- camino: cobro de mesa, tiquetera…) y ANULADA si se anula su venta.
+CREATE OR REPLACE FUNCTION public.comandas_por_pago() RETURNS trigger
+LANGUAGE plpgsql AS $$
+DECLARE c record;
+BEGIN
+  IF NEW.estado_pago AND NOT COALESCE(OLD.estado_pago, false) THEN
+    FOR c IN UPDATE comandas SET estado = 'PAGADA', pagada_en = now(), updated_at = now()
+             WHERE id_venta = NEW.id_venta AND estado = 'EN_COBRO' RETURNING id
+    LOOP
+      INSERT INTO comandas_historial (id_comanda, evento, detalle, id_usuario)
+      VALUES (c.id, 'PAGADA', jsonb_build_object('metodo_pago', NEW.metodo_pago), NULLIF(current_setting('app.id_usuario', true), '')::integer);
+    END LOOP;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_comandas_por_pago AFTER UPDATE OF estado_pago ON public.pagos
+  FOR EACH ROW EXECUTE FUNCTION public.comandas_por_pago();
+
+CREATE OR REPLACE FUNCTION public.comandas_por_anulacion() RETURNS trigger
+LANGUAGE plpgsql AS $$
+DECLARE c record;
+BEGIN
+  IF NEW.estado = 'cancelado' AND OLD.estado IS DISTINCT FROM 'cancelado' THEN
+    FOR c IN UPDATE comandas SET estado = 'ANULADA', anulada_en = now(), updated_at = now(),
+                    anulada_por = NULLIF(current_setting('app.id_usuario', true), '')::integer,
+                    motivo_anulacion = COALESCE(NEW.nota, 'Venta anulada')
+             WHERE id_venta = NEW.id AND estado IN ('EN_COBRO', 'PAGADA') RETURNING id
+    LOOP
+      INSERT INTO comandas_historial (id_comanda, evento, detalle, id_usuario)
+      VALUES (c.id, 'VENTA_ANULADA', jsonb_build_object('id_venta', NEW.id, 'factura', NEW.numero_factura), NULLIF(current_setting('app.id_usuario', true), '')::integer);
+    END LOOP;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER trg_comandas_por_anulacion AFTER UPDATE OF estado ON public.ventas
+  FOR EACH ROW EXECUTE FUNCTION public.comandas_por_anulacion();
+
+\endif
+INSERT INTO public.schema_migraciones (nombre) VALUES ('012_meseros_comandas');
+\else
+\echo '-- 012_meseros_comandas: ya estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 013_pago_dividido (up)
+-- ######################################################################
+SELECT NOT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '013_pago_dividido') AS pendiente,
+       (to_regclass('public.pagos_medios') IS NOT NULL) AS existe \gset
+\if :pendiente
+\if :existe
+\echo '-- 013_pago_dividido: sus cambios ya están en la base (aplicada antes), solo se registra'
+\else
+\echo '>> Aplicando 013_pago_dividido'
+-- =====================================================================
+-- 013 · Pago dividido (una cuenta pagada con varios medios)
+-- Aplicar:  node scripts/migrar.js up 013_pago_dividido
+-- Revertir: node scripts/migrar.js down 013_pago_dividido
+--
+-- La venta sigue teniendo un solo pago (pagos), con metodo_pago = 'MIXTO';
+-- el desglose (NEQUI 10.000 + EFECTIVO 14.000) va en pagos_medios.
+-- v_pagos_medios devuelve un renglón por medio: para los pagos de siempre, el
+-- mismo pago; para los mixtos, cada medio. Arqueo, cierre y flujo de caja suman
+-- por medio desde esta vista, así cada peso cuenta donde entró.
+-- =====================================================================
+CREATE TABLE public.pagos_medios (
+    id serial PRIMARY KEY,
+    id_pago bigint NOT NULL REFERENCES public.pagos(id) ON DELETE CASCADE,
+    metodo_pago character varying(20) NOT NULL CHECK (metodo_pago IN ('EFECTIVO', 'TARJETA', 'TRANSFERENCIA', 'NEQUI', 'DAVIPLATA')),
+    monto numeric(12,2) NOT NULL CHECK (monto > 0),
+    monto_recibido numeric(12,2),            -- solo efectivo: lo que entregó el cliente
+    cambio numeric(12,2),
+    created_at timestamp with time zone NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_pagos_medios_pago ON public.pagos_medios (id_pago);
+
+CREATE VIEW public.v_pagos_medios AS
+  SELECT pg.id AS id_pago, pg.id_venta, pg.estado_pago, pg.fecha, pm.metodo_pago, pm.monto AS monto_pagado
+  FROM public.pagos pg JOIN public.pagos_medios pm ON pm.id_pago = pg.id
+  UNION ALL
+  SELECT pg.id, pg.id_venta, pg.estado_pago, pg.fecha, pg.metodo_pago, pg.monto_pagado
+  FROM public.pagos pg
+  WHERE NOT EXISTS (SELECT 1 FROM public.pagos_medios pm WHERE pm.id_pago = pg.id);
+
+\endif
+INSERT INTO public.schema_migraciones (nombre) VALUES ('013_pago_dividido');
+\else
+\echo '-- 013_pago_dividido: ya estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 014_configuracion (up)
+-- ######################################################################
+SELECT NOT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '014_configuracion') AS pendiente,
+       (EXISTS (SELECT 1 FROM public.app_modulos WHERE url = 'negocio')) AS existe \gset
+\if :pendiente
+\if :existe
+\echo '-- 014_configuracion: sus cambios ya están en la base (aplicada antes), solo se registra'
+\else
+\echo '>> Aplicando 014_configuracion'
+-- =====================================================================
+-- 014 · Configuración del negocio para su administrador (con permiso)
+-- Aplicar:  node scripts/migrar.js up 014_configuracion
+-- Revertir: node scripts/migrar.js down 014_configuracion
+--
+-- Módulo "Mi negocio" (url 'negocio'): datos del negocio y su página web,
+-- editables por el propio negocio según permisos. La URL y el dominio siguen
+-- siendo de la administración del sistema. El menú "Configuración usuarios"
+-- pasa a "Configuración" (reúne usuarios, permisos, negocio y tiqueteras).
+-- =====================================================================
+INSERT INTO public.app_modulos (url, nombre, icono, orden, activo, modulo_sistema, descripcion, grupo)
+SELECT 'negocio', 'Mi negocio', 'StoreIcon', 2, true, false, 'Datos del negocio y su página web', 'Administración'
+WHERE NOT EXISTS (SELECT 1 FROM public.app_modulos WHERE url = 'negocio');
+
+INSERT INTO public.app_modulos_acciones (id_modulo, codigo, nombre, orden)
+SELECT m.id, v.codigo, v.nombre, v.orden
+FROM (VALUES ('ver', 'Consultar', 1), ('editar', 'Editar datos del negocio', 2), ('sitio', 'Editar la página web', 3)) AS v(codigo, nombre, orden)
+JOIN public.app_modulos m ON m.url = 'negocio'
+ON CONFLICT (id_modulo, codigo) DO NOTHING;
+
+-- Disponible donde ya se administran usuarios (cada usuario lo recibe por su perfil o asignación)
+INSERT INTO public.app_modulos_negocio (id_modulo, id_negocio, activo)
+SELECT (SELECT id FROM public.app_modulos WHERE url = 'negocio'), mn.id_negocio, true
+FROM public.app_modulos_negocio mn JOIN public.app_modulos m ON m.id = mn.id_modulo AND m.url = 'usuarios'
+WHERE mn.activo
+ON CONFLICT (id_modulo, id_negocio) DO NOTHING;
+
+UPDATE public.app_modulos SET nombre = 'Configuración', icono = 'SettingsIcon'
+WHERE url = 'usuarios' AND nombre IN ('Usuarios', 'Configuración usuarios');
+
+\endif
+INSERT INTO public.schema_migraciones (nombre) VALUES ('014_configuracion');
+\else
+\echo '-- 014_configuracion: ya estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 015_factura_al_cobrar (up)
+-- ######################################################################
+SELECT NOT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '015_factura_al_cobrar') AS pendiente,
+       (EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'negocios_impresion' AND column_name = 'factura_al_cobrar')) AS existe \gset
+\if :pendiente
+\if :existe
+\echo '-- 015_factura_al_cobrar: sus cambios ya están en la base (aplicada antes), solo se registra'
+\else
+\echo '>> Aplicando 015_factura_al_cobrar'
+-- =====================================================================
+-- 015 · Factura al cobrar (separada de la comanda) e impresión en Configuración
+-- Aplicar:  node scripts/migrar.js up 015_factura_al_cobrar
+-- Revertir: node scripts/migrar.js down 015_factura_al_cobrar
+--
+-- factura_al_cobrar: qué hace la caja cuando una cuenta queda pagada
+--   'preguntar' (por defecto): ofrece imprimir la factura
+--   'siempre': la imprime sola
+--   'nunca': no la ofrece (se puede imprimir después desde las ventas)
+-- Acción nueva negocio.impresion: el negocio configura su factura/ticket y su
+-- agente de impresión desde Configuración (antes solo la administración del sistema).
+-- =====================================================================
+ALTER TABLE public.negocios_impresion ADD COLUMN factura_al_cobrar character varying(10) NOT NULL DEFAULT 'preguntar'
+  CHECK (factura_al_cobrar IN ('preguntar', 'siempre', 'nunca'));
+
+INSERT INTO public.app_modulos_acciones (id_modulo, codigo, nombre, orden)
+SELECT id, 'impresion', 'Configurar factura, ticket e impresión', 4 FROM public.app_modulos WHERE url = 'negocio'
+ON CONFLICT (id_modulo, codigo) DO NOTHING;
+
+\endif
+INSERT INTO public.schema_migraciones (nombre) VALUES ('015_factura_al_cobrar');
+\else
+\echo '-- 015_factura_al_cobrar: ya estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 016_publicidad (up)
+-- ######################################################################
+SELECT NOT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '016_publicidad') AS pendiente,
+       (to_regclass('public.publicidades') IS NOT NULL) AS existe \gset
+\if :pendiente
+\if :existe
+\echo '-- 016_publicidad: sus cambios ya están en la base (aplicada antes), solo se registra'
+\else
+\echo '>> Aplicando 016_publicidad'
+-- =====================================================================
+-- 016 · Publicidad: piezas para estados de WhatsApp (menú del día y promociones)
+-- Aplicar:  node scripts/migrar.js up 016_publicidad
+-- Revertir: node scripts/migrar.js down 016_publicidad
+--
+-- Las imágenes se arman en el navegador (1080×1920) y se comparten o descargan;
+-- aquí solo se guardan los diseños para reutilizarlos.
+-- =====================================================================
+CREATE TABLE public.publicidades (
+    id serial PRIMARY KEY,
+    id_negocio integer NOT NULL REFERENCES public.negocios(id) ON DELETE CASCADE,
+    plantilla character varying(20) NOT NULL CHECK (plantilla IN ('menu', 'promo')),
+    nombre character varying(80) NOT NULL,
+    datos jsonb NOT NULL,
+    id_usuario integer REFERENCES public.usuarios(id) ON DELETE SET NULL,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_publicidades_negocio ON public.publicidades (id_negocio, updated_at DESC);
+
+INSERT INTO public.app_modulos (url, nombre, icono, orden, activo, modulo_sistema, descripcion, grupo)
+SELECT 'publicidad', 'Publicidad', 'CampaignIcon', 7, true, false, 'Menú del día y promociones para estados de WhatsApp', 'Ventas'
+WHERE NOT EXISTS (SELECT 1 FROM public.app_modulos WHERE url = 'publicidad');
+
+INSERT INTO public.app_modulos_acciones (id_modulo, codigo, nombre, orden)
+SELECT m.id, v.codigo, v.nombre, v.orden
+FROM (VALUES ('ver', 'Crear y descargar piezas', 1), ('guardar', 'Guardar y borrar diseños', 2)) AS v(codigo, nombre, orden)
+JOIN public.app_modulos m ON m.url = 'publicidad'
+ON CONFLICT (id_modulo, codigo) DO NOTHING;
+
+-- Disponible en los negocios que ya usan Ventas, y asignado a quienes administran usuarios
+INSERT INTO public.app_modulos_negocio (id_modulo, id_negocio, activo)
+SELECT (SELECT id FROM public.app_modulos WHERE url = 'publicidad'), mn.id_negocio, true
+FROM public.app_modulos_negocio mn JOIN public.app_modulos m ON m.id = mn.id_modulo AND m.url = 'ventas'
+WHERE mn.activo
+ON CONFLICT (id_modulo, id_negocio) DO NOTHING;
+
+INSERT INTO public.app_usuario_modulos (id_usuario, id_modulo_negocio_rol, activo)
+SELECT DISTINCT um.id_usuario, (SELECT id FROM public.app_modulos WHERE url = 'publicidad'), true
+FROM public.app_usuario_modulos um JOIN public.app_modulos m ON m.id = um.id_modulo_negocio_rol AND m.url = 'usuarios'
+WHERE um.activo
+ON CONFLICT (id_usuario, id_modulo_negocio_rol) DO NOTHING;
+
+\endif
+INSERT INTO public.schema_migraciones (nombre) VALUES ('016_publicidad');
+\else
+\echo '-- 016_publicidad: ya estaba aplicada, se omite'
 \endif
 
 COMMIT;

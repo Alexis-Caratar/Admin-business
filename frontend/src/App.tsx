@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import Tienda from "./pages/PublicComponents/tienda/Tienda";
 import EstadoPedido from "./pages/PublicComponents/tienda/EstadoPedido";
 import ProductoPagina from "./pages/PublicComponents/tienda/ProductoPagina";
+import PortalTiquetera from "./pages/PublicComponents/tiquetera/PortalTiquetera";
 
 const App: React.FC = () => {
   return (
@@ -21,6 +22,8 @@ const App: React.FC = () => {
         <Route path="/tienda" element={<Tienda />} />
         <Route path="/tienda/p/:slug" element={<ProductoPagina />} />
         <Route path="/tienda/pedido/:codigo/:token" element={<EstadoPedido />} />
+        {/* Portal del cliente de tiqueteras: por enlace/QR o buscando con código + documento */}
+        <Route path="/tiquetera/:token" element={<PortalTiquetera />} />
 
         {/* 🔥 RUTA PRINCIPAL ADMIN */}
         <Route
@@ -46,6 +49,7 @@ const App: React.FC = () => {
         <Route path="/:negocio" element={<Home />} />
         <Route path="/:negocio/tienda" element={<Tienda />} />
         <Route path="/:negocio/tienda/p/:slug" element={<ProductoPagina />} />
+        <Route path="/:negocio/tiquetera" element={<PortalTiquetera />} />
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />

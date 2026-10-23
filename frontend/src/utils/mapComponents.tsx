@@ -1,5 +1,4 @@
 import React from "react";
-import AdminUsuarios from "../pages/AdminComponents/Usuarios/AdminUsuarios";
 import AdminNegocios from "../pages/AdminComponents/Negocios/AdminNegocios";
 //import AdminProductos from "../pages/AdminComponents/Productos/AdminProductos";
 import  AdminInventario  from "../pages/AdminComponents/Inventario/AdminInventario";
@@ -9,10 +8,16 @@ import  CajeroDashboard  from "../pages/AdminComponents/Ventas/Cajero/CajeroDash
 import AdminCompras from "../pages/AdminComponents/Compras/AdminCompras";
 import HomeAdmin from "../pages/AdminComponents/HomeAdmin";
 import AdminPedidos from "../pages/AdminComponents/Pedidos/AdminPedidos";
+import AdminFinanzas from "../pages/AdminComponents/Finanzas/AdminFinanzas";
+import MeseroPanel from "../pages/AdminComponents/Meseros/MeseroPanel";
+import AdminMesas from "../pages/AdminComponents/Mesas/AdminMesas";
+import Configuracion from "../pages/AdminComponents/Permisos/Configuracion";
+import AdminPublicidad from "../pages/AdminComponents/Publicidad/AdminPublicidad";
 
 // Mapea componentes según el "codigo" que llega desde la BD
 export const componentMap: Record<string, React.FC> = {
-  usuarios: AdminUsuarios,
+  // Configuración: Mi negocio, Página web, Usuarios, Permisos y Tiqueteras en un solo lugar
+  usuarios: Configuracion,
   negocios: AdminNegocios,
   home: HomeAdmin,
  // productos: AdminProductos,
@@ -22,4 +27,10 @@ export const componentMap: Record<string, React.FC> = {
   cajero:CajeroDashboard,
   categorias: AdminCategorias,
   pedidos: AdminPedidos,
+  finanzas: AdminFinanzas,
+  meseros: MeseroPanel,
+  mesas: AdminMesas,
+  permisos: Configuracion,
+  negocio: Configuracion,
+  publicidad: AdminPublicidad,
 };

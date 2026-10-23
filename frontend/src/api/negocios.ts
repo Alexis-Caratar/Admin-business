@@ -184,6 +184,7 @@ export type ConfigImpresion = {
   ancho_caracteres: 32 | 42 | 48; encabezado: string | null; pie: string | null; mostrar_qr: boolean;
   qr_contenido: "tienda" | "factura" | "texto"; qr_texto: string | null; qr_leyenda: string | null;
   documento_consumidor: string; imprimir_comanda_al_vender: boolean; copias_comanda: number;
+  factura_al_cobrar: "preguntar" | "siempre" | "nunca";   // qué hace la caja con la factura al cobrar
 };
 export type AgenteConectado = {
   punto: string; protocolo: number; version: string | null; conectado_desde: string | null;

@@ -38,6 +38,8 @@ import SyncIcon from "@mui/icons-material/Sync";
 const DEFAULT_AVATAR =
   "https://e7.pngegg.com/pngimages/340/946/png-clipart-avatar-user-computer-icons-software-developer-avatar-child-face-thumbnail.png";
 
+// Módulos que se abren en la misma pantalla de Configuración (se muestra solo el primero)
+const GRUPO_CONFIG = ["usuarios", "permisos", "negocio"];
 const SIDEBAR_WIDTH = 240;
 const SIDEBAR_COLLAPSED = 90;
 
@@ -244,7 +246,12 @@ const AdminDashboard: React.FC = () => {
   }, [isSmallScreen]);
 
 
-  const ActiveComponent = modulo ? componentMap[modulo] : null;
+  // Solo los módulos del menú del usuario (permisos efectivos); escribir otra URL no abre la pantalla
+  const configElegido = menus.find((m) => m.url === "usuarios") ?? menus.find((m) => GRUPO_CONFIG.includes(m.url));
+  const menusVisibles = menus
+    .filter((m) => !GRUPO_CONFIG.includes(m.url) || m === configElegido)
+    .map((m) => (m === configElegido ? { ...m, nombre: "Configuración", icono: "SettingsIcon" } : m));
+  const ActiveComponent = modulo && !loading && menus.some((m) => m.url === modulo) ? componentMap[modulo] : null;
 
   const reconnectPrinter = () => {
     console.log("Reconectando...");
@@ -358,7 +365,8 @@ const AdminDashboard: React.FC = () => {
 
       {/* MENU */}
       <List sx={{ flex: 1 }}>
-        {menus.map((menu) => {
+        {/* Usuarios, Módulos y permisos y Mi negocio viven en Configuración: una sola entrada en el menú */}
+        {menusVisibles.map((menu) => {
           const selected = modulo === menu.url;
 
           return (

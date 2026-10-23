@@ -1,5 +1,6 @@
 // menusistema.service.js
 import { db } from "../config/db.js";
+import { SQL_PERFIL_PERMITE_MODULO } from "../middlewares/auth.middleware.js";
 export const listar = async (id_negocio, id_usuario) => {
   
   if(id_negocio !== "SISTEMA"){
@@ -15,6 +16,7 @@ export const listar = async (id_negocio, id_usuario) => {
             and mn.activo=true
               AND m.activo = true
             AND  um.activo = true 
+            AND EXISTS (SELECT 1 FROM usuarios u WHERE u.id = um.id_usuario AND u.id_negocio = mn.id_negocio AND ${SQL_PERFIL_PERMITE_MODULO})
             ORDER BY m.orden;
         `,
         [id_negocio, id_usuario]

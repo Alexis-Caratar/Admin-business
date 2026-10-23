@@ -290,7 +290,8 @@ const VentasDelDia: React.FC<Props> = ({ ventas, fecha,onCajaEliminada }) => {
 
     } catch (error) {
       console.error(error);
-      Swal.fire("Error", "No se pudo imprimir", "error");
+      const msg = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      Swal.fire("No se imprimió", msg ?? "No se pudo imprimir", msg ? "warning" : "error");
     }
   };
 
@@ -803,7 +804,7 @@ const cajasData = ventas
                         <Stack direction="row" alignItems="center" spacing={0.5}>
                           {getMetodoPagoIcon(venta.metodo_pago)}
                           <Typography fontSize={10} color="text.secondary">
-                            {venta.metodo_pago}
+                            {venta.detalle_pago ?? venta.metodo_pago}
                           </Typography>
                         </Stack>
 
@@ -1164,33 +1165,37 @@ const cajasData = ventas
             )}
           */}
 
-            {/*  IMPRESIONES COMANDA O FACTURA */}
-
-            {ventaSeleccionada?.estado_pago === false && (
-              <Button
-                fullWidth
-                startIcon={<PrintIcon />}
-                variant="contained"
-                color="primary"
-                sx={{ borderRadius: 3, fontWeight: 700 }}
-                onClick={() => imprimirFactura("comanda")}
-              >
-                Imprimir Comanda
-              </Button>
+            {/*  IMPRESIONES: pendiente → solo comanda; pagada → comanda o factura; anulada → nada */}
+            {ventaSeleccionada?.estado_venta !== "cancelado" ? (
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ width: "100%" }}>
+                <Button
+                  fullWidth
+                  startIcon={<PrintIcon />}
+                  variant={ventaSeleccionada?.estado_pago === true ? "outlined" : "contained"}
+                  color="primary"
+                  sx={{ borderRadius: 3, fontWeight: 700, textTransform: "none" }}
+                  onClick={() => imprimirFactura("comanda")}
+                >
+                  Imprimir comanda
+                </Button>
+                {ventaSeleccionada?.estado_pago === true && (
+                  <Button
+                    fullWidth
+                    startIcon={<ReceiptLongIcon />}
+                    variant="contained"
+                    color="primary"
+                    sx={{ borderRadius: 3, fontWeight: 700, textTransform: "none", background: "linear-gradient(135deg,#2563EB,#3B82F6)" }}
+                    onClick={() => imprimirFactura("factura")}
+                  >
+                    Imprimir factura
+                  </Button>
+                )}
+              </Stack>
+            ) : (
+              <Typography sx={{ width: "100%", textAlign: "center", fontSize: 13, color: "#64748B" }}>Factura anulada: no se imprime</Typography>
             )}
-
-            {ventaSeleccionada?.estado_pago === true && (
-              <Button
-                fullWidth
-                startIcon={<PrintIcon />}
-                variant="contained"
-                color="primary"
-                sx={{ borderRadius: 3, fontWeight: 700 }}
-                onClick={() => imprimirFactura("factura")}
-              >
-                Imprimir Factura
-              </Button>
-
+            {ventaSeleccionada?.estado_venta !== "cancelado" && ventaSeleccionada?.estado_pago !== true && (
+              <Typography sx={{ width: "100%", textAlign: "center", fontSize: 12, color: "#64748B" }}>La factura se imprime cuando la cuenta esté pagada</Typography>
             )}
 
 

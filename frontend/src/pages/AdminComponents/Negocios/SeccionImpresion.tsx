@@ -4,7 +4,7 @@
  * de consumidor final y comandas. También se genera el token del agente para
  * instalarlo en cualquier punto de venta y se ven los agentes conectados.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import {
   Alert, Box, Button, Chip, CircularProgress, Dialog, DialogContent, DialogTitle, FormControlLabel, IconButton, MenuItem, Stack, Switch, TextField, Tooltip, Typography,
 } from "@mui/material";
@@ -19,6 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Swal from "sweetalert2";
 
 import { guardarImpresion, obtenerImpresion, pruebaImpresion, tokenAgente } from "../../../api/negocios";
+import { impresionPropia } from "../../../api/miNegocio";
 import type { ConfigImpresion, ImpresionNegocio } from "../../../api/negocios";
 import { Tarjeta } from "./SeccionesSitio";
 
@@ -34,7 +35,11 @@ const campo = {
 
 const mensaje = (e: unknown) => (e as { response?: { data?: { error?: string; errores?: Record<string, string> } } })?.response?.data;
 
-export default function SeccionImpresion({ idNegocio }: { idNegocio: number | null }) {
+// propio: dentro de Configuración, sobre el negocio del usuario (endpoints /mi-negocio/impresion)
+export default function SeccionImpresion({ idNegocio, propio = false }: { idNegocio: number | null; propio?: boolean }) {
+  const api = useMemo(() => propio
+    ? { obtener: () => impresionPropia.obtener(), guardar: (c: Partial<ConfigImpresion>) => impresionPropia.guardar(c), token: () => impresionPropia.token(), prueba: (r: "factura" | "comanda") => impresionPropia.prueba(r) }
+    : { obtener: () => obtenerImpresion(idNegocio!), guardar: (c: Partial<ConfigImpresion>) => guardarImpresion(idNegocio!, c), token: () => tokenAgente(idNegocio!), prueba: (r: "factura" | "comanda") => pruebaImpresion(idNegocio!, r) }, [idNegocio, propio]);
   const [datos, setDatos] = useState<ImpresionNegocio | null>(null);
   const [c, setC] = useState<ConfigImpresion | null>(null);
   const [errores, setErrores] = useState<Record<string, string>>({});
@@ -44,10 +49,10 @@ export default function SeccionImpresion({ idNegocio }: { idNegocio: number | nu
   const [token, setToken] = useState<{ token: string; ws_url: string } | null>(null);
 
   const cargar = useCallback(async () => {
-    if (!idNegocio) return;
+    if (!idNegocio && !propio) return;
     setRefrescando(true);
     try {
-      const d = await obtenerImpresion(idNegocio);
+      const d = await api.obtener();
       setDatos(d);
       setC((actual) => actual ?? d.config);
     } catch (e) {
@@ -55,17 +60,17 @@ export default function SeccionImpresion({ idNegocio }: { idNegocio: number | nu
     } finally {
       setRefrescando(false);
     }
-  }, [idNegocio]);
+  }, [idNegocio, propio, api]);
 
   useEffect(() => {
-    if (!idNegocio) return;
+    if (!idNegocio && !propio) return;
     const t = window.setTimeout(cargar, 0);
     // Los agentes conectados se refrescan solos
     const i = window.setInterval(cargar, 20_000);
     return () => { window.clearTimeout(t); window.clearInterval(i); };
-  }, [idNegocio, cargar]);
+  }, [idNegocio, propio, cargar]);
 
-  if (!idNegocio) return <Alert severity="info">Guarda primero el negocio para configurar la impresión.</Alert>;
+  if (!idNegocio && !propio) return <Alert severity="info">Guarda primero el negocio para configurar la impresión.</Alert>;
   if (error && !datos) return <Alert severity="error">{error}</Alert>;
   if (!datos || !c) return <Box sx={{ display: "grid", placeItems: "center", py: 8 }}><CircularProgress /></Box>;
 
@@ -76,7 +81,7 @@ export default function SeccionImpresion({ idNegocio }: { idNegocio: number | nu
     setGuardando(true);
     setError(null);
     try {
-      const d = await guardarImpresion(idNegocio, c);
+      const d = await api.guardar(c);
       setDatos(d); setC(d.config); setErrores({});
       Swal.fire({ icon: "success", title: "Impresión guardada", text: "Los próximos tickets salen con este formato en todos los puntos de venta.", timer: 1800, showConfirmButton: false });
     } catch (e) {
@@ -96,7 +101,7 @@ export default function SeccionImpresion({ idNegocio }: { idNegocio: number | nu
     });
     if (!ok.isConfirmed) return;
     try {
-      setToken(await tokenAgente(idNegocio));
+      setToken(await api.token());
     } catch (e) {
       Swal.fire("Error", mensaje(e)?.error ?? "No se pudo generar el token", "error");
     }
@@ -104,7 +109,7 @@ export default function SeccionImpresion({ idNegocio }: { idNegocio: number | nu
 
   const probar = async (rol: "factura" | "comanda") => {
     try {
-      const r = await pruebaImpresion(idNegocio, rol);
+      const r = await api.prueba(rol);
       Swal.fire({ icon: r.ok ? "success" : "warning", title: r.ok ? "Prueba impresa" : "No se imprimió", text: r.mensaje });
     } catch (e) {
       Swal.fire("Error", mensaje(e)?.error ?? "No se pudo enviar la prueba", "error");
@@ -146,6 +151,13 @@ export default function SeccionImpresion({ idNegocio }: { idNegocio: number | nu
                 <TextField size="small" fullWidth label="Texto bajo el QR" value={c.qr_leyenda ?? ""} onChange={(e) => set("qr_leyenda", e.target.value)} sx={campo} />
               </>
             )}
+            <TextField select size="small" fullWidth label="Factura al cobrar" value={c.factura_al_cobrar ?? "preguntar"} sx={campo} {...err("factura_al_cobrar")}
+              onChange={(e) => set("factura_al_cobrar", e.target.value as ConfigImpresion["factura_al_cobrar"])}
+              helperText="La factura es aparte de la comanda: sale cuando la cuenta queda pagada">
+              <MenuItem value="preguntar">Preguntar al cobrar (opcional)</MenuItem>
+              <MenuItem value="siempre">Imprimir siempre al cobrar</MenuItem>
+              <MenuItem value="nunca">No imprimir (solo desde las ventas)</MenuItem>
+            </TextField>
             <FormControlLabel control={<Switch checked={c.imprimir_comanda_al_vender} onChange={(e) => set("imprimir_comanda_al_vender", e.target.checked)} />}
               label={<b>Imprimir la comanda al registrar cada venta</b>} />
             <TextField select size="small" label="Copias de cada comanda" value={c.copias_comanda} sx={{ ...campo, maxWidth: 220 }} onChange={(e) => set("copias_comanda", Number(e.target.value))}>

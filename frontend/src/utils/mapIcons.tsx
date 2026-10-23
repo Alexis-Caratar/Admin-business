@@ -8,6 +8,13 @@ import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import CategoryIcon from "@mui/icons-material/Category";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import RoomServiceIcon from "@mui/icons-material/RoomService";
+import TableRestaurantIcon from "@mui/icons-material/TableRestaurant";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import SettingsIcon from "@mui/icons-material/Settings";
+import CampaignIcon from "@mui/icons-material/Campaign";
 
 
 export const iconMap: Record<string, React.ReactNode> = {
@@ -20,5 +27,12 @@ export const iconMap: Record<string, React.ReactNode> = {
   CategoryIcon:<CategoryIcon/>,
   PointOfSaleIcon:<PointOfSaleIcon/>,
   ReceiptLongIcon:<ReceiptLongIcon/>,
+  AccountBalanceIcon:<AccountBalanceIcon/>,
+  RoomServiceIcon:<RoomServiceIcon/>,
+  TableRestaurantIcon:<TableRestaurantIcon/>,
+  AdminPanelSettingsIcon:<AdminPanelSettingsIcon/>,
+  ManageAccountsIcon:<ManageAccountsIcon/>,
+  SettingsIcon:<SettingsIcon/>,
+  CampaignIcon:<CampaignIcon/>,
   default: <MenuIcon />   // default
 };

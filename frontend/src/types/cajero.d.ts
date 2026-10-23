@@ -60,4 +60,11 @@ export interface Mesa {
   estado: "Disponible" | "Ocupada" | "Reservada"; // Ajusta según tus valores posibles
   estado_pago: string;
   fecha_creacion: string; // ISO string
+  // Estado real calculado por el servidor (comandas de meseros)
+  activo?: boolean;
+  estado_operativo?: "DISPONIBLE" | "CON_PEDIDO" | "PENDIENTE_PAGO" | "OCUPADA" | "RESERVADA";
+  id_comanda?: number | null;
+  numero_comanda?: number | null;
+  estado_comanda?: "ABIERTA" | "EN_COBRO" | null;
+  mesero?: string | null;
 }

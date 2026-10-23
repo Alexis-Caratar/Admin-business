@@ -27,6 +27,8 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PaymentIcon from "@mui/icons-material/Payment";
 import { motion, AnimatePresence } from "framer-motion";
+import PagoDividido from "../../../../../components/pagos/PagoDividido";
+import { estadoPago, lineasIniciales, paraEnviar, type LineaPago } from "../../../../../components/pagos/pagoDivididoUtil";
 import { CrearClienteModal } from "./CrearClienteModal";
 import type { Mesa } from "../../../../../types/cajero"; // ajusta la ruta
 import { Categorias } from "./Categorias";
@@ -59,7 +61,7 @@ type Props = {
   onSub: (id: number) => void;
   onFinalizar: (
     idCliente: number | null,
-    pago: {metodo_pago: string;monto_recibido: number | "";cambio: number;nota: string;}) => void;
+    pago: {metodo_pago: string;monto_recibido: number | "";cambio: number;nota: string;pagos?: { metodo_pago: string; monto: number; monto_recibido?: number }[]}) => void;
   mesaSeleccionada: Mesa | null;
   onClearMesa: () => void;
   categorias: any[];
@@ -104,6 +106,9 @@ export const CarritoMobile: React.FC<Props> = ({
   const [montoRecibido, setMontoRecibido] = useState<number>(0);
    const [nota, setNota] = useState("");
   const cambio = montoRecibido - total;
+  // Pago dividido (p. ej. Nequi + efectivo)
+  const [lineasPago, setLineasPago] = useState<LineaPago[]>([]);
+  useEffect(() => { if (metodoPago === "MIXTO") setLineasPago(lineasIniciales(total)); }, [metodoPago, total]);
   const trailingActions = (id: number) => (
     <TrailingActions>
       <SwipeAction destructive onClick={() => onRemove(id)}>
@@ -198,8 +203,9 @@ useEffect(() => {
     const pago = {
       metodo_pago: metodoPago,
       monto_recibido: montoRecibido,
-      cambio: Math.max(cambio, 0),
-      nota:nota
+      cambio: metodoPago === "MIXTO" ? estadoPago(lineasPago, total).cambio : Math.max(cambio, 0),
+      nota:nota,
+      ...(metodoPago === "MIXTO" ? { pagos: paraEnviar(lineasPago) } : {}),
     };
 
     onFinalizar(clienteSeleccionado ? clienteSeleccionado.id : null, pago);
@@ -680,19 +686,11 @@ useEffect(() => {
                     <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
                     <MenuItem value="NEQUI">📲 Nequi</MenuItem>
                     <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
-                    <MenuItem value="TIQUERERA" disabled={!clienteSeleccionado}>🎟️ Tiquetera</MenuItem>
-                      {(!clienteSeleccionado ||
-                                        clienteSeleccionado.identificacion?.toLowerCase().includes("22222222")) && (
-                                        <Typography
-                                          mt={1}
-                                          fontSize={12}
-                                          color="warning.main"
-                                          fontWeight={600}
-                                        >
-                                          ⚠️ Debes seleccionar un cliente válido para usar tiquetera
-                                        </Typography>
-                                      )}                 
+                    <MenuItem value="TIQUERERA">🎟️ Tiquetera (almuerzos prepagados)</MenuItem>
+                    <MenuItem value="MIXTO">🔀 Pago dividido (varios medios)</MenuItem>
                   </TextField>
+
+                  {metodoPago === "MIXTO" && <PagoDividido total={total} lineas={lineasPago} onChange={setLineasPago} />}
 
                   {/* MONTO RECIBIDO: mostrar vacío cuando es 0 */}
                   {metodoPago === "EFECTIVO" && (
@@ -754,7 +752,8 @@ useEffect(() => {
                     }}
                     disabled={
                       carrito.length === 0 ||
-                      (metodoPago === "EFECTIVO" && cambio < 0)
+                      (metodoPago === "EFECTIVO" && cambio < 0) ||
+                      (metodoPago === "MIXTO" && !estadoPago(lineasPago, total).valido)
                     }
                     onClick={handleFinalizar}
                   >

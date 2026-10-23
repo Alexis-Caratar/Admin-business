@@ -30,6 +30,14 @@ const HUELLA = {
   "006_ficha_producto": "EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'productos' AND column_name = 'marca')",
   "007_integraciones": "to_regclass('public.negocios_integraciones') IS NOT NULL",
   "008_impresion": "to_regclass('public.negocios_impresion') IS NOT NULL",
+  "009_finanzas": "to_regclass('public.fin_gastos') IS NOT NULL",
+  "010_finanzas_en_ventas": "NOT EXISTS (SELECT 1 FROM public.app_modulos WHERE url = 'finanzas' AND activo)",
+  "011_tiqueteras": "to_regclass('public.tiqueteras') IS NOT NULL",
+  "012_meseros_comandas": "to_regclass('public.comandas') IS NOT NULL",
+  "013_pago_dividido": "to_regclass('public.pagos_medios') IS NOT NULL",
+  "014_configuracion": "EXISTS (SELECT 1 FROM public.app_modulos WHERE url = 'negocio')",
+  "015_factura_al_cobrar": "EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'negocios_impresion' AND column_name = 'factura_al_cobrar')",
+  "016_publicidad": "to_regclass('public.publicidades') IS NOT NULL",
 };
 
 // psql: \\if con el resultado de una consulta

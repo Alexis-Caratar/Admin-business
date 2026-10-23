@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {Card,Typography,Box,Chip,Dialog,DialogTitle,DialogContent,IconButton,TextField,
   MenuItem,
   Button,
@@ -15,6 +15,17 @@ import Swal from "sweetalert2";
 import ChairIcon from "@mui/icons-material/Chair";
 import { apibuscar_cliente } from "../../../../../api/cajero";
 import { CrearClienteModal } from "./CrearClienteModal";
+import { PagoTiqueteraDialog } from "./Tiqueteras/PagoTiqueteraDialog";
+import { resumenConsumo } from "./Tiqueteras/tiqueterasUtil";
+import { ventaCobrada } from "../../../../../components/impresion/factura";
+import type { Consumo } from "../../../../../api/tiqueteras";
+import { apiComanda, apiPasarACobro, errorDe as errorComanda, type ComandaDetalle } from "../../../../../api/comandas";
+import { usePermisos } from "../../../../../hooks/usePermisos";
+import { Encabezado, Seccion } from "../../../../../components/pedidos/DisenoPedidos";
+import { sxBotonPrincipal } from "../../../../../components/pedidos/pedidosUtil";
+import RoomServiceIcon from "@mui/icons-material/RoomService";
+import PagoDividido from "../../../../../components/pagos/PagoDividido";
+import { estadoPago, lineasIniciales, paraEnviar, type LineaPago } from "../../../../../components/pagos/pagoDivididoUtil";
 
 
 type Props = {
@@ -23,6 +34,8 @@ type Props = {
   mesas: Mesa[];
   mesaSeleccionada: Mesa | null;
   onSelect?: (m: Mesa | null) => void;
+  abrirMesaId?: number | null;      // abrir una mesa desde fuera (p. ej. el panel de comandas)
+  onAbierta?: () => void;
 };
 
 type Cliente = {
@@ -32,7 +45,11 @@ type Cliente = {
   identificacion: string;
 };
 
-export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSeleccionada, onSelect }) => {
+export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSeleccionada, onSelect, abrirMesaId, onAbierta }) => {
+  const { tiene } = usePermisos();
+  // Comanda de un mesero en la mesa (aún sin venta): se muestra y se pasa a cobro
+  const [comandaMesa, setComandaMesa] = useState<ComandaDetalle | null>(null);
+  const [pasando, setPasando] = useState(false);
   const [mesaOrden, setMesaOrden] = useState<Mesa | null>(null);
   const [openOrden, setOpenOrden] = useState(false);
   const [detalleVenta, setDetalleVenta] = useState<any | null>(null);
@@ -46,6 +63,7 @@ export const Mesas: React.FC<Props> = ({ idUsuario, id_negocio, mesas,mesaSelecc
   useState<Cliente | null>(null);
 const [modoEditarCliente, setModoEditarCliente] = useState(false);
 const [openCrearModal, setOpenCrearModal] = useState(false);
+const [pagoTiquetera, setPagoTiquetera] = useState<number | null>(null);
 
 
 const handleBuscarCliente = async (term: string) => {
@@ -118,6 +136,11 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
 
   const cambio = (Number(montoRecibido) || 0) - (detalleVenta?.venta_total || 0);
   const cambioSeguro = Math.max(cambio, 0);
+  // Pago dividido (p. ej. Nequi + efectivo) contra el total de la cuenta
+  const totalCuenta = Number(detalleVenta?.venta_total || 0);
+  const [lineasPago, setLineasPago] = useState<LineaPago[]>([]);
+  useEffect(() => { if (metodoPago === "MIXTO") setLineasPago(lineasIniciales(totalCuenta)); }, [metodoPago, totalCuenta]);
+  const bloqueado = (metodoPago === "EFECTIVO" && cambio < 0) || (metodoPago === "MIXTO" && !estadoPago(lineasPago, totalCuenta).valido);
 
   const handleClickMesa = async (mesa: Mesa) => {
     if (mesa.estado === "Disponible") {
@@ -130,9 +153,17 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
     setOpenOrden(true);
     setLoadingDetalle(true);
     try {
+      setComandaMesa(null);
+      // Comanda abierta de un mesero: la mesa aún no tiene venta, se muestra la comanda
+      if (mesa.id_comanda && mesa.estado_comanda === "ABIERTA") {
+        setDetalleVenta(null);
+        setComandaMesa(await apiComanda(mesa.id_comanda).catch(() => null));
+        return;
+      }
       const { data } = await apidetallesMesa({ id_negocio, mesaId: mesa.id });
       if (!data?.ok || !Array.isArray(data.result) || data.result.length === 0) {
         setDetalleVenta(null);
+        if (mesa.id_comanda) setComandaMesa(await apiComanda(mesa.id_comanda).catch(() => null));
         setLoadingDetalle(false);
         return;
       }
@@ -155,6 +186,31 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
   };
 
 
+  // La caja toma la comanda: se crea la venta pendiente de la mesa y sigue el cobro de siempre
+  const pasarACobro = async () => {
+    if (!comandaMesa || !mesaOrden) return;
+    setPasando(true);
+    try {
+      await apiPasarACobro(comandaMesa.id);
+      // Ya tiene venta: se abre el cobro de siempre (la lista de mesas aún puede traer el estado anterior)
+      await handleClickMesa({ ...mesaOrden, estado_comanda: "EN_COBRO" });
+    } catch (e) {
+      const er = errorComanda(e);
+      Swal.fire({ icon: "warning", title: "No se pudo pasar a cobro", text: er.mensaje });
+      if (er.id_venta) await handleClickMesa({ ...mesaOrden, estado_comanda: "EN_COBRO" });   // otra caja ya la tomó: se muestra su venta
+    } finally {
+      setPasando(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!abrirMesaId) return;
+    const m = mesas.find((x) => x.id === abrirMesaId);
+    if (m) handleClickMesa(m);
+    onAbierta?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abrirMesaId]);
+
   const handleLiberarMesa = async () => {
     try {
       // Aquí llamas tu API para liberar la mesa
@@ -174,12 +230,29 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
       setDetalleVenta(null);
     } catch (error) {
       console.error(error);
-      alert("❌ Error al liberar mesa");
+      Swal.fire({ icon: "warning", title: "No se liberó la mesa", text: errorComanda(error).mensaje });
     }
+  };
+
+  const reiniciarCobro = () => {
+    setDetalleVenta(null);
+    setHabilitarPago(false);
+    setMontoRecibido("");
+    setMetodoPago("EFECTIVO");
+    setOpenOrden(false);
+  };
+
+  const pagadoConTiquetera = (r: Consumo) => {
+    setPagoTiquetera(null);
+    onSelect?.(null);
+    reiniciarCobro();
+    ventaCobrada([r.venta.id_venta, ...(r.venta_resto && r.venta_resto.metodo_pago !== "PENDIENTE" ? [r.venta_resto.id_venta] : [])], { title: "Pagado con tiquetera", html: resumenConsumo(r) });
   };
 
   const handleFinalizarVenta = async () => {
     if (!detalleVenta) return;
+    // Tiquetera: el servidor descuenta los almuerzos y cobra aparte lo demás
+    if (metodoPago === "TIQUERERA") { setPagoTiquetera(detalleVenta.id_venta); return; }
 
     const payload = {
       idUsuario: idUsuario,
@@ -188,7 +261,8 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
       id_mesa: mesaOrden?.id,
       metodo_pago: metodoPago,
       monto_recibido: montoRecibido,
-      cambio: cambioSeguro,
+      cambio: metodoPago === "MIXTO" ? estadoPago(lineasPago, totalCuenta).cambio : cambioSeguro,
+      ...(metodoPago === "MIXTO" ? { pagos: paraEnviar(lineasPago) } : {}),
       id_cliente:clienteSeleccionado?.id ||detalleVenta.id_cliente,
 
     };
@@ -206,25 +280,8 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
       setMetodoPago("EFECTIVO");
       setOpenOrden(false);
 
-      Swal.fire({
-        title: "Venta registrada",
-        html: `
-        <b style="font-size:18px;color:#16a34a">
-          ✅ Operación exitosa
-        </b>
-        <br/><br/>
-        La venta se guardó correctamente
-    `,
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        confirmButtonColor: "#16a34a",
-        showClass: {
-          popup: "animate__animated animate__zoomIn"
-        },
-        hideClass: {
-          popup: "animate__animated animate__zoomOut"
-        }
-      });
+      // Cuenta pagada: aviso y factura (opcional, según Configuración → Factura e impresión)
+      if (data?.ok) await ventaCobrada([payload.id_venta], { html: "<b style=\"font-size:18px;color:#16a34a\">✅ Operación exitosa</b><br/><br/>La venta se guardó correctamente" });
 
     } catch (err) {
       console.error("Error al actualizar venta:", err);
@@ -232,7 +289,7 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
       Swal.fire({
         icon: "error",
         title: "Error al registrar la venta",
-        text: "Ocurrió un problema al guardar la venta. Intente nuevamente.",
+        text: errorComanda(err).status ? errorComanda(err).mensaje : "Ocurrió un problema al guardar la venta. Intente nuevamente.",
         confirmButtonText: "Entendido",
         confirmButtonColor: "#d32f2f",
         background: "#ffffff",
@@ -433,6 +490,11 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
             >
               Capacidad: {mesa.capacidad} personas
             </Typography>
+            {mesa.id_comanda && (
+              <Typography sx={{ mt: .5, fontSize: 12, fontWeight: 700, color: mesa.estado_comanda === "EN_COBRO" ? "#1E40AF" : "#92400E" }} noWrap>
+                Comanda #{mesa.numero_comanda} · {mesa.estado_comanda === "EN_COBRO" ? "en cobro" : mesa.mesero}
+              </Typography>
+            )}
 
             <Box flexGrow={1} />
 
@@ -896,8 +958,8 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
 </Box>
               <Typography fontWeight={600} mb={1}>Detalle de Productos</Typography>
               <Box sx={{ borderRadius: 3, overflow: "hidden", border: "1px solid #e5e7eb", bgcolor: "#fff" }}>
-                {detalleVenta.productos.map((prod: any) => (
-                  <Box key={prod.id_producto} sx={{ display: "flex", justifyContent: "space-between", p: 0.8, gap: 2 }}>
+                {detalleVenta.productos.map((prod: any, k: number) => (
+                  <Box key={`${prod.id_producto}-${k}`} sx={{ display: "flex", justifyContent: "space-between", p: 0.8, gap: 2 }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
                       <Box component="img" src={prod.url_imagen || "/no-image.png"} alt={prod.nombre} sx={{ width: 30, height: 30, objectFit: "cover", borderRadius: 2, border: "1px solid #e5e7eb" }} />
                       <Box>
@@ -1012,19 +1074,11 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
                   <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
                   <MenuItem value="NEQUI">📲 Nequi</MenuItem>
                   <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
-                 <MenuItem value="TIQUERERA" disabled={!clienteSeleccionado} >🎟️ Tiquetera</MenuItem>
-                  {(!clienteSeleccionado ||
-                    clienteSeleccionado.identificacion?.toLowerCase().includes("22222222")) && (
-                    <Typography
-                      mt={1}
-                      fontSize={12}
-                      color="warning.main"
-                      fontWeight={600}
-                    >
-                      ⚠️ Debes seleccionar un cliente válido para usar tiquetera
-                    </Typography>
-                  )}                  
+                  <MenuItem value="TIQUERERA">🎟️ Tiquetera (almuerzos prepagados)</MenuItem>
+                  <MenuItem value="MIXTO">🔀 Pago dividido (varios medios)</MenuItem>
                   </TextField>
+
+                  {metodoPago === "MIXTO" && <PagoDividido total={totalCuenta} lineas={lineasPago} onChange={setLineasPago} />}
 
                   {metodoPago === "EFECTIVO" && (
                     <TextField
@@ -1053,12 +1107,12 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
                   )}
 
                   <Box
-                    onClick={!(metodoPago === "EFECTIVO" && cambio < 0) ? handleFinalizarVenta : undefined}                    sx={{
+                    onClick={!bloqueado ? handleFinalizarVenta : undefined}                    sx={{
                       mt: 3,
                       p: 2,
                       borderRadius: 3,
                       background:
-                        metodoPago === "EFECTIVO" && cambio < 0
+                        bloqueado
                           ? "#9e9e9e"
                           : "linear-gradient(135deg, #09a58e, #2e7d32)",
                       color: "#fff",
@@ -1066,7 +1120,7 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
                       justifyContent: "center",
                       alignItems: "center",
                       gap: 1,
-                      cursor: metodoPago === "EFECTIVO" && cambio < 0 ? "not-allowed" : "pointer",
+                      cursor: bloqueado ? "not-allowed" : "pointer",
                       userSelect: "none",
                       fontWeight: 700,
                       boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
@@ -1081,7 +1135,7 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
                       },
 
                       // Hover solo si está habilitado
-                      "&:hover": metodoPago === "EFECTIVO" && cambio < 0
+                      "&:hover": bloqueado
                         ? {}
                         : {
                           transform: "translateY(-4px)",
@@ -1104,13 +1158,52 @@ const getEstadoConfig = (estado: Mesa["estado"]) => {
             </>
           )}
 
-          {!loadingDetalle && !detalleVenta && (
+          {!loadingDetalle && !detalleVenta && comandaMesa && (
+            <Stack spacing={2}>
+              <Encabezado icono={<RoomServiceIcon />} color="ambar" titulo={`Comanda #${comandaMesa.numero}`}
+                subtitulo={`${comandaMesa.mesero} · ${new Date(comandaMesa.created_at).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}${comandaMesa.tandas > 1 ? ` · ${comandaMesa.tandas - 1} adición(es)` : ""}`} />
+              <Seccion titulo="Productos de la comanda" icono={<RestaurantIcon />}>
+                {comandaMesa.items.map((i) => (
+                  <Box key={i.id} sx={{ display: "flex", gap: 1.5, alignItems: "flex-start", py: 1, borderBottom: "1px solid #EEF2F7", "&:last-of-type": { borderBottom: "none" } }}>
+                    <Box sx={{ minWidth: 32, height: 32, borderRadius: 2, bgcolor: "#FEF3C7", color: "#92400E", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{i.cantidad}</Box>
+                    <Box flex={1} minWidth={0}>
+                      <Typography fontWeight={600} color="#0F172A" fontSize={14}>{i.nombre}{i.tanda > 1 ? ` · adición ${i.tanda - 1}` : ""}</Typography>
+                      {i.nota && <Typography fontSize={12} color="#64748B">* {i.nota}</Typography>}
+                    </Box>
+                    <Typography fontWeight={600} color="#334155" fontSize={14}>${Math.round(i.precio_unitario * i.cantidad).toLocaleString("es-CO")}</Typography>
+                  </Box>
+                ))}
+                {comandaMesa.nota && (
+                  <Box sx={{ mt: 1.5, p: 1.2, borderRadius: 3, bgcolor: "#FFFBEB", border: "1px solid #FDE68A", fontSize: 13, color: "#92400E" }}>
+                    <b>Observación:</b> {comandaMesa.nota}
+                  </Box>
+                )}
+              </Seccion>
+              <Box sx={{ p: 1.5, borderRadius: "18px", background: "linear-gradient(135deg, #111827, #1f2937)", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Typography fontWeight={600}>Total</Typography>
+                <Typography variant="h6" fontWeight={800}>${Math.round(comandaMesa.total).toLocaleString("es-CO")}</Typography>
+              </Box>
+              {tiene("cajero.cobrar") ? (
+                <Button fullWidth variant="contained" disabled={pasando} onClick={pasarACobro} sx={{ ...sxBotonPrincipal, height: 48 }}>
+                  {pasando ? "Pasando a cobro…" : "Pasar a cobro"}
+                </Button>
+              ) : <Typography color="#64748B" fontSize={13}>Tu perfil no permite cobrar.</Typography>}
+            </Stack>
+          )}
+          {!loadingDetalle && !detalleVenta && !comandaMesa && (
             <Box textAlign="center" py={3}>
               <Typography color="text.secondary">No hay venta activa para esta mesa.</Typography>
             </Box>
           )}
         </DialogContent>
       </Dialog>
+      <PagoTiqueteraDialog
+        open={pagoTiquetera !== null}
+        idVenta={pagoTiquetera ?? undefined}
+        busquedaInicial={(() => { const doc = clienteSeleccionado?.identificacion ?? detalleVenta?.identificacion; return doc && !String(doc).includes("22222222") ? String(doc) : undefined; })()}
+        onClose={() => setPagoTiquetera(null)}
+        onExito={pagadoConTiquetera}
+      />
     </Box>
   );
 };

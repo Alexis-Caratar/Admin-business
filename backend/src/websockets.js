@@ -81,7 +81,7 @@ export const enviarDocumento = (id_negocio, documento, legado) => new Promise((r
   if (legado) antiguos.forEach((a) => a.send(JSON.stringify(legado)));
   if (!nuevos.length) {
     return resolve(legado
-      ? { ok: true, agentes: agentes.length, mensaje: "Enviado a impresión (agente sin confirmación: actualízalo)" }
+      ? { ok: true, confirmado: false, agentes: agentes.length, mensaje: "Enviado a impresión (agente sin confirmación: actualízalo)" }
       : { ok: false, agentes: agentes.length, mensaje: "El agente conectado es una versión antigua: actualízalo para esta función" });
   }
   const id = `${Date.now()}-${++secuencia}`;
@@ -91,7 +91,7 @@ export const enviarDocumento = (id_negocio, documento, legado) => new Promise((r
     pendientes.delete(id);
     const impresas = estado.respuestas.filter((r) => r.ok);
     const errores = estado.respuestas.filter((r) => !r.ok && !r.omitido);
-    if (impresas.length) return resolve({ ok: true, agentes: agentes.length, mensaje: `Impreso en ${impresas.map((r) => r.impresora || r.punto).join(", ")}` });
+    if (impresas.length) return resolve({ ok: true, confirmado: true, agentes: agentes.length, mensaje: `Impreso en ${impresas.map((r) => r.impresora || r.punto).join(", ")}` });
     if (errores.length) return resolve({ ok: false, agentes: agentes.length, mensaje: `Error de impresora: ${errores.map((r) => r.error).join(" · ")}` });
     if (estado.respuestas.length) return resolve({ ok: false, agentes: agentes.length, mensaje: `Ningún punto tiene impresora de ${documento.rol}` });
     return resolve({ ok: false, agentes: agentes.length, mensaje: "El agente no respondió a tiempo: revisa la impresora" });
@@ -236,4 +236,11 @@ export const notificarCaja = async (id_usuario) => {
 export const notificarPedido = (id_negocio, evento, id_pedido) => {
   if (!wss) return;
   enviarAFrontends(id_negocio, { tipo: "pedido_evento", evento, id_pedido });
+};
+
+// 🟠 NOTIFICAR COMANDAS (meseros → caja). Como los pedidos web: solo el evento
+// y el id; cada pantalla consulta el detalle por la API, que valida permisos.
+export const notificarComanda = (id_negocio, evento, id_comanda) => {
+  if (!wss) return;
+  enviarAFrontends(id_negocio, { tipo: "comanda_evento", evento, id_comanda });
 };

@@ -504,7 +504,10 @@ export const ProductosCategoriaModal: React.FC<Props> = ({
                         size="small"
                         variant="contained"
                         startIcon={<AddShoppingCartIcon />}
-                       onClick={() => {
+                       onClick={(e) => {
+                        // El botón está dentro de la tarjeta, que también agrega al hacer clic:
+                        // sin esto el producto entraba dos veces al carrito
+                        e.stopPropagation();
                         const tieneComplementos =
                           prod.productos_complementos &&
                           prod.productos_complementos.length > 0;

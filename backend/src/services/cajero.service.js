@@ -1,12 +1,13 @@
 import { db } from "../config/db.js";
 import  {pool} from "../config/db.js";
 import { notificarCaja, notificarMesas, notificarPedido } from "../websockets.js";
-import { sqlConStock, sqlStockDisponible } from "./disponibilidad.js"; // ajusta la ruta según tu proyecto
+import { sqlConStock, sqlStockDisponible } from "./disponibilidad.js";
+import { mesasConEstado, pendienteEnMesa } from "./mesas.service.js"; // ajusta la ruta según tu proyecto
 
 
 // Siguiente número de factura. Usa la secuencia ventas_numero_seq (migración 001);
 // si aún no existe, conserva el cálculo anterior para no detener el POS.
-const siguienteConsecutivo = async (conn) => {
+export const siguienteConsecutivo = async (conn) => {
   await conn.query("SAVEPOINT consecutivo");
   try {
     const { rows } = await conn.query("SELECT nextval('ventas_numero_seq') AS siguiente");
@@ -23,6 +24,42 @@ const siguienteConsecutivo = async (conn) => {
   }
 };
 
+// Pago dividido: la cuenta se paga con varios medios (p. ej. NEQUI 10.000 + EFECTIVO 14.000).
+// Deben sumar exactamente el total; el cambio solo sale del efectivo.
+export const MEDIOS_DIVIDIDO = ["EFECTIVO", "TARJETA", "TRANSFERENCIA", "NEQUI", "DAVIPLATA"];
+const errorPago = (m) => Object.assign(new Error(m), { status: 400 });
+export const validarMedios = (pagos, total) => {
+  if (!Array.isArray(pagos) || pagos.length < 2) throw errorPago("Un pago dividido necesita al menos dos medios");
+  if (pagos.length > 6) throw errorPago("Máximo 6 medios en un pago dividido");
+  const medios = pagos.map((p) => {
+    const metodo_pago = String(p.metodo_pago ?? "").toUpperCase();
+    const monto = Math.round(Number(p.monto) * 100) / 100;
+    if (!MEDIOS_DIVIDIDO.includes(metodo_pago)) throw errorPago("Medio de pago no válido en el pago dividido");
+    if (!(monto > 0)) throw errorPago("Cada medio debe tener un valor mayor que cero");
+    let monto_recibido = null, cambio = null;
+    if (metodo_pago === "EFECTIVO") {
+      monto_recibido = p.monto_recibido === "" || p.monto_recibido == null ? monto : Number(p.monto_recibido);
+      if (!(monto_recibido >= monto)) throw errorPago("El efectivo recibido no cubre su parte");
+      cambio = Math.round((monto_recibido - monto) * 100) / 100;
+    }
+    return { metodo_pago, monto, monto_recibido, cambio };
+  });
+  const suma = medios.reduce((a, m) => a + m.monto, 0);
+  if (Math.abs(suma - Number(total)) > 0.5) throw errorPago(`Los medios suman ${Math.round(suma)} y la cuenta es ${Math.round(Number(total))}`);
+  return medios;
+};
+const guardarMedios = async (conn, id_pago, medios) => {
+  await conn.query(`DELETE FROM pagos_medios WHERE id_pago = $1`, [id_pago]);
+  for (const m of medios) {
+    await conn.query(`INSERT INTO pagos_medios (id_pago, metodo_pago, monto, monto_recibido, cambio) VALUES ($1, $2, $3, $4, $5)`,
+      [id_pago, m.metodo_pago, m.monto, m.monto_recibido, m.cambio]);
+  }
+};
+const resumenMedios = (medios) => ({
+  monto_recibido: medios.reduce((a, m) => a + (m.monto_recibido ?? m.monto), 0),
+  cambio: medios.reduce((a, m) => a + (m.cambio ?? 0), 0),
+});
+
 // Inserta venta, ítems y pago dentro de una transacción abierta (conn).
 // La usan el POS (finalizarVenta) y los pedidos web, así ambas ventas quedan iguales.
 // metodo_venta: columna ventas.metodo_pago (el POS siempre ha guardado 'EFECTIVO').
@@ -30,8 +67,13 @@ export const insertarVenta = async (conn, {
   id_cliente, id_caja, id_mesa = null,
   subtotal, descuento = 0, descuento_porcentaje = 0, impuesto = 0, total, estado,
   nota, productos, metodo_pago, metodo_venta = 'EFECTIVO',
-  monto_pagado, monto_recibido, cambio
+  monto_pagado, monto_recibido, cambio, medios = null
 }) => {
+    if (metodo_pago === 'MIXTO') {
+      medios = validarMedios(medios, total);
+      ({ monto_recibido, cambio } = resumenMedios(medios));
+      monto_pagado = total;   // lo pagado es el total; el desglose va en pagos_medios
+    }
     // 1️⃣ consecutivo
     const numeroConsecutivo = await siguienteConsecutivo(conn);
     const numeroFactura = `POS-${numeroConsecutivo.toString().padStart(6, '0')}`;
@@ -69,11 +111,12 @@ export const insertarVenta = async (conn, {
     // 5️⃣ pago
     const estado_pago_id = metodo_pago !== 'PENDIENTE' ? 1 : 0;
 
-    await conn.query(`
+    const { rows: [pagoNuevo] } = await conn.query(`
       INSERT INTO pagos (
         id_venta, estado_pago, metodo_pago,
         monto_pagado, monto_recibido, cambio
       ) VALUES ($1,$2,$3,$4,$5,$6)
+      RETURNING id
     `, [
       id_venta,
       estado_pago_id,
@@ -82,10 +125,27 @@ export const insertarVenta = async (conn, {
       monto_recibido ? Number(monto_recibido) : null,
       cambio ? Number(cambio) : null
     ]);
+    if (metodo_pago === 'MIXTO') await guardarMedios(conn, pagoNuevo.id, medios);
 
     return id_venta;
 };
 
+
+// Un egreso que paga una compra o un gasto (Finanzas) no se borra ni cambia de valor:
+// se anula el pago desde Finanzas/Compras, así el flujo de caja no se descuadra.
+const egresoLibre = async (id, nuevoMonto) => {
+  const { rows: [v] } = await pool.query(
+    `SELECT e.monto::float AS monto,
+            EXISTS (SELECT 1 FROM pagos_compras pc WHERE pc.id_egreso = e.id) AS compra,
+            EXISTS (SELECT 1 FROM fin_pagos fp WHERE fp.id_egreso = e.id AND NOT fp.anulado) AS gasto
+     FROM egresos e WHERE e.id = $1`,
+    [id]
+  ).catch((err) => (err.code === "42P01" || err.code === "42703" ? { rows: [] } : Promise.reject(err)));
+  if (!v || (!v.compra && !v.gasto)) return;
+  if (nuevoMonto === undefined || Number(nuevoMonto) !== v.monto) {
+    throw Object.assign(new Error(`Este egreso paga ${v.compra ? "una compra" : "un gasto"}: anula ese pago desde ${v.compra ? "Compras" : "Finanzas"}`), { status: 409 });
+  }
+};
 
 const CajeroService = {
   estadoCaja: async ({ id_usuario }) => {
@@ -358,7 +418,7 @@ abrirCaja: async ({ id_usuario, monto_inicial, inventario }) => {
 },
 
  cerrarCaja: async ({id_caja,monto_final,dinero_esperado,base_caja,venta_libre,diferencia,nota
-}) => {
+}, id_usuario) => {
   // 1️⃣ Actualizar la caja con todos los campos
   const update = `
     UPDATE caja 
@@ -371,7 +431,8 @@ abrirCaja: async ({ id_usuario, monto_inicial, inventario }) => {
       venta_libre=$4,
       diferencia = $5,
       nota = $6
-    WHERE id = $7
+    WHERE id = $7 AND id_usuario = $8 AND estado = 'ABIERTA'   -- solo la caja abierta del propio cajero
+    RETURNING id
   `;
   const [result] = await db.query(update, [
     monto_final,
@@ -380,8 +441,10 @@ abrirCaja: async ({ id_usuario, monto_inicial, inventario }) => {
     venta_libre,
     diferencia,
     nota,
-    id_caja
+    id_caja,
+    id_usuario
   ]);
+  if (!result.length) throw Object.assign(new Error("Esa caja no está abierta a tu nombre"), { status: 409 });
 
   // 2️⃣ Consultar la caja actualizada
   const [rows] = await db.query('SELECT * FROM caja WHERE id = $1', [id_caja]);
@@ -516,7 +579,8 @@ arqueo: async ({ id_caja },id_negocio) => {
         THEN pa.monto_pagado ELSE 0 END) AS total_ventas
 
     FROM ventas v
-    INNER JOIN pagos pa
+    -- un renglón por medio (los pagos divididos suman en cada medio)
+    INNER JOIN v_pagos_medios pa
         ON pa.id_venta = v.id
     WHERE v.id_caja = $1 and v.estado!='cancelado'
   `;
@@ -693,6 +757,12 @@ ORDER BY i.nombre;
   const [inventarioRows] = await db.query(inventarioQuery, [id_caja,id_negocio]);
 
   const pagos = pagosRows[0] || {};
+  // Tiqueteras vendidas en esta caja: dinero que SÍ entró (por adelantado).
+  // Sus consumos se pagan con 'TIQUERERA' y no son dinero nuevo.
+  const { rows: tiqRows } = await pool.query(
+    `SELECT metodo_pago, count(*)::int AS cantidad, COALESCE(sum(valor_pagado), 0)::float AS total
+     FROM tiqueteras WHERE id_caja = $1 AND estado <> 'ANULADA' GROUP BY 1`, [id_caja]
+  ).catch((err) => (err.code === "42P01" ? { rows: [] } : Promise.reject(err)));
 
   const ventas_metodos = [
     { metodo_pago: "EFECTIVO", total: pagos.efectivo || 0 },
@@ -712,7 +782,10 @@ ORDER BY i.nombre;
     egresos: egresosRows,
     mesasOcupadas: mesasRows,
     facturasPendientes: facturasRows,
-    inventario:inventarioRows
+    inventario:inventarioRows,
+    tiqueteras_vendidas: tiqRows,
+    tiqueteras_efectivo: tiqRows.filter((t) => t.metodo_pago === "EFECTIVO").reduce((a, t) => a + t.total, 0),
+    tiqueteras_total: tiqRows.reduce((a, t) => a + t.total, 0),
   };
 },
 
@@ -726,7 +799,7 @@ finalizarVenta: async (payload) => {
       idUsuario, id_negocio, id_cliente, id_caja,
       subtotal, descuento, descuento_porcentaje, impuesto, total, estado,
       nota, productos, metodo_pago,
-      monto_pagado, monto_recibido, cambio, id_mesa
+      monto_pagado, monto_recibido, cambio, id_mesa, pagos
     } = payload;
 
     // 1️⃣ venta + 4️⃣ items + 5️⃣ pago (misma lógica que usan los pedidos web)
@@ -734,14 +807,17 @@ finalizarVenta: async (payload) => {
       id_cliente, id_caja, id_mesa,
       subtotal, descuento, descuento_porcentaje, impuesto, total, estado,
       nota, productos, metodo_pago,
-      monto_pagado, monto_recibido, cambio
+      monto_pagado, monto_recibido, cambio, medios: pagos
     });
 
-    // 3️⃣ mesa
-    await conn.query(
-      `UPDATE mesas SET estado='Ocupada' WHERE id=$1`,
-      [id_mesa]
-    );
+    // 3️⃣ mesa (del negocio; si un mesero ya tiene una comanda abierta en ella, se cobra esa)
+    if (id_mesa) {
+      const { rows: [mesa] } = await conn.query(`SELECT id FROM mesas WHERE id = $1 AND id_negocio = $2 FOR UPDATE`, [id_mesa, id_negocio]);
+      if (!mesa) throw Object.assign(new Error("Mesa no encontrada"), { status: 404 });
+      const { rows: [abierta] } = await conn.query(`SELECT numero FROM comandas WHERE id_mesa = $1 AND estado IN ('ABIERTA', 'EN_COBRO')`, [id_mesa]);
+      if (abierta) throw Object.assign(new Error(`La mesa tiene la comanda #${abierta.numero} de un mesero: cóbrala desde la mesa`), { status: 409 });
+      await conn.query(`UPDATE mesas SET estado='Ocupada' WHERE id=$1`, [id_mesa]);
+    }
 
     await conn.query('COMMIT');
     await notificarMesas(id_negocio);
@@ -849,28 +925,8 @@ crearcliente: async (payload) => {
     throw error;
   }
 },
-  mesas: async (id_negocio) => {
-
-    const query = `
-    SELECT 
-        m.*
-      
-    FROM mesas m
-
-    LEFT JOIN (
-        SELECT DISTINCT ON (id_mesa) *
-        FROM ventas
-        ORDER BY id_mesa, fecha DESC
-    ) v ON v.id_mesa = m.id
-
-    LEFT JOIN pagos p ON p.id_venta = v.id
-
-    WHERE m.id_negocio = $1
-    ORDER BY m.id ASC;
-    `;
-    const [rows] = await db.query(query, [id_negocio]);
-    return rows;
-  },
+  // Mesas activas con su estado real (comanda abierta / en cobro, mesero, cuenta pendiente)
+  mesas: async (id_negocio) => mesasConEstado(id_negocio),
 
   detallesMesa: async (id_negocio, mesaId) => {
 
@@ -932,6 +988,8 @@ INNER JOIN personas per2 ON u.id_persona=per2.id
 WHERE m.estado = 'Ocupada'
 AND m.id_negocio = $1
 AND m.id = $2
+-- Con una comanda de mesero abierta, la mesa aún no tiene venta: no mostrar una anterior
+AND NOT EXISTS (SELECT 1 FROM comandas cm WHERE cm.id_mesa = m.id AND cm.estado = 'ABIERTA')
 
 GROUP BY 
     m.id,
@@ -1036,6 +1094,7 @@ LIMIT 1;
 
 
   actualizarEgreso: async (id, data, id_negocio) => {
+    await egresoLibre(id, data.monto);
 
     const sql = `
     UPDATE egresos
@@ -1055,6 +1114,7 @@ LIMIT 1;
   },
 
   eliminarEgreso: async (id, idUsuario, id_negocio) => {
+    await egresoLibre(id);
 
     const sql = `DELETE FROM egresos WHERE id = $1 AND id_negocio = $2`;
     await db.query(sql, [id, id_negocio]);
@@ -1071,11 +1131,31 @@ actualizaventa: async (payload) => {
 
     const {
       idUsuario, id_negocio, id_venta,
-      metodo_pago, monto_recibido, cambio, id_mesa,id_cliente
+      metodo_pago, monto_recibido, cambio, id_cliente
     } = payload;
         
     // estado de pago
     const estado_pago_id = metodo_pago !== 'PENDIENTE' ? 1 : 0;
+
+    // La venta debe ser del negocio; se bloquea su pago para que dos cajas no la cobren a la vez
+    await conn.query(`SELECT set_config('app.id_usuario', $1, true)`, [String(idUsuario)]);
+    const { rows: [actual] } = await conn.query(`
+      SELECT v.id, v.estado, v.id_mesa, v.total, pg.id AS id_pago, pg.estado_pago FROM ventas v
+      JOIN pagos pg ON pg.id_venta = v.id
+      JOIN caja c ON c.id = v.id_caja JOIN usuarios u ON u.id = c.id_usuario
+      WHERE v.id = $1 AND u.id_negocio = $2
+      FOR UPDATE OF pg
+    `, [id_venta, id_negocio]);
+    if (!actual) throw Object.assign(new Error("Venta no encontrada"), { status: 404 });
+    if (actual.estado === 'cancelado') throw Object.assign(new Error("La venta está anulada"), { status: 409 });
+    if (actual.estado_pago) throw Object.assign(new Error("Esta cuenta ya fue cobrada"), { status: 409 });
+    const id_mesa = actual.id_mesa;
+    // Pago dividido: el desglose debe sumar el total de la venta (el del servidor, no el del navegador)
+    let medios = null, recibido = monto_recibido, vuelto = cambio;
+    if (metodo_pago === 'MIXTO') {
+      medios = validarMedios(payload.pagos, actual.total);
+      ({ monto_recibido: recibido, cambio: vuelto } = resumenMedios(medios));
+    }
 
     // 1️⃣ Actualizar pago
     const result = await conn.query(`
@@ -1084,16 +1164,20 @@ actualizaventa: async (payload) => {
           metodo_pago = $2,
           monto_recibido = $3,
           cambio = $4,
+          monto_pagado = COALESCE($6, monto_pagado),   -- pago dividido: el total de la venta
           fecha_actualizacion = NOW()
       WHERE id_venta = $5
       RETURNING *
     `, [
       estado_pago_id,
       metodo_pago,
-      monto_recibido ? Number(monto_recibido) : null,
-      cambio ? Number(cambio) : null,
-      id_venta
+      recibido ? Number(recibido) : null,
+      vuelto ? Number(vuelto) : null,
+      id_venta,
+      medios ? Number(actual.total) : null
     ]);
+    if (medios) await guardarMedios(conn, actual.id_pago, medios);
+    else await conn.query(`DELETE FROM pagos_medios WHERE id_pago = $1`, [actual.id_pago]);
 
     // 🔥 En PostgreSQL esto reemplaza affectedRows
     if (result.rowCount === 0) {
@@ -1125,8 +1209,8 @@ actualizaventa: async (payload) => {
       id_venta
     ]);
 
-    //3 2️⃣ Liberar mesa
-    await conn.query(
+    //3 2️⃣ Liberar mesa (solo si quedó pagada)
+    if (id_mesa && estado_pago_id === 1) await conn.query(
       `UPDATE mesas SET estado='Disponible' WHERE id = $1`,
       [id_mesa]
     );
@@ -1144,10 +1228,18 @@ actualizaventa: async (payload) => {
     conn.release();
   }
 },
-liberar_mesa: async (id_mesa, id_negocio) => {
+liberar_mesa: async (id_mesa, id_negocio, { forzar = false, motivo = null, id_usuario = null } = {}) => {
   const conn = await pool.connect();
 
   try {
+    const pendiente = await pendienteEnMesa(conn, id_mesa);
+    if (pendiente && !forzar) throw Object.assign(new Error(`${pendiente}: cóbrala o anúlala antes de liberar la mesa`), { status: 409 });
+    if (pendiente) {
+      await conn.query(
+        `INSERT INTO app_auditoria (id_negocio, tabla, id_registro, accion, despues, id_usuario) VALUES ($1, 'mesas', $2, 'LIBERAR_FORZADO', $3, $4)`,
+        [id_negocio, id_mesa, JSON.stringify({ pendiente, motivo }), id_usuario]
+      );
+    }
     const result = await conn.query(
       `UPDATE mesas SET estado = 'Disponible' WHERE id = $1 AND id_negocio = $2 RETURNING *`,
       [id_mesa, id_negocio]
@@ -1184,6 +1276,7 @@ SELECT
     v.subtotal AS venta_total,
     p.estado_pago,
     p.metodo_pago,
+    (SELECT string_agg(pm.metodo_pago || ' ' || round(pm.monto)::text, ' + ' ORDER BY pm.id) FROM pagos_medios pm WHERE pm.id_pago = p.id) AS detalle_pago,
     p.monto_recibido,
     p.cambio,
     m.id as id_mesa,
@@ -1232,18 +1325,27 @@ const [rows] = await db.query(sql,[id_venta]);
 return rows;
 
 },
-cancelar_factura: async (payload) => {
+// Solo ventas del negocio del usuario. Queda registrado quién anuló (lo usa el
+// trigger de tiqueteras para dejar constancia del reintegro de almuerzos).
+cancelar_factura: async (payload, ctx = {}) => {
   const conn = await pool.connect();
 
   try {
+    await conn.query("BEGIN");
+    await conn.query(`SELECT set_config('app.id_usuario', $1, true)`, [String(ctx.id_usuario ?? "")]);
     const result = await conn.query(
-      `UPDATE ventas SET estado = 'cancelado',nota=$2 WHERE id = $1 RETURNING *`,
-      [payload.id_venta,payload.nota]
+      `UPDATE ventas v SET estado = 'cancelado', nota = $2
+       FROM caja c JOIN usuarios u ON u.id = c.id_usuario
+       WHERE v.id = $1 AND c.id = v.id_caja AND ($3::int IS NULL OR u.id_negocio = $3)
+       RETURNING v.*`,
+      [payload.id_venta, payload.nota, ctx.id_negocio ?? null]
     );
-        
-    return result.rows[0]; 
+    if (!result.rowCount) throw Object.assign(new Error("Venta no encontrada"), { status: 404 });
+    await conn.query("COMMIT");
+    return result.rows[0];
 
   } catch (err) {
+    await conn.query("ROLLBACK").catch(() => {});
     console.error("Error cancelar factura:", err.message);
     throw err;
   } finally {

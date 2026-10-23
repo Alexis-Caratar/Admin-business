@@ -22,6 +22,7 @@ export const CONFIG_DEFECTO = {
   documento_consumidor: "222222222222",
   imprimir_comanda_al_vender: true,
   copias_comanda: 1,
+  factura_al_cobrar: "preguntar",
   agente_version: 1,
 };
 
@@ -66,7 +67,9 @@ export const datosVenta = async (id_venta, id_negocio) => {
             per.identificacion AS identificacion_cliente, TRIM(CONCAT(per.nombres, ' ', per.apellidos)) AS nombre_completo,
             per.telefono, per.email,
             COALESCE(v.total, v.subtotal) AS venta_total,
-            pg.metodo_pago, pg.monto_recibido, pg.cambio, m.nombre AS mesa
+            pg.metodo_pago, pg.monto_recibido, pg.cambio, m.nombre AS mesa,
+            COALESCE((SELECT json_agg(json_build_object('metodo_pago', pm.metodo_pago, 'monto', pm.monto::float) ORDER BY pm.id)
+                      FROM pagos_medios pm WHERE pm.id_pago = pg.id), '[]') AS medios
      FROM ventas v
      JOIN caja c ON c.id = v.id_caja
      JOIN usuarios u ON u.id = c.id_usuario
@@ -96,6 +99,8 @@ const despachar = async (id_negocio, doc, legado) => {
   const r = await enviarDocumento(id_negocio, doc, legado);
   return {
     ok: r.ok,
+    // true solo si el agente confirmó que imprimió (los agentes antiguos no confirman)
+    confirmado: Boolean(r.confirmado),
     agentes: r.agentes,
     mensaje: r.mensaje,
     // El navegador puede imprimir este mismo ticket (celular o computador sin agente)
@@ -119,10 +124,11 @@ export const ticketFactura = async (id_venta, id_negocio) => {
 };
 
 // Comanda (cocina/barra): viene del carrito o de una venta; no lleva precios
-export const imprimirComanda = async (id_negocio, { numero, mesa, mesero, productos = [], nota, venta }) => {
+// titulo / etiqueta / estado: comandas de meseros ("ADICIÓN", "REIMPRESIÓN"…); por defecto, como siempre
+export const imprimirComanda = async (id_negocio, { numero, mesa, mesero, productos = [], nota, venta, titulo, etiqueta, estado }) => {
   const [negocio, cfg] = await Promise.all([datosNegocio(id_negocio), configImpresion(id_negocio)]);
-  const lista = productos.map((p) => ({ cantidad: Number(p.cantidad) || 1, nombre: String(p.nombre ?? "").slice(0, 120) }));
-  const doc = comandaDocumento({ negocio, cfg, numero: numero ?? venta?.numero_factura, fecha: negocio.fecha_impresion, mesero, mesa, productos: lista, nota });
+  const lista = productos.map((p) => ({ cantidad: Number(p.cantidad) || 1, nombre: String(p.nombre ?? "").slice(0, 120), nota: p.nota ? String(p.nota).slice(0, 200) : null }));
+  const doc = comandaDocumento({ negocio, cfg, numero: numero ?? venta?.numero_factura, fecha: negocio.fecha_impresion, mesero, mesa, productos: lista, nota, titulo, etiqueta, ...(estado ? { estado } : {}) });
   const legado = {
     tipo: "imprimir_comanda",
     payload: { negocio, mesa: { nombre: mesa || "N/A" }, usuario: { nombre: mesero ?? "" }, fecha: negocio.fecha_impresion, nota: nota ?? "", venta: { numero_factura: numero ?? venta?.numero_factura ?? "" }, productos: lista },
@@ -145,7 +151,7 @@ export const imprimirPedido = async (id_negocio, pedido) => {
  * Admin > Negocios > Impresión
  * ------------------------------------------------------------------ */
 const CAMPOS = ["ancho_caracteres", "encabezado", "pie", "mostrar_qr", "qr_contenido", "qr_texto", "qr_leyenda",
-  "documento_consumidor", "imprimir_comanda_al_vender", "copias_comanda"];
+  "documento_consumidor", "imprimir_comanda_al_vender", "copias_comanda", "factura_al_cobrar"];
 
 const vista = async (id_negocio) => {
   const [negocio, cfg] = await Promise.all([datosNegocio(id_negocio), configImpresion(id_negocio)]);
@@ -178,6 +184,7 @@ export const guardarAdmin = async (id_negocio, body = {}) => {
   c.copias_comanda = Number(c.copias_comanda);
   if (!(c.copias_comanda >= 1 && c.copias_comanda <= 5)) e.copias_comanda = "Entre 1 y 5";
   if (!["tienda", "factura", "texto"].includes(c.qr_contenido)) e.qr_contenido = "Opción no válida";
+  if (!["preguntar", "siempre", "nunca"].includes(c.factura_al_cobrar)) e.factura_al_cobrar = "Opción no válida";
   for (const [k, max] of Object.entries({ encabezado: 300, pie: 300, qr_texto: 300, qr_leyenda: 80, documento_consumidor: 20 })) {
     c[k] = c[k] == null ? null : String(c[k]).trim().slice(0, max) || null;
   }

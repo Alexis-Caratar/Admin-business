@@ -151,6 +151,7 @@ export const VentasService = {
           v.subtotal AS venta_total,
           p.estado_pago,
           p.metodo_pago,
+          (SELECT string_agg(pm.metodo_pago || ' ' || round(pm.monto)::text, ' + ' ORDER BY pm.id) FROM pagos_medios pm WHERE pm.id_pago = p.id) AS detalle_pago,
           p.monto_recibido,
           p.cambio,
           m.id as id_mesa,

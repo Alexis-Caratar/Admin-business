@@ -5,14 +5,14 @@ Archivos de esta carpeta:
 | Archivo | Qué hace | ¿Cambia datos? |
 |---|---|---|
 | `verificar.sql` | Muestra qué migraciones están aplicadas, negocios, módulo Pedidos, códigos de barras repetidos y conteos | No (solo lectura) |
-| `actualizacion.sql` | Aplica las migraciones 001 a 008 que falten, en orden, en **una sola transacción** | Sí |
-| `reversion.sql` | Deshace las migraciones (008 → 001). Solo para emergencias | Sí (borra lo nuevo) |
+| `actualizacion.sql` | Aplica las migraciones 001 a 016 que falten, en orden, en **una sola transacción** | Sí |
+| `reversion.sql` | Deshace las migraciones (016 → 001). Solo para emergencias | Sí (borra lo nuevo) |
 
 `actualizacion.sql` es seguro de repetir: lo ya aplicado se omite, y si detecta cambios aplicados antes
 a mano (sin registro) solo los registra. Si algo falla, **no se aplica nada** (la base queda como estaba).
 
 Se probó sobre una copia del respaldo de producción `Bd/backup24072026 .dump`: se aplicó completo,
-se repitió sin cambios, los datos quedaron intactos y las 61 pruebas del backend pasaron sobre esa copia.
+se repitió sin cambios, los datos quedaron intactos y las 107 pruebas del backend pasaron sobre esa copia (incluidas 011 tiqueteras, 012 meseros/comandas/permisos, 013 pago dividido, 014 configuración del negocio, 015 factura al cobrar y 016 publicidad).
 
 > Si se agrega una migración nueva en `migrations/`, vuelve a generar estos archivos con
 > `node scripts/armar-produccion.js` (y agrega su "huella" en ese script).
@@ -54,7 +54,7 @@ mensaje y no sigas.
 ```bash
 sudo -u postgres psql -d adminbusiness -f /tmp/verificar.sql
 ```
-Las 8 migraciones deben salir **APLICADA**.
+Las 10 migraciones deben salir **APLICADA**.
 
 **Si el backend NO se conecta con el usuario `postgres`** (mira `DB_USER` en `backend/.env`), dale permisos
 sobre las tablas nuevas (cambia `usuario_app`):
@@ -88,11 +88,23 @@ cd ~/Admin-business/frontend && npm install && npm run build      # y publica di
 ```
 
 ### 8. Configurar desde el admin (Negocios > Editar)
-- **Módulos:** activa **Pedidos** en los negocios que lo usen y asígnalo a sus usuarios (igual que los demás menús).
+- **Módulos:** activa **Pedidos** en los negocios que lo usen y asígnalo a sus usuarios. Las finanzas están dentro de **Ventas** (no hay que activar nada aparte).
 - **Sitio web / Tienda en línea:** revisa la `url_negocio`, publica el sitio y activa la tienda.
 - **Pagos y WhatsApp:** llaves de Wompi de producción (o déjalas en el `.env`) y la URL de eventos en el panel de Wompi.
 - **Impresión:** formato del ticket y "Instalar en un punto de venta" para el token de cada agente
   (ver `agente-local/README.md`). Los agentes antiguos siguen imprimiendo hasta que generes un token nuevo.
+- **Meseros, Mesas y Módulos y permisos (012):** actívalos en el negocio (Negocios → módulos). Luego, con un
+  usuario que tenga "Módulos y permisos", asigna el perfil **Mesero** a los meseros. Los usuarios que ya
+  existen siguen igual (sin perfil = todas las acciones de sus módulos). Detalle en `docs/MESEROS_COMANDAS_PERMISOS.md`.
+  **Configuración (014):** el menú "Usuarios" pasa a "Configuración" (Mi negocio, Página web, Usuarios, Permisos y
+  Tiqueteras). "Mi negocio" queda disponible donde ya se administran usuarios; cada usuario lo recibe por su perfil
+  (el perfil Administrador lo tiene) o asignándole el módulo. La URL y el dominio siguen siendo del administrador del sistema.
+  **Factura al cobrar (015):** en Configuración → Factura e impresión se elige si la caja pregunta (por defecto),
+  imprime siempre o nunca la factura al quedar pagada una cuenta. La comanda sigue aparte.
+  **Publicidad (016):** módulo nuevo (menú del día y promociones para estados de WhatsApp). Queda activo donde se usa
+  Ventas y asignado a quienes administran usuarios; a los demás se les da por perfil o asignación.
+  Ojo: desde esta versión la caja y Usuarios exigen su módulo; un usuario sin el módulo Cajero (o Ventas) ya no
+  entra a la caja aunque conozca la dirección.
 
 ---
 

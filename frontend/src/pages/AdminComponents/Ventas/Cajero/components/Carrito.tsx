@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   ListItem,
@@ -34,6 +34,8 @@ import { apibuscar_cliente } from "../../../../../api/cajero";
 import CloseIcon from "@mui/icons-material/Close";
 
 // Modal para crear cliente
+import PagoDividido from "../../../../../components/pagos/PagoDividido";
+import { estadoPago, lineasIniciales, paraEnviar, type LineaPago } from "../../../../../components/pagos/pagoDivididoUtil";
 import { CrearClienteModal } from "./CrearClienteModal";
 import type { Mesa } from "../../../../../types/cajero"; // ajusta la ruta
 import { Categorias } from "./Categorias";
@@ -55,7 +57,7 @@ type Props = {
   onSub: (id: number) => void;
   onFinalizar: (
   idCliente: number | null,
-  pago: {metodo_pago: string;monto_recibido: number | "";cambio: number;nota: string;}) => void;
+  pago: {metodo_pago: string;monto_recibido: number | "";cambio: number;nota: string;pagos?: { metodo_pago: string; monto: number; monto_recibido?: number }[]}) => void;
   mesaSeleccionada: Mesa | null;
   onClearMesa: () => void;
   categorias: any[];
@@ -94,7 +96,10 @@ export const Carrito: React.FC<Props> = ({
   const monto = Number(montoRecibido) || 0;
   const cambio = monto - total;
   const cambioSeguro = Math.max(cambio, 0);
-  const pagoBloqueado = metodoPago === "EFECTIVO" && cambio < 0;
+  // Pago dividido (p. ej. Nequi + efectivo)
+  const [lineasPago, setLineasPago] = useState<LineaPago[]>([]);
+  useEffect(() => { if (metodoPago === "MIXTO") setLineasPago(lineasIniciales(total)); }, [metodoPago, total]);
+  const pagoBloqueado = (metodoPago === "EFECTIVO" && cambio < 0) || (metodoPago === "MIXTO" && !estadoPago(lineasPago, total).valido);
 
   const formatCOP = (value: number) =>
     new Intl.NumberFormat("es-CO", {
@@ -518,19 +523,16 @@ export const Carrito: React.FC<Props> = ({
                 <MenuItem value="TARJETA">💳 Tarjeta</MenuItem>
                 <MenuItem value="NEQUI">📲 Nequi</MenuItem>
                 <MenuItem value="DAVIPLATA">📲 DaviPlata</MenuItem>
-                <MenuItem value="TIQUERERA" disabled={!clienteSeleccionado} >🎟️ Tiquetera</MenuItem>
-                    {(!clienteSeleccionado ||
-                                    clienteSeleccionado.identificacion?.toLowerCase().includes("22222222")) && (
-                                    <Typography
-                                      mt={1}
-                                      fontSize={12}
-                                      color="warning.main"
-                                      fontWeight={600}
-                                    >
-                                      ⚠️ Debes seleccionar un cliente válido para usar tiquetera
-                                    </Typography>
-                                  )}  
+                <MenuItem value="TIQUERERA">🎟️ Tiquetera (almuerzos prepagados)</MenuItem>
+                <MenuItem value="MIXTO">🔀 Pago dividido (varios medios)</MenuItem>
               </TextField>
+              {metodoPago === "TIQUERERA" && (
+                <Typography mt={1} fontSize={12} color="text.secondary">
+                  Al confirmar se busca la tiquetera del cliente; lo que no sea almuerzo se cobra aparte.
+                </Typography>
+              )}
+
+              {metodoPago === "MIXTO" && <PagoDividido total={total} lineas={lineasPago} onChange={setLineasPago} />}
 
               {/* MONTO RECIBIDO */}
               {metodoPago === "EFECTIVO" && (
@@ -584,8 +586,9 @@ export const Carrito: React.FC<Props> = ({
           onFinalizar(clienteSeleccionado?.id ?? null, {
             metodo_pago: metodoPago,
             monto_recibido: montoRecibido,
-            cambio: Math.max(cambio, 0),
+            cambio: metodoPago === "MIXTO" ? estadoPago(lineasPago, total).cambio : Math.max(cambio, 0),
             nota:nota,
+            ...(metodoPago === "MIXTO" ? { pagos: paraEnviar(lineasPago) } : {}),
           });
 
           setClienteSeleccionado(null);

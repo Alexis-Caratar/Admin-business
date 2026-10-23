@@ -35,6 +35,31 @@ import {
 } from "../../../../api/ventas";
 
 import DashboardVentas from "./DashboardVentas";
+// Finanzas dentro de Ventas: mismas pestañas del antiguo módulo Finanzas
+import PanelFinanzas from "../../Finanzas/PanelFinanzas";
+import GastosFinanzas from "../../Finanzas/GastosFinanzas";
+import EgresosFinanzas from "../../Finanzas/EgresosFinanzas";
+import RentabilidadFinanzas from "../../Finanzas/RentabilidadFinanzas";
+import FlujoFinanzas from "../../Finanzas/FlujoFinanzas";
+import MetasFinanzas from "../../Finanzas/MetasFinanzas";
+import AdminCompras from "../../Compras/AdminCompras";
+import { rangoDe } from "../../Finanzas/finanzasUtil";
+import type { Periodo } from "../../Finanzas/finanzasUtil";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
+import WaterfallChartIcon from "@mui/icons-material/WaterfallChart";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import FlagIcon from "@mui/icons-material/Flag";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import AdminTiqueteras from "./AdminTiqueteras";
+
+// Pestañas: 0 Dashboard · 1 Calendario · 2.. finanzas (en este orden)
+const TAB_FIN = { panel: 2, gastos: 3, egresos: 4, rentabilidad: 5, flujo: 6, compras: 7, metas: 8 };
+const TAB_TIQUETERAS = 9;
+// Índices que usa el panel financiero (los del antiguo módulo) → pestañas de Ventas
+const DESDE_PANEL: Record<number, number> = { 0: TAB_FIN.panel, 1: TAB_FIN.gastos, 2: TAB_FIN.egresos, 3: TAB_FIN.rentabilidad, 4: TAB_FIN.flujo, 5: TAB_FIN.metas };
 import StatsCards from "./StatsCards";
 
 const AdminVentas: React.FC = () => {
@@ -606,7 +631,14 @@ const ventasFiltradas = resumen;
             label="Calendario"
           />
 
-         
+          <Tab icon={<AccountBalanceIcon />} iconPosition="start" label="Finanzas" />
+          <Tab icon={<ReceiptIcon />} iconPosition="start" label="Gastos" />
+          <Tab icon={<PointOfSaleIcon />} iconPosition="start" label="Egresos de caja" />
+          <Tab icon={<RestaurantMenuIcon />} iconPosition="start" label="Rentabilidad" />
+          <Tab icon={<WaterfallChartIcon />} iconPosition="start" label="Flujo de caja" />
+          <Tab icon={<ShoppingCartOutlinedIcon />} iconPosition="start" label="Compras" />
+          <Tab icon={<FlagIcon />} iconPosition="start" label="Metas y alertas" />
+          <Tab icon={<ConfirmationNumberIcon />} iconPosition="start" label="Tiqueteras" />
         </Tabs>
 
         <Divider />
@@ -636,6 +668,28 @@ const ventasFiltradas = resumen;
           </Box>
 
 )}
+
+        {/* FINANZAS (mismo período del filtro de arriba) */}
+        {tab === TAB_TIQUETERAS && <Box p={{ xs: 1, md: 2 }} sx={{ bgcolor: "#F8FAFC" }}><AdminTiqueteras /></Box>}
+
+        {tab >= TAB_FIN.panel && tab <= TAB_FIN.metas && (() => {
+          const rango = rangoDe(tipoFiltro as Periodo, fechaInicio, fechaFin);
+          if (!rango && tab !== TAB_FIN.metas) {
+            return <Box p={3}><Typography color="text.secondary">Elige las dos fechas del rango.</Typography></Box>;
+          }
+          const [desde, hasta] = rango ?? ["", ""];
+          return (
+            <Box p={{ xs: 1, md: 2 }} sx={{ bgcolor: "#F8FAFC" }}>
+              {tab === TAB_FIN.panel && <PanelFinanzas desde={desde} hasta={hasta} onIr={(n) => setTab(DESDE_PANEL[n] ?? TAB_FIN.panel)} />}
+              {tab === TAB_FIN.gastos && <GastosFinanzas desde={desde} hasta={hasta} />}
+              {tab === TAB_FIN.egresos && <EgresosFinanzas desde={desde} hasta={hasta} />}
+              {tab === TAB_FIN.rentabilidad && <RentabilidadFinanzas desde={desde} hasta={hasta} />}
+              {tab === TAB_FIN.flujo && <FlujoFinanzas desde={desde} hasta={hasta} />}
+              {tab === TAB_FIN.compras && <AdminCompras incrustado desde={desde} hasta={hasta} />}
+              {tab === TAB_FIN.metas && <MetasFinanzas />}
+            </Box>
+          );
+        })()}
       </Card>
 
       {/* ================================================= */}

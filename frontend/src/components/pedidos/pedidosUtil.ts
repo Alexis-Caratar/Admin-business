@@ -180,3 +180,10 @@ export const campo = {
   },
   "& .MuiInputLabel-root": { fontSize: 13 },
 } as const;
+
+/** Botón principal del proyecto (degradado azul, redondeado, sin mayúsculas) */
+export const sxBotonPrincipal = {
+  borderRadius: 3, fontWeight: 700, textTransform: "none", px: 2.5, height: 42,
+  background: "linear-gradient(135deg,#2563EB,#3B82F6)", boxShadow: "0 8px 20px rgba(37,99,235,.20)",
+  "&:hover": { background: "linear-gradient(135deg,#1D4ED8,#2563EB)" },
+} as const;

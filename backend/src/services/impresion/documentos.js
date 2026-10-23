@@ -107,7 +107,10 @@ export const facturaDocumento = ({ negocio, cfg, venta, productos, qrTienda }) =
   }
   tk.cols("TOTAL", cop(venta.venta_total), true);
   tk.sep();
-  if (venta.metodo_pago) tk.texto(`Pago: ${venta.metodo_pago}`);
+  if (Array.isArray(venta.medios) && venta.medios.length) {
+    tk.texto("Pago dividido:");
+    for (const m of venta.medios) tk.cols(`  ${m.metodo_pago}`, cop(m.monto));
+  } else if (venta.metodo_pago) tk.texto(`Pago: ${venta.metodo_pago}`);
   if (Number(venta.monto_recibido) > 0) tk.cols("Recibido", cop(venta.monto_recibido));
   if (Number(venta.cambio) > 0) tk.cols("Cambio", cop(venta.cambio));
   if (venta.nota) tk.texto(`Nota: ${venta.nota}`);
@@ -118,17 +121,20 @@ export const facturaDocumento = ({ negocio, cfg, venta, productos, qrTienda }) =
   return documento("factura", "factura", tk);
 };
 
-export const comandaDocumento = ({ negocio, cfg, numero, fecha, mesero, mesa, productos, nota, estado = "EN PREPARACIÓN" }) => {
+export const comandaDocumento = ({ negocio, cfg, numero, fecha, mesero, mesa, productos, nota, estado = "EN PREPARACIÓN", titulo = "COMANDA", etiqueta = "Factura/orden" }) => {
   const tk = new Ticket(cfg.ancho_caracteres);
   tk.texto(negocio.nombre ?? "", { a: "c", b: true });
-  tk.texto("COMANDA", { a: "c", b: true, g: true });
+  tk.texto(titulo, { a: "c", b: true, g: true });
   tk.sep();
   if (mesa) tk.texto(`MESA: ${mesa}`, { b: true, g: true });
-  if (numero) tk.texto(`Factura/orden: ${numero}`);
+  if (numero) tk.texto(`${etiqueta}: ${numero}`);
   if (fecha) tk.texto(`Fecha: ${fecha}`);
   if (mesero) tk.texto(`Atendió: ${mesero}`);
   tk.sep();
-  for (const p of productos) tk.texto(`${Number(p.cantidad)} x ${p.nombre}`, { b: !String(p.nombre).startsWith(" ") });
+  for (const p of productos) {
+    tk.texto(`${Number(p.cantidad)} x ${p.nombre}`, { b: !String(p.nombre).startsWith(" ") });
+    if (p.nota) tk.texto(`   * ${p.nota}`);
+  }
   tk.sep();
   if (nota) tk.texto(`Nota: ${nota}`, { b: true }).sep();
   tk.texto(estado, { a: "c", b: true });

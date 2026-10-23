@@ -1,7 +1,7 @@
 -- =====================================================================
 -- REVERSIÓN DE LA ACTUALIZACIÓN (producción)
--- Generado: 2026-10-20 con node scripts/armar-produccion.js (no editar a mano)
--- Migraciones: 001_tienda_pedidos, 002_sitio_negocios, 003_tipos_negocio, 004_inventario, 005_whatsapp, 006_ficha_producto, 007_integraciones, 008_impresion
+-- Generado: 2026-10-22 con node scripts/armar-produccion.js (no editar a mano)
+-- Migraciones: 001_tienda_pedidos, 002_sitio_negocios, 003_tipos_negocio, 004_inventario, 005_whatsapp, 006_ficha_producto, 007_integraciones, 008_impresion, 009_finanzas, 010_finanzas_en_ventas, 011_tiqueteras, 012_meseros_comandas, 013_pago_dividido, 014_configuracion, 015_factura_al_cobrar, 016_publicidad
 --
 -- Uso (solo si hay que deshacer): sudo -u postgres psql -d adminbusiness -f reversion.sql
 -- ATENCIÓN: borra pedidos web, configuración de sitios, credenciales e impresión.
@@ -17,6 +17,183 @@ CREATE TABLE IF NOT EXISTS public.schema_migraciones (
     nombre character varying(100) PRIMARY KEY,
     aplicada_en timestamp without time zone NOT NULL DEFAULT now()
 );
+
+-- ######################################################################
+-- 016_publicidad (down)
+-- ######################################################################
+SELECT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '016_publicidad') AS pendiente \gset
+\if :pendiente
+\echo '>> Revirtiendo 016_publicidad'
+-- Revierte 016_publicidad (borra los diseños guardados)
+DELETE FROM public.app_perfiles_permisos WHERE id_accion IN (SELECT a.id FROM public.app_modulos_acciones a JOIN public.app_modulos m ON m.id = a.id_modulo WHERE m.url = 'publicidad');
+DELETE FROM public.app_usuario_modulos WHERE id_modulo_negocio_rol IN (SELECT id FROM public.app_modulos WHERE url = 'publicidad');
+DELETE FROM public.app_modulos_negocio WHERE id_modulo IN (SELECT id FROM public.app_modulos WHERE url = 'publicidad');
+DELETE FROM public.app_modulos WHERE url = 'publicidad';
+DROP TABLE IF EXISTS public.publicidades;
+
+DELETE FROM public.schema_migraciones WHERE nombre = '016_publicidad';
+\else
+\echo '-- 016_publicidad: no estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 015_factura_al_cobrar (down)
+-- ######################################################################
+SELECT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '015_factura_al_cobrar') AS pendiente \gset
+\if :pendiente
+\echo '>> Revirtiendo 015_factura_al_cobrar'
+-- Revierte 015_factura_al_cobrar
+DELETE FROM public.app_perfiles_permisos WHERE id_accion IN (SELECT a.id FROM public.app_modulos_acciones a JOIN public.app_modulos m ON m.id = a.id_modulo WHERE m.url = 'negocio' AND a.codigo = 'impresion');
+DELETE FROM public.app_modulos_acciones WHERE codigo = 'impresion' AND id_modulo = (SELECT id FROM public.app_modulos WHERE url = 'negocio');
+ALTER TABLE public.negocios_impresion DROP COLUMN IF EXISTS factura_al_cobrar;
+
+DELETE FROM public.schema_migraciones WHERE nombre = '015_factura_al_cobrar';
+\else
+\echo '-- 015_factura_al_cobrar: no estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 014_configuracion (down)
+-- ######################################################################
+SELECT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '014_configuracion') AS pendiente \gset
+\if :pendiente
+\echo '>> Revirtiendo 014_configuracion'
+-- Revierte 014_configuracion
+UPDATE public.app_modulos SET nombre = 'Configuración usuarios', icono = 'ManageAccountsIcon' WHERE url = 'usuarios' AND nombre = 'Configuración';
+DELETE FROM public.app_perfiles_permisos WHERE id_accion IN (SELECT a.id FROM public.app_modulos_acciones a JOIN public.app_modulos m ON m.id = a.id_modulo WHERE m.url = 'negocio');
+DELETE FROM public.app_usuario_modulos WHERE id_modulo_negocio_rol IN (SELECT id FROM public.app_modulos WHERE url = 'negocio');
+DELETE FROM public.app_modulos_negocio WHERE id_modulo IN (SELECT id FROM public.app_modulos WHERE url = 'negocio');
+DELETE FROM public.app_modulos WHERE url = 'negocio';
+
+DELETE FROM public.schema_migraciones WHERE nombre = '014_configuracion';
+\else
+\echo '-- 014_configuracion: no estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 013_pago_dividido (down)
+-- ######################################################################
+SELECT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '013_pago_dividido') AS pendiente \gset
+\if :pendiente
+\echo '>> Revirtiendo 013_pago_dividido'
+-- Revierte 013_pago_dividido (los pagos mixtos quedan solo con el total, como MIXTO)
+DROP VIEW IF EXISTS public.v_pagos_medios;
+DROP TABLE IF EXISTS public.pagos_medios;
+
+DELETE FROM public.schema_migraciones WHERE nombre = '013_pago_dividido';
+\else
+\echo '-- 013_pago_dividido: no estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 012_meseros_comandas (down)
+-- ######################################################################
+SELECT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '012_meseros_comandas') AS pendiente \gset
+\if :pendiente
+\echo '>> Revirtiendo 012_meseros_comandas'
+-- Revierte 012_meseros_comandas (borra comandas, perfiles y la auditoría de permisos)
+DROP TRIGGER IF EXISTS trg_comandas_por_anulacion ON public.ventas;
+DROP TRIGGER IF EXISTS trg_comandas_por_pago ON public.pagos;
+DROP FUNCTION IF EXISTS public.comandas_por_anulacion();
+DROP FUNCTION IF EXISTS public.comandas_por_pago();
+DROP TABLE IF EXISTS public.comandas_idempotencia;
+DROP TABLE IF EXISTS public.comandas_historial;
+DROP TABLE IF EXISTS public.comandas_impresiones;
+DROP TABLE IF EXISTS public.comandas_items;
+DROP TABLE IF EXISTS public.comandas;
+ALTER TABLE public.mesas DROP COLUMN IF EXISTS activo;
+DROP TABLE IF EXISTS public.app_auditoria;
+ALTER TABLE public.usuarios DROP COLUMN IF EXISTS id_perfil;
+DROP TABLE IF EXISTS public.app_perfiles_permisos;
+DROP TABLE IF EXISTS public.app_perfiles;
+DROP TABLE IF EXISTS public.app_modulos_acciones;
+DELETE FROM public.app_usuario_modulos WHERE id_modulo_negocio_rol IN (SELECT id FROM public.app_modulos WHERE url IN ('meseros', 'mesas', 'permisos'));
+DELETE FROM public.app_modulos_negocio WHERE id_modulo IN (SELECT id FROM public.app_modulos WHERE url IN ('meseros', 'mesas', 'permisos'));
+DELETE FROM public.app_modulos WHERE url IN ('meseros', 'mesas', 'permisos');
+UPDATE public.app_modulos SET nombre = 'Usuarios', icono = 'PersonIcon' WHERE url = 'usuarios' AND nombre = 'Configuración usuarios';
+ALTER TABLE public.app_modulos DROP COLUMN IF EXISTS grupo;
+ALTER TABLE public.app_modulos DROP COLUMN IF EXISTS descripcion;
+
+DELETE FROM public.schema_migraciones WHERE nombre = '012_meseros_comandas';
+\else
+\echo '-- 012_meseros_comandas: no estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 011_tiqueteras (down)
+-- ######################################################################
+SELECT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '011_tiqueteras') AS pendiente \gset
+\if :pendiente
+\echo '>> Revirtiendo 011_tiqueteras'
+-- Revierte 011_tiqueteras: borra tiqueteras, consumos y su configuración.
+-- Las ventas pagadas con tiquetera se conservan (con su pago 'TIQUERERA').
+DROP TRIGGER IF EXISTS trg_tiqueteras_anulacion ON public.ventas;
+DROP FUNCTION IF EXISTS public.tiqueteras_por_anulacion();
+DROP TABLE IF EXISTS public.tiqueteras_idempotencia;
+DROP TABLE IF EXISTS public.tiqueteras_consumos;
+DROP TABLE IF EXISTS public.tiqueteras;
+DROP TABLE IF EXISTS public.tiqueteras_tipos;
+ALTER TABLE public.productos DROP COLUMN IF EXISTS tiquetera_elegible;
+ALTER TABLE public.categorias DROP COLUMN IF EXISTS tiquetera_elegible;
+
+DELETE FROM public.schema_migraciones WHERE nombre = '011_tiqueteras';
+\else
+\echo '-- 011_tiqueteras: no estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 010_finanzas_en_ventas (down)
+-- ######################################################################
+SELECT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '010_finanzas_en_ventas') AS pendiente \gset
+\if :pendiente
+\echo '>> Revirtiendo 010_finanzas_en_ventas'
+-- Revierte 010: vuelve a mostrar el menú "Finanzas".
+UPDATE public.app_modulos SET activo = true WHERE url = 'finanzas';
+
+DELETE FROM public.schema_migraciones WHERE nombre = '010_finanzas_en_ventas';
+\else
+\echo '-- 010_finanzas_en_ventas: no estaba aplicada, se omite'
+\endif
+
+-- ######################################################################
+-- 009_finanzas (down)
+-- ######################################################################
+SELECT EXISTS (SELECT 1 FROM public.schema_migraciones WHERE nombre = '009_finanzas') AS pendiente \gset
+\if :pendiente
+\echo '>> Revirtiendo 009_finanzas'
+-- Revierte 009_finanzas: borra gastos, pagos, presupuestos, alertas, auditoría
+-- y el costo histórico guardado. Las ventas, compras e inventario se conservan.
+DROP TRIGGER IF EXISTS trg_fin_costo_venta_item ON public.ventas_items;
+DROP TRIGGER IF EXISTS trg_fin_costo_movimiento ON public.inventario_movimientos;
+DROP FUNCTION IF EXISTS public.fin_costo_venta_item();
+DROP FUNCTION IF EXISTS public.fin_costo_movimiento();
+DROP FUNCTION IF EXISTS public.fin_costo_producto(integer);
+
+DROP INDEX IF EXISTS public.idx_egresos_negocio_fecha;
+DROP INDEX IF EXISTS public.idx_ventas_fecha;
+ALTER TABLE public.pagos_compras DROP COLUMN IF EXISTS id_egreso;
+ALTER TABLE public.compras_items DROP COLUMN IF EXISTS id_inventario;
+ALTER TABLE public.egresos DROP COLUMN IF EXISTS id_categoria, DROP COLUMN IF EXISTS categoria_confirmada;
+ALTER TABLE public.ventas_items DROP COLUMN IF EXISTS costo_unitario, DROP COLUMN IF EXISTS costo_estimado;
+ALTER TABLE public.inventario_movimientos DROP COLUMN IF EXISTS costo_unitario;
+
+DROP TABLE IF EXISTS public.inventario_costos;
+DROP TABLE IF EXISTS public.fin_auditoria;
+DROP TABLE IF EXISTS public.fin_alertas;
+DROP TABLE IF EXISTS public.fin_presupuestos;
+DROP TABLE IF EXISTS public.fin_pagos;
+DROP TABLE IF EXISTS public.fin_gastos;
+DROP TABLE IF EXISTS public.fin_recurrentes;
+DROP TABLE IF EXISTS public.fin_categorias;
+
+DELETE FROM public.app_usuario_modulos WHERE id_modulo_negocio_rol IN (SELECT id FROM public.app_modulos WHERE url = 'finanzas');
+DELETE FROM public.app_modulos_negocio WHERE id_modulo IN (SELECT id FROM public.app_modulos WHERE url = 'finanzas');
+DELETE FROM public.app_modulos WHERE url = 'finanzas';
+
+DELETE FROM public.schema_migraciones WHERE nombre = '009_finanzas';
+\else
+\echo '-- 009_finanzas: no estaba aplicada, se omite'
+\endif
 
 -- ######################################################################
 -- 008_impresion (down)

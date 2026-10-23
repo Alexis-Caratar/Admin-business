@@ -55,9 +55,10 @@ import type { User } from "../../../types";
 
 interface AdminUsuariosProps {
   idNegocio?: number | string;
+  incrustado?: boolean;   // dentro de Configuración usuarios (sin título propio)
 }
 
-const AdminUsuarios: React.FC<AdminUsuariosProps> = ({ idNegocio }) => {
+const AdminUsuarios: React.FC<AdminUsuariosProps> = ({ idNegocio, incrustado = false }) => {
 
   const idNegocioFinal = idNegocio ?? localStorage.getItem("id_negocio") ?? "";
 
@@ -357,8 +358,8 @@ const AdminUsuarios: React.FC<AdminUsuariosProps> = ({ idNegocio }) => {
     gap: 2,
   }}
 >
-  {/* TÍTULO + DESCRIPCIÓN */}
-  <Box>
+  {/* TÍTULO + DESCRIPCIÓN (dentro de Configuración usuarios lo muestra la tarjeta principal) */}
+  <Box sx={{ display: incrustado ? "none" : "block" }}>
     <Typography
       sx={{
         display: "flex",

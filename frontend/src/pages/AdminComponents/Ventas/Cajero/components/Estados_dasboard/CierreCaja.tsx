@@ -64,12 +64,15 @@ const total_wompi = getTotalByMetodo("WOMPI");
 const ventas = toNumber(arqueoInfo?.total_ventas);
 const egresos = toNumber(arqueoInfo?.total_egresos);
 const montoInicial = toNumber(arqueoInfo?.monto_inicial);
+// Tiqueteras vendidas en esta caja: es dinero que entró (el efectivo va al cajón)
+const tiqVendidasEfectivo = toNumber(arqueoInfo?.tiqueteras_efectivo);
+const tiqVendidasTotal = toNumber(arqueoInfo?.tiqueteras_total);
 
 const totalDigital =total_targeta +total_trasferencia +total_nequi +total_daviplata +total_tiqueteras +total_wompi;
 
   const dineroEsperado = useMemo(() => {
-  return montoInicial + ventas - egresos - totalDigital;
-}, [montoInicial, ventas, egresos, totalDigital]);
+  return montoInicial + ventas - egresos - totalDigital + tiqVendidasEfectivo;
+}, [montoInicial, ventas, egresos, totalDigital, tiqVendidasEfectivo]);
 
 const ventaLibre = useMemo(() => {
   if (dineroContado === "" || baseCaja === "") return 0;
@@ -380,6 +383,12 @@ const camposValidos = () => {
     </Box>
   </AccordionDetails>
 </Accordion>
+      {tiqVendidasTotal > 0 && (
+        <Stack direction="row" justifyContent="space-between">
+          <Typography color="text.secondary">Venta de tiqueteras{tiqVendidasTotal !== tiqVendidasEfectivo ? ` (efectivo de ${formatCOP(tiqVendidasTotal)})` : ""}</Typography>
+          <Typography fontWeight={700} color="success.main">+ {formatCOP(tiqVendidasEfectivo)}</Typography>
+        </Stack>
+      )}
       <Stack direction="row" justifyContent="space-between">
         <Typography color="text.secondary">Egresos</Typography>
         <Typography fontWeight={700} color="error.main">
@@ -424,6 +433,11 @@ const camposValidos = () => {
       <Typography fontSize={11}>
         + 💵 Ventas en efectivo {formatCOP(total_efectivo)}
       </Typography>
+      {tiqVendidasEfectivo > 0 && (
+        <Typography fontSize={11}>
+          + 🎟️ Tiqueteras vendidas en efectivo {formatCOP(tiqVendidasEfectivo)}
+        </Typography>
+      )}
       <Typography fontSize={11}> 
         - 💸 Egresos {formatCOP(egresos)}
       </Typography>
@@ -801,9 +815,18 @@ onClose={(_, reason) => {
               <Avatar sx={{ bgcolor: 'success.main', width: 30, height: 30 }}>
                 <ReceiptIcon sx={{ fontSize: 18, color: 'white' }} />
               </Avatar>
-              <Typography fontWeight={600}>Tiqueteras:</Typography>
+              <Typography fontWeight={600}>Almuerzos con tiquetera (prepagados):</Typography>
               <Typography sx={{ ml: 'auto', color: 'success.main' }}>{formatCOP(total_tiqueteras)}</Typography>
             </Box>
+            {tiqVendidasTotal > 0 && (
+              <Box display="flex" alignItems="center" gap={1}>
+                <Avatar sx={{ bgcolor: 'success.main', width: 30, height: 30 }}>
+                  <ReceiptIcon sx={{ fontSize: 18, color: 'white' }} />
+                </Avatar>
+                <Typography fontWeight={600}>Venta de tiqueteras (efectivo):</Typography>
+                <Typography sx={{ ml: 'auto', color: 'success.main' }}>+ {formatCOP(tiqVendidasEfectivo)}</Typography>
+              </Box>
+            )}
 
             {/* Egresos */}
             <Box display="flex" alignItems="center" gap={1}>

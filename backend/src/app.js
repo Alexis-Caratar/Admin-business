@@ -15,10 +15,18 @@ import ventasRoutes from "./routes/ventas.routes.js";
 import categoriasRouter from "./routes/categorias.routes.js";
 import cajero from "./routes/cajero.routes.js";
 import compras from "./routes/compras.routes.js";
+import finanzasRoutes from "./routes/finanzas.routes.js";
+import tiqueterasRoutes from "./routes/tiqueteras.routes.js";
+import tiqueterasPortalRoutes from "./routes/tiqueterasPortal.routes.js";
 import ai from "./routes/ai.route.js";
 import tiendaRoutes from "./routes/tienda.routes.js";
 import pedidosRoutes from "./routes/pedidos.routes.js";
 import sitioRoutes from "./routes/sitio.routes.js";
+import comandasRoutes from "./routes/comandas.routes.js";
+import mesasRoutes from "./routes/mesas.routes.js";
+import permisosRoutes from "./routes/permisos.routes.js";
+import miNegocioRoutes from "./routes/miNegocio.routes.js";
+import publicidadRoutes from "./routes/publicidad.routes.js";
 import { tipos as tiposNegocio } from "./controllers/sitio.controller.js";
 
 
@@ -66,7 +74,15 @@ app.use("/api/inventario",  authenticate, inventariosRoutes);
 app.use("/api/ventas",  authenticate, ventasRoutes);
 app.use("/api/cajero",  authenticate, cajero);
 app.use("/api/compras",  authenticate, compras);
+app.use("/api/finanzas",  authenticate, finanzasRoutes);
+app.use("/api/tiqueteras-portal", tiqueterasPortalRoutes);   // público (enlace del cliente)
+app.use("/api/tiqueteras",  authenticate, tiqueterasRoutes);
 app.use("/api/pedidos",  authenticate, pedidosRoutes);
+app.use("/api/comandas",  authenticate, comandasRoutes);   // meseros → caja
+app.use("/api/mesas",  authenticate, mesasRoutes);         // gestión de mesas
+app.use("/api/permisos",  authenticate, permisosRoutes);   // módulos, perfiles y permisos
+app.use("/api/mi-negocio",  authenticate, miNegocioRoutes);  // datos y página web del propio negocio
+app.use("/api/publicidad",  authenticate, publicidadRoutes); // menú del día y promociones (estados de WhatsApp)
 app.get("/api/tipos-negocio", authenticate, tiposNegocio);
 
 

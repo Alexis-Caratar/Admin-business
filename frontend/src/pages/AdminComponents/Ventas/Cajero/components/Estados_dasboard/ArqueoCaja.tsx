@@ -115,7 +115,9 @@ export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo, es
     ? toNumber(arqueoInfo.monto_inicial) +
     toNumber(arqueoInfo.total_ventas) -
     toNumber(arqueoInfo.total_egresos) -
-    totalDigital
+    totalDigital +
+    // Tiqueteras vendidas en efectivo: entran al cajón (no son venta de productos)
+    toNumber(arqueoInfo.tiqueteras_efectivo)
     : 0;
 
   /** Agrupar productos por categoría */
@@ -993,6 +995,12 @@ export const ArqueoCajaModal: React.FC<Props> = ({ open, onClose, arqueoInfo, es
                     >
                       Disponible al cierre de caja
                     </Typography>
+                    {toNumber(arqueoInfo?.tiqueteras_total) > 0 && (
+                      <Typography fontSize={12} color="text.secondary">
+                        Incluye {formatCOP(arqueoInfo.tiqueteras_efectivo)} de {arqueoInfo.tiqueteras_vendidas} tiquetera(s) vendida(s) en efectivo
+                        {toNumber(arqueoInfo.tiqueteras_total) !== toNumber(arqueoInfo.tiqueteras_efectivo) && ` · ${formatCOP(toNumber(arqueoInfo.tiqueteras_total) - toNumber(arqueoInfo.tiqueteras_efectivo))} por otros medios`}
+                      </Typography>
+                    )}
                   </Box>                  
                 </Box>
 

@@ -49,6 +49,8 @@ type Props = {
   /** Nombre del tipo de negocio y acción para cargar sus textos sugeridos */
   tipoNombre?: string;
   onSugeridos?: () => void;
+  /** URL y dominio solo los cambia la administración del sistema (Configuración del negocio) */
+  bloquearUrl?: boolean;
 };
 
 const err = (errores: Record<string, string>, k: string) => ({ error: Boolean(errores[k]), helperText: errores[k] });
@@ -78,7 +80,7 @@ const Quitar = ({ onClick }: { onClick: () => void }) => (
 /* ================================================================
  * SITIO WEB
  * ================================================================ */
-export function SeccionSitioWeb({ sitio: s, set, errores, tipoNombre, onSugeridos }: Props) {
+export function SeccionSitioWeb({ sitio: s, set, errores, tipoNombre, onSugeridos, bloquearUrl = false }: Props) {
   const host = window.location.host;
   return (
     <Box display="grid" gridTemplateColumns={{ xs: "1fr", lg: "1fr 1fr" }} gap={3}>
@@ -91,10 +93,11 @@ export function SeccionSitioWeb({ sitio: s, set, errores, tipoNombre, onSugerido
       )}
       <Tarjeta icono={<LanguageIcon />} titulo="Dirección y publicación"
         accion={<Chip size="small" label={s.publicado ? "PUBLICADO" : "SIN PUBLICAR"} color={s.publicado ? "success" : "default"} sx={{ fontWeight: 700 }} />}>
-        <TextField size="small" fullWidth label="URL del negocio" value={s.url_negocio} sx={campo}
+        <TextField size="small" fullWidth label="URL del negocio" value={s.url_negocio} sx={campo} disabled={bloquearUrl}
           onChange={(e) => set("url_negocio", slugNegocio(e.target.value))} {...err(errores, "url_negocio")}
+          {...(bloquearUrl ? { helperText: "La URL y el dominio los cambia la administración del sistema" } : {})}
           InputProps={{ startAdornment: <InputAdornment position="start">{host}/</InputAdornment> }} />
-        <TextField size="small" fullWidth label="Dominio propio (opcional)" placeholder="puntourbano.co" value={s.dominio ?? ""} sx={campo}
+        <TextField size="small" fullWidth label="Dominio propio (opcional)" placeholder="puntourbano.co" value={s.dominio ?? ""} sx={campo} disabled={bloquearUrl}
           onChange={(e) => set("dominio", e.target.value || null)} {...err(errores, "dominio")} />
         <TextField size="small" fullWidth label="Nombre que se muestra en la web" value={s.nombre_publico ?? ""} sx={campo}
           onChange={(e) => set("nombre_publico", e.target.value)} helperText="Vacío: se usa el nombre del negocio" />

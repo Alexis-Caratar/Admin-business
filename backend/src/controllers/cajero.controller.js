@@ -1,6 +1,8 @@
 import CajeroService from "../services/cajero.service.js";
+import { pool } from "../config/db.js";
 import dotenv from "dotenv";
 
+import { tienePermiso } from "../middlewares/auth.middleware.js";
 import { configImpresion, imprimirComanda, imprimirFactura, ticketFactura } from "../services/impresion/impresion.service.js";
 
 
@@ -34,10 +36,10 @@ export const abrirCaja = async (req, res) => {
 
 export const cerrarCaja = async (req, res) => {
   try {
-    const result = await CajeroService.cerrarCaja(req.body);
+    const result = await CajeroService.cerrarCaja(req.body, req.user.id);
     return res.json({ ok: true, result });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return res.status(e.status || 500).json({ ok: false, error: e.message });
   }
 };
 
@@ -67,7 +69,7 @@ export const finalizarVenta = async (req, res) => {
       }
       return res.json({ ok: true, result: resultado, impresion });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return res.status(e.status || 500).json({ ok: false, error: e.message });
   }
   
 };
@@ -244,11 +246,12 @@ export const eliminarEgreso = async (req, res) => {
 
 export const actualizaventa = async (req, res) => {
   try {
-   const payload = req.body;
+   // Negocio y usuario salen del token, nunca del cuerpo
+   const payload = { ...req.body, id_negocio: req.user.id_negocio, idUsuario: req.user.id };
       const resultado = await CajeroService.actualizaventa(payload);
     return res.json({ ok: true, result: resultado });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return res.status(e.status || 500).json({ ok: false, error: e.message });
   }
   
 };
@@ -258,9 +261,16 @@ export const liberar_mesa = async (req, res) => {
   try {
     const { id_mesa } = req.params;
 
-    const respuesta = await CajeroService.liberar_mesa(id_mesa, req.user.id_negocio);
+    // Excepción autorizada: liberar con algo pendiente exige permiso de Mesas y un motivo (queda en auditoría)
+    const forzar = req.query.forzar === "1";
+    const motivo = String(req.query.motivo ?? "").trim();
+    if (forzar && (motivo.length < 3 || !(await tienePermiso(req.user, "mesas.editar")))) {
+      return res.status(403).json({ message: "Liberar una mesa con pendientes requiere permiso de Mesas y un motivo" });
+    }
+    const respuesta = await CajeroService.liberar_mesa(id_mesa, req.user.id_negocio, { forzar, motivo, id_usuario: req.user.id });
     res.json(respuesta);
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ message: error.message, error: error.message });
     console.error(error);
     res.status(500).json({ message: "Error al actualizar mesas" });
   }
@@ -301,12 +311,30 @@ export const imprimirfactura = async (req, res) => {
   try {
     const id_venta = Number(req.body?.id_venta ?? req.body?.venta?.id_venta);
     if (!id_venta) return res.status(400).json({ ok: false, error: "Falta la venta a imprimir" });
+    // La factura es del cliente: solo con la cuenta pagada (pendiente → comanda); anulada no se imprime
+    const { rows: [v] } = await pool.query(
+      `SELECT v.estado, pg.estado_pago FROM ventas v JOIN pagos pg ON pg.id_venta = v.id
+       JOIN caja c ON c.id = v.id_caja JOIN usuarios u ON u.id = c.id_usuario
+       WHERE v.id = $1 AND u.id_negocio = $2 ORDER BY pg.id DESC LIMIT 1`, [id_venta, req.user.id_negocio]);
+    if (!v) return res.status(404).json({ ok: false, error: "Venta no encontrada" });
+    if (v.estado === "cancelado") return res.status(409).json({ ok: false, error: "La factura está anulada" });
+    if (!v.estado_pago) return res.status(409).json({ ok: false, error: "La cuenta está pendiente: imprime la comanda; la factura sale al pagarla" });
     const r = await imprimirFactura(id_venta, req.user.id_negocio);
     res.json({ ok: true, impreso: r.ok, ...r });
   } catch (error) {
     if (error.status && error.status < 500) return res.status(error.status).json({ ok: false, error: error.message });
     console.error("Error al enviar a impresión:", error);
     res.status(500).json({ ok: false, msg: "Error al enviar a impresión" });
+  }
+};
+
+// Qué hace la caja con la factura cuando una cuenta queda pagada (Configuración → Factura e impresión)
+export const preferenciaFactura = async (req, res) => {
+  try {
+    const cfg = await configImpresion(req.user.id_negocio);
+    res.json({ ok: true, factura_al_cobrar: cfg.factura_al_cobrar ?? "preguntar" });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: "No se pudo leer la configuración de impresión" });
   }
 };
 
@@ -324,10 +352,10 @@ export const ticketVenta = async (req, res) => {
 export const cancelarFactura = async (req, res) => {
   try {
    const payload = req.body;   
-     const result= await CajeroService.cancelar_factura(payload)
+     const result= await CajeroService.cancelar_factura(payload, { id_negocio: req.user.id_negocio, id_usuario: req.user.id })
       res.json({ok: true, result});
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e.message });
+    return res.status(e.status || 500).json({ ok: false, error: e.message });
   }
   
 };

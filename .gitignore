@@ -13,3 +13,6 @@ frontend/out-tsc/
 
 # Configuración local del agente (incluye el token)
 agente-local/config/agente.json
+
+# Informes financieros (contienen cifras del negocio)
+informes/
